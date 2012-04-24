@@ -77,12 +77,12 @@ const char** WMTransferCalc::getXPMIcon() const
 
 const std::string WMTransferCalc::getName() const
 {
-    return "Show as Orbs";
+    return "Transfer Function Calculation";
 }
 
 const std::string WMTransferCalc::getDescription() const
 {
-    return "Displays the given data with an orb per voxel if the value of the voxel equals a given iso-range.";
+    return "Will calculate optimal settings for the Transfer Function after klicking within the data.";
 }
 
 void WMTransferCalc::connectors()
@@ -96,9 +96,12 @@ void WMTransferCalc::connectors()
 void WMTransferCalc::properties()
 {
     m_propCondition = boost::shared_ptr< WCondition >( new WCondition() );
-    m_isoValue      = m_properties->addProperty( "ISO-Value", "Iso value to be rendered.", 100.0, m_propCondition );
-    m_epsilon       = m_properties->addProperty( "Epsilon", "Epsilon value to define the iso range.", 1.0, m_propCondition );
+//     m_isoValue      = m_properties->addProperty( "ISO-Value", "Iso value to be rendered.", 100.0, m_propCondition );
+//     m_epsilon       = m_properties->addProperty( "Epsilon", "Epsilon value to define the iso range.", 1.0, m_propCondition );
     m_color         = m_properties->addProperty(  "Color", "Color of the orbs.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
+    
+    m_xPos          = m_properties->addProperty( "X position", "x coordinate of the ray origin", 0, m_propCondition );
+    m_yPos          = m_properties->addProperty( "Y position", "y coordinate of the ray origin", 0, m_propCondition );
 
     WModule::properties();
 }
@@ -147,44 +150,32 @@ void WMTransferCalc::moduleMain()
             WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
         }
         
-        bool propsChanged = m_isoValue->changed() || m_epsilon->changed(); // || m_color->changed();
+        bool propsChanged = m_xPos->changed() || m_yPos->changed();  //m_isoValue->changed() || m_epsilon->changed();
         
         if( ( propsChanged || dataUpdated ) && dataValid )
         {
             debugLog() << "Received Data or Data changed.";
     
-            double min = dataSet->getMin();
-            double max = dataSet->getMax();
-
-            m_isoValue->setMin( min );
-            m_isoValue->setMax( max );
-            m_isoValue->setRecommendedValue( min + ( 0.5 * max ) );
+//             double min = dataSet->getMin();
+//             double max = dataSet->getMax();
+// 
+//             m_isoValue->setMin( min );
+//             m_isoValue->setMax( max );
+//             m_isoValue->setRecommendedValue( min + ( 0.5 * max ) );
             
 //            m_epsilon->setMin( 0 );
 //            m_epsilon->setMax( 0.1 * (max - min) );
-            m_epsilon->setRecommendedValue( 0.005 * (max - min) );
+//            m_epsilon->setRecommendedValue( 0.005 * (max - min) );
             
-            double eps = m_epsilon->get( true );
-            double iso = m_isoValue->get( true );
-            
-            debugLog() << "Given epsilon: " << eps;
-            debugLog() << "Given iso value: " << iso;
+//             double eps = m_epsilon->get( true );
+//             double iso = m_isoValue->get( true );
+//             
+//             debugLog() << "Given epsilon: " << eps;
+//             debugLog() << "Given iso value: " << iso;
             
             osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
             
-            size_t s = dataSet->getValueSet()->rawSize();
-            
-            debugLog() << "Raw size of ValueSet: " << s ;
-            
-            double currentVal;
-            int count = 0;
-            
-            boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Going through data.", s ) );
-            m_progress->addSubProgress( prog );
-            
-             osg::ref_ptr< osg::ShapeDrawable > orb = new osg::ShapeDrawable ();
-            
-            // First, grab the grid
+            // grab the grid
             boost::shared_ptr< WGridRegular3D > grid = boost::shared_dynamic_cast< WGridRegular3D >( dataSet->getGrid() );
             if( !grid )
             {
@@ -192,24 +183,41 @@ void WMTransferCalc::moduleMain()
                 continue;
             }
             
-            for( size_t i = 0; i < s ; i++ )
+            unsigned int x_scale = grid->getNbCoordsX();
+            unsigned int y_scale = grid->getNbCoordsY();
+            unsigned int z_scale = grid->getNbCoordsZ();
+            
+            debugLog() << "x = " << x_scale << ", y = " << y_scale << ", z = " << z_scale;
+            
+            m_xPos->setMin( 0 );
+            m_xPos->setMax( x_scale );
+            m_xPos->setRecommendedValue( 0.5 * x_scale );
+            
+            m_yPos->setMin( 0 );
+            m_yPos->setMax( y_scale );
+            m_yPos->setRecommendedValue( 0.5 * y_scale );
+            
+            // (x,y) position for the ray
+            
+            unsigned int x = m_xPos->get( true );
+            unsigned int y = m_yPos->get( true );
+            
+//            size_t s = dataSet->getValueSet()->rawSize();            
+//            debugLog() << "Raw size of ValueSet: " << s ;
+            
+            boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Reading one scale of data.", z_scale ) );
+            m_progress->addSubProgress( prog );
+            
+            for( unsigned int z = 0; z < z_scale; z++ )
             {
                 ++*prog;
                 
-                currentVal = dataSet->getValueAt( i );
-                                
-                if( (iso-eps) <= currentVal && currentVal <= (iso+eps) )
-                {
-                    count++;
-                    
-                    newGeode->addDrawable(
-                        new osg::ShapeDrawable( new osg::Sphere( grid->getPosition( i ).as< osg::Vec3d >() , 0.5f ) ) );
-                    
-                    if( count == 5000 ) break;
-                }
+                newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( osg::Vec3(x,y,z), 0.5f ) ) );
+                double val = dataSet->getValueSet()->getScalarDouble( grid->getVoxelNum(x,y,z) );
+                
+                debugLog() << "Value: " << val;
+                
             }
-            
-            debugLog() << "Found: " << count;
             
             m_rootNode->remove( m_geode );
             m_geode = newGeode;

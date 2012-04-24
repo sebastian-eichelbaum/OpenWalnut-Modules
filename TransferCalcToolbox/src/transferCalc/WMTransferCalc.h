@@ -32,9 +32,7 @@
 //    * External Lib headers (like OSG or Boost headers)
 //    * headers of other classes inside OpenWalnut
 
-//#include <map>
 #include <string>
-//#include <vector>
 
 #include <osg/Node>
 #include <osg/Geode>
@@ -44,12 +42,10 @@
 #include "core/kernel/WModuleInputData.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 
-//#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
-
 #include "core/dataHandler/WDataSetScalar.h"
 
 /**
- * Operators for processing two WDataSetScalar.
+ * --
  *
  * \ingroup modules
  */
@@ -135,6 +131,16 @@ private:
      */
     boost::shared_ptr< WCondition > m_propCondition;
 
+    /**
+     * x position of the ray origin.
+     */
+    WPropInt   m_xPos;
+    
+    /**
+     * y position of the ray origin.
+     */
+    WPropInt   m_yPos;
+    
     /**
      * The iso value to be rendered.
      */
