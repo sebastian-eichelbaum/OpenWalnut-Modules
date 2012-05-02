@@ -37,11 +37,14 @@
 #include <osg/Geode>
 #include <osg/Material>
 #include <osg/StateAttribute>
+#include <osg/Vec3>
 
 #include "core/kernel/WKernel.h"
 #include "core/common/WColor.h"
 #include "core/common/WPathHelper.h"
 #include "core/common/WPropertyHelper.h"
+#include "core/common/math/WMatrix.h"
+#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
@@ -183,6 +186,10 @@ void WMTransferCalc::moduleMain()
                 continue;
             }
             
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Getting Data and Setting Properties
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            
             unsigned int x_scale = grid->getNbCoordsX();
             unsigned int y_scale = grid->getNbCoordsY();
             unsigned int z_scale = grid->getNbCoordsZ();
@@ -196,27 +203,58 @@ void WMTransferCalc::moduleMain()
             m_yPos->setMin( 0 );
             m_yPos->setMax( y_scale );
             m_yPos->setRecommendedValue( 0.5 * y_scale );
-            
-            // (x,y) position for the ray
-            
-            unsigned int x = m_xPos->get( true );
-            unsigned int y = m_yPos->get( true );
-            
+
 //            size_t s = dataSet->getValueSet()->rawSize();            
 //            debugLog() << "Raw size of ValueSet: " << s ;
             
-            boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Reading one scale of data.", z_scale ) );
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Calculating Ray
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            
+            // start point and direction of the ray
+            double x = m_xPos->get( true ); 
+            double y = m_yPos->get( true );
+            double z = 0;
+            
+            WVector3d start( x, y, z );
+            debugLog() << "Start: " << start;
+            
+            WVector3d dir( 0, 0, 1 );
+            debugLog() << "Direction: " << dir;
+            
+            // ray object
+            // ray = start + t * direction
+            WRay ray ( start, dir );
+            
+            // step length
+            double interval = 1;
+            double distance = 0;
+            
+            // progress
+            boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
             m_progress->addSubProgress( prog );
             
-            for( unsigned int z = 0; z < z_scale; z++ )
+            bool calc = true;
+            while( calc )
             {
-                ++*prog;
+                WVector3d current = ray.getSpot( distance );
+                distance += interval;
+                debugLog() << "Point: " << current;
                 
-                newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( osg::Vec3(x,y,z), 0.5f ) ) );
-                double val = dataSet->getValueSet()->getScalarDouble( grid->getVoxelNum(x,y,z) );
+                // do not calculate anything for vectors outside of the data grid
+                if( current[0] > x_scale - 0.5 || current[1] > y_scale - 0.5 || current[2] > z_scale - 0.5 )
+                {
+                    calc = false;
+                    break;
+                }
                 
+                // static_cast< osg::Vec3 >( ~ )
+                
+                newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( current, 0.5f ) ) );
+                
+                double val = dataSet->getValueSet()->getScalarDouble( grid->getVoxelNum( current ) );
                 debugLog() << "Value: " << val;
-                
+
             }
             
             m_rootNode->remove( m_geode );
@@ -226,6 +264,7 @@ void WMTransferCalc::moduleMain()
             
             m_rootNode->insert( m_geode );
             prog->finish();
+            m_progress->removeSubProgress( prog );
         } 
     }    
 }

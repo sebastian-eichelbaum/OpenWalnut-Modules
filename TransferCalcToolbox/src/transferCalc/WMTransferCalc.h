@@ -41,8 +41,11 @@
 #include "core/kernel/WModule.h"
 #include "core/kernel/WModuleInputData.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
-
 #include "core/dataHandler/WDataSetScalar.h"
+#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/math/WMatrix.h"
+
+#include "WRay.h"
 
 /**
  * --
