@@ -34,6 +34,12 @@
 class WRay
 {
 public:
+    
+    /**
+     * Standard Constructor
+     */
+    WRay();
+    
     /**
      * constructor - 
      * normalizes direction
@@ -46,7 +52,7 @@ public:
     /**
      * destructor
      */
-    ~WRay();
+    virtual ~WRay();
     
     /**
      * Calculates a spot on the ray with given parameter t
@@ -56,7 +62,7 @@ public:
      *
      * \return vector
      */
-    WVector3d getSpot( double t );
+    virtual WVector3d getSpot( double t );
 
 protected:
 private:

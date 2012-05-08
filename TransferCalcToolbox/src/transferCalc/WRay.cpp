@@ -24,6 +24,8 @@
 
 #include "WRay.h"
 
+WRay::WRay() {}
+
 WRay::WRay( WVector3d st, WVector3d dir ) :
     m_start( st ),
     m_direction( dir )
@@ -32,9 +34,7 @@ WRay::WRay( WVector3d st, WVector3d dir ) :
     m_direction *= ( 1/n );
 }
 
-WRay::~WRay()
-{
-}
+WRay::~WRay() {}
 
 WVector3d WRay::getSpot( double t )
 {

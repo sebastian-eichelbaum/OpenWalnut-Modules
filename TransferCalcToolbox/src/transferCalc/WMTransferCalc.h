@@ -125,6 +125,13 @@ protected:
 private:
 
     /**
+     * Trilinear interpolation within the grid for a given position
+     * 
+     * \return interpolated value
+     */
+    virtual double interpolate( WVector3d position, boost::shared_ptr<WGridRegular3D> grid );
+    
+    /**
      * An input connector used to get datasets from other modules.
      */
     boost::shared_ptr< WModuleInputData< WDataSetScalar > >  m_inputData;
