@@ -45,7 +45,7 @@
 #include "core/common/math/linearAlgebra/WLinearAlgebra.h"
 #include "core/common/math/WMatrix.h"
 
-#include "WRay.h"
+#include "../dataStructures/WRay.h"
 
 /**
  * --
@@ -116,7 +116,7 @@ protected:
      * The root node used for this modules graphics. For OSG nodes, always use osg::ref_ptr to ensure proper resource management.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
-    
+
     /**
      * The geometry rendered by this module.
      */
@@ -126,11 +126,11 @@ private:
 
     /**
      * Trilinear interpolation within the grid for a given position
-     * 
+     *
      * \return interpolated value
      */
     virtual double interpolate( WVector3d position, boost::shared_ptr<WGridRegular3D> grid );
-    
+
     /**
      * An input connector used to get datasets from other modules.
      */
@@ -145,27 +145,27 @@ private:
      * x position of the ray origin.
      */
     WPropInt   m_xPos;
-    
+
     /**
      * y position of the ray origin.
      */
     WPropInt   m_yPos;
-    
+
     /**
      * The iso value to be rendered.
      */
     WPropDouble   m_isoValue;
-    
+
     /**
      * Epsilon value to define the range for the iso value.
      */
     WPropDouble   m_epsilon;
-    
+
     /**
      * A color.
      */
     WPropColor    m_color;
-    
+
     /**
      * Node callback to change the color of the shapes inside the root node. For more details on this class, refer to the documentation in
      * moduleMain().
