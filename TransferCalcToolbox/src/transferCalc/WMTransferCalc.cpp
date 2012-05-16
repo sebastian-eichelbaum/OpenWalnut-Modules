@@ -115,6 +115,12 @@ void WMTransferCalc::requirements()
     m_requirements.push_back( new WGERequirement() );
 }
 
+/*
+
+WRayProfile WMTransferCalc::buildProfileForRay( WRay ray )
+
+*/
+
 void WMTransferCalc::moduleMain()
 {
     debugLog() << "moduleMain started...";
@@ -187,9 +193,9 @@ void WMTransferCalc::moduleMain()
             m_yPos->setMin( 0 );
             m_yPos->setMax( y_scale );
             m_yPos->setRecommendedValue( 0.5 * y_scale );
-            
+
             m_dataRays.clear();
-            
+
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Calculating BoundingBox and OuterBounding
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -201,8 +207,7 @@ void WMTransferCalc::moduleMain()
 //             WVector4d ergebnis = c * d * v;
 
             std::vector< WVector4d > bounding_box   ( 8 );  // BoundingBox of the dataset
-            std::vector< WVector4d > outer_bounding ( 2 );  // BoundingBox parallel to the screen (just min and max)
-            
+
             bounding_box[0] = c * d * WVector4d( 0,       0,       0,       1 );
             bounding_box[1] = c * d * WVector4d( x_scale, 0,       0,       1 );
             bounding_box[2] = c * d * WVector4d( 0,       y_scale, 0,       1 );
@@ -211,10 +216,15 @@ void WMTransferCalc::moduleMain()
             bounding_box[5] = c * d * WVector4d( x_scale, 0,       z_scale, 1 );
             bounding_box[6] = c * d * WVector4d( 0,       y_scale, z_scale, 1 );
             bounding_box[7] = c * d * WVector4d( x_scale, y_scale, z_scale, 1 );
-            
+
+            std::vector< WVector4d > outer_bounding ( 2,  bounding_box[0] );  // BoundingBox parallel to the screen (just min and max)
+
             for( unsigned int k=0; k<8; k++)
             {
                 // minimal point in BoundingBox
+
+                // TIPP: outer_bounding[0][0] = std::min( bounding_box[k][0], outer_bounding[0][0] );
+
                 if( bounding_box[k][0] < outer_bounding[0][0] ) outer_bounding[0][0] = bounding_box[k][0];  // x-min
                 if( bounding_box[k][1] < outer_bounding[0][1] ) outer_bounding[0][1] = bounding_box[k][1];  // y-min
                 if( bounding_box[k][2] < outer_bounding[0][2] ) outer_bounding[0][2] = bounding_box[k][2];  // z-min
@@ -225,7 +235,7 @@ void WMTransferCalc::moduleMain()
                 if( bounding_box[k][2] > outer_bounding[1][2] ) outer_bounding[1][2] = bounding_box[k][2];  // z-max
                 outer_bounding[1][3] = 1;
             }
-            
+
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Ray Data
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -251,7 +261,7 @@ void WMTransferCalc::moduleMain()
             double sample_start = outer_bounding[0][2]; // z-min
             // end position
             double sample_end = outer_bounding[1][2]; // z-max
-            
+
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Calculating Profiles and Samples
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -269,8 +279,9 @@ void WMTransferCalc::moduleMain()
             {
                 WVector4d current = ray.getSpot( sample_t );
                 sample_t += interval;
+
                 debugLog() << "Point: " << current;
-                
+
                 if( sample_t > sample_end ) break;
 
                 // do not calculate anything for vectors outside of the data grid
@@ -282,7 +293,10 @@ void WMTransferCalc::moduleMain()
 
                 double val = interpolate( current, grid );
                 debugLog() << "Value: " << val;
-
+                /* TIPP
+                curProfile[sampleC].setValue( val );
+                sampleC++;
+                */
             }
 
             m_rootNode->remove( m_geode );
@@ -312,7 +326,7 @@ double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridR
     double vox_y = static_cast< double >( grid->getYVoxelCoord( getAs3D( position ) ) );
     double vox_z = static_cast< double >( grid->getZVoxelCoord( getAs3D( position ) ) );
     WVector4d voxel_center( vox_x, vox_y, vox_z, 1 );
-    
+
     // TODO getOffsetX - distance between voxels in x direction
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -497,7 +511,7 @@ double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridR
             values[i] = dataSet->getValueSet()->getScalarDouble( grid->getVoxelNum( getAs3D( neighbours[i] ) ) );
         }
     }
-    
+
     // trilinear interpolation from wikipedia
 
     double x_dif = position[0] - min_val[0];
