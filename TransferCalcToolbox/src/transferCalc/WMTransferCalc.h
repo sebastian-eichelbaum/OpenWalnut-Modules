@@ -46,6 +46,8 @@
 #include "core/common/math/WMatrix.h"
 
 #include "../dataStructures/WRay.h"
+#include "../dataStructures/WRaySample.h"
+#include "../dataStructures/WRayProfile.h"
 
 /**
  * --
@@ -126,10 +128,22 @@ private:
 
     /**
      * Trilinear interpolation within the grid for a given position
+     * 
+     * \param position Position for which the value should be determined.
+     * \param grid The grid which contains the values.
      *
      * \return interpolated value
      */
-    virtual double interpolate( WVector3d position, boost::shared_ptr<WGridRegular3D> grid );
+    virtual double interpolate( WVector4d position, boost::shared_ptr<WGridRegular3D> grid );
+    
+    /**
+     * Calculating a WVector3d out of a given WVector4d
+     * 
+     * \param vec 4D vector which shall be transfered to 3D
+     * 
+     * \return Calculated Vector.
+     */
+    WVector3d getAs3D( WVector4d vec );
 
     /**
      * An input connector used to get datasets from other modules.
@@ -140,6 +154,11 @@ private:
      * A condition used to notify about changes in several properties.
      */
     boost::shared_ptr< WCondition > m_propCondition;
+    
+    /**
+     * All profiles of the current dataset.
+     */
+    std::vector<WRayProfile> m_dataRays;
 
     /**
      * x position of the ray origin.

@@ -47,7 +47,7 @@ public:
      * \param st start vector
      * \param dir direction of the ray
      */
-    WRay( WVector3d st, WVector3d dir );
+    WRay( WVector4d st, WVector4d dir );
 
     /**
      * destructor
@@ -62,19 +62,19 @@ public:
      *
      * \return vector
      */
-    virtual WVector3d getSpot( double t );
+    virtual WVector4d getSpot( double t );
 
 protected:
 private:
     /**
      * origin of the ray
      */
-    WVector3d m_start;
+    WVector4d m_start;
     
     /**
      * direction of the ray
      */
-    WVector3d m_direction;
+    WVector4d m_direction;
     
 };
 

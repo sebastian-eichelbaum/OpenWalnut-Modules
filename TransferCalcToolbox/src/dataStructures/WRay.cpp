@@ -26,7 +26,7 @@
 
 WRay::WRay() {}
 
-WRay::WRay( WVector3d st, WVector3d dir ) :
+WRay::WRay( WVector4d st, WVector4d dir ) :
     m_start( st ),
     m_direction( dir )
 {
@@ -36,7 +36,7 @@ WRay::WRay( WVector3d st, WVector3d dir ) :
 
 WRay::~WRay() {}
 
-WVector3d WRay::getSpot( double t )
+WVector4d WRay::getSpot( double t )
 {
     return m_start + m_direction * t;
 }
