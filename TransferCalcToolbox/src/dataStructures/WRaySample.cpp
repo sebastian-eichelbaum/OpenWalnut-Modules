@@ -30,11 +30,6 @@ WRaySample::WRaySample():
     // initialize members
 }
 
-WRaySample::WRaySample( double value )
-{
-    m_value = value;
-}
-
 WRaySample::~WRaySample()
 {
     // cleanup

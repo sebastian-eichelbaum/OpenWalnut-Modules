@@ -58,14 +58,6 @@ public:
      * Destructor.
      */
     virtual ~WRayProfile();
-        
-//     /**
-//      * Adds a new sample to the profile.
-//      *
-//      * \param smp sample which shall be added
-//      * 
-//      */
-//     void addSample( WRaySample smp );
 
     /**
      * Access the specified ray sample. Provide a valid ray sample ID. Invalid IDs cause an exception.

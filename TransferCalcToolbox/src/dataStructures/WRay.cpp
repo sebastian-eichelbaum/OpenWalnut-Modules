@@ -24,7 +24,10 @@
 
 #include "WRay.h"
 
-WRay::WRay() {}
+WRay::WRay()
+{
+    // constructor
+}
 
 WRay::WRay( WVector4d st, WVector4d dir ) :
     m_start( st ),
@@ -34,7 +37,10 @@ WRay::WRay( WVector4d st, WVector4d dir ) :
     m_direction *= ( 1/n );
 }
 
-WRay::~WRay() {}
+WRay::~WRay()
+{
+    // destructor
+}
 
 WVector4d WRay::getSpot( double t )
 {

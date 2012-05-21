@@ -35,13 +35,6 @@ public:
      * Default constructor.
      */
     WRaySample();
-    
-    /**
-     * Constructor with direct value initialization.
-     * 
-     * \param value Value of this sample point.
-     */
-    WRaySample( double value );
 
     /**
      * Destructor.

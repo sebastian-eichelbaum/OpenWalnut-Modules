@@ -125,7 +125,6 @@ protected:
     osg::ref_ptr< osg::Geode > m_geode;
 
 private:
-
     /**
      * Trilinear interpolation within the grid for a given position
      * 
@@ -134,8 +133,8 @@ private:
      *
      * \return interpolated value
      */
-    virtual double interpolate( WVector4d position, boost::shared_ptr<WGridRegular3D> grid );
-    
+    virtual double interpolate( WVector4d position );
+
     /**
      * Calculating a WVector3d out of a given WVector4d
      * 
@@ -154,11 +153,21 @@ private:
      * A condition used to notify about changes in several properties.
      */
     boost::shared_ptr< WCondition > m_propCondition;
-    
+
+//     /**
+//      * All profiles of the current dataset.
+//      */
+//     std::vector<WRayProfile> m_dataRays;
+
     /**
-     * All profiles of the current dataset.
+     * Current dataset
      */
-    std::vector<WRayProfile> m_dataRays;
+    boost::shared_ptr< WDataSetScalar > m_dataSet;
+
+    /**
+     * Current grid
+     */
+    boost::shared_ptr< WGridRegular3D > m_grid;
 
     /**
      * x position of the ray origin.
@@ -171,19 +180,9 @@ private:
     WPropInt   m_yPos;
 
     /**
-     * The iso value to be rendered.
-     */
-    WPropDouble   m_isoValue;
-
-    /**
-     * Epsilon value to define the range for the iso value.
-     */
-    WPropDouble   m_epsilon;
-
-    /**
      * A color.
      */
-    WPropColor    m_color;
+    WPropColor  m_color;
 
     /**
      * Node callback to change the color of the shapes inside the root node. For more details on this class, refer to the documentation in
@@ -222,7 +221,6 @@ private:
          */
         bool m_initialUpdate;
     };
-
 };
 
 #endif  // WMTRANSFERCALC_H

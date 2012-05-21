@@ -22,6 +22,7 @@
 //
 //---------------------------------------------------------------------------
 
+#include "core/kernel/WKernel.h"
 #include "core/common/WAssert.h"
 
 #include "WRayProfile.h"
@@ -31,7 +32,9 @@ WRayProfile::WRayProfile( size_t nbSamples )
     // initialize members
 
     // reserve some space for all the profiles.
-    m_profile.resize( nbSamples );
+    m_profile.resize( nbSamples, WRaySample() );
+
+//     wlog::debug( "WRayProfile" ) << "Size of RayProfile: " << m_profile.size();
 
     // NOTE: the number of samples does not need to be stored as it is the number of elements in m_profile.
 }
@@ -41,19 +44,14 @@ WRayProfile::~WRayProfile()
     // cleanup
 }
 
-// void WRayProfile::addSample( WRaySample smp )
-// {
-//     m_profile.push_back( smp );
-// }
-
 const WRaySample& WRayProfile::operator[]( size_t sampleID ) const
 {
-    WAssert( sampleID >= m_profile.size(), "Invalid sample ID." );
+    WAssert( sampleID < m_profile.size(), "Invalid sample ID." );  // assert was wrong in the beginning
     return m_profile[ sampleID ];
 }
 
 WRaySample& WRayProfile::operator[]( size_t sampleID )
 {
-    WAssert( sampleID >= m_profile.size(), "Invalid sample ID." );
+    WAssert( sampleID < m_profile.size(), "Invalid sample ID." );
     return m_profile[ sampleID ];
 }

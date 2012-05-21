@@ -34,12 +34,11 @@
 class WRay
 {
 public:
-    
     /**
      * Standard Constructor
      */
     WRay();
-    
+
     /**
      * constructor - 
      * normalizes direction
@@ -53,7 +52,7 @@ public:
      * destructor
      */
     virtual ~WRay();
-    
+
     /**
      * Calculates a spot on the ray with given parameter t
      * ray = start + t * direction
@@ -70,12 +69,11 @@ private:
      * origin of the ray
      */
     WVector4d m_start;
-    
+
     /**
      * direction of the ray
      */
     WVector4d m_direction;
-    
 };
 
 #endif  // WRAY_H

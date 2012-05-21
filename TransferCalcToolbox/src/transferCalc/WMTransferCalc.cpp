@@ -31,6 +31,8 @@
 //    * your own header file
 
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include <osg/ShapeDrawable>
 #include <osg/Group>
@@ -50,10 +52,6 @@
 
 #include "WMTransferCalc.xpm"
 #include "WMTransferCalc.h"
-
-// This line is needed by the module loader to actually find your module. You need to add this to your module too. Do NOT add a ";" here.
-// W_LOADABLE_MODULE( WMTransferCalc )
-// TODO
 
 WMTransferCalc::WMTransferCalc():
     WModule()
@@ -100,8 +98,6 @@ void WMTransferCalc::connectors()
 void WMTransferCalc::properties()
 {
     m_propCondition = boost::shared_ptr< WCondition >( new WCondition() );
-//     m_isoValue      = m_properties->addProperty( "ISO-Value", "Iso value to be rendered.", 100.0, m_propCondition );
-//     m_epsilon       = m_properties->addProperty( "Epsilon", "Epsilon value to define the iso range.", 1.0, m_propCondition );
     m_color         = m_properties->addProperty(  "Color", "Color of the orbs.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
     m_xPos          = m_properties->addProperty( "X position", "x coordinate of the ray origin", 0, m_propCondition );
@@ -114,12 +110,6 @@ void WMTransferCalc::requirements()
 {
     m_requirements.push_back( new WGERequirement() );
 }
-
-/*
-
-WRayProfile WMTransferCalc::buildProfileForRay( WRay ray )
-
-*/
 
 void WMTransferCalc::moduleMain()
 {
@@ -151,38 +141,45 @@ void WMTransferCalc::moduleMain()
         }
 
         bool dataUpdated = m_inputData->updated();
-        boost::shared_ptr< WDataSetScalar > dataSet = m_inputData->getData();
-        bool dataValid = ( dataSet );
+        bool dataValid = ( m_dataSet );
 
-        if( !dataValid )
+        if( dataUpdated )
         {
-            debugLog() << "Data changed. No valid data anymore. Cleaning up.";
-            WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
+            if( m_dataSet != m_inputData->getData() )
+            {
+                m_dataSet = m_inputData->getData();
+                dataValid = ( m_dataSet );
+                debugLog() << "New Data!";
+
+                if( !dataValid )
+                {
+                    debugLog() << "No valid data anymore. Cleaning up.";
+                    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
+                }
+
+                // grab the grid
+                m_grid = boost::shared_dynamic_cast< WGridRegular3D >( m_dataSet->getGrid() );
+                if( !m_grid )
+                {
+                    errorLog() << "The dataset does not provide a regular grid. Ignoring dataset.";
+                    dataValid = false;
+                }
+            }
         }
-
-        bool propsChanged = m_xPos->changed() || m_yPos->changed();  //m_isoValue->changed() || m_epsilon->changed();
-
-        if( ( propsChanged || dataUpdated ) && dataValid )
+        bool propsChanged = m_xPos->changed() || m_yPos->changed();
+        if( propsChanged && dataValid )
         {
-            debugLog() << "Received Data or Data changed.";
+            debugLog() << "Properties changed.";
 
             osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
-
-            // grab the grid
-            boost::shared_ptr< WGridRegular3D > grid = boost::shared_dynamic_cast< WGridRegular3D >( dataSet->getGrid() );
-            if( !grid )
-            {
-                errorLog() << "The dataset does not provide a regular grid. Ignoring dataset.";
-                continue;
-            }
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Getting Data and setting Properties
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            unsigned int x_scale = grid->getNbCoordsX();
-            unsigned int y_scale = grid->getNbCoordsY();
-            unsigned int z_scale = grid->getNbCoordsZ();
+            unsigned int x_scale = m_grid->getNbCoordsX();
+            unsigned int y_scale = m_grid->getNbCoordsY();
+            unsigned int z_scale = m_grid->getNbCoordsZ();
 
             debugLog() << "x = " << x_scale << ", y = " << y_scale << ", z = " << z_scale;
 
@@ -194,19 +191,19 @@ void WMTransferCalc::moduleMain()
             m_yPos->setMax( y_scale );
             m_yPos->setRecommendedValue( 0.5 * y_scale );
 
-            m_dataRays.clear();
+            //m_dataRays.clear();
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Calculating BoundingBox and OuterBounding
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
             WMatrix4d c = WMatrix4d::identity();
-            WMatrix4d d = grid->getTransform();
+            WMatrix4d d = m_grid->getTransform();
             // BEISPIEL
 //             WVector4d v;
 //             WVector4d ergebnis = c * d * v;
 
-            std::vector< WVector4d > bounding_box   ( 8 );  // BoundingBox of the dataset
+            std::vector< WVector4d > bounding_box( 8 );  // BoundingBox of the dataset
 
             bounding_box[0] = c * d * WVector4d( 0,       0,       0,       1 );
             bounding_box[1] = c * d * WVector4d( x_scale, 0,       0,       1 );
@@ -217,23 +214,24 @@ void WMTransferCalc::moduleMain()
             bounding_box[6] = c * d * WVector4d( 0,       y_scale, z_scale, 1 );
             bounding_box[7] = c * d * WVector4d( x_scale, y_scale, z_scale, 1 );
 
-            std::vector< WVector4d > outer_bounding ( 2,  bounding_box[0] );  // BoundingBox parallel to the screen (just min and max)
+            std::vector< WVector4d > outer_bounding( 2,  bounding_box[0] );  // BoundingBox parallel to the screen (just min and max)
+//             debugLog() << "Outer1: " << outer_bounding[0];
+//             debugLog() << "Outer2: " << outer_bounding[1];
 
-            for( unsigned int k=0; k<8; k++)
+            for( unsigned int k = 0; k < 8; k++)
             {
                 // minimal point in BoundingBox
-
-                // TIPP: outer_bounding[0][0] = std::min( bounding_box[k][0], outer_bounding[0][0] );
-
-                if( bounding_box[k][0] < outer_bounding[0][0] ) outer_bounding[0][0] = bounding_box[k][0];  // x-min
-                if( bounding_box[k][1] < outer_bounding[0][1] ) outer_bounding[0][1] = bounding_box[k][1];  // y-min
-                if( bounding_box[k][2] < outer_bounding[0][2] ) outer_bounding[0][2] = bounding_box[k][2];  // z-min
+                outer_bounding[0][0] = std::min( bounding_box[k][0], outer_bounding[0][0] ); // x-min
+                outer_bounding[0][1] = std::min( bounding_box[k][1], outer_bounding[0][1] ); // y-min
+                outer_bounding[0][2] = std::min( bounding_box[k][2], outer_bounding[0][2] ); // z-min
                 outer_bounding[0][3] = 1;
+//                 debugLog() << "min-vec:" << outer_bounding[0];
                 // maximal point in BoundingBox
-                if( bounding_box[k][0] > outer_bounding[1][0] ) outer_bounding[1][0] = bounding_box[k][0];  // x-max
-                if( bounding_box[k][1] > outer_bounding[1][1] ) outer_bounding[1][1] = bounding_box[k][1];  // y-max
-                if( bounding_box[k][2] > outer_bounding[1][2] ) outer_bounding[1][2] = bounding_box[k][2];  // z-max
+                outer_bounding[1][0] = std::max( bounding_box[k][0], outer_bounding[1][0] ); // x-max
+                outer_bounding[1][1] = std::max( bounding_box[k][1], outer_bounding[1][1] ); // y-max
+                outer_bounding[1][2] = std::max( bounding_box[k][2], outer_bounding[1][2] ); // z-max
                 outer_bounding[1][3] = 1;
+//                 debugLog() << "max-vec:" << outer_bounding[1];
             }
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -253,10 +251,10 @@ void WMTransferCalc::moduleMain()
 
             // ray object
             // ray = start + t * direction
-            WRay ray ( start, dir );
+            WRay ray( start, dir );
 
             // step length
-            double interval = 1;
+            double interval = 0.33;
             // start position
             double sample_start = outer_bounding[0][2]; // z-min
             // end position
@@ -265,40 +263,44 @@ void WMTransferCalc::moduleMain()
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Calculating Profiles and Samples
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                                       // TODO ?
+
             size_t max_nbSamples = ceil( length( outer_bounding[1] - outer_bounding[0] ) / interval );
-            WRayProfile curProfile ( max_nbSamples );
-            // new profiles with clear and resize?
+            WRayProfile curProfile( max_nbSamples );
+//             debugLog() << "Max samples: " << max_nbSamples;
+            size_t sampleC = 0;
 
             // progress
             boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
             m_progress->addSubProgress( prog );
 
-            double sample_t = sample_start;
+            double sample_t = sample_start - 1;
             while( true )
             {
                 WVector4d current = ray.getSpot( sample_t );
-                sample_t += interval;
-
                 debugLog() << "Point: " << current;
 
-                if( sample_t > sample_end ) break;
+                sample_t += interval;
+                if( sample_t > sample_end + 1 ) break;
 
                 // do not calculate anything for vectors outside of the data grid
-                if( ! grid->encloses( getAs3D( current ) ) )
+                if( !m_grid->encloses( getAs3D( current ) ) )
                 {
+                    debugLog() << "continue...";
                     continue;
                 }
                 newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( current ), 0.5f ) ) );
-
-                double val = interpolate( current, grid );
+//                 double not_int_val = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( current ) ) );
+//                 debugLog() << "Old value: " << not_int_val;
+                double val = interpolate( current );
                 debugLog() << "Value: " << val;
-                /* TIPP
-                curProfile[sampleC].setValue( val );
-                sampleC++;
-                */
-            }
 
+                WRaySample testSample;
+                testSample.value() = val;
+//                 debugLog() << "Value of Sample: " << testSample.value();
+//                 debugLog() << "Sample ID: " << sampleC;
+                curProfile[sampleC] = testSample;
+                sampleC++;
+            }
             m_rootNode->remove( m_geode );
             m_geode = newGeode;
 
@@ -314,29 +316,38 @@ void WMTransferCalc::moduleMain()
 WVector3d WMTransferCalc::getAs3D( WVector4d vec )
 {
     if( vec[3] == 0 )
+    {
         return WVector3d( vec[0], vec[1], vec[2] );
+    }
     else
+    {
         return WVector3d( vec[0]/vec[3], vec[1]/vec[3], vec[2]/vec[3] );
+    }
 }
 
 
-double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridRegular3D> grid )
+double WMTransferCalc::interpolate( WVector4d position )
 {
-    double vox_x = static_cast< double >( grid->getXVoxelCoord( getAs3D( position ) ) );
-    double vox_y = static_cast< double >( grid->getYVoxelCoord( getAs3D( position ) ) );
-    double vox_z = static_cast< double >( grid->getZVoxelCoord( getAs3D( position ) ) );
+    double vox_x = static_cast< double >( m_grid->getXVoxelCoord( getAs3D( position ) ) );
+    double vox_y = static_cast< double >( m_grid->getYVoxelCoord( getAs3D( position ) ) );
+    double vox_z = static_cast< double >( m_grid->getZVoxelCoord( getAs3D( position ) ) );
     WVector4d voxel_center( vox_x, vox_y, vox_z, 1 );
 
-    // TODO getOffsetX - distance between voxels in x direction
+    // distance between voxels in each direction
+    double x_offset = m_grid->getOffsetX();
+    double y_offset = m_grid->getOffsetY();
+    double z_offset = m_grid->getOffsetZ();
+//     debugLog() << "Offsets: " << x_offset << ", " << y_offset << ", " << z_offset;
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Calculating all relevant neighbours for the interpolation
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // vector with all 8 neighbours
-    std::vector< WVector4d > neighbours ( 8 );
-    // vector with min values of the scales of the "neighbour cube"
+    // vector with all 8 neighbours to the position
+    std::vector< WVector4d > neighbours( 8 );
+    // vectors with min / max coordinates of neighbours
     // { min_x, min_y, min_z }
-    std::vector< double > min_val ( 3 );
+    std::vector< double > min_val( 3 );
+    std::vector< double > max_val( 3 );
 
     // positive x direction
     if( position[0] >= voxel_center[0] )
@@ -348,34 +359,42 @@ double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridR
             if( position[2] >= voxel_center[2] )
             {
                 // Quadrant I
-                neighbours[0] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[1] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[2] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]  , 1 );
-                neighbours[3] = WVector4d( voxel_center[0]+1, voxel_center[1]+1, voxel_center[2]  , 1 );
-                neighbours[4] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]+1, 1 );
-                neighbours[5] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]+1, 1 );
-                neighbours[6] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]+1, 1 );
-                neighbours[7] = WVector4d( voxel_center[0]+1, voxel_center[1]+1, voxel_center[2]+1, 1 );
+                neighbours[0] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[1] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[2] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]         , 1 );
+                neighbours[3] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]+y_offset, voxel_center[2]         , 1 );
+                neighbours[4] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]+z_offset, 1 );
+                neighbours[5] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]+z_offset, 1 );
+                neighbours[6] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]+z_offset, 1 );
+                neighbours[7] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]+y_offset, voxel_center[2]+z_offset, 1 );
 
                 min_val[0] = voxel_center[0];
                 min_val[1] = voxel_center[1];
                 min_val[2] = voxel_center[2];
+
+                max_val[0] = voxel_center[0]+x_offset;
+                max_val[1] = voxel_center[1]+y_offset;
+                max_val[2] = voxel_center[2]+z_offset;
             }
             else // negative z direction
             {
                 // Quadrant V
-                neighbours[0] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[1] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[2] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]-1, 1 );
-                neighbours[3] = WVector4d( voxel_center[0]+1, voxel_center[1]+1, voxel_center[2]-1, 1 );
-                neighbours[4] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[5] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[6] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]  , 1 );
-                neighbours[7] = WVector4d( voxel_center[0]+1, voxel_center[1]+1, voxel_center[2]  , 1 );
+                neighbours[0] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[1] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[2] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[3] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]+y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[4] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[5] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[6] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]         , 1 );
+                neighbours[7] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]+y_offset, voxel_center[2]         , 1 );
 
                 min_val[0] = voxel_center[0];
                 min_val[1] = voxel_center[1];
-                min_val[2] = voxel_center[2]-1;
+                min_val[2] = voxel_center[2]-z_offset;
+
+                max_val[0] = voxel_center[0]+x_offset;
+                max_val[1] = voxel_center[1]+y_offset;
+                max_val[2] = voxel_center[2];
             }
         }
         else // negative y direction
@@ -384,34 +403,42 @@ double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridR
             if( position[2] >= voxel_center[2] )
             {
                 // Quadrant IV
-                neighbours[0] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[1] = WVector4d( voxel_center[0]+1, voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[2] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[3] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[4] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]+1, 1 );
-                neighbours[5] = WVector4d( voxel_center[0]+1, voxel_center[1]-1, voxel_center[2]+1, 1 );
-                neighbours[6] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]+1, 1 );
-                neighbours[7] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]+1, 1 );
+                neighbours[0] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[1] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[2] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[3] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[4] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]+z_offset, 1 );
+                neighbours[5] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]-y_offset, voxel_center[2]+z_offset, 1 );
+                neighbours[6] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]+z_offset, 1 );
+                neighbours[7] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]+z_offset, 1 );
 
                 min_val[0] = voxel_center[0];
-                min_val[1] = voxel_center[1]-1;
+                min_val[1] = voxel_center[1]-y_offset;
                 min_val[2] = voxel_center[2];
+
+                max_val[0] = voxel_center[0]+x_offset;
+                max_val[1] = voxel_center[1];
+                max_val[2] = voxel_center[2]+z_offset;
             }
             else // negative z direction
             {
                 // Quadrant VIII
-                neighbours[0] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]-1, 1 );
-                neighbours[1] = WVector4d( voxel_center[0]+1, voxel_center[1]-1, voxel_center[2]-1, 1 );
-                neighbours[2] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[3] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[4] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[5] = WVector4d( voxel_center[0]+1, voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[6] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[7] = WVector4d( voxel_center[0]+1, voxel_center[1],   voxel_center[2]  , 1 );
+                neighbours[0] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[1] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]-y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[2] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[3] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[4] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[5] = WVector4d( voxel_center[0]+x_offset, voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[6] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[7] = WVector4d( voxel_center[0]+x_offset, voxel_center[1],          voxel_center[2]         , 1 );
 
                 min_val[0] = voxel_center[0];
-                min_val[1] = voxel_center[1]-1;
-                min_val[2] = voxel_center[2]-1;
+                min_val[1] = voxel_center[1]-y_offset;
+                min_val[2] = voxel_center[2]-z_offset;
+
+                max_val[0] = voxel_center[0]+x_offset;
+                max_val[1] = voxel_center[1];
+                max_val[2] = voxel_center[2];
             }
         }
     }
@@ -424,34 +451,42 @@ double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridR
             if( position[2] >= voxel_center[2] )
             {
                 // Quadrant II
-                neighbours[0] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[1] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[2] = WVector4d( voxel_center[0]-1, voxel_center[1]+1, voxel_center[2]  , 1 );
-                neighbours[3] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]  , 1 );
-                neighbours[4] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]+1, 1 );
-                neighbours[5] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]+1, 1 );
-                neighbours[6] = WVector4d( voxel_center[0]-1, voxel_center[1]+1, voxel_center[2]+1, 1 );
-                neighbours[7] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]+1, 1 );
+                neighbours[0] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[1] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[2] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]+y_offset, voxel_center[2]         , 1 );
+                neighbours[3] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]         , 1 );
+                neighbours[4] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]+z_offset, 1 );
+                neighbours[5] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]+z_offset, 1 );
+                neighbours[6] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]+y_offset, voxel_center[2]+z_offset, 1 );
+                neighbours[7] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]+z_offset, 1 );
 
-                min_val[0] = voxel_center[0]-1;
+                min_val[0] = voxel_center[0]-x_offset;
                 min_val[1] = voxel_center[1];
                 min_val[2] = voxel_center[2];
+
+                max_val[0] = voxel_center[0];
+                max_val[1] = voxel_center[1]+y_offset;
+                max_val[2] = voxel_center[2]+z_offset;
             }
             else // negative z direction
             {
                 // Quadrant VI
-                neighbours[0] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[1] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[2] = WVector4d( voxel_center[0]-1, voxel_center[1]+1, voxel_center[2]-1, 1 );
-                neighbours[3] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]-1, 1 );
-                neighbours[4] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[5] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[6] = WVector4d( voxel_center[0]-1, voxel_center[1]+1, voxel_center[2]  , 1 );
-                neighbours[7] = WVector4d( voxel_center[0],   voxel_center[1]+1, voxel_center[2]  , 1 );
+                neighbours[0] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[1] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[2] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]+y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[3] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[4] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[5] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[6] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]+y_offset, voxel_center[2]         , 1 );
+                neighbours[7] = WVector4d( voxel_center[0],          voxel_center[1]+y_offset, voxel_center[2]         , 1 );
 
-                min_val[0] = voxel_center[0]-1;
+                min_val[0] = voxel_center[0]-x_offset;
                 min_val[1] = voxel_center[1];
-                min_val[2] = voxel_center[2]-1;
+                min_val[2] = voxel_center[2]-z_offset;
+
+                max_val[0] = voxel_center[0];
+                max_val[1] = voxel_center[1]+y_offset;
+                max_val[2] = voxel_center[2];
             }
         }
         else // negative y direction
@@ -460,63 +495,69 @@ double WMTransferCalc::interpolate( WVector4d position, boost::shared_ptr<WGridR
             if( position[2] >= voxel_center[2] )
             {
                 // Quadrant III
-                neighbours[0] = WVector4d( voxel_center[0]-1, voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[1] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[2] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[3] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[4] = WVector4d( voxel_center[0]-1, voxel_center[1]-1, voxel_center[2]+1, 1 );
-                neighbours[5] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]+1, 1 );
-                neighbours[6] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]+1, 1 );
-                neighbours[7] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]+1, 1 );
+                neighbours[0] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[1] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[2] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[3] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[4] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]-y_offset, voxel_center[2]+z_offset, 1 );
+                neighbours[5] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]+z_offset, 1 );
+                neighbours[6] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]+z_offset, 1 );
+                neighbours[7] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]+z_offset, 1 );
 
-                min_val[0] = voxel_center[0]-1;
-                min_val[1] = voxel_center[1]-1;
+                min_val[0] = voxel_center[0]-x_offset;
+                min_val[1] = voxel_center[1]-y_offset;
                 min_val[2] = voxel_center[2];
+
+                max_val[0] = voxel_center[0];
+                max_val[1] = voxel_center[1];
+                max_val[2] = voxel_center[2]+z_offset;
             }
             else // negative z direction
             {
                 // Quadrant VII
-                neighbours[0] = WVector4d( voxel_center[0]-1, voxel_center[1]-1, voxel_center[2]-1, 1 );
-                neighbours[1] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]-1, 1 );
-                neighbours[2] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[3] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]-1, 1 );
-                neighbours[4] = WVector4d( voxel_center[0]-1, voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[5] = WVector4d( voxel_center[0],   voxel_center[1]-1, voxel_center[2]  , 1 );
-                neighbours[6] = WVector4d( voxel_center[0]-1, voxel_center[1],   voxel_center[2]  , 1 );
-                neighbours[7] = WVector4d( voxel_center[0],   voxel_center[1],   voxel_center[2]  , 1 );
+                neighbours[0] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]-y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[1] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]-z_offset, 1 );
+                neighbours[2] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[3] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]-z_offset, 1 );
+                neighbours[4] = WVector4d( voxel_center[0]-x_offset, voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[5] = WVector4d( voxel_center[0],          voxel_center[1]-y_offset, voxel_center[2]         , 1 );
+                neighbours[6] = WVector4d( voxel_center[0]-x_offset, voxel_center[1],          voxel_center[2]         , 1 );
+                neighbours[7] = WVector4d( voxel_center[0],          voxel_center[1],          voxel_center[2]         , 1 );
 
-                min_val[0] = voxel_center[0]-1;
-                min_val[1] = voxel_center[1]-1;
-                min_val[2] = voxel_center[2]-1;
+                min_val[0] = voxel_center[0]-x_offset;
+                min_val[1] = voxel_center[1]-y_offset;
+                min_val[2] = voxel_center[2]-z_offset;
+
+                max_val[0] = voxel_center[0];
+                max_val[1] = voxel_center[1];
+                max_val[2] = voxel_center[2];
             }
         }
     }
-
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Interpolate
+    // Interpolation
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // for storing the values of the 8 neighbours
-    std::vector< double > values ( 8 );
+    std::vector< double > values( 8 );
 
     // check, if all neighbours are inside the grid
-    boost::shared_ptr< WDataSetScalar > dataSet = m_inputData->getData();
     for( unsigned int i = 0; i < neighbours.size(); i++)
     {
-        if( ! grid->encloses( getAs3D( neighbours[i] ) ) )
+        if( !m_grid->encloses( getAs3D( neighbours[i] ) ) )
         {
-            values[i] = 0;  // TODO any better?
+            values[i] = 0;  // TODO(fjacob): any better?
         }
         else
         {
-            values[i] = dataSet->getValueSet()->getScalarDouble( grid->getVoxelNum( getAs3D( neighbours[i] ) ) );
+            values[i] = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( neighbours[i] ) ) );
         }
     }
 
     // trilinear interpolation from wikipedia
 
-    double x_dif = position[0] - min_val[0];
-    double y_dif = position[1] - min_val[1];
-    double z_dif = position[2] - min_val[2];
+    double x_dif = ( position[0] - min_val[0] ) / ( max_val[0] - min_val[0] );
+    double y_dif = ( position[1] - min_val[1] ) / ( max_val[1] - min_val[1] );
+    double z_dif = ( position[2] - min_val[2] ) / ( max_val[2] - min_val[2] );
 
     double c_00  = values[0]*( 1-x_dif ) + values[1]*x_dif;
     double c_10  = values[2]*( 1-x_dif ) + values[3]*x_dif;
