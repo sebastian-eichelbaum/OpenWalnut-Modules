@@ -140,8 +140,9 @@ void WMTransferCalc::moduleMain()
             break;
         }
 
+        // TODO irgendetwas stimmt mit den pointern nicht
         bool dataUpdated = m_inputData->updated();
-        bool dataValid = ( m_dataSet );
+        bool dataValid  = ( m_dataSet );
 
         if( dataUpdated )
         {
@@ -166,6 +167,7 @@ void WMTransferCalc::moduleMain()
                 }
             }
         }
+
         bool propsChanged = m_xPos->changed() || m_yPos->changed();
         if( propsChanged && dataValid )
         {
@@ -277,7 +279,7 @@ void WMTransferCalc::moduleMain()
             while( true )
             {
                 WVector4d current = ray.getSpot( sample_t );
-                debugLog() << "Point: " << current;
+                //debugLog() << "Point: " << current;
 
                 sample_t += interval;
                 if( sample_t > sample_end + 1 ) break;
@@ -285,22 +287,27 @@ void WMTransferCalc::moduleMain()
                 // do not calculate anything for vectors outside of the data grid
                 if( !m_grid->encloses( getAs3D( current ) ) )
                 {
-                    debugLog() << "continue...";
+                    //debugLog() << "continue...";
                     continue;
                 }
                 newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( current ), 0.5f ) ) );
 //                 double not_int_val = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( current ) ) );
 //                 debugLog() << "Old value: " << not_int_val;
                 double val = interpolate( current );
-                debugLog() << "Value: " << val;
+                //debugLog() << "Value: " << val;
 
-                WRaySample testSample;
-                testSample.value() = val;
 //                 debugLog() << "Value of Sample: " << testSample.value();
 //                 debugLog() << "Sample ID: " << sampleC;
-                curProfile[sampleC] = testSample;
+                curProfile[sampleC].value() = val;
                 sampleC++;
             }
+            std::cout << "DEBUG - RayProfile: " << std::endl;
+            for( size_t i = 0; i < curProfile.size(); i++ )
+            {
+                std::cout << curProfile[i].value() << " ";
+            }
+            std::cout << std::endl;
+
             m_rootNode->remove( m_geode );
             m_geode = newGeode;
 

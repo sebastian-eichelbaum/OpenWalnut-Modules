@@ -77,6 +77,13 @@ public:
      */
     WRaySample& operator[]( size_t sampleID );
 
+    /**
+     * Get the size of the Profile - the number of samples.
+     *
+     * \return the sample
+     */
+    virtual size_t size();
+
 protected:
 private:
     /**

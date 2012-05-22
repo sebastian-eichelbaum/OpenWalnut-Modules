@@ -44,6 +44,11 @@ WRayProfile::~WRayProfile()
     // cleanup
 }
 
+size_t WRayProfile::size( )
+{
+    return m_profile.size();
+}
+
 const WRaySample& WRayProfile::operator[]( size_t sampleID ) const
 {
     WAssert( sampleID < m_profile.size(), "Invalid sample ID." );  // assert was wrong in the beginning
