@@ -1,0 +1,4 @@
+This is an example for fixtures. If you use uni tests, it might come in handy
+to also have test data avilable. Place the test data into the fixtures
+directory and our build scripts handle them automatically. They get copied to
+the binary dir of the unit test.
