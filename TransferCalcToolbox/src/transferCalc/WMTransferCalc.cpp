@@ -126,12 +126,12 @@ void WMTransferCalc::moduleMain()
     //m_rootNode->addUpdateCallback( new TranslateCallback( this ) );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
 
-
     debugLog() << "Entering main loop";
     while( !m_shutdownFlag() )
     {
         debugLog() << "Waiting ...";
         m_moduleState.wait();
+        debugLog() << "New Data Incoming ...";
 
         // woke up since the module is requested to finish
         if( m_shutdownFlag() )
@@ -140,24 +140,23 @@ void WMTransferCalc::moduleMain()
             break;
         }
 
-        // TODO irgendetwas stimmt mit den pointern nicht
-        bool dataUpdated = m_inputData->updated();
+        bool dataChanged = ( m_inputData->getData() != m_dataSet );
         bool dataValid  = ( m_dataSet );
 
-        if( dataUpdated )
+        if( dataChanged )
         {
-            if( m_dataSet != m_inputData->getData() )
+            m_dataSet = m_inputData->getData();
+            dataValid = ( m_dataSet );
+            debugLog() << "New Data!";
+
+            if( !dataValid )
             {
-                m_dataSet = m_inputData->getData();
-                dataValid = ( m_dataSet );
-                debugLog() << "New Data!";
-
-                if( !dataValid )
-                {
-                    debugLog() << "No valid data anymore. Cleaning up.";
-                    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
-                }
-
+                debugLog() << "No valid data anymore. Cleaning up.";
+                m_rootNode->clear();
+                m_grid.reset();
+            }
+            else
+            {
                 // grab the grid
                 m_grid = boost::shared_dynamic_cast< WGridRegular3D >( m_dataSet->getGrid() );
                 if( !m_grid )
@@ -169,9 +168,9 @@ void WMTransferCalc::moduleMain()
         }
 
         bool propsChanged = m_xPos->changed() || m_yPos->changed();
-        if( propsChanged && dataValid )
+        if( ( propsChanged || dataChanged ) && dataValid )
         {
-            debugLog() << "Properties changed.";
+            debugLog() << "Data or properties changed.";
 
             osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
 
@@ -201,6 +200,7 @@ void WMTransferCalc::moduleMain()
 
             WMatrix4d c = WMatrix4d::identity();
             WMatrix4d d = m_grid->getTransform();
+            WMatrix4d transformation = c * d;
             // BEISPIEL
 //             WVector4d v;
 //             WVector4d ergebnis = c * d * v;
@@ -313,11 +313,14 @@ void WMTransferCalc::moduleMain()
 
             m_geode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
+            m_rootNode->clear();
             m_rootNode->insert( m_geode );
             prog->finish();
             m_progress->removeSubProgress( prog );
         }
     }
+
+    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
 
 WVector3d WMTransferCalc::getAs3D( WVector4d vec )
