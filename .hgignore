@@ -13,11 +13,8 @@ tags
 cscope.out
 ncscope.out
 
-# files geneterated by build system
-^src/WVersion.h
-
 # local vim rc
-^lvimrc
+lvimrc
 
 .project
 .cproject
