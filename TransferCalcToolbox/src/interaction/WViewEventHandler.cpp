@@ -27,7 +27,8 @@
 #include "WViewEventHandler.h"
 
 WViewEventHandler::WViewEventHandler():
-    osgGA::GUIEventHandler()
+    osgGA::GUIEventHandler(),
+    m_wasDrag( false )
 {
     // initialize members
 }
@@ -37,7 +38,7 @@ WViewEventHandler::~WViewEventHandler()
     // cleanup
 }
 
-bool WViewEventHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& /*aa*/ )
+bool WViewEventHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActionAdapter& aa )
 {
     // handle the interesting events
     switch( ea.getEventType() )
@@ -48,16 +49,25 @@ bool WViewEventHandler::handle( const osgGA::GUIEventAdapter& ea, osgGA::GUIActi
         // middle and right button initiates dragging. Store initial mouse coordinates
         if( ea.getButton() == osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON )
         {
-            m_onLeftClick( WVector2i( ea.getX(), ea.getY() ) );
+            // if this was a drag, ignore it as onLeftClick only reacts on pure clicks
+            if( !m_wasDrag )
+            {
+                m_onLeftClick( WVector2i( ea.getX(), ea.getY() ) );
+            }
+            m_wasDrag = false;
         }
         break;
     case osgGA::GUIEventAdapter::DOUBLECLICK:
         break;
-     default:
-        return false;
+    case osgGA::GUIEventAdapter::DRAG:
+        m_wasDrag = true;
+        break;
+    default:
+        break;
     }
 
-    return true;
+    // in ALL cases, allow standard handling
+    return osgGA::GUIEventHandler::handle( ea, aa );
 }
 
 boost::signals2::connection WViewEventHandler::onLeftClick( t_MouseHandlerType handler )

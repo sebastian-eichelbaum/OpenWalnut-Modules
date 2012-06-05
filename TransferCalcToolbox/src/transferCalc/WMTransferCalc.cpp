@@ -50,6 +50,9 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
+#include "../interaction/WViewEventHandler.h"
+#include "../interaction/WGetMatrixCallback.h"
+
 #include "WMTransferCalc.xpm"
 #include "WMTransferCalc.h"
 
@@ -111,6 +114,13 @@ void WMTransferCalc::requirements()
     m_requirements.push_back( new WGERequirement() );
 }
 
+void WMTransferCalc::onClick( WVector2i mousePos )
+{
+    debugLog() << "Left Click at " << mousePos;
+    debugLog() << "Projection Matrix: " << m_matrixCallback->getProjectionMatrix()->get();
+    debugLog() << "ModelView Matrix: " << m_matrixCallback->getModelViewMatrix()->get();
+}
+
 void WMTransferCalc::moduleMain()
 {
     debugLog() << "moduleMain started...";
@@ -125,6 +135,15 @@ void WMTransferCalc::moduleMain()
     m_rootNode = new WGEManagedGroupNode( m_active );
     //m_rootNode->addUpdateCallback( new TranslateCallback( this ) );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
+
+    // Create and add an event handler for the main view as we are interested in click events
+    WViewEventHandler::RefPtr handler( new WViewEventHandler() );
+    WKernel::getRunningKernel()->getGraphicsEngine()->getViewer()->getView()->addEventHandler( handler );
+    handler->onLeftClick( boost::bind( &WMTransferCalc::onClick, this, _1 ) );
+
+    // as we need the projection and view matrices: add a callback which queries this
+    m_matrixCallback = new WGetMatrixCallback();
+    m_rootNode->addCullCallback( m_matrixCallback );
 
     debugLog() << "Entering main loop";
     while( !m_shutdownFlag() )
@@ -320,6 +339,8 @@ void WMTransferCalc::moduleMain()
         }
     }
 
+    // we technically need to remove the event handler too but there is no method available to do this ...
+    // WKernel::getRunningKernel()->getGraphicsEngine()->getViewer()->removeEventHandler( handler );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
 

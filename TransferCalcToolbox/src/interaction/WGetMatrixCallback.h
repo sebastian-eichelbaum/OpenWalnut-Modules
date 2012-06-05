@@ -25,6 +25,7 @@
 #ifndef WGETMATRIXCALLBACK_H
 #define WGETMATRIXCALLBACK_H
 
+#include <osg/ref_ptr>
 #include <osg/NodeCallback>
 #include <osg/NodeVisitor>
 #include <osg/Node>
@@ -39,6 +40,16 @@
 class WGetMatrixCallback: public osg::NodeCallback
 {
 public:
+    /**
+     * Reference counted pointer
+     */
+    typedef osg::ref_ptr< WGetMatrixCallback > RefPtr;
+
+    /**
+     * Reference counted pointer
+     */
+    typedef osg::ref_ptr< const WGetMatrixCallback > ConstRefPtr;
+
     /**
      * Default constructor.
      */

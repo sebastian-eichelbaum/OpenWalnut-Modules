@@ -48,6 +48,7 @@
 #include "../dataStructures/WRay.h"
 #include "../dataStructures/WRaySample.h"
 #include "../dataStructures/WRayProfile.h"
+#include "../interaction/WGetMatrixCallback.h"
 
 /**
  * --
@@ -126,8 +127,15 @@ protected:
 
 private:
     /**
+     * Handle click events in the main view
+     *
+     * \param mousePos the mouse position
+     */
+    void onClick( WVector2i mousePos );
+
+    /**
      * Trilinear interpolation within the grid for a given position
-     * 
+     *
      * \param position Position for which the value should be determined.
      * \param grid The grid which contains the values.
      *
@@ -137,9 +145,9 @@ private:
 
     /**
      * Calculating a WVector3d out of a given WVector4d
-     * 
+     *
      * \param vec 4D vector which shall be transfered to 3D
-     * 
+     *
      * \return Calculated Vector.
      */
     WVector3d getAs3D( WVector4d vec );
@@ -221,6 +229,11 @@ private:
          */
         bool m_initialUpdate;
     };
+
+    /**
+     * Needed to query the modelview and projection matrices of the m_rootNode;
+     */
+    WGetMatrixCallback::RefPtr m_matrixCallback;
 };
 
 #endif  // WMTRANSFERCALC_H

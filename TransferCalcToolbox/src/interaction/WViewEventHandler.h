@@ -99,6 +99,11 @@ private:
      * Signal for left click events.
      */
     t_MouseHandlerSignalType m_onLeftClick;
+
+    /**
+     * If true, the next release will be after a drag event
+     */
+    bool m_wasDrag;
 };
 
 #endif  // WVIEWEVENTHANDLER_H
