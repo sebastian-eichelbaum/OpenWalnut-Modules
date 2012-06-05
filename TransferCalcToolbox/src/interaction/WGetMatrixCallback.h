@@ -84,7 +84,6 @@ public:
 
 protected:
 private:
-
     /**
      * Current projection matrix.
      */

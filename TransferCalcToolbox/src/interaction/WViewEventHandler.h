@@ -43,7 +43,6 @@
 class WViewEventHandler: public osgGA::GUIEventHandler
 {
 public:
-
     /**
      * Convenience typedef for a osg::ref_ptr< WViewEventHandler >.
      */
@@ -87,9 +86,9 @@ public:
      * \return the connection. Keep this and disconnect if you do not need it anymore!
      */
     boost::signals2::connection onLeftClick( t_MouseHandlerType handler );
+
 protected:
 private:
-
     /**
      * The signal for mouse events associated with a two dimensional coordinate.
      */
