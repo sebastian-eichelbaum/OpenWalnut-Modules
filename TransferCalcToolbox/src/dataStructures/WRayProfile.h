@@ -48,6 +48,11 @@ public:
     typedef boost::shared_ptr< const WRayProfile > ConstSPtr;
 
     /**
+     * Default constructor.
+     */
+    WRayProfile();
+
+    /**
      * Default constructor. Creates an profile with the given number of samples. The profiles are not filled.
      *
      * \param nbSamples the number of samples along the ray used for this profile.

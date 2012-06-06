@@ -27,6 +27,11 @@
 
 #include "WRayProfile.h"
 
+WRayProfile::WRayProfile()
+{
+
+}
+
 WRayProfile::WRayProfile( size_t nbSamples )
 {
     // initialize members

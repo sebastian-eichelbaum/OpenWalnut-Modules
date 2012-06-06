@@ -42,6 +42,16 @@ WRay::~WRay()
     // destructor
 }
 
+WVector4d WRay::getStart( )
+{
+    return m_start;
+}
+
+WVector4d WRay::getDirection( )
+{
+    return m_direction;
+}
+
 WVector4d WRay::getSpot( double t )
 {
     return m_start + m_direction * t;

@@ -33,6 +33,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <limits>
+#include <iostream>
+#include <fstream>
 
 #include <osg/ShapeDrawable>
 #include <osg/Group>
@@ -100,11 +103,18 @@ void WMTransferCalc::connectors()
 
 void WMTransferCalc::properties()
 {
-    m_propCondition = boost::shared_ptr< WCondition >( new WCondition() );
-    m_color         = m_properties->addProperty(  "Color", "Color of the orbs.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
+    m_propCondition   = boost::shared_ptr< WCondition >( new WCondition() );
+    m_color           = m_properties->addProperty(  "Color", "Color of the orbs.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
-    m_xPos          = m_properties->addProperty( "X position", "x coordinate of the ray origin", 0, m_propCondition );
-    m_yPos          = m_properties->addProperty( "Y position", "y coordinate of the ray origin", 0, m_propCondition );
+    m_xPos            = m_properties->addProperty( "X position", "x coordinate of the ray origin", 0.0, m_propCondition );
+    m_yPos            = m_properties->addProperty( "Y position", "y coordinate of the ray origin", 0.0, m_propCondition );
+    m_zPos            = m_properties->addProperty( "Z position", "z coordinate of the ray origin", 0.0, m_propCondition );
+
+    m_RaySaveFilePath = m_properties->addProperty( "Save RayProfile to:", "Savefile for RayProfile.", WPathHelper::getAppPath(), m_propCondition );
+    m_saveTrigger     = m_properties->addProperty( "Save", "Save RayProfile to given directory.", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
+
+    WPropertyHelper::PC_PATHEXISTS::addTo( m_RaySaveFilePath );
+    WPropertyHelper::PC_ISDIRECTORY::addTo( m_RaySaveFilePath );
 
     WModule::properties();
 }
@@ -112,6 +122,24 @@ void WMTransferCalc::properties()
 void WMTransferCalc::requirements()
 {
     m_requirements.push_back( new WGERequirement() );
+}
+
+bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename, WRayProfile *profile )
+{
+    WRayProfile *prof;
+    ( profile == NULL ) ? prof = &m_currentProfile : prof = profile;
+    if( prof->size() == 0 ) return false;
+
+    std::ofstream savefile( (path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
+    savefile << "# RayProfile data for OpenWalnut TransferCalcModule" << std::endl;
+    savefile << "# ID \t value" << std::endl;
+    for( size_t sample = 0; sample < prof->size(); sample++ )
+    {
+        savefile << sample+1 << "\t";                      // print id
+        savefile << (*prof)[sample].value() << std::endl;  // print value
+    }
+    savefile.close();
+    return true;
 }
 
 void WMTransferCalc::onClick( WVector2i mousePos )
@@ -159,6 +187,31 @@ void WMTransferCalc::moduleMain()
             break;
         }
 
+//         if( m_RaySaveFilePath->changed() )
+//         {
+//             // This is a simple example for doing an operation which is not depending on any other property.
+//             debugLog() << "Doing an operation on the file \"" << m_RaySaveFilePath->get( true ).string() << "\"."; //path without '/' at the end
+//         }
+
+        // activates if user pushes save button to save current RayProfile
+        if( m_saveTrigger->get( true ) == WPVBaseTypes::PV_TRIGGER_TRIGGERED )
+        {
+            debugLog() << "User saves RayProfile.";
+
+            boost::shared_ptr< WProgress > saving = boost::shared_ptr< WProgress >( new WProgress( "Saving current RayProfile." ) );
+            m_progress->addSubProgress( saving );
+
+            std::string filename( "RayProfile.dat" );
+
+            bool success = saveRayProfileTo( m_RaySaveFilePath, filename );
+            if( !success ) errorLog() << "RayProfile could not be saved.";
+
+            saving->finish();
+            m_progress->removeSubProgress( saving );
+
+            m_saveTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, false );
+        }
+
         bool dataChanged = ( m_inputData->getData() != m_dataSet );
         bool dataValid  = ( m_dataSet );
 
@@ -186,162 +239,211 @@ void WMTransferCalc::moduleMain()
             }
         }
 
-        bool propsChanged = m_xPos->changed() || m_yPos->changed();
+        bool propsChanged = m_xPos->changed() || m_yPos->changed() || m_zPos->changed();
+
         if( ( propsChanged || dataChanged ) && dataValid )
         {
             debugLog() << "Data or properties changed.";
 
-            osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
+            double x_scale = m_grid->getNbCoordsX();
+            double y_scale = m_grid->getNbCoordsY();
+            double z_scale = m_grid->getNbCoordsZ();
+
+            debugLog() << "x = " << x_scale << ", y = " << y_scale << ", z = " << z_scale;
+
+            WMatrix4d c = WMatrix4d::identity();
+            WMatrix4d d = m_grid->getTransform();
+            WMatrix4d transformation = c * d;
+                // BEISPIEL
+                // WVector4d v;
+                // WVector4d ergebnis = transformation * v;
+
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            // Calculating BoundingBox and OuterBounding
+            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            if( dataChanged )
+            {
+                std::vector< WVector4d > bounding_box( 8 );  // BoundingBox of the dataset
+
+                bounding_box[0] = transformation * WVector4d( 0,       0,       0,       1 );
+                bounding_box[1] = transformation * WVector4d( x_scale, 0,       0,       1 );
+                bounding_box[2] = transformation * WVector4d( 0,       y_scale, 0,       1 );
+                bounding_box[3] = transformation * WVector4d( x_scale, y_scale, 0,       1 );
+                bounding_box[4] = transformation * WVector4d( 0,       0,       z_scale, 1 );
+                bounding_box[5] = transformation * WVector4d( x_scale, 0,       z_scale, 1 );
+                bounding_box[6] = transformation * WVector4d( 0,       y_scale, z_scale, 1 );
+                bounding_box[7] = transformation * WVector4d( x_scale, y_scale, z_scale, 1 );
+
+                //std::vector< WVector4d > outer_bounding( 2,  bounding_box[0] );
+                // BoundingBox parallel to the screen (just min and max)
+                m_outer_bounding.resize( 2 );
+                m_outer_bounding[0] = bounding_box[0];
+                m_outer_bounding[1] = bounding_box[0];
+
+                for( unsigned int k = 0; k < 8; k++)
+                {
+                    // minimal point in BoundingBox
+                    m_outer_bounding[0][0] = std::min( bounding_box[k][0], m_outer_bounding[0][0] ); // x-min
+                    m_outer_bounding[0][1] = std::min( bounding_box[k][1], m_outer_bounding[0][1] ); // y-min
+                    m_outer_bounding[0][2] = std::min( bounding_box[k][2], m_outer_bounding[0][2] ); // z-min
+                    m_outer_bounding[0][3] = 1;
+    //                  debugLog() << "min-vec:" << m_outer_bounding[0];
+                    // maximal point in BoundingBox
+                    m_outer_bounding[1][0] = std::max( bounding_box[k][0], m_outer_bounding[1][0] ); // x-max
+                    m_outer_bounding[1][1] = std::max( bounding_box[k][1], m_outer_bounding[1][1] ); // y-max
+                    m_outer_bounding[1][2] = std::max( bounding_box[k][2], m_outer_bounding[1][2] ); // z-max
+                    m_outer_bounding[1][3] = 1;
+    //                  debugLog() << "max-vec:" << m_outer_bounding[1];
+                }
+            }
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Getting Data and setting Properties
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            unsigned int x_scale = m_grid->getNbCoordsX();
-            unsigned int y_scale = m_grid->getNbCoordsY();
-            unsigned int z_scale = m_grid->getNbCoordsZ();
-
-            debugLog() << "x = " << x_scale << ", y = " << y_scale << ", z = " << z_scale;
-
-            m_xPos->setMin( 0 );
+            m_xPos->setMin( 0.0 );
             m_xPos->setMax( x_scale );
             m_xPos->setRecommendedValue( 0.5 * x_scale );
 
-            m_yPos->setMin( 0 );
+            m_yPos->setMin( 0.0 );
             m_yPos->setMax( y_scale );
             m_yPos->setRecommendedValue( 0.5 * y_scale );
 
-            //m_dataRays.clear();
-
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Calculating BoundingBox and OuterBounding
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-            WMatrix4d c = WMatrix4d::identity();
-            WMatrix4d d = m_grid->getTransform();
-            WMatrix4d transformation = c * d;
-            // BEISPIEL
-//             WVector4d v;
-//             WVector4d ergebnis = c * d * v;
-
-            std::vector< WVector4d > bounding_box( 8 );  // BoundingBox of the dataset
-
-            bounding_box[0] = c * d * WVector4d( 0,       0,       0,       1 );
-            bounding_box[1] = c * d * WVector4d( x_scale, 0,       0,       1 );
-            bounding_box[2] = c * d * WVector4d( 0,       y_scale, 0,       1 );
-            bounding_box[3] = c * d * WVector4d( x_scale, y_scale, 0,       1 );
-            bounding_box[4] = c * d * WVector4d( 0,       0,       z_scale, 1 );
-            bounding_box[5] = c * d * WVector4d( x_scale, 0,       z_scale, 1 );
-            bounding_box[6] = c * d * WVector4d( 0,       y_scale, z_scale, 1 );
-            bounding_box[7] = c * d * WVector4d( x_scale, y_scale, z_scale, 1 );
-
-            std::vector< WVector4d > outer_bounding( 2,  bounding_box[0] );  // BoundingBox parallel to the screen (just min and max)
-//             debugLog() << "Outer1: " << outer_bounding[0];
-//             debugLog() << "Outer2: " << outer_bounding[1];
-
-            for( unsigned int k = 0; k < 8; k++)
-            {
-                // minimal point in BoundingBox
-                outer_bounding[0][0] = std::min( bounding_box[k][0], outer_bounding[0][0] ); // x-min
-                outer_bounding[0][1] = std::min( bounding_box[k][1], outer_bounding[0][1] ); // y-min
-                outer_bounding[0][2] = std::min( bounding_box[k][2], outer_bounding[0][2] ); // z-min
-                outer_bounding[0][3] = 1;
-//                 debugLog() << "min-vec:" << outer_bounding[0];
-                // maximal point in BoundingBox
-                outer_bounding[1][0] = std::max( bounding_box[k][0], outer_bounding[1][0] ); // x-max
-                outer_bounding[1][1] = std::max( bounding_box[k][1], outer_bounding[1][1] ); // y-max
-                outer_bounding[1][2] = std::max( bounding_box[k][2], outer_bounding[1][2] ); // z-max
-                outer_bounding[1][3] = 1;
-//                 debugLog() << "max-vec:" << outer_bounding[1];
-            }
+            m_zPos->setMin( 0.0 );
+            m_zPos->setMax( z_scale );
+            m_zPos->setRecommendedValue( 0.5 * z_scale );
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Ray Data
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            // start point and direction of the ray
-            double x = m_xPos->get( true );
-            double y = m_yPos->get( true );
-            double z = 0;
+            //TODO not transformed!!!
 
-            WVector4d start( x, y, z, 1 );
+            // start point and direction of the ray
+            WVector4d start( m_xPos->get( true ),
+                             m_yPos->get( true ),
+                             0, 1 );
             debugLog() << "Start: " << start;
 
             WVector4d dir( 0, 0, 1, 0 );
             debugLog() << "Direction: " << dir;
 
-            // ray object
-            // ray = start + t * direction
+            // ray object - ray = start + t * direction
             WRay ray( start, dir );
 
             // step length
             double interval = 0.33;
-            // start position
-            double sample_start = outer_bounding[0][2]; // z-min
-            // end position
-            double sample_end = outer_bounding[1][2]; // z-max
 
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Calculating Profiles and Samples
-            //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            m_currentProfile = castRay( ray, interval );
 
-            size_t max_nbSamples = ceil( length( outer_bounding[1] - outer_bounding[0] ) / interval );
-            WRayProfile curProfile( max_nbSamples );
-//             debugLog() << "Max samples: " << max_nbSamples;
-            size_t sampleC = 0;
-
-            // progress
-            boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
-            m_progress->addSubProgress( prog );
-
-            double sample_t = sample_start - 1;
-            while( true )
-            {
-                WVector4d current = ray.getSpot( sample_t );
-                //debugLog() << "Point: " << current;
-
-                sample_t += interval;
-                if( sample_t > sample_end + 1 ) break;
-
-                // do not calculate anything for vectors outside of the data grid
-                if( !m_grid->encloses( getAs3D( current ) ) )
-                {
-                    //debugLog() << "continue...";
-                    continue;
-                }
-                newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( current ), 0.5f ) ) );
-//                 double not_int_val = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( current ) ) );
-//                 debugLog() << "Old value: " << not_int_val;
-                double val = interpolate( current );
-                //debugLog() << "Value: " << val;
-
-//                 debugLog() << "Value of Sample: " << testSample.value();
-//                 debugLog() << "Sample ID: " << sampleC;
-                curProfile[sampleC].value() = val;
-                sampleC++;
-            }
-            std::cout << "DEBUG - RayProfile: " << std::endl;
-            for( size_t i = 0; i < curProfile.size(); i++ )
-            {
-                std::cout << curProfile[i].value() << " ";
-            }
-            std::cout << std::endl;
-
-            m_rootNode->remove( m_geode );
-            m_geode = newGeode;
-
-            m_geode->addUpdateCallback( new SafeUpdateCallback( this ) );
-
-            m_rootNode->clear();
-            m_rootNode->insert( m_geode );
-            prog->finish();
-            m_progress->removeSubProgress( prog );
+//             std::cout << "DEBUG - RayProfile: " << std::endl;
+//             for( size_t i = 0; i < m_currentProfile.size(); i++ )
+//             {
+//                 std::cout << m_currentProfile[i].value() << " ";
+//             }
+//             std::cout << std::endl;
         }
     }
 
     // we technically need to remove the event handler too but there is no method available to do this ...
     // WKernel::getRunningKernel()->getGraphicsEngine()->getViewer()->removeEventHandler( handler );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
+}
+
+WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
+{
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Calculating a single profile with samples
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
+
+    size_t max_nbSamples = ceil( length( m_outer_bounding[1] - m_outer_bounding[0] ) / interval );
+    WRayProfile curProfile( max_nbSamples );
+//   debugLog() << "Max samples: " << max_nbSamples;
+    size_t sampleCount = 0;
+
+    // progress
+    boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
+    m_progress->addSubProgress( prog );
+
+    double* bounds = new double[2];
+    bounds = rayIntersectsBox(ray);
+
+    if( bounds == NULL ) return curProfile; //empty profile
+
+    double start_t = bounds[0]; //can be negative
+    double end_t = bounds[1];
+
+    double sample_t = start_t;
+    while( true )
+    {
+        WVector4d current = ray.getSpot( sample_t );
+        //debugLog() << "Point: " << current;
+
+        sample_t += interval;
+        if( sample_t > end_t + 0.1 ) break;
+
+        // do not calculate anything for vectors outside of the data grid
+        if( !m_grid->encloses( getAs3D( current ) ) )
+        {
+            //debugLog() << "continue...";
+            continue;
+        }
+        newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( current ), 0.5f ) ) );
+    //                 double not_int_val = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( current ) ) );
+    //                 debugLog() << "Old value: " << not_int_val;
+        double val = interpolate( current );
+        //debugLog() << "Value: " << val;
+
+    //                 debugLog() << "Value of Sample: " << testSample.value();
+    //                 debugLog() << "Sample ID: " << sampleCount;
+        curProfile[sampleCount].value() = val;
+        sampleCount++;
+    }
+    m_rootNode->remove( m_geode );
+    m_geode = newGeode;
+
+    m_geode->addUpdateCallback( new SafeUpdateCallback( this ) );
+
+    m_rootNode->clear();
+    m_rootNode->insert( m_geode );
+    prog->finish();
+    m_progress->removeSubProgress( prog );
+
+    return curProfile;
+}
+
+double* WMTransferCalc::rayIntersectsBox( WRay ray )
+{
+    // ray = start + t*dir
+    double tnear = std::numeric_limits<double>::min();
+    double tfar  = std::numeric_limits<double>::max();
+    double t0, t1;
+
+    for( unsigned int coord = 0; coord < 3; coord++ ) // for x,y,z
+    {
+        if( (ray.getDirection())[coord] == 0 ) // ray parallel to the min/max coord-planes
+        {
+            if( (ray.getStart())[coord] < m_outer_bounding[0][coord] || (ray.getStart())[coord] > m_outer_bounding[1][coord] )
+                    return NULL;
+        }
+        else // ray not parallel, so calculate intersections
+        {
+            // time at which ray intersects min plane
+            t0 = ( m_outer_bounding[0][coord] - (ray.getStart())[coord] ) / (ray.getDirection())[coord];
+            // time at which ray intersects max plane
+            t1 = ( m_outer_bounding[1][coord] - (ray.getStart())[coord] ) / (ray.getDirection())[coord];
+            if( t0 > t1 ) std::swap( t0, t1 );
+            if( t0 > tnear ) tnear = t0;
+            if( t1 < tfar  ) tfar  = t1;
+            if( tnear > tfar ) return NULL; // cube is missed
+            //if( tfar  < 0    ) return NULL; // cube behind ray
+        }
+    }
+    double *res = new double[2];
+    res[0] = tnear;
+    res[1] = tfar;
+    return res;
 }
 
 WVector3d WMTransferCalc::getAs3D( WVector4d vec )

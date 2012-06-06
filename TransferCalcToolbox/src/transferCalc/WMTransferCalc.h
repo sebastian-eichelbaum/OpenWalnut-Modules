@@ -33,6 +33,9 @@
 //    * headers of other classes inside OpenWalnut
 
 #include <string>
+#include <vector>
+#include <algorithm>
+#include <string>
 
 #include <osg/Node>
 #include <osg/Geode>
@@ -144,6 +147,38 @@ private:
     virtual double interpolate( WVector4d position );
 
     /**
+     * Cast a single ray through the current data.
+     *
+     * \param ray WRay object which holds the start and direction vector of the ray.
+     * \param interval Interval for taking the samples on the ray.
+     *
+     * \return complete profile of casted ray
+     */
+    virtual WRayProfile castRay( WRay ray, double interval );
+
+    /**
+     * Calculates the nearest and farest intersection
+     * of the ray and the m_outer_bounding box.
+     *
+     * \param ray Current ray.
+     *
+     * \return  An array with the nearest and farest t values.
+     */
+    virtual double* rayIntersectsBox( WRay ray );
+
+    /**
+     * Function to save a RayProfile to a given file.
+     *
+     * \param path Filename of the file where the data should be saved to
+     * \param filename Name of the file.
+     * \param profile Pointer to RayProfile that shall be saved.
+     *                If this parameter is NULL, the current Profile will be saved if it exists.
+     *
+     * \return true if saving is successful, false otherwise
+     */
+    bool saveRayProfileTo( WPropFilename path, std::string filename, WRayProfile *profile = NULL );
+
+    /**
      * Calculating a WVector3d out of a given WVector4d
      *
      * \param vec 4D vector which shall be transfered to 3D
@@ -173,19 +208,46 @@ private:
     boost::shared_ptr< WDataSetScalar > m_dataSet;
 
     /**
+     * Contains the minimum and maximum values of the bounding box.
+     * outer_bounding[0] = ( min_x, min_y, min_z )
+     * outer_bounding[1] = ( max_x, max_y, max_z )
+     */
+    std::vector< WVector4d > m_outer_bounding;
+
+    /**
      * Current grid
      */
     boost::shared_ptr< WGridRegular3D > m_grid;
 
     /**
+     * Latest calculated RayProfile.
+     */
+    WRayProfile m_currentProfile;
+    
+    /**
+     * Filename for saving a RayProfile.
+     */
+    WPropFilename m_RaySaveFilePath;
+
+    /**
+     * Trigger for saving RayProfile to given directory m_RaySaveFilePath.
+     */
+    WPropTrigger  m_saveTrigger;
+    
+    /**
      * x position of the ray origin.
      */
-    WPropInt   m_xPos;
+    WPropDouble   m_xPos;
 
     /**
      * y position of the ray origin.
      */
-    WPropInt   m_yPos;
+    WPropDouble   m_yPos;
+
+    /**
+     * z position of the ray origin.
+     */
+    WPropDouble   m_zPos;
 
     /**
      * A color.
