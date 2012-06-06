@@ -147,6 +147,25 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     debugLog() << "Left Click at " << mousePos;
     debugLog() << "Projection Matrix: " << m_matrixCallback->getProjectionMatrix()->get();
     debugLog() << "ModelView Matrix: " << m_matrixCallback->getModelViewMatrix()->get();
+    debugLog() << "Viewport: " << m_matrixCallback->getViewportX()->get() << ", " << m_matrixCallback->getViewportY()->get() << ", "
+                               << m_matrixCallback->getViewportWidth()->get() << ", " << m_matrixCallback->getViewportHeight()->get();
+
+    // get the clip-space coordinate:
+    WVector4d pInClipSpace( ( 2.0 * mousePos.x() / m_matrixCallback->getViewportWidth()->get() ) - 1.0,
+                            ( 2.0 * mousePos.y() / m_matrixCallback->getViewportHeight()->get() ) - 1.0,
+                            1.0,
+                            1.0 );
+
+    // get the both matrices inverted
+    WMatrix4d projectionMatrixInverted = invert( m_matrixCallback->getProjectionMatrix()->get() );
+    WMatrix4d modelviewMatrixInverted = invert( m_matrixCallback->getModelViewMatrix()->get() );
+
+    // unproject the clip-space vector to the world space
+    WVector4d pInWorldSpace = projectionMatrixInverted * pInClipSpace;
+    // get back to model-space
+    WVector4d pInObjectSpace = modelviewMatrixInverted * pInWorldSpace;
+
+    debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
 }
 
 void WMTransferCalc::moduleMain()

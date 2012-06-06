@@ -28,11 +28,19 @@
 
 WGetMatrixCallback::WGetMatrixCallback():
     m_projectionMatrix( new WPVMatrix4X4( "Projection Matrix", "The OpenGL Projection Matrix.", WPVMatrix4X4::ValueType() ) ),
-    m_modelViewMatrix( new WPVMatrix4X4( "ModelView Matrix", "The OpenGL Modelview Matrix.", WPVMatrix4X4::ValueType() ) )
+    m_modelViewMatrix( new WPVMatrix4X4( "ModelView Matrix", "The OpenGL Modelview Matrix.", WPVMatrix4X4::ValueType() ) ),
+    m_viewportWidth( new WPVDouble( "Viewport Width", "The OpenGL Viewport Width.", WPVDouble::ValueType() ) ),
+    m_viewportHeight( new WPVDouble( "MViewport Width", "The OpenGL Viewport Height.", WPVDouble::ValueType() ) ),
+    m_viewportX( new WPVDouble( "Viewport X", "The OpenGL Viewport X Coordinate.", WPVDouble::ValueType() ) ),
+    m_viewportY( new WPVDouble( "Viewport Y", "The OpenGL Viewport Y Coordinate.", WPVDouble::ValueType() ) )
 {
     // initialize members
     m_projectionMatrix->setPurpose( PV_PURPOSE_INFORMATION );
     m_modelViewMatrix->setPurpose( PV_PURPOSE_INFORMATION );
+    m_viewportWidth->setPurpose( PV_PURPOSE_INFORMATION );
+    m_viewportHeight->setPurpose( PV_PURPOSE_INFORMATION );
+    m_viewportX->setPurpose( PV_PURPOSE_INFORMATION );
+    m_viewportY->setPurpose( PV_PURPOSE_INFORMATION );
 }
 
 WGetMatrixCallback::~WGetMatrixCallback()
@@ -49,10 +57,14 @@ void WGetMatrixCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
         // grab the matrices
         osg::Matrix mvMat = *( cv->getModelViewMatrix() );
         osg::Matrix projMat = *( cv->getProjectionMatrix() );
+        double viewportX = cv->getViewport()->x();
+        double viewportY = cv->getViewport()->y();
+        double viewportW = cv->getViewport()->width();
+        double viewportH = cv->getViewport()->height();
 
         // different from current?
         // We do this to avoid setting the same matrix if it is not needed. We therefore use some temporarily stored values instead of the
-        // propertie's get() method to avoid locking
+        // property's get() method to avoid locking
         if( mvMat != m_currentModelViewMatrix )
         {
             m_modelViewMatrix->set( mvMat );
@@ -62,6 +74,26 @@ void WGetMatrixCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
         {
             m_projectionMatrix->set( projMat );
             m_currentProjectionMatrix = projMat;
+        }
+        if( viewportX != m_currentViewportX )
+        {
+            m_viewportX->set( viewportX );
+            m_currentViewportX = viewportX;
+        }
+        if( viewportY != m_currentViewportY )
+        {
+            m_viewportY->set( viewportY );
+            m_currentViewportY = viewportY;
+        }
+        if( viewportW != m_currentViewportWidth )
+        {
+            m_viewportWidth->set( viewportW );
+            m_currentViewportWidth = viewportW;
+        }
+        if( viewportH != m_currentViewportHeight )
+        {
+            m_viewportHeight->set( viewportH );
+            m_currentViewportHeight = viewportH;
         }
     }
 
@@ -78,3 +110,25 @@ WPropMatrix4X4 WGetMatrixCallback::getModelViewMatrix() const
 {
     return m_modelViewMatrix;
 }
+
+WPropDouble WGetMatrixCallback::getViewportX() const
+{
+    return m_viewportX;
+}
+
+WPropDouble WGetMatrixCallback::getViewportY() const
+{
+    return m_viewportY;
+}
+
+WPropDouble WGetMatrixCallback::getViewportWidth() const
+{
+    return m_viewportWidth;
+}
+
+WPropDouble WGetMatrixCallback::getViewportHeight() const
+{
+    return m_viewportHeight;
+}
+
+

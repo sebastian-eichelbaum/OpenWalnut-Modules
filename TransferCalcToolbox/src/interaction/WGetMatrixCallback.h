@@ -82,6 +82,34 @@ public:
      */
     WPropMatrix4X4 getModelViewMatrix() const;
 
+    /**
+     * Viewport X.
+     *
+     * \return the property.
+     */
+    WPropDouble getViewportX() const;
+
+    /**
+     * Viewport Y.
+     *
+     * \return the property.
+     */
+    WPropDouble getViewportY() const;
+
+    /**
+     * Viewport width.
+     *
+     * \return the property.
+     */
+    WPropDouble getViewportWidth() const;
+
+    /**
+     * Viewport height.
+     *
+     * \return the property.
+     */
+    WPropDouble getViewportHeight() const;
+
 protected:
 private:
     /**
@@ -105,6 +133,46 @@ private:
      * unneeded locking during each frame.
      */
     osg::Matrix m_currentProjectionMatrix;
+
+    /**
+     * Width of the viewport.
+     */
+    WPropDouble m_viewportWidth;
+
+    /**
+     * Width of the viewport. Use this for faster testing of changes.
+     */
+    double m_currentViewportWidth;
+
+    /**
+     * Height of the viewport.
+     */
+    WPropDouble m_viewportHeight;
+
+    /**
+     * Height of the viewport. Use this for faster testing of changes.
+     */
+    double m_currentViewportHeight;
+
+    /**
+     * X coordinate of viewport.
+     */
+    WPropDouble m_viewportX;
+
+    /**
+     * X coordinate of viewport. Use this for faster testing of changes.
+     */
+    double m_currentViewportX;
+
+    /**
+     * Y coordinate of viewport.
+     */
+    WPropDouble m_viewportY;
+
+    /**
+     * Y coordinate of viewport. Use this for faster testing of changes.
+     */
+    double m_currentViewportY;
 };
 
 #endif  // WGETMATRIXCALLBACK_H
