@@ -55,12 +55,69 @@ public:
      */
     double& value();
 
+    /**
+     * Access the distance of the sample point to the XY plane (z=0).
+     *
+     * \return the distance reference.
+     */
+    const double& distance() const;
+
+    /**
+     * Access the distance of the sample point to the XY plane (z=0).
+     *
+     * \return the distance reference.
+     */
+    double& distance();
+
+    /**
+     * Access the value of the sample point.
+     *
+     * \return the value reference.
+     */
+    const double& gradient() const;
+
+    /**
+     * Access the gradient of the sample point.
+     *
+     * \return the gradient reference.
+     */
+    double& gradient();
+
+    /**
+     * Access the gradient length of the sample point.
+     *
+     * \return the gradient length reference.
+     */
+    const double& gradLength() const;
+
+    /**
+     * Access the gradient length of the sample point.
+     *
+     * \return the gradient length reference.
+     */
+    double& gradLength();
+    
 protected:
 private:
     /**
      * The value at this sample point.
      */
     double m_value;
+
+    /**
+     * The distance at this sample point to the XY plane (z=0).
+     */
+    double m_distance;
+
+    /**
+     * The gradient at this sample point.
+     */
+    double m_gradient;
+
+    /**
+     * The gradient length at this sample point.
+     */
+    double m_gradLength;
 };
 
 #endif  // WRAYSAMPLE_H

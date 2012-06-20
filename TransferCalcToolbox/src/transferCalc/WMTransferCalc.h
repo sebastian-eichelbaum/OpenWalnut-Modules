@@ -52,6 +52,7 @@
 #include "../dataStructures/WRaySample.h"
 #include "../dataStructures/WRayProfile.h"
 #include "../interaction/WGetMatrixCallback.h"
+#include "../interaction/WViewEventHandler.h"
 
 /**
  * --
@@ -220,9 +221,19 @@ private:
     boost::shared_ptr< WGridRegular3D > m_grid;
 
     /**
+     * Collection of all calculated RayProfiles.
+     */
+    std::vector< WRayProfile > m_profiles;
+    
+    /**
      * Latest calculated RayProfile.
      */
     WRayProfile m_currentProfile;
+
+    /**
+     * Camera position, changes on click.
+     */
+    WVector2i m_currentCamPosition;
     
     /**
      * Filename for saving a RayProfile.

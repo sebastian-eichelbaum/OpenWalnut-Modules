@@ -31,6 +31,7 @@
 //    * your own header file
 
 #include <string>
+#include <sstream>
 #include <vector>
 #include <algorithm>
 #include <limits>
@@ -128,15 +129,19 @@ bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename,
 {
     WRayProfile *prof;
     ( profile == NULL ) ? prof = &m_currentProfile : prof = profile;
-    if( prof->size() == 0 ) return false;
+    if( prof->size() == 0 ) return false; //empty profile
 
     std::ofstream savefile( (path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
     savefile << "# RayProfile data for OpenWalnut TransferCalcModule" << std::endl;
-    savefile << "# ID \t value" << std::endl;
+    savefile << "# ID \t dist \t value \t grad \t gradL" << std::endl;
     for( size_t sample = 0; sample < prof->size(); sample++ )
     {
-        savefile << sample+1 << "\t";                      // print id
-        savefile << (*prof)[sample].value() << std::endl;  // print value
+        savefile << sample+1 << "\t";                           // print id
+        savefile << (*prof)[sample].distance() << "\t";         // print t
+        savefile << (*prof)[sample].value() << "\t";            // print value
+        savefile << (*prof)[sample].gradient() << "\t";         // print gradient
+        savefile << (*prof)[sample].gradLength() << "\t";       // print legth of gradient
+        savefile << std::endl;
     }
     savefile.close();
     return true;
@@ -206,24 +211,23 @@ void WMTransferCalc::moduleMain()
             break;
         }
 
-//         if( m_RaySaveFilePath->changed() )
-//         {
-//             // This is a simple example for doing an operation which is not depending on any other property.
-//             debugLog() << "Doing an operation on the file \"" << m_RaySaveFilePath->get( true ).string() << "\"."; //path without '/' at the end
-//         }
-
         // activates if user pushes save button to save current RayProfile
         if( m_saveTrigger->get( true ) == WPVBaseTypes::PV_TRIGGER_TRIGGERED )
         {
             debugLog() << "User saves RayProfile.";
 
-            boost::shared_ptr< WProgress > saving = boost::shared_ptr< WProgress >( new WProgress( "Saving current RayProfile." ) );
+            boost::shared_ptr< WProgress > saving = boost::shared_ptr< WProgress >( new WProgress( "Saving calculated RayProfiles." ) );
             m_progress->addSubProgress( saving );
 
-            std::string filename( "RayProfile.dat" );
+            for( unsigned int id = 0; id < m_profiles.size(); id++ )
+            {
+                std::stringstream prepFilename;
+                prepFilename << "RayProfile" << id+1 << ".dat";
+                std::string filename( prepFilename.str() );
 
-            bool success = saveRayProfileTo( m_RaySaveFilePath, filename );
-            if( !success ) errorLog() << "RayProfile could not be saved.";
+                bool success = saveRayProfileTo( m_RaySaveFilePath, filename, &m_profiles[id] );
+                if( !success ) errorLog() << "RayProfile " << id+1 << " could not be saved.";
+            }
 
             saving->finish();
             m_progress->removeSubProgress( saving );
@@ -352,15 +356,19 @@ void WMTransferCalc::moduleMain()
 
             // step length
             double interval = 0.33;
+            m_profiles.clear();
 
-            m_currentProfile = castRay( ray, interval );
-
+            for( unsigned int n = 0; n < 1; n++ )
+            {
+                m_currentProfile = castRay( ray, interval );
+                m_profiles.push_back( m_currentProfile );
 //             std::cout << "DEBUG - RayProfile: " << std::endl;
 //             for( size_t i = 0; i < m_currentProfile.size(); i++ )
 //             {
 //                 std::cout << m_currentProfile[i].value() << " ";
 //             }
 //             std::cout << std::endl;
+            }
         }
     }
 
@@ -374,16 +382,17 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Calculating a single profile with samples
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // progress
+    boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
+    m_progress->addSubProgress( prog );
+    
     osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
 
     size_t max_nbSamples = ceil( length( m_outer_bounding[1] - m_outer_bounding[0] ) / interval );
     WRayProfile curProfile( max_nbSamples );
 //   debugLog() << "Max samples: " << max_nbSamples;
     size_t sampleCount = 0;
-
-    // progress
-    boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
-    m_progress->addSubProgress( prog );
 
     double* bounds = new double[2];
     bounds = rayIntersectsBox(ray);
@@ -393,14 +402,10 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
     double start_t = bounds[0]; //can be negative
     double end_t = bounds[1];
 
-    double sample_t = start_t;
-    while( true )
+    for( double sample_t = start_t; sample_t <= end_t + 0.1; sample_t += interval )
     {
         WVector4d current = ray.getSpot( sample_t );
         //debugLog() << "Point: " << current;
-
-        sample_t += interval;
-        if( sample_t > end_t + 0.1 ) break;
 
         // do not calculate anything for vectors outside of the data grid
         if( !m_grid->encloses( getAs3D( current ) ) )
@@ -412,11 +417,10 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
     //                 double not_int_val = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( current ) ) );
     //                 debugLog() << "Old value: " << not_int_val;
         double val = interpolate( current );
-        //debugLog() << "Value: " << val;
-
-    //                 debugLog() << "Value of Sample: " << testSample.value();
-    //                 debugLog() << "Sample ID: " << sampleCount;
         curProfile[sampleCount].value() = val;
+        curProfile[sampleCount].distance() = sample_t;
+        curProfile[sampleCount].gradient() = 0; //TODO
+        curProfile[sampleCount].gradLength() = 0; //TODO
         sampleCount++;
     }
     m_rootNode->remove( m_geode );
