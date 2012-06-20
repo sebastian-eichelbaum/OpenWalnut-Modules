@@ -386,7 +386,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
     // progress
     boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
     m_progress->addSubProgress( prog );
-    
+
     osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
 
     size_t max_nbSamples = ceil( length( m_outer_bounding[1] - m_outer_bounding[0] ) / interval );
@@ -469,7 +469,7 @@ double* WMTransferCalc::rayIntersectsBox( WRay ray )
     return res;
 }
 
-WVector3d WMTransferCalc::getAs3D( WVector4d vec )
+WVector3d WMTransferCalc::getAs3D( const WVector4d& vec )
 {
     if( vec[3] == 0 )
     {

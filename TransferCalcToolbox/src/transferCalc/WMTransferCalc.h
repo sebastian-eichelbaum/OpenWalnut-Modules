@@ -186,7 +186,7 @@ private:
      *
      * \return Calculated Vector.
      */
-    WVector3d getAs3D( WVector4d vec );
+    WVector3d getAs3D( const WVector4d& vec );
 
     /**
      * An input connector used to get datasets from other modules.
@@ -224,7 +224,7 @@ private:
      * Collection of all calculated RayProfiles.
      */
     std::vector< WRayProfile > m_profiles;
-    
+
     /**
      * Latest calculated RayProfile.
      */
@@ -234,7 +234,7 @@ private:
      * Camera position, changes on click.
      */
     WVector2i m_currentCamPosition;
-    
+
     /**
      * Filename for saving a RayProfile.
      */
@@ -244,7 +244,7 @@ private:
      * Trigger for saving RayProfile to given directory m_RaySaveFilePath.
      */
     WPropTrigger  m_saveTrigger;
-    
+
     /**
      * x position of the ray origin.
      */
