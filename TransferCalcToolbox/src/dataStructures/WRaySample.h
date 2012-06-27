@@ -25,6 +25,9 @@
 #ifndef WRAYSAMPLE_H
 #define WRAYSAMPLE_H
 
+#include "core/common/math/WMatrix.h"
+#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+
 /**
  * Encapsulates all the possible sample data on a ray.
  */
@@ -74,29 +77,29 @@ public:
      *
      * \return the value reference.
      */
-    const double& gradient() const;
+    const WVector4d& gradient() const;
 
     /**
      * Access the gradient of the sample point.
      *
      * \return the gradient reference.
      */
-    double& gradient();
+    WVector4d& gradient();
 
     /**
      * Access the gradient length of the sample point.
      *
      * \return the gradient length reference.
      */
-    const double& gradLength() const;
+    const double& gradWeight() const;
 
     /**
      * Access the gradient length of the sample point.
      *
      * \return the gradient length reference.
      */
-    double& gradLength();
-    
+    double& gradWeight();
+
 protected:
 private:
     /**
@@ -112,12 +115,12 @@ private:
     /**
      * The gradient at this sample point.
      */
-    double m_gradient;
+    WVector4d m_gradient;
 
     /**
      * The gradient length at this sample point.
      */
-    double m_gradLength;
+    double m_gradWeight;
 };
 
 #endif  // WRAYSAMPLE_H

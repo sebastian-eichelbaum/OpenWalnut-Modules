@@ -54,14 +54,32 @@ public:
     virtual ~WRay();
 
     /**
-     * Getter for the start vector.
+     * Access the start of the ray.
+     *
+     * \return the start reference.
      */
-    virtual WVector4d getStart( );
+    const WVector4d& start() const;
 
     /**
-     * Getter for the direction vector.
+     * Access the start of the ray.
+     *
+     * \return the start reference.
      */
-    virtual WVector4d getDirection( );
+    WVector4d& start();
+
+    /**
+     * Access the direction of the ray.
+     *
+     * \return the direction reference.
+     */
+    const WVector4d& direction() const;
+
+    /**
+     * Access the direction of the ray.
+     *
+     * \return the direction reference.
+     */
+    WVector4d& direction();
 
     /**
      * Calculates a spot on the ray with given parameter t

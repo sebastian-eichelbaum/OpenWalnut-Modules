@@ -25,7 +25,7 @@
 #include "WRaySample.h"
 
 WRaySample::WRaySample():
-    m_value( 0.0 ), m_distance( 0.0 ), m_gradient( 0.0 ), m_gradLength( 0.0 )
+    m_value( 0.0 ), m_distance( 0.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ), m_gradWeight( 0.0 )
 {
     // initialize members
 }
@@ -55,22 +55,22 @@ double& WRaySample::distance()
     return m_distance;
 }
 
-const double& WRaySample::gradient() const
+const WVector4d& WRaySample::gradient() const
 {
     return m_gradient;
 }
 
-double& WRaySample::gradient()
+WVector4d& WRaySample::gradient()
 {
     return m_gradient;
 }
 
-const double& WRaySample::gradLength() const
+const double& WRaySample::gradWeight() const
 {
-    return m_gradLength;
+    return m_gradWeight;
 }
 
-double& WRaySample::gradLength()
+double& WRaySample::gradWeight()
 {
-    return m_gradLength;
+    return m_gradWeight;
 }

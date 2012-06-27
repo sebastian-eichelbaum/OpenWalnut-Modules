@@ -32,7 +32,6 @@
 //    * External Lib headers (like OSG or Boost headers)
 //    * headers of other classes inside OpenWalnut
 
-#include <string>
 #include <vector>
 #include <algorithm>
 #include <string>
@@ -141,11 +140,19 @@ private:
      * Trilinear interpolation within the grid for a given position
      *
      * \param position Position for which the value should be determined.
-     * \param grid The grid which contains the values.
      *
      * \return interpolated value
      */
-    virtual double interpolate( WVector4d position );
+    virtual double interpolate( const WVector4d& position );
+
+    /**
+     * Gradient calculation for a given position in the grid.
+     *
+     * \param position Position for which the gradient should be determined.
+     *
+     * \return gradient at the given position
+     */
+    virtual WVector4d getGradient( const WVector4d& position );
 
     /**
      * Cast a single ray through the current data.

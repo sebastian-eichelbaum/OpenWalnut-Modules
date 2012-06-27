@@ -35,6 +35,7 @@
 #include <vector>
 #include <algorithm>
 #include <limits>
+#include <cmath>
 #include <iostream>
 #include <fstream>
 
@@ -131,46 +132,22 @@ bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename,
     ( profile == NULL ) ? prof = &m_currentProfile : prof = profile;
     if( prof->size() == 0 ) return false; //empty profile
 
-    std::ofstream savefile( (path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
+    std::ofstream savefile( ( path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
     savefile << "# RayProfile data for OpenWalnut TransferCalcModule" << std::endl;
-    savefile << "# ID \t dist \t value \t grad \t gradL" << std::endl;
+    savefile << "# ID \t dist \t value \t grad_x \t grad_y \t grad_z \t gradL" << std::endl;
     for( size_t sample = 0; sample < prof->size(); sample++ )
     {
         savefile << sample+1 << "\t";                           // print id
         savefile << (*prof)[sample].distance() << "\t";         // print t
         savefile << (*prof)[sample].value() << "\t";            // print value
-        savefile << (*prof)[sample].gradient() << "\t";         // print gradient
-        savefile << (*prof)[sample].gradLength() << "\t";       // print legth of gradient
+        savefile << (*prof)[sample].gradient()[0] << "\t";      // print gradient x
+        savefile << (*prof)[sample].gradient()[1] << "\t";      // print gradient y
+        savefile << (*prof)[sample].gradient()[2] << "\t";      // print gradient z
+        savefile << (*prof)[sample].gradWeight() << "\t";       // print weight of gradient
         savefile << std::endl;
     }
     savefile.close();
     return true;
-}
-
-void WMTransferCalc::onClick( WVector2i mousePos )
-{
-    debugLog() << "Left Click at " << mousePos;
-    debugLog() << "Projection Matrix: " << m_matrixCallback->getProjectionMatrix()->get();
-    debugLog() << "ModelView Matrix: " << m_matrixCallback->getModelViewMatrix()->get();
-    debugLog() << "Viewport: " << m_matrixCallback->getViewportX()->get() << ", " << m_matrixCallback->getViewportY()->get() << ", "
-                               << m_matrixCallback->getViewportWidth()->get() << ", " << m_matrixCallback->getViewportHeight()->get();
-
-    // get the clip-space coordinate:
-    WVector4d pInClipSpace( ( 2.0 * mousePos.x() / m_matrixCallback->getViewportWidth()->get() ) - 1.0,
-                            ( 2.0 * mousePos.y() / m_matrixCallback->getViewportHeight()->get() ) - 1.0,
-                            1.0,
-                            1.0 );
-
-    // get the both matrices inverted
-    WMatrix4d projectionMatrixInverted = invert( m_matrixCallback->getProjectionMatrix()->get() );
-    WMatrix4d modelviewMatrixInverted = invert( m_matrixCallback->getModelViewMatrix()->get() );
-
-    // unproject the clip-space vector to the world space
-    WVector4d pInWorldSpace = projectionMatrixInverted * pInClipSpace;
-    // get back to model-space
-    WVector4d pInObjectSpace = modelviewMatrixInverted * pInWorldSpace;
-
-    debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
 }
 
 void WMTransferCalc::moduleMain()
@@ -274,13 +251,6 @@ void WMTransferCalc::moduleMain()
 
             debugLog() << "x = " << x_scale << ", y = " << y_scale << ", z = " << z_scale;
 
-            WMatrix4d c = WMatrix4d::identity();
-            WMatrix4d d = m_grid->getTransform();
-            WMatrix4d transformation = c * d;
-                // BEISPIEL
-                // WVector4d v;
-                // WVector4d ergebnis = transformation * v;
-
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Calculating BoundingBox and OuterBounding
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -288,14 +258,14 @@ void WMTransferCalc::moduleMain()
             {
                 std::vector< WVector4d > bounding_box( 8 );  // BoundingBox of the dataset
 
-                bounding_box[0] = transformation * WVector4d( 0,       0,       0,       1 );
-                bounding_box[1] = transformation * WVector4d( x_scale, 0,       0,       1 );
-                bounding_box[2] = transformation * WVector4d( 0,       y_scale, 0,       1 );
-                bounding_box[3] = transformation * WVector4d( x_scale, y_scale, 0,       1 );
-                bounding_box[4] = transformation * WVector4d( 0,       0,       z_scale, 1 );
-                bounding_box[5] = transformation * WVector4d( x_scale, 0,       z_scale, 1 );
-                bounding_box[6] = transformation * WVector4d( 0,       y_scale, z_scale, 1 );
-                bounding_box[7] = transformation * WVector4d( x_scale, y_scale, z_scale, 1 );
+                bounding_box[0] = WVector4d( 0,       0,       0,       1 );
+                bounding_box[1] = WVector4d( x_scale, 0,       0,       1 );
+                bounding_box[2] = WVector4d( 0,       y_scale, 0,       1 );
+                bounding_box[3] = WVector4d( x_scale, y_scale, 0,       1 );
+                bounding_box[4] = WVector4d( 0,       0,       z_scale, 1 );
+                bounding_box[5] = WVector4d( x_scale, 0,       z_scale, 1 );
+                bounding_box[6] = WVector4d( 0,       y_scale, z_scale, 1 );
+                bounding_box[7] = WVector4d( x_scale, y_scale, z_scale, 1 );
 
                 //std::vector< WVector4d > outer_bounding( 2,  bounding_box[0] );
                 // BoundingBox parallel to the screen (just min and max)
@@ -337,19 +307,12 @@ void WMTransferCalc::moduleMain()
             m_zPos->setRecommendedValue( 0.5 * z_scale );
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Ray Data
+            // Ray Casting
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            //TODO not transformed!!!
-
-            // start point and direction of the ray
-            WVector4d start( m_xPos->get( true ),
-                             m_yPos->get( true ),
-                             0, 1 );
-            debugLog() << "Start: " << start;
-
+            // start point in Window Coordinates
+            WVector4d start( m_xPos->get( true ), m_yPos->get( true ), 0, 1 );
             WVector4d dir( 0, 0, 1, 0 );
-            debugLog() << "Direction: " << dir;
 
             // ray object - ray = start + t * direction
             WRay ray( start, dir );
@@ -358,23 +321,90 @@ void WMTransferCalc::moduleMain()
             double interval = 0.33;
             m_profiles.clear();
 
-            for( unsigned int n = 0; n < 1; n++ )
+            unsigned int samplesInVicinity = 3;
+            unsigned int radi = 1.0;
+
+            for( unsigned int n = 0; n < samplesInVicinity; n++ )
             {
-                m_currentProfile = castRay( ray, interval );
-                m_profiles.push_back( m_currentProfile );
+                if( n == 0 )
+                {
+                    m_currentProfile = castRay( ray, interval );
+                    m_profiles.push_back( m_currentProfile );
+                }
+                else
+                {
+                    WRay vicinity( ray.start() + WVector4d( std::sin( n )*radi, std::cos( n )*radi, 0, 0 ), dir );
+                    m_currentProfile = castRay( vicinity, interval );
+                    m_profiles.push_back( m_currentProfile );
+                }
+            }
+        }
+    }
+    // we technically need to remove the event handler too but there is no method available to do this ...
+    // WKernel::getRunningKernel()->getGraphicsEngine()->getViewer()->removeEventHandler( handler );
+    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
+}
+
+void WMTransferCalc::onClick( WVector2i mousePos )
+{
+    debugLog() << "Left Click at " << mousePos;
+    debugLog() << "Projection Matrix: " << m_matrixCallback->getProjectionMatrix()->get();
+    debugLog() << "ModelView Matrix: " << m_matrixCallback->getModelViewMatrix()->get();
+    debugLog() << "Viewport: " << m_matrixCallback->getViewportX()->get() << ", " << m_matrixCallback->getViewportY()->get() << ", "
+                               << m_matrixCallback->getViewportWidth()->get() << ", " << m_matrixCallback->getViewportHeight()->get();
+
+    // get the clip-space coordinate:
+    WVector4d pInClipSpace( ( 2.0 * mousePos.x() / m_matrixCallback->getViewportWidth()->get() ) - 1.0,
+                            ( 2.0 * mousePos.y() / m_matrixCallback->getViewportHeight()->get() ) - 1.0,
+                            1.0,
+                            1.0 );
+
+    // get the both matrices inverted
+    WMatrix4d projectionMatrixInverted = invert( m_matrixCallback->getProjectionMatrix()->get() );
+    WMatrix4d modelviewMatrixInverted = invert( m_matrixCallback->getModelViewMatrix()->get() );
+
+    // unproject the clip-space vector to the world space
+    WVector4d pInWorldSpace = projectionMatrixInverted * pInClipSpace;
+    // get back to model-space
+    WVector4d pInObjectSpace = modelviewMatrixInverted * pInWorldSpace;
+
+    debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
+
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Ray Casting
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+    // start point in Window Coordinates
+    WVector4d start( mousePos.x(), mousePos.y(), 0, 1 );
+    debugLog() << "Start Window: \t" << start;
+    debugLog() << "Start Clip: \t" << pInClipSpace; //coord between -1 and 1
+    debugLog() << "Start World: \t" << pInWorldSpace;
+    debugLog() << "Start Object:\t" << pInObjectSpace;
+
+    WVector4d dir( 0, 0, 1, 0 );
+    debugLog() << "Direction Window: \t" << dir;
+    WVector4d dirInWorldSpace = projectionMatrixInverted * dir;
+    WVector4d dirInObjectSpace = modelviewMatrixInverted * dirInWorldSpace;
+    debugLog() << "Direction World: \t" << dirInObjectSpace;
+
+    // ray object - ray = start + t * direction
+    WRay ray( pInObjectSpace, dirInObjectSpace );
+
+    // step length
+    double interval = 0.33;
+    m_profiles.clear();
+
+    for( unsigned int n = 0; n < 1; n++ )
+    {
+        m_currentProfile = castRay( ray, interval );
+        m_profiles.push_back( m_currentProfile );
 //             std::cout << "DEBUG - RayProfile: " << std::endl;
 //             for( size_t i = 0; i < m_currentProfile.size(); i++ )
 //             {
 //                 std::cout << m_currentProfile[i].value() << " ";
 //             }
 //             std::cout << std::endl;
-            }
-        }
     }
-
-    // we technically need to remove the event handler too but there is no method available to do this ...
-    // WKernel::getRunningKernel()->getGraphicsEngine()->getViewer()->removeEventHandler( handler );
-    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
 
 WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
@@ -395,12 +425,23 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
     size_t sampleCount = 0;
 
     double* bounds = new double[2];
-    bounds = rayIntersectsBox(ray);
+    bounds = rayIntersectsBox( ray );
 
-    if( bounds == NULL ) return curProfile; //empty profile
+    if( bounds == NULL )
+    {
+        prog->finish();
+        m_progress->removeSubProgress( prog );
+        return curProfile; //empty profile
+    }
 
-    double start_t = bounds[0]; //can be negative
-    double end_t = bounds[1];
+    double start_t = bounds[0];
+    double end_t   = bounds[1];
+
+    debugLog() << start_t << " - " << end_t;
+
+//     prog->finish();
+//     m_progress->removeSubProgress( prog );
+//     return curProfile;
 
     for( double sample_t = start_t; sample_t <= end_t + 0.1; sample_t += interval )
     {
@@ -419,8 +460,15 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
         double val = interpolate( current );
         curProfile[sampleCount].value() = val;
         curProfile[sampleCount].distance() = sample_t;
-        curProfile[sampleCount].gradient() = 0; //TODO
-        curProfile[sampleCount].gradLength() = 0; //TODO
+
+        //calculate gradient
+        WVector4d grad = getGradient( current );
+        double weight = sqrt( grad[0]*grad[0] + grad[1]*grad[1] + grad[2]*grad[2] );
+        curProfile[sampleCount].gradWeight() = weight;
+        if( weight != 0 ) //normalize
+        {
+            curProfile[sampleCount].gradient() = grad * ( 1/weight );
+        }
         sampleCount++;
     }
     m_rootNode->remove( m_geode );
@@ -445,17 +493,17 @@ double* WMTransferCalc::rayIntersectsBox( WRay ray )
 
     for( unsigned int coord = 0; coord < 3; coord++ ) // for x,y,z
     {
-        if( (ray.getDirection())[coord] == 0 ) // ray parallel to the min/max coord-planes
+        if( (ray.direction())[coord] == 0 ) // ray parallel to the min/max coord-planes
         {
-            if( (ray.getStart())[coord] < m_outer_bounding[0][coord] || (ray.getStart())[coord] > m_outer_bounding[1][coord] )
+            if( (ray.start())[coord] < m_outer_bounding[0][coord] || (ray.start())[coord] > m_outer_bounding[1][coord] )
                     return NULL;
         }
         else // ray not parallel, so calculate intersections
         {
             // time at which ray intersects min plane
-            t0 = ( m_outer_bounding[0][coord] - (ray.getStart())[coord] ) / (ray.getDirection())[coord];
+            t0 = ( m_outer_bounding[0][coord] - ( ray.start() )[coord] ) / ( ray.direction() )[coord];
             // time at which ray intersects max plane
-            t1 = ( m_outer_bounding[1][coord] - (ray.getStart())[coord] ) / (ray.getDirection())[coord];
+            t1 = ( m_outer_bounding[1][coord] - ( ray.start() )[coord] ) / ( ray.direction() )[coord];
             if( t0 > t1 ) std::swap( t0, t1 );
             if( t0 > tnear ) tnear = t0;
             if( t1 < tfar  ) tfar  = t1;
@@ -481,8 +529,22 @@ WVector3d WMTransferCalc::getAs3D( const WVector4d& vec )
     }
 }
 
+WVector4d WMTransferCalc::getGradient( const WVector4d& position )
+{
+    double dist_x = 1, dist_y = 1, dist_z = 1;
+    double x_val, y_val, z_val;
 
-double WMTransferCalc::interpolate( WVector4d position )
+    x_val = ( ( interpolate( position + WVector4d( 0.5*dist_x, 0.0, 0.0, 0.0 ) ) )
+            - ( interpolate( position - WVector4d( 0.5*dist_x, 0.0, 0.0, 0.0 ) ) ) ) / dist_x;
+    y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5*dist_y, 0.0, 0.0 ) ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.5*dist_y, 0.0, 0.0 ) ) ) ) / dist_y;
+    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, 0.5*dist_z, 0.0 ) ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.0, 0.5*dist_z, 0.0 ) ) ) ) / dist_z;
+
+    return WVector4d( x_val, y_val, z_val, 0 );
+}
+
+double WMTransferCalc::interpolate( const WVector4d& position )
 {
     double vox_x = static_cast< double >( m_grid->getXVoxelCoord( getAs3D( position ) ) );
     double vox_y = static_cast< double >( m_grid->getYVoxelCoord( getAs3D( position ) ) );

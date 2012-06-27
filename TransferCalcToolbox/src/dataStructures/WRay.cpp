@@ -42,12 +42,22 @@ WRay::~WRay()
     // destructor
 }
 
-WVector4d WRay::getStart( )
+const WVector4d& WRay::start() const
 {
     return m_start;
 }
 
-WVector4d WRay::getDirection( )
+WVector4d& WRay::start()
+{
+    return m_start;
+}
+
+const WVector4d& WRay::direction() const
+{
+    return m_direction;
+}
+
+WVector4d& WRay::direction()
 {
     return m_direction;
 }

@@ -29,7 +29,7 @@
 
 WRayProfile::WRayProfile()
 {
-
+    // constructor
 }
 
 WRayProfile::WRayProfile( size_t nbSamples )
@@ -40,8 +40,6 @@ WRayProfile::WRayProfile( size_t nbSamples )
     m_profile.resize( nbSamples, WRaySample() );
 
 //     wlog::debug( "WRayProfile" ) << "Size of RayProfile: " << m_profile.size();
-
-    // NOTE: the number of samples does not need to be stored as it is the number of elements in m_profile.
 }
 
 WRayProfile::~WRayProfile()
