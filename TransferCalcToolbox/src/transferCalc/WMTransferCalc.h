@@ -159,10 +159,11 @@ private:
      *
      * \param ray WRay object which holds the start and direction vector of the ray.
      * \param interval Interval for taking the samples on the ray.
+     * \param rayGeode the method adds a drawable to this geode representing the ray that has been casted.
      *
      * \return complete profile of casted ray
      */
-    virtual WRayProfile castRay( WRay ray, double interval );
+    virtual WRayProfile castRay( WRay ray, double interval, osg::ref_ptr< osg::Geode > rayGeode );
 
     /**
      * Calculates the nearest and farest intersection

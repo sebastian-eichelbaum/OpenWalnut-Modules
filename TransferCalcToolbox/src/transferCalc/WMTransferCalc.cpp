@@ -321,23 +321,31 @@ void WMTransferCalc::moduleMain()
             double interval = 0.33;
             m_profiles.clear();
 
+            // TODO(fjacob): provide these two as properties
             unsigned int samplesInVicinity = 3;
             unsigned int radi = 1.0;
+
+            osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
+            // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+            rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
             for( unsigned int n = 0; n < samplesInVicinity; n++ )
             {
                 if( n == 0 )
                 {
-                    m_currentProfile = castRay( ray, interval );
+                    m_currentProfile = castRay( ray, interval, rayGeode );
                     m_profiles.push_back( m_currentProfile );
                 }
                 else
                 {
                     WRay vicinity( ray.start() + WVector4d( std::sin( n )*radi, std::cos( n )*radi, 0, 0 ), dir );
-                    m_currentProfile = castRay( vicinity, interval );
+                    m_currentProfile = castRay( vicinity, interval, rayGeode );
                     m_profiles.push_back( m_currentProfile );
                 }
             }
+
+            m_rootNode->clear();
+            m_rootNode->insert( rayGeode );
         }
     }
     // we technically need to remove the event handler too but there is no method available to do this ...
@@ -396,7 +404,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
 
     for( unsigned int n = 0; n < 1; n++ )
     {
-        m_currentProfile = castRay( ray, interval );
+        //m_currentProfile = castRay( ray, interval );
         m_profiles.push_back( m_currentProfile );
 //             std::cout << "DEBUG - RayProfile: " << std::endl;
 //             for( size_t i = 0; i < m_currentProfile.size(); i++ )
@@ -407,7 +415,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     }
 }
 
-WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
+WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< osg::Geode > rayGeode )
 {
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Calculating a single profile with samples
@@ -416,8 +424,6 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
     // progress
     boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
     m_progress->addSubProgress( prog );
-
-    osg::ref_ptr< osg::Geode > newGeode = new osg::Geode();
 
     size_t max_nbSamples = ceil( length( m_outer_bounding[1] - m_outer_bounding[0] ) / interval );
     WRayProfile curProfile( max_nbSamples );
@@ -454,7 +460,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
             //debugLog() << "continue...";
             continue;
         }
-        newGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( current ), 0.5f ) ) );
+        rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( current ), 0.5f ) ) );
     //                 double not_int_val = m_dataSet->getValueSet()->getScalarDouble( m_grid->getVoxelNum( getAs3D( current ) ) );
     //                 debugLog() << "Old value: " << not_int_val;
         double val = interpolate( current );
@@ -463,6 +469,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
 
         //calculate gradient
         WVector4d grad = getGradient( current );
+        // TODO(fjacob): use length here -> see core/common/math/linearAlgebra/WMatrixFixed.h
         double weight = sqrt( grad[0]*grad[0] + grad[1]*grad[1] + grad[2]*grad[2] );
         curProfile[sampleCount].gradWeight() = weight;
         if( weight != 0 ) //normalize
@@ -471,19 +478,13 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval )
         }
         sampleCount++;
     }
-    m_rootNode->remove( m_geode );
-    m_geode = newGeode;
-
-    m_geode->addUpdateCallback( new SafeUpdateCallback( this ) );
-
-    m_rootNode->clear();
-    m_rootNode->insert( m_geode );
     prog->finish();
     m_progress->removeSubProgress( prog );
 
     return curProfile;
 }
 
+// TODO(fjacob): better use a struct here
 double* WMTransferCalc::rayIntersectsBox( WRay ray )
 {
     // ray = start + t*dir
@@ -495,8 +496,10 @@ double* WMTransferCalc::rayIntersectsBox( WRay ray )
     {
         if( (ray.direction())[coord] == 0 ) // ray parallel to the min/max coord-planes
         {
-            if( (ray.start())[coord] < m_outer_bounding[0][coord] || (ray.start())[coord] > m_outer_bounding[1][coord] )
-                    return NULL;
+            if( ( ray.start() )[coord] < m_outer_bounding[0][coord] || (ray.start())[coord] > m_outer_bounding[1][coord] )
+            {
+                return NULL;
+            }
         }
         else // ray not parallel, so calculate intersections
         {
@@ -531,15 +534,16 @@ WVector3d WMTransferCalc::getAs3D( const WVector4d& vec )
 
 WVector4d WMTransferCalc::getGradient( const WVector4d& position )
 {
+    // TODO(fjacob): use voxel scales here
     double dist_x = 1, dist_y = 1, dist_z = 1;
     double x_val, y_val, z_val;
 
-    x_val = ( ( interpolate( position + WVector4d( 0.5*dist_x, 0.0, 0.0, 0.0 ) ) )
-            - ( interpolate( position - WVector4d( 0.5*dist_x, 0.0, 0.0, 0.0 ) ) ) ) / dist_x;
-    y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5*dist_y, 0.0, 0.0 ) ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.5*dist_y, 0.0, 0.0 ) ) ) ) / dist_y;
-    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, 0.5*dist_z, 0.0 ) ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.0, 0.5*dist_z, 0.0 ) ) ) ) / dist_z;
+    x_val = ( ( interpolate( position + WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ) ) )
+            - ( interpolate( position - WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ) ) ) ) / dist_x;
+    y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ) ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ) ) ) ) / dist_y;
+    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ) ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ) ) ) ) / dist_z;
 
     return WVector4d( x_val, y_val, z_val, 0 );
 }
