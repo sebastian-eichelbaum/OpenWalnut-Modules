@@ -140,10 +140,11 @@ private:
      * Trilinear interpolation within the grid for a given position
      *
      * \param position Position for which the value should be determined.
+     * \param grid Pointer to the grid, which shall be the base for the interpolation.
      *
      * \return interpolated value
      */
-    virtual double interpolate( const WVector4d& position );
+    virtual double interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid );
 
     /**
      * Gradient calculation for a given position in the grid.
@@ -173,7 +174,7 @@ private:
      *
      * \return  An array with the nearest and farest t values.
      */
-    virtual double* rayIntersectsBox( WRay ray );
+    virtual struct BoxIntersecParameter rayIntersectsBox( WRay ray );
 
     /**
      * Function to save a RayProfile to a given file.
@@ -202,6 +203,11 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetScalar > >  m_inputData;
 
     /**
+     * An input connector used to get fractional anisotropy datasets from other modules.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetScalar > >  m_inputFA;
+
+    /**
      * A condition used to notify about changes in several properties.
      */
     boost::shared_ptr< WCondition > m_propCondition;
@@ -217,6 +223,16 @@ private:
     boost::shared_ptr< WDataSetScalar > m_dataSet;
 
     /**
+     * Optinal: additional dataset with fractional anisotropy data.
+     */
+    boost::shared_ptr< WDataSetScalar > m_FAdataSet;
+
+    /**
+     * Boolean to check if any FA data is present and valid.
+     */
+    bool m_FAisValid;
+
+    /**
      * Contains the minimum and maximum values of the bounding box.
      * outer_bounding[0] = ( min_x, min_y, min_z )
      * outer_bounding[1] = ( max_x, max_y, max_z )
@@ -229,6 +245,11 @@ private:
     boost::shared_ptr< WGridRegular3D > m_grid;
 
     /**
+     * Current FA grid
+     */
+    boost::shared_ptr< WGridRegular3D > m_FAgrid;
+
+    /**
      * Collection of all calculated RayProfiles.
      */
     std::vector< WRayProfile > m_profiles;
@@ -236,7 +257,7 @@ private:
     /**
      * Latest calculated RayProfile.
      */
-    WRayProfile m_currentProfile;
+    WRayProfile m_mainProfile;
 
     /**
      * Camera position, changes on click.
@@ -267,6 +288,21 @@ private:
      * z position of the ray origin.
      */
     WPropDouble   m_zPos;
+
+    /**
+     * Interval for sampling rays.
+     */
+    WPropDouble   m_interval;
+
+    /**
+     * Number of rays being casted.
+     */
+    WPropInt   m_rayNumber;
+
+    /**
+     * Radius for circular vicinity in which the rays shall be casted.
+     */
+    WPropInt   m_radius;
 
     /**
      * A color.
@@ -315,6 +351,13 @@ private:
      * Needed to query the modelview and projection matrices of the m_rootNode;
      */
     WGetMatrixCallback::RefPtr m_matrixCallback;
+};
+
+struct BoxIntersecParameter
+{
+        double minimum_t;
+        double maximum_t;
+        bool isNull;
 };
 
 #endif  // WMTRANSFERCALC_H

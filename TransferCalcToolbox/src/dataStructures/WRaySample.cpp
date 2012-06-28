@@ -25,7 +25,7 @@
 #include "WRaySample.h"
 
 WRaySample::WRaySample():
-    m_value( 0.0 ), m_distance( 0.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ), m_gradWeight( 0.0 )
+    m_value( 0.0 ), m_distance( -1.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ), m_gradWeight( -1.0 ), m_fracAnisotropy( -1.0 )
 {
     // initialize members
 }
@@ -73,4 +73,14 @@ const double& WRaySample::gradWeight() const
 double& WRaySample::gradWeight()
 {
     return m_gradWeight;
+}
+
+const double& WRaySample::fracA() const
+{
+    return m_fracAnisotropy;
+}
+
+double& WRaySample::fracA()
+{
+    return m_fracAnisotropy;
 }

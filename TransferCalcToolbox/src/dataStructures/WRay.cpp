@@ -30,11 +30,9 @@ WRay::WRay()
 }
 
 WRay::WRay( WVector4d st, WVector4d dir ) :
-    m_start( st ),
-    m_direction( dir )
+    m_start( st ), m_direction( normalize( dir ) )
 {
-    double n = sqrt( dir[0]*dir[0] + dir[1]*dir[1] + dir[2]*dir[2] );
-    m_direction *= ( 1/n );
+    // constructor
 }
 
 WRay::~WRay()

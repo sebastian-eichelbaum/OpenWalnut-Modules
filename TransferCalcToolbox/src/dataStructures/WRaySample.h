@@ -100,6 +100,20 @@ public:
      */
     double& gradWeight();
 
+    /**
+     * Access the fractional anisotropy of the sample point.
+     *
+     * \return the fractional anisotropy reference.
+     */
+    const double& fracA() const;
+
+    /**
+     * Access the fractional anisotropy of the sample point.
+     *
+     * \return the fractional anisotropy reference.
+     */
+    double& fracA();
+
 protected:
 private:
     /**
@@ -121,6 +135,11 @@ private:
      * The gradient length at this sample point.
      */
     double m_gradWeight;
+
+    /**
+     * The fractional anisotropy at this sample point.
+     */
+    double m_fracAnisotropy;
 };
 
 #endif  // WRAYSAMPLE_H
