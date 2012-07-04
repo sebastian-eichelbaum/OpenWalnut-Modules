@@ -365,34 +365,38 @@ void WMTransferCalc::moduleMain()
             m_interval->setRecommendedValue( 0.33 );
 
             m_rayNumber->setMin( 1 );
-            m_rayNumber->setRecommendedValue( 10 );
+            m_rayNumber->setRecommendedValue( 1 );
 
             m_radius->setMin( 0 );
             m_radius->setRecommendedValue( 2 );
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Drawing current position of the future ray from properties
+            // Drawing current position of the future ray from properties (debugging)
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
-            rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
-            WVector4d cylStart = WVector4d( m_xPos->get( true ), m_yPos->get( true ), 0.0, 1.0 );
+            if( false )
+            {
+                osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
+                rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
-            osg::Cylinder* cylinder = new osg::Cylinder( getAs3D( cylStart + WVector4d( 0.0, 0.0, 0.5 * z_scale, 0.0 ) ), 0.5f, static_cast<float>( z_scale ) );
-            osg::Quat rot;
-            rot.makeRotate( osg::Vec3d( 0.0, 0.0, 1.0 ),
-                            osg::Vec3d( 1.0, 0.0, 0.0 )   // <-- ray direction vector
-                          );
-            cylinder->setRotation( rot );
+                WVector4d cylStart = WVector4d( m_xPos->get( true ), m_yPos->get( true ), 0.0, 1.0 );
 
-            osg::Cone* cone = new osg::Cone( getAs3D( cylStart + WVector4d( 0.0, 0.0, z_scale, 0.0 ) ), 1.0f, 5.0f );
-            cone->setRotation( rot );
+                osg::Cylinder* cylinder = new osg::Cylinder( getAs3D( cylStart + WVector4d( 0.0, 0.0, 0.5 * z_scale, 0.0 ) ), 0.5f, static_cast<float>( z_scale ) );
+                osg::Quat rot;
+                rot.makeRotate( osg::Vec3d( 0.0, 0.0, 1.0 ),
+                                osg::Vec3d( 1.0, 0.0, 0.0 )   // <-- ray direction vector
+                            );
+                cylinder->setRotation( rot );
 
-            rayGeode->addDrawable( new osg::ShapeDrawable( cylinder ) );
-            rayGeode->addDrawable( new osg::ShapeDrawable( cone ) );
+                osg::Cone* cone = new osg::Cone( getAs3D( cylStart + WVector4d( 0.0, 0.0, z_scale, 0.0 ) ), 1.0f, 5.0f );
+                cone->setRotation( rot );
 
-            m_rootNode->clear();
-            m_rootNode->insert( rayGeode );
+                rayGeode->addDrawable( new osg::ShapeDrawable( cylinder ) );
+                rayGeode->addDrawable( new osg::ShapeDrawable( cone ) );
+
+                m_rootNode->clear();
+                m_rootNode->insert( rayGeode );
+            }
         }
     }
     // we technically need to remove the event handler too but there is no method available to do this ...
@@ -402,110 +406,88 @@ void WMTransferCalc::moduleMain()
 
 void WMTransferCalc::onClick( WVector2i mousePos )
 {
-    debugLog() << "Left Click at " << mousePos;
+/*    debugLog() << "Left Click at " << mousePos;
     debugLog() << "Projection Matrix: " << m_matrixCallback->getProjectionMatrix()->get();
     debugLog() << "ModelView Matrix: " << m_matrixCallback->getModelViewMatrix()->get();
     debugLog() << "Viewport: " << m_matrixCallback->getViewportX()->get() << ", " << m_matrixCallback->getViewportY()->get() << ", "
                                << m_matrixCallback->getViewportWidth()->get() << ", " << m_matrixCallback->getViewportHeight()->get();
-
-    // get the clip-space coordinate:
-    WVector4d pInClipSpace( ( 2.0 * mousePos.x() / m_matrixCallback->getViewportWidth()->get() ) - 1.0,
-                            ( 2.0 * mousePos.y() / m_matrixCallback->getViewportHeight()->get() ) - 1.0,
-                            0.0,
-                            1.0 );
-
-    WVector4d vecInClipSpace( 0.0,
-                             0.0,
-                              1.0,
-                              0.0 );
-
-
+*/
     // get the both matrices inverted
     WMatrix4d projectionMatrixInverted = invert( m_matrixCallback->getProjectionMatrix()->get() );
     WMatrix4d modelviewMatrixInverted = invert( m_matrixCallback->getModelViewMatrix()->get() );
+                               
+    // get the clip-space coordinate:
+    WVector4d pInClipSpace( ( 2.0 * mousePos.x() / m_matrixCallback->getViewportWidth()->get() ) - 1.0,
+                            ( 2.0 * mousePos.y() / m_matrixCallback->getViewportHeight()->get() ) - 1.0,
+                              0.0,
+                              1.0 );
+    WVector4d dirInClipSpace( 0.0,
+                              0.0,
+                              1.0,
+                              0.0 );
 
-    // unproject the clip-space vector to the world space
-    WVector4d pInWorldSpace = projectionMatrixInverted * pInClipSpace;
+    // unproject the clip-space vectors to the world space
+    WVector4d pInWorldSpace   = projectionMatrixInverted * pInClipSpace;
+    WVector4d dirInWorldSpace = projectionMatrixInverted * dirInClipSpace;
     // get back to model-space
-    WVector4d pInObjectSpace = modelviewMatrixInverted * pInWorldSpace;
+    WVector4d pInObjectSpace   = modelviewMatrixInverted * pInWorldSpace;
+    WVector4d dirInObjectSpace = modelviewMatrixInverted * dirInWorldSpace;
 
-    WVector4d vecInWorldSpace = projectionMatrixInverted * vecInClipSpace;
-    // get back to model-space
-    WVector4d vecInObjectSpace = modelviewMatrixInverted * vecInWorldSpace;
+    // for multilication with a vertex
+    WMatrix4d totalTransform = modelviewMatrixInverted * projectionMatrixInverted;
 
-    debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
+//     debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
+//     debugLog() << dirInWorldSpace << " --- " << dirInObjectSpace;
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Ray Casting
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    // start point in Window Coordinates
-    WVector4d startc( mousePos.x(), mousePos.y(), 0, 1 );
-    debugLog() << "Start Window: \t" << startc;
-    debugLog() << "Start Clip: \t" << pInClipSpace; //coord between -1 and 1
-    debugLog() << "Start World: \t" << pInWorldSpace;
-    debugLog() << "Start Object:\t" << pInObjectSpace;
-
-    WVector4d test(-50.0,-50.0,-50.0,1.0);
-
-    WVector4d dirc( 0, 0, 1, 0 );
-    debugLog() << "Direction Window: \t" << dirc;
-    WVector4d dirInWorldSpace = projectionMatrixInverted * dirc;
-    WVector4d dirInObjectSpace = modelviewMatrixInverted * dirInWorldSpace;
-    debugLog() << "Direction World: \t" << dirInObjectSpace;
-
+//     // start point in Object Coordinates
+//     WVector4d start( m_xPos->get( true ), m_yPos->get( true ), 0.0, 1.0 );
+//     WVector4d dir( 0.0, 0.0, 1.0, 0.0 );
+//     // ray object - ray = start + t * direction
+//     WRay ray( start, dir );
+    
     // ray object - ray = start + t * direction
-    WRay rayc( pInObjectSpace, dirInObjectSpace );
-
-    osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
-    // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-    rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
+    WRay ray( pInObjectSpace, dirInObjectSpace );
 
     // debug "vector"
-    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 2.5f ) ) );
-    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace+vecInObjectSpace, true ), 5.0f ) ) );
-
-
-
+    osg::ref_ptr< osg::Geode > debugGeode = new osg::Geode();
+    debugGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
+    debugGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 2.5f ) ) );
+    debugGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace + dirInObjectSpace, true ), 5.0f ) ) );
     m_rootNode->clear();
-    m_rootNode->insert( rayGeode );
+    m_rootNode->insert( debugGeode );
 
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Ray Casting
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    // start point in Window Coordinates
-    WVector4d start( m_xPos->get( true ), m_yPos->get( true ), 0.0, 1.0 );
-    WVector4d dir( 0.0, 0.0, 1.0, 0.0 );
-    // ray object - ray = start + t * direction
-    WRay ray( start, dir );
-
+    // delete old profiles
     m_profiles.clear();
 
     double interval = m_interval->get( true );
     unsigned int samplesInVicinity = static_cast<unsigned int>( m_rayNumber->get( true ) );
     unsigned int radi = static_cast<unsigned int>( m_radius->get( true ) );
 
-//     osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
-//     // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-//     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
-//
-//     unsigned int seed = time( 0 ); // for thread safe rand_r function
-//     for( unsigned int n = 0; n < samplesInVicinity; n++ )
-//     {
-//         if( n == 0 ) // the initial profile
-//         {
-//             m_mainProfile = castRay( ray, interval, rayGeode );
-//             m_profiles.push_back( m_mainProfile );
-//         }
-//         else // random profiles in vicinity
-//         {
-//             WRay vicinity( ray.start() + WVector4d( std::sin( rand_r( &seed ) ) * radi, std::cos( rand_r( &seed ) ) * radi, 0, 0 ), dir );
-//             m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
-//         }
-//     }
-//     m_rootNode->clear();
-//     m_rootNode->insert( rayGeode );
+    osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
+    rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
+
+    unsigned int seed = time( 0 ); // for thread safe rand_r function
+    for( unsigned int n = 0; n < samplesInVicinity; n++ )
+    {
+        if( n == 0 ) // the initial profile
+        {
+            m_mainProfile = castRay( ray, interval, rayGeode );
+            m_profiles.push_back( m_mainProfile );
+        }
+        else // random profiles in vicinity
+        {
+            WRay vicinity( ray.start() +
+                           ( totalTransform * WVector4d( std::sin( rand_r( &seed ) ) * radi, std::cos( rand_r( &seed ) ) * radi, 0.0, 0.0 ) ),
+                           ray.direction() );
+            m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
+        }
+    }
+    m_rootNode->clear();
+    m_rootNode->insert( rayGeode );
 }
 
 WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< osg::Geode > rayGeode )
@@ -518,28 +500,30 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
     m_progress->addSubProgress( prog );
 
+    //TODO(fjacob): the not set RaySamples may be deleted after collecting all profiles
     size_t max_nbSamples = ceil( length( m_outer_bounding[1] - m_outer_bounding[0] ) / interval );
     WRayProfile curProfile( max_nbSamples );
 //   debugLog() << "Max samples: " << max_nbSamples;
-    size_t sampleCount = 0;
 
     struct BoxIntersecParameter bounds = rayIntersectsBox( ray );
-
-    if( bounds.isNull )
+    if( bounds.isNull ) //no intersection with data grid
     {
         prog->finish();
         m_progress->removeSubProgress( prog );
         return curProfile; //empty profile
     }
-
     double start_t = bounds.minimum_t;
     double end_t   = bounds.maximum_t;
 
-    debugLog() << start_t << " - " << end_t;
-
+/*    debugLog() << start_t << " - " << end_t;
+    prog->finish();
+    m_progress->removeSubProgress( prog );
+    return curProfile;
+*/
     WVector4d geodeStartVec, geodeEndVec, cylinderVec;
 
-    for( double sample_t = start_t; sample_t <= end_t + 0.1; sample_t += interval )
+    size_t sampleCount = 0;
+    for( double sample_t = start_t; sample_t <= end_t; sample_t += interval )
     {
         WVector4d current = ray.getSpot( sample_t );
         if( sample_t == start_t )
@@ -575,17 +559,28 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
             curProfile[sampleCount].gradient() = grad * ( 1 / weight );
         }
 
-        if( sample_t + interval <= end_t + 0.1 )
+        if( sample_t + interval <= end_t )
         {
             geodeEndVec = current;
         }
         sampleCount++;
     }
+    // draw ray (a cylinder and a cone)
     cylinderVec = geodeEndVec - geodeStartVec;
-    rayGeode->addDrawable( new osg::ShapeDrawable(
-                new osg::Cylinder( getAs3D( geodeStartVec + ( 0.5 * cylinderVec ) ), 0.5f, static_cast<float>( length( cylinderVec ) ) )
-    ) );
-    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Cone( getAs3D( geodeEndVec ), 1.0f, 5.0f ) ) );
+    
+    osg::Cylinder* cylinder = new osg::Cylinder( getAs3D( geodeStartVec + ( 0.5 * cylinderVec ) ), 0.5f, length( cylinderVec ) );
+    osg::Cone* cone = new osg::Cone( getAs3D( geodeEndVec ), 1.0f, 5.0f );
+
+    osg::Quat rot;
+    rot.makeRotate( osg::Vec3d( 0.0, 0.0, 1.0 ),
+                    osg::Vec3d( ray.direction().x(), ray.direction().y(), ray.direction().z() ) //TODO(fjacob): cast from WVector4d to osg::Vec3d ?
+                );
+    cylinder->setRotation( rot );
+    cone->setRotation( rot );
+
+    rayGeode->addDrawable( new osg::ShapeDrawable( cylinder ) );
+    rayGeode->addDrawable( new osg::ShapeDrawable( cone ) );
+
     prog->finish();
     m_progress->removeSubProgress( prog );
 
@@ -595,10 +590,10 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
 struct BoxIntersecParameter WMTransferCalc::rayIntersectsBox( WRay ray )
 {
     // ray = start + t * dir
-    double tnear = std::numeric_limits<double>::min();
-    double tfar  = std::numeric_limits<double>::max();
+    double tnear = - std::numeric_limits<double>::max();
+    double tfar  =   std::numeric_limits<double>::max();
     double t0, t1;
-
+    
     struct BoxIntersecParameter result;
     result.isNull = true;
 
