@@ -407,6 +407,12 @@ void WMTransferCalc::onClick( WVector2i mousePos )
                             0.0,
                             1.0 );
 
+    WVector4d vecInClipSpace( 0.0,
+                             0.0,
+                              1.0,
+                              0.0 );
+
+
     // get the both matrices inverted
     WMatrix4d projectionMatrixInverted = invert( m_matrixCallback->getProjectionMatrix()->get() );
     WMatrix4d modelviewMatrixInverted = invert( m_matrixCallback->getModelViewMatrix()->get() );
@@ -415,6 +421,10 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     WVector4d pInWorldSpace = projectionMatrixInverted * pInClipSpace;
     // get back to model-space
     WVector4d pInObjectSpace = modelviewMatrixInverted * pInWorldSpace;
+
+    WVector4d vecInWorldSpace = projectionMatrixInverted * vecInClipSpace;
+    // get back to model-space
+    WVector4d vecInObjectSpace = modelviewMatrixInverted * vecInWorldSpace;
 
     debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
 
@@ -444,8 +454,12 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
-    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 5.0f ) ) );
-    
+    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 2.5f ) ) );
+
+    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace+vecInObjectSpace, true ), 5.0f ) ) );
+
+
+
     m_rootNode->clear();
     m_rootNode->insert( rayGeode );
 
@@ -468,7 +482,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
 //     osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
 //     // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
 //     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
-// 
+//
 //     unsigned int seed = time( 0 ); // for thread safe rand_r function
 //     for( unsigned int n = 0; n < samplesInVicinity; n++ )
 //     {

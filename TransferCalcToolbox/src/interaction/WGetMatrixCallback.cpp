@@ -67,12 +67,12 @@ void WGetMatrixCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
         // property's get() method to avoid locking
         if( mvMat != m_currentModelViewMatrix )
         {
-            m_modelViewMatrix->set( mvMat );
+            m_modelViewMatrix->set( transpose( static_cast< WMatrix4d >( mvMat ) ) );
             m_currentModelViewMatrix = mvMat;
         }
         if( projMat != m_currentProjectionMatrix )
         {
-            m_projectionMatrix->set( projMat );
+            m_projectionMatrix->set( transpose( static_cast< WMatrix4d >( projMat ) ) );
             m_currentProjectionMatrix = projMat;
         }
         if( viewportX != m_currentViewportX )
