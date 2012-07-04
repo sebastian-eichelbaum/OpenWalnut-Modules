@@ -376,13 +376,20 @@ void WMTransferCalc::moduleMain()
 
             osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
             rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
-
             WVector4d cylStart = WVector4d( m_xPos->get( true ), m_yPos->get( true ), 0.0, 1.0 );
-            rayGeode->addDrawable( new osg::ShapeDrawable(
-                        new osg::Cylinder( getAs3D( cylStart + WVector4d( 0.0, 0.0, 0.5 * z_scale, 0.0 ) ),
-                                            0.5f, static_cast<float>( z_scale ) ) ) );
-            rayGeode->addDrawable( new osg::ShapeDrawable(
-                        new osg::Cone( getAs3D( cylStart + WVector4d( 0.0, 0.0, z_scale, 0.0 ) ), 1.0f, 5.0f ) ) );
+
+            osg::Cylinder* cylinder = new osg::Cylinder( getAs3D( cylStart + WVector4d( 0.0, 0.0, 0.5 * z_scale, 0.0 ) ), 0.5f, static_cast<float>( z_scale ) );
+            osg::Quat rot;
+            rot.makeRotate( osg::Vec3d( 0.0, 0.0, 1.0 ),
+                            osg::Vec3d( 1.0, 0.0, 0.0 )   // <-- ray direction vector
+                          );
+            cylinder->setRotation( rot );
+
+            osg::Cone* cone = new osg::Cone( getAs3D( cylStart + WVector4d( 0.0, 0.0, z_scale, 0.0 ) ), 1.0f, 5.0f );
+            cone->setRotation( rot );
+
+            rayGeode->addDrawable( new osg::ShapeDrawable( cylinder ) );
+            rayGeode->addDrawable( new osg::ShapeDrawable( cone ) );
 
             m_rootNode->clear();
             m_rootNode->insert( rayGeode );
@@ -454,8 +461,8 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
+    // debug "vector"
     rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 2.5f ) ) );
-
     rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace+vecInObjectSpace, true ), 5.0f ) ) );
 
 
