@@ -195,7 +195,7 @@ private:
      *
      * \return Calculated Vector.
      */
-    WVector3d getAs3D( const WVector4d& vec );
+    WVector3d getAs3D( const WVector4d& vec, bool disregardW = false );
 
     /**
      * An input connector used to get datasets from other modules.

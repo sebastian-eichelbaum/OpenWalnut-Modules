@@ -404,7 +404,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     // get the clip-space coordinate:
     WVector4d pInClipSpace( ( 2.0 * mousePos.x() / m_matrixCallback->getViewportWidth()->get() ) - 1.0,
                             ( 2.0 * mousePos.y() / m_matrixCallback->getViewportHeight()->get() ) - 1.0,
-                            1.0,
+                            0.0,
                             1.0 );
 
     // get the both matrices inverted
@@ -429,6 +429,8 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     debugLog() << "Start World: \t" << pInWorldSpace;
     debugLog() << "Start Object:\t" << pInObjectSpace;
 
+    WVector4d test(-50.0,-50.0,-50.0,1.0);
+
     WVector4d dirc( 0, 0, 1, 0 );
     debugLog() << "Direction Window: \t" << dirc;
     WVector4d dirInWorldSpace = projectionMatrixInverted * dirc;
@@ -437,6 +439,15 @@ void WMTransferCalc::onClick( WVector2i mousePos )
 
     // ray object - ray = start + t * direction
     WRay rayc( pInObjectSpace, dirInObjectSpace );
+
+    osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
+    // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+    rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
+
+    rayGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 5.0f ) ) );
+    
+    m_rootNode->clear();
+    m_rootNode->insert( rayGeode );
 
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Ray Casting
@@ -454,26 +465,26 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     unsigned int samplesInVicinity = static_cast<unsigned int>( m_rayNumber->get( true ) );
     unsigned int radi = static_cast<unsigned int>( m_radius->get( true ) );
 
-    osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
-    // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-    rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
-
-    unsigned int seed = time( 0 ); // for thread safe rand_r function
-    for( unsigned int n = 0; n < samplesInVicinity; n++ )
-    {
-        if( n == 0 ) // the initial profile
-        {
-            m_mainProfile = castRay( ray, interval, rayGeode );
-            m_profiles.push_back( m_mainProfile );
-        }
-        else // random profiles in vicinity
-        {
-            WRay vicinity( ray.start() + WVector4d( std::sin( rand_r( &seed ) ) * radi, std::cos( rand_r( &seed ) ) * radi, 0, 0 ), dir );
-            m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
-        }
-    }
-    m_rootNode->clear();
-    m_rootNode->insert( rayGeode );
+//     osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
+//     // rayGeode->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+//     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
+// 
+//     unsigned int seed = time( 0 ); // for thread safe rand_r function
+//     for( unsigned int n = 0; n < samplesInVicinity; n++ )
+//     {
+//         if( n == 0 ) // the initial profile
+//         {
+//             m_mainProfile = castRay( ray, interval, rayGeode );
+//             m_profiles.push_back( m_mainProfile );
+//         }
+//         else // random profiles in vicinity
+//         {
+//             WRay vicinity( ray.start() + WVector4d( std::sin( rand_r( &seed ) ) * radi, std::cos( rand_r( &seed ) ) * radi, 0, 0 ), dir );
+//             m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
+//         }
+//     }
+//     m_rootNode->clear();
+//     m_rootNode->insert( rayGeode );
 }
 
 WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< osg::Geode > rayGeode )
@@ -613,9 +624,9 @@ struct BoxIntersecParameter WMTransferCalc::rayIntersectsBox( WRay ray )
     return result;
 }
 
-WVector3d WMTransferCalc::getAs3D( const WVector4d& vec )
+WVector3d WMTransferCalc::getAs3D( const WVector4d& vec, bool disregardW )
 {
-    if( vec[3] == 0 || vec[3] == 1 )
+    if( vec[3] == 0 || vec[3] == 1 || disregardW )
     {
         return WVector3d( vec[0], vec[1], vec[2] );
     }
