@@ -208,12 +208,39 @@ void WMTransferCalc::moduleMain()
         // activates if user pushes save button to save current RayProfile
         if( m_saveTrigger->get( true ) == WPVBaseTypes::PV_TRIGGER_TRIGGERED )
         {
-            debugLog() << "User saves RayProfile.";
+            debugLog() << "User saves RayProfile(s).";
 
             boost::shared_ptr< WProgress > saving = boost::shared_ptr< WProgress >( new WProgress( "Saving calculated RayProfiles." ) );
             m_progress->addSubProgress( saving );
 
-            for( unsigned int id = 0; id < m_profiles.size(); id++ )
+            std::stringstream prepGNUPlotScript;
+            prepGNUPlotScript << "# Measured RayProfile data" << std::endl
+                              << "#====================================" << std::endl << std::endl
+                              << "set title 'RayProfile data'" << std::endl
+                              << "set pointsize 0.5" << std::endl
+                              << "set grid" << std::endl
+                              << "set xlabel 'distance to click point'" << std::endl;
+
+            bool plotValues = true;
+            std::string usingParam;
+            if( plotValues )
+            {
+                prepGNUPlotScript << "set ylabel 'value'" << std::endl << std::endl;
+                usingParam = "using 2:3";
+            }
+            else// plot gradient weight
+            {
+                prepGNUPlotScript << "set ylabel 'gradient weight'" << std::endl << std::endl;
+                usingParam = " using 2:7";
+            }
+
+            unsigned int nrProfiles = m_profiles.size();
+            if( nrProfiles != 0 )
+            {
+                prepGNUPlotScript << "plot ";
+            }
+
+            for( unsigned int id = 0; id < nrProfiles; id++ )
             {
                 std::stringstream prepFilename;
                 prepFilename << "RayProfile" << id + 1 << ".dat";
@@ -224,7 +251,20 @@ void WMTransferCalc::moduleMain()
                 {
                     errorLog() << "RayProfile " << id + 1 << " could not be saved.";
                 }
+                else
+                {
+                    prepGNUPlotScript << "'" << prepFilename.str() << "'" << usingParam << " title 'RayProfile " << id + 1 << "' with points";
+                    if( id + 1 < nrProfiles )
+                    {
+                        prepGNUPlotScript << ", \\" << std::endl;
+                    }
+                }
             }
+            //std::string plotScript( prepGNUPlotScript.str() );
+            //debugLog() << plotScript;
+            std::ofstream plotFile( ( m_RaySaveFilePath->get( true ).string() + "/GNUPlotScript.gsc" ).c_str() );
+            plotFile << prepGNUPlotScript.str();
+            plotFile.close();
 
             saving->finish();
             m_progress->removeSubProgress( saving );
@@ -367,7 +407,7 @@ void WMTransferCalc::moduleMain()
             m_rayNumber->setMin( 1 );
             m_rayNumber->setRecommendedValue( 1 );
 
-            m_radius->setMin( 0 );
+            m_radius->setMin( 1 );
             m_radius->setRecommendedValue( 2 );
 
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -480,9 +520,26 @@ void WMTransferCalc::onClick( WVector2i mousePos )
         }
         else // random profiles in vicinity
         {
-            WRay vicinity( ray.start() +
-                           ( totalTransform * WVector4d( std::sin( rand_r( &seed ) ) * radi, std::cos( rand_r( &seed ) ) * radi, 0.0, 0.0 ) ),
-                           ray.direction() );
+            double angle = rand_r( &seed );
+            double dis = ( rand_r( &seed ) / RAND_MAX ) * radi + ( rand_r( &seed ) / RAND_MAX ) * radi;
+            double random_rad;
+            if( dis > radi )
+            {
+                random_rad = ( 2 * radi ) - dis;
+            }
+            else
+            {
+                random_rad = dis;
+            }
+            //[r*cos(t), r*sin(t)]
+
+            //WRay vicinity( ray.start() + WVector4d( std::sin( n )*radi, std::cos( n )*radi, 0, 0 ), dir );
+            
+            WVector4d vic( std::sin( n )*radi, std::cos( n )*radi, 0, 0 );
+            WVector4d vicInWorldSpace  = projectionMatrixInverted * vic;
+            WVector4d vicInObjectSpace = normalize( modelviewMatrixInverted * vicInWorldSpace );
+            
+            WRay vicinity( vicInObjectSpace, ray.direction() );
             m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
         }
     }
