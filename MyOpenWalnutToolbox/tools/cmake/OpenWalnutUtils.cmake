@@ -150,7 +150,7 @@ FUNCTION( SETUP_TESTS _TEST_FILES _TEST_TARGET )
 
             # create the test-target
             CXXTEST_ADD_TEST( ${UnitTestName} "${UnitTestName}.cc" ${testfile} )
-            TARGET_LINK_LIBRARIES( ${UnitTestName} ${_TEST_TARGET} ${_DEPENDENCIES} )
+            TARGET_LINK_LIBRARIES( ${UnitTestName} ${_TEST_TARGET} ${CMAKE_STANDARD_LIBRARIES} ${_DEPENDENCIES} )
 
             # unfortunately, the tests search their fixtures relative to their working directory. So we add a preprocessor define containing the
             # path to the fixtures. This is quite ugly but I do not know how to ensure that the working directory of tests can be modified.
@@ -195,32 +195,41 @@ ENDFUNCTION( SETUP_TESTS )
 # break the install targets
 # _Component the name of the install component
 FUNCTION( SETUP_SHADERS _Shaders _TargetDir _Component )
-    # only if we are allowed to
-    IF( OW_HANDLE_SHADERS )
-        EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory ${_TargetDir} )
+    EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E make_directory ${_TargetDir} )
 
-        # should we copy or link them?
-        SET( ShaderOperation "copy_if_different" )
-        IF ( OW_LINK_SHADERS ) # link
-             SET( ShaderOperation "create_symlink" )
-        ENDIF( OW_LINK_SHADERS )
+    # should we copy or link them?
+    SET( ShaderOperation "copy_if_different" )
+    IF ( OW_LINK_SHADERS ) # link
+         SET( ShaderOperation "create_symlink" )
+    ENDIF( OW_LINK_SHADERS )
 
-        # now do the operation for each shader into build dir
-        FOREACH( fname ${_Shaders} )
-            # We need the plain filename (create_symlink needs it)
-            STRING( REGEX REPLACE "^.*/" "" StrippedFileName "${fname}" )
+    # now do the operation for each shader into build dir
+    FOREACH( fname ${_Shaders} )
+        # We need the plain filename (create_symlink needs it)
+        STRING( REGEX REPLACE "^.*/" "" StrippedFileName "${fname}" )
 
-            # let cmake do it
-            EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E ${ShaderOperation} ${fname} "${PROJECT_BINARY_DIR}/${_TargetDir}/${StrippedFileName}" )
-        ENDFOREACH( fname )
+        # construct final filename
+        SET( targetFile "${PROJECT_BINARY_DIR}/${_TargetDir}/${StrippedFileName}" )
 
-        # now add install targets for each shader. All paths are relative to the current source dir.
-        FOREACH( fname ${_Shaders} )
-            INSTALL( FILES ${fname} DESTINATION ${_TargetDir} 
-                                    COMPONENT ${_Component}
-                   )
-        ENDFOREACH( fname )
-    ENDIF( OW_HANDLE_SHADERS )
+        # if the file already exists as non-symlink and we use the "create_symlink" command, we first need to remove the files
+        IF( NOT IS_SYMLINK ${targetFile} AND OW_LINK_SHADERS )
+            # before creating the symlink, remove the old files or cmake will not create the symlinks (as intended)
+            EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E remove -f ${targetFile} )
+        ELSEIF( IS_SYMLINK ${targetFile} AND NOT OW_LINK_SHADERS )
+            # also handle the inverse case. The files exist as symlinks but copies should be used. Remove symlinks!
+            EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E remove -f ${targetFile} )
+        ENDIF()
+
+        # let cmake do it
+        EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E ${ShaderOperation} ${fname} ${targetFile} )
+    ENDFOREACH( fname )
+
+    # now add install targets for each shader. All paths are relative to the current source dir.
+    FOREACH( fname ${_Shaders} )
+        INSTALL( FILES ${fname} DESTINATION ${_TargetDir} 
+                                COMPONENT ${_Component}
+               )
+    ENDFOREACH( fname )
 ENDFUNCTION( SETUP_SHADERS )
 
 # Sets up the stylecheck mechanism. Use this to add your codes to the stylecheck mechanism.
@@ -257,10 +266,9 @@ FUNCTION( SETUP_STYLECHECKER _TargetName _CheckFiles _Excludes )
 
     # Export our filtered file list to a file in build dir
     SET( BrainLinterListFile "${PROJECT_BINARY_DIR}/brainlint/brainlintlist_${_TargetName}" )
-    FILE( WRITE ${BrainLinterListFile} "" )
-    FOREACH( filename ${_CheckFiles} )
-        FILE( APPEND ${BrainLinterListFile} "${filename}\n" )
-    ENDFOREACH( filename )
+    LIST( REMOVE_ITEM _CheckFiles "" )
+    STRING( REPLACE ";" "\n" _CheckFiles "${_CheckFiles}" )
+    FILE( WRITE ${BrainLinterListFile} "${_CheckFiles}\n" )
 
     # add a new target for this lib
     ADD_CUSTOM_TARGET( stylecheck_${_TargetName}
@@ -292,7 +300,7 @@ FUNCTION( SETUP_RESOURCES_GENERIC _source_path _destination_path _component _ins
 
     # remove trailing slashes if any
     STRING( REGEX REPLACE "/$" "" ResourcesPath "${ResourcesPath}" )
-    # this ensures we definitely have one slash at the and
+    # this ensures we definitely have one slash at the end
     SET( ResourcesPath "${ResourcesPath}/" )
 
     IF( IS_DIRECTORY "${ResourcesPath}" )
@@ -383,20 +391,24 @@ ENDFUNCTION( SETUP_CONFIGURED_FILE )
 # _OTHERS you can add an arbitrary list of additional arguments which represent the files to copy.
 FUNCTION( SETUP_ADDITIONAL_FILES _destination _component )
     FOREACH( _file ${ARGN} )
-        FILE_TO_TARGETSTRING( ${_file} fileTarget )
+        # only do if it exists
+        IF( EXISTS ${OW_VERSION_FILENAME} )
+            # create useful target name
+            FILE_TO_TARGETSTRING( ${_file} fileTarget )
 
-        # add a copy target
-        ADD_CUSTOM_TARGET( CopyAdditionalFile_${fileTarget}_${_component}
-            ALL
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/${_destination}/"
-            COMMAND ${CMAKE_COMMAND} -E copy "${_file}" "${PROJECT_BINARY_DIR}/${_destination}/"
-            COMMENT "Copying file ${_file}"
-        )
+            # add a copy target
+            ADD_CUSTOM_TARGET( CopyAdditionalFile_${fileTarget}_${_component}
+                ALL
+                COMMAND ${CMAKE_COMMAND} -E make_directory "${PROJECT_BINARY_DIR}/${_destination}/"
+                COMMAND ${CMAKE_COMMAND} -E copy "${_file}" "${PROJECT_BINARY_DIR}/${_destination}/"
+                COMMENT "Copying file ${_file}"
+            )
 
-        # add a INSTALL operation for this file
-        INSTALL( FILES ${_file} DESTINATION ${_destination}
-                                COMPONENT ${_component}
-               )
+            # add a INSTALL operation for this file
+            INSTALL( FILES ${_file} DESTINATION ${_destination}
+                                    COMPONENT ${_component}
+                   )
+        ENDIF()
     ENDFOREACH() 
 ENDFUNCTION( SETUP_ADDITIONAL_FILES )
 
@@ -662,7 +674,7 @@ FUNCTION( SETUP_MODULE _MODULE_NAME _MODULE_SOURCE_DIR _MODULE_DEPENDENCIES _MOD
 
     # Setup the target
     ADD_LIBRARY( ${MODULE_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} )
-    TARGET_LINK_LIBRARIES( ${MODULE_NAME} ${OW_LIB_OPENWALNUT} ${Boost_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${_MODULE_DEPENDENCIES} )
+    TARGET_LINK_LIBRARIES( ${MODULE_NAME} ${CMAKE_STANDARD_LIBRARIES} ${OW_LIB_OPENWALNUT} ${Boost_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${_MODULE_DEPENDENCIES} )
 
     # Set the version of the library.
     SET_TARGET_PROPERTIES( ${MODULE_NAME} PROPERTIES

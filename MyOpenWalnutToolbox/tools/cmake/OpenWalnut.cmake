@@ -153,7 +153,7 @@ FUNCTION( BUILD_SYSTEM_COMPILER )
     IF( CMAKE_HOST_SYSTEM MATCHES "Windows" )
         SET( CMAKE_CXX_FLAGS "-frtti -pedantic -Wall -Wno-long-long -Wextra " CACHE STRING "" FORCE )
     ELSE()
-        SET( CMAKE_CXX_FLAGS "-frtti -pedantic -ansi -Wall -Wno-long-long -Wextra " CACHE STRING "" FORCE )
+        SET( CMAKE_CXX_FLAGS "-frtti -pedantic -std=c++98 -Wall -Wno-long-long -Wextra " CACHE STRING "" FORCE )
     ENDIF()
 
     # Darwin's ld isn't GNU and doesn't like the following
@@ -167,6 +167,20 @@ FUNCTION( BUILD_SYSTEM_COMPILER )
     SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" CACHE STRING "" FORCE )
 ENDFUNCTION( BUILD_SYSTEM_COMPILER )
 
+# GCC 4.7 requires us to explicitly link against libstdc++ and libm. CMake offers a variable for this called "CMAKE_STANDARD_LIBRARIES".
+# Unfortunately, this variable is empty. We fill it here and hopefully this is fixed in the near future.
+LIST( APPEND CMAKE_STANDARD_LIBRARIES "stdc++" "m" )
+
+# Allow injection of other flags
+# NOTE: do not set these variables somewhere in cmake. They are intended to be used when calling CMake from the command line.
+# Utilize this to append build flags from external systems (like dpkg-buildflags).
+SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OW_LD_FLAGS_INJECT}" CACHE STRING "" FORCE )
+SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OW_LD_FLAGS_INJECT}" CACHE STRING "" FORCE )
+SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OW_LD_FLAGS_INJECT}" CACHE STRING "" FORCE )
+SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OW_CXX_FLAGS_INJECT}" CACHE STRING "" FORCE )
+SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OW_C_FLAGS_INJECT}" CACHE STRING "" FORCE )
+ADD_DEFINITIONS( ${OW_CPP_FLAGS_INJECT} )
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Compiler setup
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -178,8 +192,6 @@ BUILD_SYSTEM_COMPILER()
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 # OpenWalnut specific options
-# other options
-OPTION( OW_HANDLE_SHADERS "This ensures that shaders are available in build directory after build." ON )
 
 # sorry, linking not available properly on windows, Cygwin supports this but we do not want special rules for thousands of environments.
 # ==> keep it clean
@@ -224,8 +236,7 @@ SET( OW_SOVERSION ${OW_VERSION_MAJOR} )
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------
-# Boost, at least 1.39
-# See http://www.boost.org/
+# Boost, see http://www.boost.org/
 #
 # To see, which boost libs we currently use, you may run the following command # in the src directory on a linux box to make some investigations:
 # grep -i include `find . -type f` | grep boost | awk '{print $2}' | sort | uniq
@@ -234,7 +245,7 @@ SET( OW_SOVERSION ${OW_VERSION_MAJOR} )
 SET( Boost_USE_MULTITHREAD ON )
 
 # find the boost packages
-FIND_PACKAGE( Boost 1.39.0 REQUIRED program_options thread filesystem date_time system signals regex )
+FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex )
 
 # include the boost headers
 INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
@@ -245,11 +256,19 @@ ADD_DEFINITIONS( "-DBOOST_FILESYSTEM_VERSION=3" )
 # -----------------------------------------------------------------------------------------------------------------------------------------------
 # OpenGL, at least 1.2
 # See http://www.opengl.org
-#
-FIND_PACKAGE( OpenGL REQUIRED )
 
-# include the OpenGL header paths
-INCLUDE_DIRECTORIES( ${OPENGL_INCLUDE_DIR} )
+# Find OpenGL or OpenGL ES on Android
+IF( ANDROID )
+  # on Android, we rely on the fact the the GLES headers reside in the correct NDK search paths
+  # -> so we do not add the include dir directly. We only set the variables needed to fake a found OpenGL:
+  SET( OPENGL_FOUND ON )
+  # link against GLES 2
+  SET( OPENGL_LIBRARIES "GLESv2" )
+ELSE()
+  FIND_PACKAGE( OpenGL REQUIRED )
+  # include the OpenGL header paths
+  INCLUDE_DIRECTORIES( ${OPENGL_INCLUDE_DIR} )
+ENDIF()
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------
 # OpenSceneGraph, at least 2.8.0
