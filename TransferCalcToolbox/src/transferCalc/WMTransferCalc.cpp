@@ -115,9 +115,9 @@ void WMTransferCalc::properties()
     m_propCondition   = boost::shared_ptr< WCondition >( new WCondition() );
     m_color           = m_properties->addProperty(  "Color", "Color of the orbs.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
-    m_xPos            = m_properties->addProperty( "X position", "X coordinate of the ray origin.", 0.0, m_propCondition );
-    m_yPos            = m_properties->addProperty( "Y position", "Y coordinate of the ray origin.", 0.0, m_propCondition );
-    m_zPos            = m_properties->addProperty( "Z position", "Z coordinate of the ray origin.", 0.0, m_propCondition );
+//     m_xPos            = m_properties->addProperty( "X position", "X coordinate of the ray origin.", 0.0, m_propCondition );
+//     m_yPos            = m_properties->addProperty( "Y position", "Y coordinate of the ray origin.", 0.0, m_propCondition );
+//     m_zPos            = m_properties->addProperty( "Z position", "Z coordinate of the ray origin.", 0.0, m_propCondition );
 
     m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.33, m_propCondition );
     m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted.", 10, m_propCondition );
@@ -149,17 +149,17 @@ bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename,
 
     std::ofstream savefile( ( path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
     savefile << "# RayProfile data for OpenWalnut TransferCalcModule" << std::endl;
-    savefile << "# ID \t dist \t value \t grad_x \t grad_y \t grad_z \t gradL \t FA" << std::endl;
+    savefile << "# ID \t dist \t value \t grad_x \t grad_y \t grad_z \t gradW \t FA" << std::endl;
     for( size_t sample = 0; sample < prof->size(); sample++ )
     {
-        savefile << sample + 1 << "\t";                           // print id
+        savefile << sample + 1 << "\t";                         // print id
         savefile << (*prof)[sample].distance() << "\t";         // print t
         savefile << (*prof)[sample].value() << "\t";            // print value
         savefile << (*prof)[sample].gradient()[0] << "\t";      // print gradient x
         savefile << (*prof)[sample].gradient()[1] << "\t";      // print gradient y
         savefile << (*prof)[sample].gradient()[2] << "\t";      // print gradient z
         savefile << (*prof)[sample].gradWeight() << "\t";       // print weight of gradient
-        savefile << (*prof)[sample].fracA() << "\t";       // print fractional anisotropy
+        savefile << (*prof)[sample].fracA() << "\t";            // print fractional anisotropy
         savefile << std::endl;
     }
     savefile.close();
@@ -226,7 +226,7 @@ void WMTransferCalc::moduleMain()
             if( plotValues )
             {
                 prepGNUPlotScript << "set ylabel 'value'" << std::endl << std::endl;
-                usingParam = "using 2:3";
+                usingParam = " using 2:3";
             }
             else// plot gradient weight
             {
@@ -249,7 +249,7 @@ void WMTransferCalc::moduleMain()
                 bool success = saveRayProfileTo( m_RaySaveFilePath, filename, &m_profiles[id] );
                 if( !success )
                 {
-                    errorLog() << "RayProfile " << id + 1 << " could not be saved.";
+                    errorLog() << "RayProfile " << id + 1 << " was empty or could not be saved.";
                 }
                 else
                 {
@@ -325,8 +325,8 @@ void WMTransferCalc::moduleMain()
             }
         }
 
-        bool propsChanged = m_xPos->changed() || m_yPos->changed() || m_zPos->changed()  ||
-                            m_interval->changed() || m_rayNumber->changed() || m_radius->changed();
+        bool propsChanged = m_interval->changed() || m_rayNumber->changed() || m_radius->changed();
+                            //m_xPos->changed() || m_yPos->changed() || m_zPos->changed()  ||
 
         if( ( propsChanged || dataChanged ) && dataValid )
         {
@@ -338,9 +338,9 @@ void WMTransferCalc::moduleMain()
             double z_scale = m_grid->getNbCoordsZ();
 
             // voxel scale
-            double dist_x = m_grid->getOffsetX();
-            double dist_y = m_grid->getOffsetY();
-            double dist_z = m_grid->getOffsetZ();
+//             double dist_x = m_grid->getOffsetX();
+//             double dist_y = m_grid->getOffsetY();
+//             double dist_z = m_grid->getOffsetZ();
 
             debugLog() << "x = " << x_scale << ", y = " << y_scale << ", z = " << z_scale;
 
@@ -387,17 +387,17 @@ void WMTransferCalc::moduleMain()
             // Getting Data and setting Properties
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            m_xPos->setMin( 0.0 );
-            m_xPos->setMax( x_scale );
-            m_xPos->setRecommendedValue( 0.5 * x_scale );
-
-            m_yPos->setMin( 0.0 );
-            m_yPos->setMax( y_scale );
-            m_yPos->setRecommendedValue( 0.5 * y_scale );
-
-            m_zPos->setMin( 0.0 );
-            m_zPos->setMax( z_scale );
-            m_zPos->setRecommendedValue( 0.5 * z_scale );
+//             m_xPos->setMin( 0.0 );
+//             m_xPos->setMax( x_scale );
+//             m_xPos->setRecommendedValue( 0.5 * x_scale );
+// 
+//             m_yPos->setMin( 0.0 );
+//             m_yPos->setMax( y_scale );
+//             m_yPos->setRecommendedValue( 0.5 * y_scale );
+// 
+//             m_zPos->setMin( 0.0 );
+//             m_zPos->setMax( z_scale );
+//             m_zPos->setRecommendedValue( 0.5 * z_scale );
 
             m_interval->setMin( 0.0 );
             m_interval->setMax( 1.0 );
@@ -414,7 +414,7 @@ void WMTransferCalc::moduleMain()
             // Drawing current position of the future ray from properties (debugging)
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-            if( false )
+            if( false ) //just for debugging
             {
                 osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
                 rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
@@ -474,7 +474,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     WVector4d dirInObjectSpace = modelviewMatrixInverted * dirInWorldSpace;
 
     // for multilication with a vertex
-    WMatrix4d totalTransform = modelviewMatrixInverted * projectionMatrixInverted;
+    //WMatrix4d totalTransform = modelviewMatrixInverted * projectionMatrixInverted;
 
 //     debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
 //     debugLog() << dirInWorldSpace << " --- " << dirInObjectSpace;
@@ -510,7 +510,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
-    unsigned int seed = time( 0 ); // for thread safe rand_r function
+    std::srand( time( 0 ) );
     for( unsigned int n = 0; n < samplesInVicinity; n++ )
     {
         if( n == 0 ) // the initial profile
@@ -520,8 +520,10 @@ void WMTransferCalc::onClick( WVector2i mousePos )
         }
         else // random profiles in vicinity
         {
-            double angle = rand_r( &seed );
-            double dis = ( rand_r( &seed ) / RAND_MAX ) * radi + ( rand_r( &seed ) / RAND_MAX ) * radi;
+            // http://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
+            double angle = static_cast< double >( ( std::rand() % 255 + 1 ) / 255.0 ) * 360.0;
+            double dis = static_cast< double >( ( std::rand() % 255 + 1 ) / 255.0 ) * radi +
+                         static_cast< double >( ( std::rand() % 255 + 1 ) / 255.0 ) * radi;
             double random_rad;
             if( dis > radi )
             {
@@ -531,15 +533,18 @@ void WMTransferCalc::onClick( WVector2i mousePos )
             {
                 random_rad = dis;
             }
-            //[r*cos(t), r*sin(t)]
+            // create orthogonal plane to ray for calculating rays in vicinity
+            double coord = std::max( ray.direction().x(), std::max( ray.direction().y(), ray.direction().z() ));
+            WVector3d helper( coord, coord, coord );
+            WVector3d ax1 = cross( getAs3D( ray.direction(), true ), helper );
+            WVector3d ax2 = cross( getAs3D( ray.direction(), true ), ax1 );
+            ax1 = normalize( ax1 );
+            ax2 = normalize( ax2 );
+            WVector4d ax1_4( ax1.x(), ax1.y(), ax1.z(), 0.0 );
+            WVector4d ax2_4( ax2.x(), ax2.y(), ax2.z(), 0.0 );
 
-            //WRay vicinity( ray.start() + WVector4d( std::sin( n )*radi, std::cos( n )*radi, 0, 0 ), dir );
-            
-            WVector4d vic( std::sin( n )*radi, std::cos( n )*radi, 0, 0 );
-            WVector4d vicInWorldSpace  = projectionMatrixInverted * vic;
-            WVector4d vicInObjectSpace = normalize( modelviewMatrixInverted * vicInWorldSpace );
-            
-            WRay vicinity( vicInObjectSpace, ray.direction() );
+            WVector4d vicPoint = ray.start() + ( ax1_4 * random_rad * std::cos( angle ) ) + ( ax2_4 * random_rad * std::sin( angle ) );
+            WRay vicinity( vicPoint, ray.direction() );
             m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
         }
     }
@@ -960,15 +965,15 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
     double y_dif = ( position[1] - min_val[1] ) / ( max_val[1] - min_val[1] );
     double z_dif = ( position[2] - min_val[2] ) / ( max_val[2] - min_val[2] );
 
-    double c_00  = values[0] * ( 1-x_dif ) + values[1] * x_dif;
-    double c_10  = values[2] * ( 1-x_dif ) + values[3] * x_dif;
-    double c_01  = values[4] * ( 1-x_dif ) + values[5] * x_dif;
-    double c_11  = values[6] * ( 1-x_dif ) + values[7] * x_dif;
+    double c_00  = values[0] * ( 1 - x_dif ) + values[1] * x_dif;
+    double c_10  = values[2] * ( 1 - x_dif ) + values[3] * x_dif;
+    double c_01  = values[4] * ( 1 - x_dif ) + values[5] * x_dif;
+    double c_11  = values[6] * ( 1 - x_dif ) + values[7] * x_dif;
 
-    double c_0   = c_00 * ( 1-y_dif ) + c_10 * y_dif;
-    double c_1   = c_01 * ( 1-y_dif ) + c_11 * y_dif;
+    double c_0   = c_00 * ( 1 - y_dif ) + c_10 * y_dif;
+    double c_1   = c_01 * ( 1 - y_dif ) + c_11 * y_dif;
 
-    return c_0 * ( 1-z_dif ) + c_1 * z_dif;
+    return c_0 * ( 1 - z_dif ) + c_1 * z_dif;
 }
 
 void WMTransferCalc::SafeUpdateCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
