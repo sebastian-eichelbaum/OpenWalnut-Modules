@@ -23,7 +23,6 @@ WMAnotherModule::WMAnotherModule():
 WMAnotherModule::~WMAnotherModule()
 {
     // cleanup
-    removeConnectors();
 }
 
 boost::shared_ptr< WModule > WMAnotherModule::factory() const
