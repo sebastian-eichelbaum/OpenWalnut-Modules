@@ -195,7 +195,10 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract )
     WVector3d sizes = ( maxV - minV );
     WVector3d midBB = minV + ( sizes * 0.5 );
 
-    // update the properties
+    osg::Vec3 aVec( sizes[0], 0.0, 0.0 );
+    osg::Vec3 bVec( 0.0, 0.0, sizes[2] );
+    osg::Vec3 planeNormal( 0.0, 1.0, 0.0 );
+
     m_Pos->setMin( minV[1] );
     m_Pos->setMax( maxV[1] );
 
@@ -215,14 +218,13 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract )
     // create a new geode containing the slices
     for( size_t i = 0; i < numSlices; ++i )
     {
-        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( 3000, minV, osg::Vec3( sizes[0], 0.0, 0.0 ),
-                                                                        osg::Vec3( 0.0, 0.0, sizes[2] ), i );
+        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( 3000, minV, aVec, bVec, i );
         slice->setCullingActive( false );
         mT->addChild( slice );
     }
 
-    osg::ref_ptr< osg::Uniform > u_aVec = new osg::Uniform( "u_aVec", osg::Vec3( sizes[0], 0.0, 0.0 ) );
-    osg::ref_ptr< osg::Uniform > u_bVec = new osg::Uniform( "u_bVec", osg::Vec3( 0.0, 0.0, sizes[2] ) );
+    osg::ref_ptr< osg::Uniform > u_aVec = new osg::Uniform( "u_aVec", aVec );
+    osg::ref_ptr< osg::Uniform > u_bVec = new osg::Uniform( "u_bVec", bVec );
     osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
     boost::shared_ptr< const WGridRegular3D > grid = boost::shared_dynamic_cast< const WGridRegular3D >( probTract->getGrid() );
     if( !grid )
@@ -254,7 +256,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract )
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
-    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( osg::Vec3( 0.0, 1.0, 0.0 ), m_Pos, u_WorldTransform ) );
+    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_Pos, u_WorldTransform ) );
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
