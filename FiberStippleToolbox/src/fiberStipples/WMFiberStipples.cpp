@@ -27,34 +27,22 @@
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
-// #include <osg/Vec3>
 
 #include "core/common/math/WMath.h"
-//#include "core/common/WPropertyHelper.h"
-//#include "core/dataHandler/WDataSetFibers.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/dataHandler/WDataSetVector.h"
 #include "core/dataHandler/WGridRegular3D.h"
 #include "core/graphicsEngine/callbacks/WGELinearTranslationCallback.h"
-//#include "core/graphicsEngine/callbacks/WGENodeMaskCallback.h"
 #include "core/graphicsEngine/callbacks/WGEPropertyUniformCallback.h"
 #include "core/graphicsEngine/shaders/WGEPropertyUniform.h"
 #include "core/graphicsEngine/shaders/WGEShader.h"
-//#include "core/graphicsEngine/shaders/WGEShaderDefineOptions.h"
-//#include "core/graphicsEngine/shaders/WGEShaderPropertyDefineOptions.h"
-//#include "core/graphicsEngine/WGEColormapping.h"
 #include "core/graphicsEngine/WGEGeodeUtils.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/graphicsEngine/WGraphicsEngine.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
-//#include "core/kernel/WSelectionManager.h"
 #include "WMFiberStipples.h"
 #include "WMFiberStipples.xpm"
-
-
-// This line is needed by the module loader to actually find your module. Do not remove. Do NOT add a ";" here.
-W_LOADABLE_MODULE( WMFiberStipples )
 
 WMFiberStipples::WMFiberStipples()
     : WModule(),

@@ -37,8 +37,6 @@
 #include "modules/emptyIcon.xpm" // Please put a real icon here.
 #include "WMIsoLines.h"
 
-W_LOADABLE_MODULE( WMIsoLines )
-
 WMIsoLines::WMIsoLines():
     WModule(),
     m_propCondition( new WCondition() )
