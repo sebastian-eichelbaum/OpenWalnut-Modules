@@ -26,6 +26,7 @@
 
 #include <osg/Geometry>
 
+
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/graphicsEngine/callbacks/WGELinearTranslationCallback.h"
 #include "core/graphicsEngine/shaders/WGEPropertyUniform.h"
