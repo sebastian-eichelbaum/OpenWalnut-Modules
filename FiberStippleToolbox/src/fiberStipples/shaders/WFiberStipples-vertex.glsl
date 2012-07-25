@@ -107,6 +107,16 @@ uniform float u_maxConnectivityScore;
 uniform float u_threshold;
 
 /**
+ * Minimal density of the fiber stipples.
+ */
+uniform float u_minRange;
+
+/**
+ * Maximal density of the fiber stipples.
+ */
+uniform float u_maxRange;
+
+/**
  * Middle point of the quad in texture coordinates, needed for scaling the
  * projection of the principal diffusion direction to fit inside quad.
  */
@@ -136,7 +146,7 @@ void main()
     probability = texture3D( u_probTractSampler, texturePosition ).r;
 
     // span quad incase of regions with high probablility
-    if( probability > u_threshold && probability * u_numSlices >= gl_TexCoord[2].x )
+    if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numSlices  >= gl_TexCoord[2].x )
     {
          // transform position, the 4th component must be explicitly set, as otherwise they would have been scaled
          gl_Position = gl_ModelViewProjectionMatrix * ( vec4( gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );

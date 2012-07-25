@@ -135,6 +135,16 @@ private:
     WPropColor m_color;
 
     /**
+     * Minimal density of the fiberstipples.
+     */
+    WPropDouble m_minRange;
+
+    /**
+     * Maximal density of the fiberstipples.
+     */
+    WPropDouble m_maxRange;
+
+    /**
      * Connectivity scores below that threshold will not be rendered.
      */
     WPropDouble m_threshold;

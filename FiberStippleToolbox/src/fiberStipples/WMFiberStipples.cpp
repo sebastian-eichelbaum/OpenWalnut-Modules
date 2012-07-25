@@ -101,15 +101,14 @@ void WMFiberStipples::properties()
     m_threshold->setMin( 0.0 );
     m_threshold->setMax( 1.0 );
 
-//    WPropDouble spacing = m_vectorGroup->addProperty( "Spacing", "Spacing of the sprites", 1.0, m_sliceChanged );
-//    spacing->setMin( 0.25 );
-//    spacing->setMax( 5.0 );
-//    WPropDouble glyphSize = m_vectorGroup->addProperty( "Glyph size", "Size of the quads transformed to the glyphs", 1.0 );
-//    glyphSize->setMin( 0.0 );
-//    glyphSize->setMax( 2.0 );
-//    WPropDouble glyphSpacing = m_vectorGroup->addProperty( "Glyph Spacing", "Spacing ", 0.4, m_sliceChanged );
-//    glyphSpacing->setMin( 0.0 );
-//    glyphSpacing->setMax( 5.0 );
+    m_minRange = m_properties->addProperty( "Min Range", "Minimal stipple density", 0.0 );
+    m_minRange->setMin( 0.0 );
+    m_minRange->setMax( 1.0 );
+
+    m_maxRange = m_properties->addProperty( "Max Range", "Maximal stipple density", 0.5 );
+    m_maxRange->setMin( 0.0 );
+    m_maxRange->setMax( 1.0 );
+
     m_glyphThickness = m_properties->addProperty( "Glyph Thickness", "Line thickness of the glyphs", 1.0 );
     m_glyphThickness->setMin( 0.01 );
     m_glyphThickness->setMax( 3.0 );
@@ -259,13 +258,13 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     // each slice is child of an transformation node
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
 
-    size_t numSlices = 10;
+    size_t numSlices = 20;
     std::srand( time( NULL ) ); // start random number generator here, as seeding within one second might not produce different vertices
 
     // create a new geode containing the slices
     for( size_t i = 0; i < numSlices; ++i )
     {
-        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( 3000, minV, aVec, bVec, i );
+        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( i / 3.0 * 3000, minV, aVec, bVec, i );
         slice->setCullingActive( false );
         mT->addChild( slice );
     }
@@ -283,6 +282,8 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     osg::ref_ptr< osg::Uniform > u_pixelSizeY = new osg::Uniform( "u_pixelSizeY", static_cast< float >( offsets[1] ) );
     osg::ref_ptr< osg::Uniform > u_pixelSizeZ = new osg::Uniform( "u_pixelSizeZ", static_cast< float >( offsets[2] ) );
     osg::ref_ptr< osg::Uniform > u_color = new WGEPropertyUniform< WPropColor >( "u_color", m_color );
+    osg::ref_ptr< osg::Uniform > u_minRange = new WGEPropertyUniform< WPropDouble >( "u_minRange", m_minRange );
+    osg::ref_ptr< osg::Uniform > u_maxRange = new WGEPropertyUniform< WPropDouble >( "u_maxRange", m_maxRange );
     osg::ref_ptr< osg::Uniform > u_threshold = new WGEPropertyUniform< WPropDouble >( "u_threshold", m_threshold );
     osg::ref_ptr< osg::Uniform > u_maxConnectivityScore = new osg::Uniform( "u_maxConnectivityScore", static_cast< float >( probTract->getMax() ) );
     osg::ref_ptr< osg::Uniform > u_numSlices = new osg::Uniform( "u_numSlices", static_cast< int >( numSlices ) );
@@ -296,6 +297,8 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     states->addUniform( u_pixelSizeY );
     states->addUniform( u_pixelSizeZ );
     states->addUniform( u_color );
+    states->addUniform( u_minRange );
+    states->addUniform( u_maxRange );
     states->addUniform( u_threshold );
     states->addUniform( u_maxConnectivityScore );
     states->addUniform( u_numSlices );
@@ -352,7 +355,7 @@ void WMFiberStipples::moduleMain()
             continue;
         }
 
-        size_t axis = m_sliceSelection->get(true).at( 0 )->getAs< AxisType >()->getValue();
+        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
         initOSG( probTract, axis );
 
         wge::bindTexture( m_output, vectors->getTexture(), 0, "u_vectors" );
