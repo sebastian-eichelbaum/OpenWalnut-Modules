@@ -147,19 +147,15 @@ void main()
     }
 
     // get principal diffusion direction
-    vec3 diffusionDirection = abs( texture3DUnscaled( u_vectorsSampler, texturePosition, u_vectorsMin, u_vectorsScale ).xyz );
-    diffusionDirection = normalize( diffusionDirection );
+    vec3 diffusionDirection = normalize( texture3DUnscaled( u_vectorsSampler, texturePosition, u_vectorsMin, u_vectorsScale ).xyz );
 
     // project into plane (given by two vectors aVec and bVec)
-    vec3 normal = normalize( cross( u_aVec, u_bVec ) );
-    vec3 projectedDirection = diffusionDirection - dot( diffusionDirection, normal ) * normal;
+    vec3 aVecNorm = normalize( u_aVec );
+    vec3 bVecNorm = normalize( u_bVec );
+    vec3 projectedDirectionTextCoords = 0.5 * vec3( dot( aVecNorm, diffusionDirection ), dot( bVecNorm, diffusionDirection ), 0.0 );
 
-    vec3 projectedDirectionTextCoords = 0.5 * vec3( dot( normalize( u_aVec ), projectedDirection ),
-                                                    dot( normalize( u_bVec ), projectedDirection ),
-                                                    0.0 );
     scaledFocalPoint1 = middlePoint_tex + scale * projectedDirectionTextCoords;
     scaledFocalPoint2 = middlePoint_tex - scale * projectedDirectionTextCoords;
-    // but scale directions to fit 1x1 unit square, these 0.8 are just arbitrary choosen
     focalPoint1 = middlePoint_tex + projectedDirectionTextCoords;
     focalPoint2 = middlePoint_tex - projectedDirectionTextCoords;
 }

@@ -82,7 +82,7 @@ void main()
     }
 
 
-    // // Color debugging facilities
+    // // Draw Line and focal points
     // if( distancePointLineSegment( gl_TexCoord[1].xyz, focalPoint1, focalPoint2 ) < 0.01 )
     // {
     //     if( l <= 1.1 )

@@ -31,6 +31,7 @@
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
+template< class T > class WItemSelectionItemTyped;
 class WDataSetScalar;
 class WDataSetVector;
 class WGEManagedGroupNode;
@@ -104,8 +105,9 @@ private:
      * \param probTract Pointer to dataset containing the connectivity scores or probabilities. We need this for two things:
      * First, determine the maxium of connectivity scores to, scale the tracts between 0.0...1.0 and secondly to determine the
      * boundingbox for the scene. (Furthermore it is assumed that the vectors are also available within this BB.)
+     * \param axis Selects the axis aligned plane (aka slice) by number. 0 => sagittal, 1 => coronal, 2=> axial.
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > probTract );
+    void initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis );
 
     /**
      * The probabilistic tractogram input connector.
@@ -141,6 +143,21 @@ private:
      * For scale the thickness of the stipples.
      */
     WPropDouble m_glyphThickness;
+
+    /**
+     * We need a type for numbering the axis selections. Best would be size_t as then we could directly use the selected item as axis number.
+     */
+    typedef WItemSelectionItemTyped< size_t > AxisType;
+
+    /**
+     * Selection for axis / plane or slice. Meaning whether we should draw stipples on Axial, Cornoal or Sagittal slices.
+     */
+    WPropSelection m_sliceSelection;
+
+    /**
+     * Used for rerun the module main loop. (e.g. something substantially has changed so the whole geometry needs to be build up)
+     */
+    boost::shared_ptr< WCondition > m_propCondition;
 
     /**
      * For initial slice positioning we need to control if the module is in intial state or not.

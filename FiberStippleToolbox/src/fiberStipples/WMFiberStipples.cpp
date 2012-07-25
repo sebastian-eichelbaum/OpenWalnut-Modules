@@ -23,12 +23,14 @@
 //---------------------------------------------------------------------------
 
 #include <cstdlib>
+#include <cmath> // for logarithm function
 #include <string>
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 
 #include "core/common/math/WMath.h"
+#include "core/common/WItemSelectionItemTyped.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/dataHandler/WDataSetVector.h"
 #include "core/dataHandler/WGridRegular3D.h"
@@ -46,6 +48,7 @@
 
 WMFiberStipples::WMFiberStipples()
     : WModule(),
+      m_propCondition( new WCondition() ),
       m_first( true )
 {
 }
@@ -109,7 +112,14 @@ void WMFiberStipples::properties()
 //    glyphSpacing->setMax( 5.0 );
     m_glyphThickness = m_properties->addProperty( "Glyph Thickness", "Line thickness of the glyphs", 1.0 );
     m_glyphThickness->setMin( 0.01 );
-    m_glyphThickness->setMax( 2.0 );
+    m_glyphThickness->setMax( 3.0 );
+
+    boost::shared_ptr< WItemSelection > axis( new WItemSelection() );
+    axis->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
+    axis->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
+    axis->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
+    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", axis->getSelectorFirst(), m_propCondition );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_sliceSelection );
 
     // call WModule's initialization
     WModule::properties();
@@ -180,9 +190,34 @@ namespace
         geode->addDrawable( geometry );
         return geode;
     }
+
+    // unsigned int whichAxisAlignedPlane( const WVector3d& normal )
+    // {
+    //     int axis = 0; // the normal is no one of: (1,0,0), (0,1,0) or (0,0,1)
+    //     if( dot( normal, WVector3d( 1.0, 0.0, 0.0 ) ) != 0.0 )
+    //     {
+    //         axis += 1;
+    //     }
+    //     if( dot( normal, WVector3d( 0.0, 1.0, 0.0 ) ) != 0.0 )
+    //     {
+    //         axis += 2;
+    //     }
+    //     if( dot( normal, WVector3d( 0.0, 0.0, 1.0 ) ) != 0.0 )
+    //     {
+    //         axis += 4;
+    //     }
+    //     if( axis != 1 || axis != 2 || axis != 4 )
+    //     {
+    //         return -1;
+    //     }
+    //     else
+    //     {
+    //         return std::log( axis ) / std::log( 2 );
+    //     }
+    // }
 }
 
-void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract )
+void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis )
 {
     debugLog() << "Init OSG";
 
@@ -195,18 +230,30 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract )
     WVector3d sizes = ( maxV - minV );
     WVector3d midBB = minV + ( sizes * 0.5 );
 
-    osg::Vec3 aVec( sizes[0], 0.0, 0.0 );
-    osg::Vec3 bVec( 0.0, 0.0, sizes[2] );
-    osg::Vec3 planeNormal( 0.0, 1.0, 0.0 );
+    if( axis > 2 )
+    {
+        errorLog() << "Somehow an axis >= 2 was given (" << axis << "). This is a bug! Please report at openwalnut.org. Aborting.";
+        return;
+    }
 
-    m_Pos->setMin( minV[1] );
-    m_Pos->setMax( maxV[1] );
+    // determine other two plane vectors
+    osg::Vec3 aVec( sizes );
+    aVec[axis] = 0.0;
+    osg::Vec3 bVec( aVec );
+    size_t dim1 = ( axis == 2 ? 1 : 2 );
+    size_t dim2 = ( axis == 0 ? 1 : 0 );
+    aVec[dim1] = 0.0;
+    bVec[dim2] = 0.0;
+
+
+    m_Pos->setMin( minV[axis] );
+    m_Pos->setMax( maxV[axis] );
 
     // if this is done the first time, set the slices to the center of the dataset
     if( m_first )
     {
         m_first = false;
-        m_Pos->set( midBB[1] );
+        m_Pos->set( midBB[axis] );
     }
 
     // each slice is child of an transformation node
@@ -256,7 +303,10 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract )
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
+    osg::Vec3 planeNormal( 0.0, 0.0, 0.0 );
+    planeNormal[axis] = 1.0;
     mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_Pos, u_WorldTransform ) );
+    debugLog() << "Slice: " << planeNormal << " aVec: " << aVec << " bVec: " << bVec << " axis: " << axis;
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
@@ -271,6 +321,7 @@ void WMFiberStipples::moduleMain()
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_probIC->getDataChangedCondition() );
     m_moduleState.add( m_vectorIC->getDataChangedCondition() );
+    m_moduleState.add( m_propCondition );
 
     ready();
 
@@ -301,7 +352,8 @@ void WMFiberStipples::moduleMain()
             continue;
         }
 
-        initOSG( probTract );
+        size_t axis = m_sliceSelection->get(true).at( 0 )->getAs< AxisType >()->getValue();
+        initOSG( probTract, axis );
 
         wge::bindTexture( m_output, vectors->getTexture(), 0, "u_vectors" );
         wge::bindTexture( m_output, probTract->getTexture(), 1, "u_probTract" );
