@@ -29,6 +29,7 @@
 #include <boost/array.hpp>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+#include <osgManipulator/TabPlaneTrackballDragger>
 
 #include "core/common/math/WMath.h"
 #include "core/common/WItemSelectionItemTyped.h"
@@ -107,98 +108,6 @@ void WMAASlices::properties()
     WModule::properties();
 }
 
-namespace
-{
-    // osg::ref_ptr< osg::Geode > genScatteredDegeneratedQuads( size_t numSamples, osg::Vec3 const& base, osg::Vec3 const& a,
-    //         osg::Vec3 const& b, size_t sliceNum )
-    // {
-    //     // the stuff needed by the OSG to create a geometry instance
-    //     osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array( numSamples * 4 );
-    //     osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array( numSamples * 4 );
-    //     osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array( numSamples * 4 );
-    //     osg::ref_ptr< osg::Vec3Array > texcoords2 = new osg::Vec3Array( numSamples * 4 );
-    //     osg::ref_ptr< osg::Vec3Array > normals = new osg::Vec3Array;
-    //     osg::ref_ptr< osg::Vec4Array > colors = new osg::Vec4Array;
-
-    //     osg::Vec3 aCrossB = a ^ b;
-    //     aCrossB.normalize();
-    //     osg::Vec3 aNorm = a;
-    //     aNorm.normalize();
-    //     osg::Vec3 bNorm = b;
-    //     bNorm.normalize();
-
-    //     double lambda0, lambda1;
-    //     const double rndMax = RAND_MAX;
-
-    //     for( size_t i = 0; i < numSamples; ++i )
-    //     {
-    //         // The degenerated QUAD should have all points in its center
-    //         lambda0 = rand() / rndMax; // NOLINT, we do not need thread safety here
-    //         lambda1 = rand() / rndMax; // NOLINT, we do not need thread safety here
-    //         osg::Vec3 quadCenter = base + a * lambda0 + b * lambda1;
-    //         for( int j = 0; j < 4; ++j )
-    //         {
-    //             vertices->push_back( quadCenter );
-    //             texcoords2->push_back( osg::Vec3( static_cast< double >( sliceNum ), 0.0, 0.0 ) );
-    //         }
-
-    //         texcoords0->push_back( ( -aNorm + -bNorm ) );
-    //         texcoords0->push_back( (  aNorm + -bNorm ) );
-    //         texcoords0->push_back( (  aNorm +  bNorm ) );
-    //         texcoords0->push_back( ( -aNorm +  bNorm ) );
-
-    //         texcoords1->push_back( osg::Vec3( 0.0, 0.0, 0.0 ) );
-    //         texcoords1->push_back( osg::Vec3( 1.0, 0.0, 0.0 ) );
-    //         texcoords1->push_back( osg::Vec3( 1.0, 1.0, 0.0 ) );
-    //         texcoords1->push_back( osg::Vec3( 0.0, 1.0, 0.0 ) );
-    //     }
-
-    //     normals->push_back( aCrossB );
-    //     colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
-
-    //     // put it all together
-    //     osg::ref_ptr< osg::Geometry > geometry = new osg::Geometry();
-    //     geometry->setVertexArray( vertices );
-    //     geometry->setTexCoordArray( 0, texcoords0 );
-    //     geometry->setTexCoordArray( 1, texcoords1 );
-    //     geometry->setTexCoordArray( 2, texcoords2 );
-    //     geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-    //     geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
-    //     geometry->setNormalArray( normals );
-    //     geometry->setColorArray( colors );
-    //     geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
-
-    //     osg::ref_ptr< osg::Geode > geode = new osg::Geode();
-    //     geode->addDrawable( geometry );
-    //     return geode;
-    // }
-
-    // unsigned int whichAxisAlignedPlane( const WVector3d& normal )
-    // {
-    //     int axis = 0; // the normal is no one of: (1,0,0), (0,1,0) or (0,0,1)
-    //     if( dot( normal, WVector3d( 1.0, 0.0, 0.0 ) ) != 0.0 )
-    //     {
-    //         axis += 1;
-    //     }
-    //     if( dot( normal, WVector3d( 0.0, 1.0, 0.0 ) ) != 0.0 )
-    //     {
-    //         axis += 2;
-    //     }
-    //     if( dot( normal, WVector3d( 0.0, 0.0, 1.0 ) ) != 0.0 )
-    //     {
-    //         axis += 4;
-    //     }
-    //     if( axis != 1 || axis != 2 || axis != 4 )
-    //     {
-    //         return -1;
-    //     }
-    //     else
-    //     {
-    //         return std::log( axis ) / std::log( 2 );
-    //     }
-    // }
-}
-
 void WMAASlices::initOSG()
 {
     debugLog() << "Init OSG";
@@ -214,29 +123,21 @@ void WMAASlices::initOSG()
 
     boost::array< osg::ref_ptr< osg::Node >, 3 > slices;
 
-    osg::Vec3 xDim( sizes[0], 0.0, 0.0 );
-    osg::Vec3 yDim( 0.0, sizes[1], 0.0 );
-    osg::Vec3 zDim( 0.0, 0.0, sizes[2] );
+    boost::array< osg::Vec3, 3 > base = {{ osg::Vec3( 1.0, 0.0, 0.0 ), osg::Vec3( 0.0, 1.0, 0.0 ), osg::Vec3( 0.0, 0.0, 1.0 ) }}; // NOLINT curley braces
 
     // we didn't put this into for loop as initialization becomes too bloated with if-else constructs
-    slices[0] = wge::genFinitePlane( minV, yDim, zDim );
-    slices[1] = wge::genFinitePlane( minV, xDim, zDim );
-    slices[2] = wge::genFinitePlane( minV, xDim, yDim );
+    slices[0] = wge::genFinitePlane( minV, base[1] * sizes[1], base[2] * sizes[2] );
+    slices[1] = wge::genFinitePlane( minV, base[0] * sizes[0], base[2] * sizes[2] );
+    slices[2] = wge::genFinitePlane( minV, base[0] * sizes[0], base[1] * sizes[1] );
+//    slices[0] = wge::genFinitePlane( osg::Vec3( midBB[0], minV[1], minV[2] ), base[1] * sizes[1], base[2] * sizes[2] );
+//    slices[1] = wge::genFinitePlane( osg::Vec3( minV[0], midBB[1], minV[2] ), base[0] * sizes[0], base[2] * sizes[2] );
+//    slices[2] = wge::genFinitePlane( osg::Vec3( minV[0], minV[1], midBB[2] ), base[0] * sizes[0], base[1] * sizes[1] );
 
     boost::array< osg::ref_ptr< osg::MatrixTransform >, 3 > mT;
     boost::array< osg::ref_ptr< osg::Uniform >, 3 > sliceUniforms;
-    boost::array< osg::Vec3, 3 > base = {{ osg::Vec3( 1.0, 0.0, 0.0 ), osg::Vec3( 0.0, 1.0, 0.0 ), osg::Vec3( 0.0, 0.0, 1.0 ) }}; // NOLINT curley braces
 
     for( int i = 0; i < 3; ++i )
     {
-        slices[i]->setCullingActive( false );
-        slices[i]->addUpdateCallback( new WGENodeMaskCallback( m_showSlice[i] ) );
-        sliceUniforms[i] = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
-        osg::ref_ptr< osg::Uniform > u_color = new WGEPropertyUniform< WPropColor >( "u_color", m_color[i] );
-        slices[i]->getOrCreateStateSet()->addUniform( sliceUniforms[i] );
-        slices[i]->getOrCreateStateSet()->addUniform( u_color );
-        mT[i] = new osg::MatrixTransform();
-        mT[i]->addChild( slices[i] );
         m_pos[i]->setMin( minV[i] );
         m_pos[i]->setMax( maxV[i] );
         m_pos[i]->setHidden( false );
@@ -245,7 +146,35 @@ void WMAASlices::initOSG()
         {
             m_pos[i]->set( midBB[i] );
         }
-        mT[i]->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
+
+        slices[i]->setCullingActive( false );
+        slices[i]->addUpdateCallback( new WGENodeMaskCallback( m_showSlice[i] ) );
+        sliceUniforms[i] = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
+        osg::ref_ptr< osg::Uniform > u_color = new WGEPropertyUniform< WPropColor >( "u_color", m_color[i] );
+        slices[i]->getOrCreateStateSet()->addUniform( sliceUniforms[i] );
+        slices[i]->getOrCreateStateSet()->addUniform( u_color );
+
+        // attach a dragger to the slice => taken from osg example: osgmanipulators
+        osg::Group* sliceGroup = new osg::Group;
+        osg::MatrixTransform* sliceTransform = new osg::MatrixTransform;
+        sliceTransform->addChild( slices[i] );
+        sliceGroup->addChild( sliceTransform );
+
+        // dragger is a sibling to the last transform of the real slice geode
+        osgManipulator::Translate1DDragger* d = new osgManipulator::Translate1DDragger( osg::Vec3( 0.0, 0.0, 0.0 ), base[i] * sizes[i] );
+        d->setupDefaultGeometry();
+        d->addTransformUpdating( sliceTransform ); // , osgManipulator::DraggerTransformCallback::HANDLE_TRANSLATE_IN_LINE );
+        d->setHandleEvents(true);
+        d->setActivationModKeyMask(osgGA::GUIEventAdapter::MODKEY_CTRL);
+        d->setActivationKeyEvent('a');
+        d->setMatrix( osg::Matrix::scale( 0.5, 0.5, 0.5 ) *
+                      osg::Matrix::translate( slices[i]->getBound().center() ) * osg::Matrix::translate( base[i] * sizes[i] * -0.25 ) );
+
+        sliceGroup->addChild( d );
+
+        mT[i] = new osg::MatrixTransform();
+        mT[i]->addChild( sliceGroup );
+        // mT[i]->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
         m_output->insert( mT[i] );
     }
     m_first = false;

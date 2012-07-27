@@ -59,6 +59,8 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
+FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgManipulator )
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
 # Setup all modules
@@ -71,7 +73,6 @@ INCLUDE( OpenWalnut )
 # the default behaviour.
 
 # Please see the documentation of SETUP_MODULE as it shows how to add custom dependencies (third-party libs)
-
 SETUP_MODULE( 
     ${PROJECT_NAME}   # use project name as module(-toolbox) name
     "."               # where to find the sources
