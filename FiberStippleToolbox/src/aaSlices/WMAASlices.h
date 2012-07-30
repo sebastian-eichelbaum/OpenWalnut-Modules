@@ -27,11 +27,6 @@
 
 #include <string>
 
-#include <osgManipulator/Dragger>
-#include <osgManipulator/Command>
-#include <osgManipulator/Translate1DDragger>
-
-#include "core/graphicsEngine/WPickInfo.h"
 #include "core/kernel/WModule.h"
 
 // forward declarations to reduce compile dependencies
@@ -100,57 +95,30 @@ protected:
     virtual void properties();
 
 private:
-    class PositionChangedCallback : public osgManipulator::DraggerCallback
-    {
-    public:
-        Klaus( WPropDouble pos, size_t axis, osgManipulator::Translate1DDragger* d ):
-            m_dragger( d ),
-            m_pos( pos ),
-            m_axis( axis )
-        {
-        }
-
-        /**
-         * Receive motion commands. Returns true on success.
-         */
-        virtual bool receive( const osgManipulator::MotionCommand& m)
-        {
-            // OSG_NOTICE<<"MotionCommand:" << m.getMotionMatrix() << std::endl;
-            double newPos = m_dragger->getMatrix()( 3, m_axis );
-            if( newPos < m_pos->getMin()->getMin() || newPos > m_pos->getMax()->getMax() )
-            {
-                return false;
-            }
-            else
-            {
-                m_pos->set( newPos );
-                return true;
-            }
-        }
-
-    private:
-        osgManipulator::Translate1DDragger* m_dragger;
-        WPropDouble m_pos;
-        size_t m_axis;
-    };
-
     /**
      * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
      */
     void initOSG();
 
+    /**
+     * Flags to trigger visibility of slices on or off.
+     */
     boost::array< WPropBool, 3 > m_showSlice;
 
+    /**
+     * Controlling the slice position on its axis.
+     */
     boost::array< WPropDouble, 3 > m_pos;
 
+    /**
+     * Color for each slice.
+     */
     boost::array< WPropColor, 3 > m_color;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_output;
-
-    bool m_first;
 };
 
 #endif  // WMAASLICES_H

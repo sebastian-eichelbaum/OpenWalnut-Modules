@@ -29,9 +29,6 @@
 #include <boost/array.hpp>
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
-#include <osgManipulator/Translate1DDragger>
-#include <osgManipulator/Dragger>
-#include <osgManipulator/Command>
 
 #include "core/common/math/WMath.h"
 #include "core/common/WItemSelectionItemTyped.h"
@@ -53,8 +50,7 @@
 #include "WMAASlices.xpm"
 
 WMAASlices::WMAASlices()
-    : WModule(),
-      m_first( true )
+    : WModule()
 {
 }
 
@@ -133,9 +129,6 @@ void WMAASlices::initOSG()
     slices[0] = wge::genFinitePlane( minV, base[1] * sizes[1], base[2] * sizes[2] );
     slices[1] = wge::genFinitePlane( minV, base[0] * sizes[0], base[2] * sizes[2] );
     slices[2] = wge::genFinitePlane( minV, base[0] * sizes[0], base[1] * sizes[1] );
-//    slices[0] = wge::genFinitePlane( osg::Vec3( midBB[0], minV[1], minV[2] ), base[1] * sizes[1], base[2] * sizes[2] );
-//    slices[1] = wge::genFinitePlane( osg::Vec3( minV[0], midBB[1], minV[2] ), base[0] * sizes[0], base[2] * sizes[2] );
-//    slices[2] = wge::genFinitePlane( osg::Vec3( minV[0], minV[1], midBB[2] ), base[0] * sizes[0], base[1] * sizes[1] );
 
     boost::array< osg::ref_ptr< osg::MatrixTransform >, 3 > mT;
     boost::array< osg::ref_ptr< osg::Uniform >, 3 > sliceUniforms;
@@ -145,11 +138,7 @@ void WMAASlices::initOSG()
         m_pos[i]->setMin( minV[i] );
         m_pos[i]->setMax( maxV[i] );
         m_pos[i]->setHidden( false );
-
-        if( m_first )
-        {
-            m_pos[i]->set( midBB[i] );
-        }
+        m_pos[i]->set( midBB[i] );
 
         slices[i]->setCullingActive( false );
         slices[i]->addUpdateCallback( new WGENodeMaskCallback( m_showSlice[i] ) );
@@ -159,34 +148,11 @@ void WMAASlices::initOSG()
         slices[i]->getOrCreateStateSet()->addUniform( u_color );
 
         // attach a dragger to the slice => taken from osg example: osgmanipulators
-        osg::Group* sliceGroup = new osg::Group;
-        osg::MatrixTransform* sliceTransform = new osg::MatrixTransform;
-        sliceTransform->addChild( slices[i] );
-        sliceTransform->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
-        sliceGroup->addChild( sliceTransform );
-
-        // dragger is a sibling to the last transform of the real slice geode
-        osgManipulator::Translate1DDragger* d = new osgManipulator::Translate1DDragger( osg::Vec3( 0.0, 0.0, 0.0 ), base[i] * sizes[i] );
-        d->setupDefaultGeometry();
-        d->addTransformUpdating( sliceTransform ); // , osgManipulator::DraggerTransformCallback::HANDLE_TRANSLATE_IN_LINE );
-        d->addDraggerCallback( new WMAASlices::PositionChangedCallback( m_pos[i], i, d ) );
-        d->setHandleEvents(true);
-        d->setActivationModKeyMask(osgGA::GUIEventAdapter::MODKEY_CTRL);
-        d->setActivationKeyEvent('a');
-        d->setMatrix( osg::Matrix::scale( 0.5, 0.5, 0.5 ) *
-                      osg::Matrix::translate( slices[i]->getBound().center() ) * osg::Matrix::translate( base[i] * sizes[i] * -0.25 ) );
-        d->addUpdateCallback( new WGENodeMaskCallback( m_showSlice[i] ) );
-        // d->addConstraint( new PlaneConstraint() );
-        d->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
-
-        sliceGroup->addChild( d );
-
         mT[i] = new osg::MatrixTransform();
-        mT[i]->addChild( sliceGroup );
-        // mT[i]->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
+        mT[i]->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
+        mT[i]->addChild( slices[i] );
         m_output->insert( mT[i] );
     }
-    m_first = false;
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
@@ -221,11 +187,7 @@ void WMAASlices::moduleMain()
             break;
         }
 
-        for( int i = 0; i < 3; ++i )
-        {
-            m_pos[i]->setMin( WGEColormapping::instance()->getBoundingBox().getMin()[i] );
-            m_pos[i]->setMax( WGEColormapping::instance()->getBoundingBox().getMax()[i] );
-        }
+        initOSG();
     }
 
     m_output->clear();
