@@ -28,6 +28,7 @@
 #include <string>
 
 #include "core/kernel/WModule.h"
+#include "../WPropTransfer.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -114,6 +115,11 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_scalarIC;
 
     /**
+     * Connector for external WPropDouble, so the slice position of this module can be controlled from another model.
+     */
+    boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_propIC;
+
+    /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_output;
@@ -126,7 +132,7 @@ private:
     /**
      * The position of the slice.
      */
-    WPropDouble m_Pos;
+    WPropDouble m_pos;
 
     /**
      * Color for the isoline.
@@ -147,6 +153,11 @@ private:
      * Needed for recreating the geometry, incase when resolution changes.
      */
     boost::shared_ptr< WCondition > m_propCondition;
+
+    /**
+     * External property controlling linear translation of the slice.
+     */
+    WPropDouble m_externPropSlider;
 };
 
 #endif  // WMISOLINES_H

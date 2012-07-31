@@ -81,8 +81,9 @@ const std::string WMAASlices::getDescription() const
 
 void WMAASlices::connectors()
 {
-    // m_vectorIC = WModuleInputData< WDataSetVector >::createAndAdd( shared_from_this(), "vectors", "Principal diffusion direction." );
-    // m_probIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "probTract", "Probabilistic tract." );
+    m_propOC[0] = WModuleOutputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "propAxial", "Position slider of this slice." );
+    m_propOC[1] = WModuleOutputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "propCoronal", "Position slider of this slice." );
+    m_propOC[2] = WModuleOutputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "propSagittal", "Position slider of this slice." );
 
     // call WModule's initialization
     WModule::connectors();
@@ -174,6 +175,10 @@ void WMAASlices::moduleMain()
     osg::ref_ptr< WGEShader > shader = new WGEShader( "WAASlices", m_localPath );
     shader->apply( m_output ); // this automatically applies the shader
     initOSG();
+
+    m_propOC[0]->updateData( WPropDoubleTransfer::SPtr( new WPropDoubleTransfer( m_pos[0] ) ) );
+    m_propOC[1]->updateData( WPropDoubleTransfer::SPtr( new WPropDoubleTransfer( m_pos[1] ) ) );
+    m_propOC[2]->updateData( WPropDoubleTransfer::SPtr( new WPropDoubleTransfer( m_pos[2] ) ) );
 
     // main loop
     while( !m_shutdownFlag() )

@@ -28,6 +28,7 @@
 #include <string>
 
 #include "core/kernel/WModule.h"
+#include "../WPropTransfer.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -99,6 +100,11 @@ private:
      * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
      */
     void initOSG();
+
+    /**
+     * For each axis aligned slice an output with the property controlling the corresponding slice position.
+     */
+    boost::array< boost::shared_ptr< WModuleOutputData< WPropDoubleTransfer > >, 3 > m_propOC;
 
     /**
      * Flags to trigger visibility of slices on or off.

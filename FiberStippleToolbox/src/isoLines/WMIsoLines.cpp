@@ -36,6 +36,7 @@
 #include "core/kernel/WModuleInputData.h"
 #include "modules/emptyIcon.xpm" // Please put a real icon here.
 #include "WMIsoLines.h"
+#include "../WPropTransfer.h"
 
 WMIsoLines::WMIsoLines():
     WModule(),
@@ -69,6 +70,7 @@ const std::string WMIsoLines::getDescription() const
 void WMIsoLines::connectors()
 {
     m_scalarIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "scalarData", "Scalar data." );
+    m_propIC = WModuleInputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "propData", "Slice Property." );
 
     WModule::connectors();
 }
@@ -77,7 +79,7 @@ void WMIsoLines::properties()
 {
     // Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
-    m_Pos = m_properties->addProperty( "Slice Position", "Where the data shoulde be sliced for drawing contours", 0.0 );
+    m_pos = m_properties->addProperty( "Slice Position", "Where the data shoulde be sliced for drawing contours", 0.0 );
     m_isovalue = m_properties->addProperty( "Isovalue", "Value selecting the contours", 0.0 );
     m_isovalue->setMin( 0.0 );
     m_isovalue->setMax( 0.0 ); // make it unusable at first
@@ -178,9 +180,9 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     WVector3d midBB = minV + ( sizes * 0.5 );
 
     // update the properties
-    m_Pos->setMin( minV[1] );
-    m_Pos->setMax( maxV[1] );
-    m_Pos->set( midBB[1] );
+    m_pos->setMin( minV[1] );
+    m_pos->setMax( maxV[1] );
+    m_pos->set( midBB[1] );
 
     // each slice is child of an transformation node
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
@@ -211,7 +213,7 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
-    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( osg::Vec3( 0.0, 1.0, 0.0 ), m_Pos, u_WorldTransform ) );
+    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( osg::Vec3( 0.0, 1.0, 0.0 ), m_pos, u_WorldTransform ) );
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
@@ -225,6 +227,7 @@ void WMIsoLines::moduleMain()
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_scalarIC->getDataChangedCondition() );
+    m_moduleState.add( m_propIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -247,6 +250,29 @@ void WMIsoLines::moduleMain()
             break;
         }
 
+        if( m_propIC->getData() && !m_externPropSlider )
+        {
+            m_externPropSlider = m_propIC->getData()->getProperty();
+            m_moduleState.add( m_externPropSlider->getCondition() );
+            WModule::properties();
+            infoLog() << "Added external slice position control.";
+        }
+
+        if( !m_propIC->getData() && m_externPropSlider )
+        {
+            m_moduleState.remove( m_externPropSlider->getCondition() );
+            m_externPropSlider.reset();
+            infoLog() << "Removed external slice position control.";
+        }
+
+        if( m_externPropSlider && m_externPropSlider->changed() )
+        {
+            // update slice position
+            debugLog() << "External slice position has changed.";
+            m_pos->set( m_externPropSlider->get( true ) );
+            continue; // do not regenerate geometry incase of slide updates
+        }
+
         // save data behind connectors since it might change during processing
         boost::shared_ptr< WDataSetScalar > scalarData = m_scalarIC->getData();
 
@@ -255,16 +281,15 @@ void WMIsoLines::moduleMain()
             continue;
         }
 
+        // now something different has happened: We need to create new geometry
+        debugLog() << "Handle scalar data update, regenerate geometry.";
+
         m_isovalue->setMin( 0.0 );
         m_isovalue->setMax( 1.0 );
-        // m_isovalue->setMin( scalarData->getMin() );
-        // m_isovalue->setMax( scalarData->getMax() );
 
         initOSG( scalarData, m_resolution->get() );
 
         wge::bindTexture( m_output, scalarData->getTexture(), 0, "u_scalarData" );
-
-        // TODO(math): unbind textures, so we have a clean OSG root node for this module again
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_output );
