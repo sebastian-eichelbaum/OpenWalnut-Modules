@@ -7,11 +7,28 @@
 #   * OPENCL_LIBRARY - the path to the OpenCL library
 #
 
-FIND_PATH( OPENCL_INCLUDE_DIR CL/cl.h /usr/include /usr/local/include )
-FIND_PATH( OPENCL_CPP_INCLUDE_DIR CL/cl.hpp /usr/include /usr/local/include )
-FIND_LIBRARY( OPENCL_LIBRARY NAMES OpenCL PATH /usr/lib /usr/local/lib /usr/local/cuda/lib64 /usr/local/cuda/lib )
+FIND_PATH( OPENCL_INCLUDE_DIR CL/cl.h 
+        $ENV{OPENCL_INCLUDE_DIR} 
+        $ENV{HOME}/.local/include
+        /usr/include
+        /usr/local/include
+)
+FIND_PATH( OPENCL_CPP_INCLUDE_DIR CL/cl.hpp
+        $ENV{OPENCL_INCLUDE_DIR} 
+        $ENV{HOME}/.local/include
+        /usr/include
+        /usr/local/include
+)
 
-message( STATUS ${OPENCL_CPP_INCLUDE_DIR} )
+FIND_LIBRARY( OPENCL_LIBRARY NAMES OpenCL PATH
+        $ENV{OPENCL_LIB_DIR} 
+        $ENV{HOME}/.local/lib
+        /usr/lib
+        /usr/lib64
+        /usr/local/lib
+        /usr/local/cuda/lib64
+        /usr/local/cuda/lib 
+)
 
 SET( OPENCL_FOUND FALSE )
 IF ( OPENCL_INCLUDE_DIR AND OPENCL_CPP_INCLUDE_DIR AND OPENCL_LIBRARY )

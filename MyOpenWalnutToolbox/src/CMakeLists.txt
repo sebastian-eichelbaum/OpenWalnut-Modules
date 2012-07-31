@@ -79,6 +79,9 @@ SETUP_MODULE(
     ""                # no sources to exclude
 )
 
+# Tell CMake that we want to use the WToolboxVersion header in our Modules. It gets created automatically if you keep this line.
+SETUP_USE_VERSION_HEADER( ${PROJECT_NAME} )
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
 # Additional Setup
