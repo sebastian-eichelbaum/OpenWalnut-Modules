@@ -153,12 +153,12 @@ ENDIF()
 IF( NOT ${OW_EXTERNAL_MODULE} )
     # if we build OW, we want the version header to be placed in core later on. We use the internal version header filename directly
     SET( OW_VERSION_HEADER_FILENAME ${OW_INTERNAL_VERSION_HEADER_FILENAME} )
-    SET( OW_VERSION_HEADER_PREFIX "" )
+    SET( OW_VERSION_HEADER_PREFIX "W" )
 ELSE()
     # if this is for external use, the module might want to use its own version header
     # if we build OW, we want the version header to be placed in core later on
     SET( OW_VERSION_HEADER_FILENAME "WToolboxVersion.h" )
-    SET( OW_VERSION_HEADER_PREFIX "TOOLBOX" )
+    SET( OW_VERSION_HEADER_PREFIX "WTOOLBOX" )
 ENDIF()
 
 # the complete header filename:
