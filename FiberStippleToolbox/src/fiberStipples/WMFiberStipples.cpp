@@ -122,7 +122,7 @@ void WMFiberStipples::properties()
     axis->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
     axis->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
     axis->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
-    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", axis->getSelectorFirst(), m_propCondition );
+    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", axis->getSelector( 1 ), m_propCondition );
     WPropertyHelper::PC_SELECTONLYONE::addTo( m_sliceSelection );
 
     // call WModule's initialization
