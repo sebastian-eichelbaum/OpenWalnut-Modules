@@ -52,7 +52,7 @@ public:
      *
      * \param property
      */
-    WPropTransfer( T property );
+    explicit WPropTransfer( T property );
 
     /**
      * Destructor.

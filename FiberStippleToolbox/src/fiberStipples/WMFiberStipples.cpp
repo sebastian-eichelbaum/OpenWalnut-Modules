@@ -82,6 +82,7 @@ void WMFiberStipples::connectors()
 {
     m_vectorIC = WModuleInputData< WDataSetVector >::createAndAdd( shared_from_this(), "vectors", "Principal diffusion direction." );
     m_probIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "probTract", "Probabilistic tract." );
+    m_sliceIC = WModuleInputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "slice", "Slice and its position." );
 
     // call WModule's initialization
     WModule::connectors();
@@ -91,10 +92,10 @@ void WMFiberStipples::properties()
 {
 //    m_sliceGroup     = m_properties->addPropertyGroup( "Slices",  "Slice based probabilistic tractogram display." );
 //
-    m_Pos = m_properties->addProperty( "Slice position", "Slice position.", 0.0 );
+    m_pos = m_properties->addProperty( "Slice position", "Slice position.", 0.0 );
     // we don't know anything about data dimensions yet => make slide unusable
-    m_Pos->setMax( 0 );
-    m_Pos->setMin( 0 );
+    m_pos->setMax( 0 );
+    m_pos->setMin( 0 );
 
     m_color = m_properties->addProperty( "Color", "Color for the fiber stipples", WColor( 1.0, 0.0, 0.0, 1.0 ) );
     m_threshold = m_properties->addProperty( "Threshold", "Connectivity scores below this threshold will be discarded.", 0.01 );
@@ -245,14 +246,14 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     bVec[dim2] = 0.0;
 
 
-    m_Pos->setMin( minV[axis] );
-    m_Pos->setMax( maxV[axis] );
+    m_pos->setMin( minV[axis] );
+    m_pos->setMax( maxV[axis] );
 
     // if this is done the first time, set the slices to the center of the dataset
     if( m_first )
     {
         m_first = false;
-        m_Pos->set( midBB[axis] );
+        m_pos->set( midBB[axis] );
     }
 
     // each slice is child of an transformation node
@@ -308,7 +309,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     // the transformation matrix used to translate the slice.
     osg::Vec3 planeNormal( 0.0, 0.0, 0.0 );
     planeNormal[axis] = 1.0;
-    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_Pos, u_WorldTransform ) );
+    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_pos, u_WorldTransform ) );
     debugLog() << "Slice: " << planeNormal << " aVec: " << aVec << " bVec: " << bVec << " axis: " << axis;
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
@@ -324,6 +325,7 @@ void WMFiberStipples::moduleMain()
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_probIC->getDataChangedCondition() );
     m_moduleState.add( m_vectorIC->getDataChangedCondition() );
+    m_moduleState.add( m_sliceIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -346,6 +348,30 @@ void WMFiberStipples::moduleMain()
             break;
         }
 
+        if( m_sliceIC->getData() && !m_externPropSlider )
+        {
+            m_externPropSlider = m_sliceIC->getData()->getProperty();
+            m_pos->set( m_externPropSlider->get( true ) );
+            m_moduleState.add( m_externPropSlider->getCondition() );
+            WModule::properties();
+            infoLog() << "Added external slice position control.";
+        }
+
+        if( !m_sliceIC->getData() && m_externPropSlider )
+        {
+            m_moduleState.remove( m_externPropSlider->getCondition() );
+            m_externPropSlider.reset();
+            infoLog() << "Removed external slice position control.";
+        }
+
+        if( m_externPropSlider && m_externPropSlider->changed() )
+        {
+            // update slice position
+            debugLog() << "External slice position has changed.";
+            m_pos->set( m_externPropSlider->get( true ) );
+            continue; // do not regenerate geometry incase of slide updates
+        }
+
         // save data behind connectors since it might change during processing
         boost::shared_ptr< WDataSetVector > vectors = m_vectorIC->getData();
         boost::shared_ptr< WDataSetScalar > probTract = m_probIC->getData();
@@ -360,8 +386,6 @@ void WMFiberStipples::moduleMain()
 
         wge::bindTexture( m_output, vectors->getTexture(), 0, "u_vectors" );
         wge::bindTexture( m_output, probTract->getTexture(), 1, "u_probTract" );
-
-        // TODO(math): unbind textures, so we have a clean OSG root node for this module again
     }
 
     m_output->clear();

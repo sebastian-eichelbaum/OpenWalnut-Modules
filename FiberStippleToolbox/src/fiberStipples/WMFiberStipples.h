@@ -28,6 +28,7 @@
 #include <string>
 
 #include "core/kernel/WModule.h"
+#include "../WPropTransfer.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -115,6 +116,11 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_probIC;
 
     /**
+     * Optional input connector for informations controlling the slice and its position.
+     */
+    boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_sliceIC;
+
+    /**
      * Input connector for the largest eigen vector dataset.
      */
     boost::shared_ptr< WModuleInputData< WDataSetVector > > m_vectorIC;
@@ -127,7 +133,7 @@ private:
     /**
      * Controls the slice position, only back and forth will be possible.
      */
-    WPropDouble m_Pos;
+    WPropDouble m_pos;
 
     /**
      * Color for the fiber stipples.
@@ -173,6 +179,11 @@ private:
      * For initial slice positioning we need to control if the module is in intial state or not.
      */
     bool m_first;
+
+    /**
+     * Controlling the slice position from another (hence extern) module.
+     */
+    WPropDouble m_externPropSlider;
 };
 
 #endif  // WMFIBERSTIPPLES_H
