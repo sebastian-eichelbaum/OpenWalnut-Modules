@@ -200,38 +200,20 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     }
 
     // determine other two plane vectors
-    osg::Vec3 aVec( sizes );
-    aVec[axis] = 0.0;
-    osg::Vec3 bVec( aVec );
-    size_t dim1 = ( axis == 2 ? 1 : 2 );
-    size_t dim2 = ( axis == 0 ? 1 : 0 );
-    aVec[dim1] = 0.0;
-    bVec[dim2] = 0.0;
+    osg::Vec3 aVec( sliceBaseVectors( sizes, axis ).first );
+    osg::Vec3 bVec( sliceBaseVectors( sizes, axis ).second );
 
     m_pos->setMin( minV[axis] );
     m_pos->setMax( maxV[axis] );
 
     // if this is done the first time, set the slices to the center of the dataset
-    if( m_first )
+    if( m_first && !m_externPropSlider )
     {
         m_first = false;
         m_pos->set( midBB[axis] );
     }
 
-    // each slice is child of an transformation node
-    osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
-
     size_t numSlices = 20;
-    std::srand( time( NULL ) ); // start random number generator here, as seeding within one second might not produce different vertices
-
-    // create a new geode containing the slices
-    for( size_t i = 0; i < numSlices; ++i )
-    {
-        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( i / 3.0 * 3000, minV, aVec, bVec, i );
-        slice->setCullingActive( false );
-        mT->addChild( slice );
-    }
-
     boost::shared_ptr< const WGridRegular3D > grid = boost::shared_dynamic_cast< const WGridRegular3D >( probTract->getGrid() );
     if( !grid )
     {
@@ -254,12 +236,22 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
     wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
 
+    // each slice (containing scattered quads) is child of an transformation node
+    osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
+    std::srand( time( NULL ) ); // start random number generator here, as seeding within one second might not produce different vertices
+    for( size_t i = 0; i < numSlices; ++i )
+    {
+        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( i / 3.0 * 3000, minV, aVec, bVec, i );
+        slice->setCullingActive( false );
+        mT->addChild( slice );
+    }
+
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
     osg::Vec3 planeNormal( 0.0, 0.0, 0.0 );
     planeNormal[axis] = 1.0;
     mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_pos, u_WorldTransform ) );
-    debugLog() << "Slice: " << planeNormal << " aVec: " << aVec << " bVec: " << bVec << " axis: " << axis;
+    // debugLog() << "Slice: " << planeNormal << " aVec: " << aVec << " bVec: " << bVec << " axis: " << axis;
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );

@@ -178,30 +178,17 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     }
 
     // determine other two plane vectors
-    osg::Vec3 aVec( sizes );
-    aVec[axis] = 0.0;
-    osg::Vec3 bVec( aVec );
-    size_t dim1 = ( axis == 2 ? 1 : 2 );
-    size_t dim2 = ( axis == 0 ? 1 : 0 );
-    aVec[dim1] = 0.0;
-    bVec[dim2] = 0.0;
+    osg::Vec3 aVec( sliceBaseVectors( sizes, axis ).first );
+    osg::Vec3 bVec( sliceBaseVectors( sizes, axis ).second );
 
     m_pos->setMin( minV[axis] );
     m_pos->setMax( maxV[axis] );
 
-    if( m_first )
+    if( m_first && !m_externPropSlider )
     {
         m_first = false;
         m_pos->set( midBB[axis] );
     }
-
-    // each slice is child of an transformation node
-    osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
-
-    osg::ref_ptr< osg::Node > slice = genQuadsPerCell( minV, aVec, bVec, scalars, resolution );
-    slice->setCullingActive( false );
-    mT->addChild( slice );
-
 
     osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
     wge::bindAsUniform( m_output, u_WorldTransform, "u_WorldTransform" );
@@ -211,6 +198,12 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     wge::bindAsUniform( m_output, aVec, "u_aVec" );
     wge::bindAsUniform( m_output, bVec, "u_bVec" );
     wge::bindAsUniform( m_output, resolution, "u_resolution" );
+
+    // each slice is child of an transformation node
+    osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
+    osg::ref_ptr< osg::Node > slice = genQuadsPerCell( minV, aVec, bVec, scalars, resolution );
+    slice->setCullingActive( false );
+    mT->addChild( slice );
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.

@@ -81,3 +81,15 @@ size_t WMAbstractSliceModule::selectAxis( const std::string& name ) const
         return wlimits::MAX_SIZE_T;
     }
 }
+
+std::pair< WVector3d, WVector3d > WMAbstractSliceModule::sliceBaseVectors( const WVector3d& sizes, const size_t axis ) const
+{
+    std::pair< WVector3d, WVector3d > result;
+    result.first = WVector3d( sizes );
+    result.first[axis] = 0.0;
+    result.second = WVector3d( result.first );
+    result.first[ axis == 2 ? 1 : 2 ] = 0.0;
+    result.second[ axis == 0 ? 1 : 0 ] = 0.0;
+    return result;
+}
+

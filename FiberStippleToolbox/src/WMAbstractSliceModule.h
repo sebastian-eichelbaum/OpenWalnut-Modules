@@ -106,6 +106,16 @@ protected:
     size_t selectAxis( const std::string& name ) const;
 
     /**
+     * Determines two vectors spanning the plane orthogonal to the given axis, where 0 means xAxis, 1 means yAxis and 2 zAxis.
+     *
+     * \param sizes Maximal dimensions in x, y and z direction.
+     * \param axis Which of the axis (x,y or z) is orthogonal to the demanded slice.
+     *
+     * \return Two independent vectors, both orthogonal to the selected axis.
+     */
+    std::pair< WVector3d, WVector3d > sliceBaseVectors( const WVector3d& sizes, const size_t axis ) const;
+
+    /**
      * Connector for external WPropDouble, so the slice type and position of this module can be controlled from another module.
      */
     boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_sliceIC;
