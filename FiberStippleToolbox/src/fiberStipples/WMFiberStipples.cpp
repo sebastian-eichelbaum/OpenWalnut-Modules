@@ -118,11 +118,11 @@ void WMFiberStipples::properties()
     m_glyphSize->setMin( 0.01 );
     m_glyphSize->setMax( 10.0 );
 
-    boost::shared_ptr< WItemSelection > axis( new WItemSelection() );
-    axis->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
-    axis->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
-    axis->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
-    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", axis->getSelector( 1 ), m_propCondition );
+    m_axes = boost::shared_ptr< WItemSelection >( new WItemSelection() );
+    m_axes->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
+    m_axes->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
+    m_axes->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
+    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", m_axes->getSelector( 1 ), m_propCondition );
     WPropertyHelper::PC_SELECTONLYONE::addTo( m_sliceSelection );
 
     // call WModule's initialization
@@ -193,6 +193,26 @@ namespace
         osg::ref_ptr< osg::Geode > geode = new osg::Geode();
         geode->addDrawable( geometry );
         return geode;
+    }
+
+    size_t selectAxis( const std::string& name )
+    {
+        if( name == "Axial Slice" )
+        {
+            return 0;
+        }
+        else if( name == "Coronal Slice" )
+        {
+            return 1;
+        }
+        else if( name == "Sagittal Slice" )
+        {
+            return 2;
+        }
+        else // undefined
+        {
+            return wlimits::MAX_SIZE_T;
+        }
     }
 
     // unsigned int whichAxisAlignedPlane( const WVector3d& normal )
@@ -359,6 +379,14 @@ void WMFiberStipples::moduleMain()
             m_externPropSlider = m_sliceIC->getData()->getProperty();
             m_pos->set( m_externPropSlider->get( true ) );
             m_moduleState.add( m_externPropSlider->getCondition() );
+            if( selectAxis( m_externPropSlider->getName() ) <= 2 )
+            {
+                m_sliceSelection->set( m_axes->getSelector( selectAxis( m_externPropSlider->getName() ) ) );
+            }
+            else
+            {
+                errorLog() << "Bug! External slice property with invalid name => axis selection failed, name was: " << m_externPropSlider->getName();
+            }
             WModule::properties();
             infoLog() << "Added external slice position control.";
         }

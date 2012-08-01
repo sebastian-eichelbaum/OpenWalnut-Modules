@@ -176,6 +176,11 @@ private:
     WPropSelection m_sliceSelection;
 
     /**
+     * Possible axes as a property selection list.
+     */
+    boost::shared_ptr< WItemSelection > m_axes;
+
+    /**
      * Used for rerun the module main loop. (e.g. something substantially has changed so the whole geometry needs to be build up)
      */
     boost::shared_ptr< WCondition > m_propCondition;
