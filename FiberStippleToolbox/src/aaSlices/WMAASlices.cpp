@@ -99,9 +99,10 @@ void WMAASlices::properties()
     m_showSlice[1]  = m_properties->addProperty( "Show Coronal", "Whether to show or hide this slice", true );
     m_showSlice[2]  = m_properties->addProperty( "Show Sagittal", "Whether to show or hide this slice", true );
 
-    m_color[0] = m_properties->addProperty( "Axial Color", "Color for this slice", WColor( 1.0, 0.0, 0.0, 0.3 ) );
-    m_color[1] = m_properties->addProperty( "Coronal Color", "Color for this slice", WColor( 0.0, 1.0, 0.0, 0.3 ) );
-    m_color[2] = m_properties->addProperty( "Sagittal Color", "Color for this slice", WColor( 0.0, 0.0, 1.0, 0.3 ) );
+    // use classic RGB colors for the slices
+    m_color[0] = m_properties->addProperty( "Axial Color", "Color for this slice", WColor( 0.0, 0.0, 1.0, 0.1 ) );
+    m_color[1] = m_properties->addProperty( "Coronal Color", "Color for this slice", WColor( 1.0, 0.0, 0.0, 0.1 ) );
+    m_color[2] = m_properties->addProperty( "Sagittal Color", "Color for this slice", WColor( 0.0, 1.0, 0.0, 0.1 ) );
 
     // call WModule's initialization
     WModule::properties();
@@ -124,12 +125,13 @@ void WMAASlices::initOSG()
 
     boost::array< osg::ref_ptr< osg::Node >, 3 > slices;
 
-    boost::array< osg::Vec3, 3 > base = {{ osg::Vec3( 1.0, 0.0, 0.0 ), osg::Vec3( 0.0, 1.0, 0.0 ), osg::Vec3( 0.0, 0.0, 1.0 ) }}; // NOLINT curley braces
+    // NOTE: the indices are somehow swapped so we nee no cases inside the forloop below
+    boost::array< osg::Vec3, 3 > base = {{ osg::Vec3( 0.0, 0.0, 1.0 ), osg::Vec3( 0.0, 1.0, 0.0 ), osg::Vec3( 1.0, 0.0, 0.0 ) }}; // NOLINT curley braces
 
     // we didn't put this into for loop as initialization becomes too bloated with if-else constructs
-    slices[0] = wge::genFinitePlane( minV, base[1] * sizes[1], base[2] * sizes[2] );
-    slices[1] = wge::genFinitePlane( minV, base[0] * sizes[0], base[2] * sizes[2] );
-    slices[2] = wge::genFinitePlane( minV, base[0] * sizes[0], base[1] * sizes[1] );
+    slices[0] = wge::genFinitePlane( minV, base[2] * sizes[0], base[1] * sizes[1] ); // axial
+    slices[1] = wge::genFinitePlane( minV, base[2] * sizes[0], base[0] * sizes[2] ); // coronal
+    slices[2] = wge::genFinitePlane( minV, base[1] * sizes[1], base[0] * sizes[2] ); // sagittal
 
     boost::array< osg::ref_ptr< osg::MatrixTransform >, 3 > mT;
     boost::array< osg::ref_ptr< osg::Uniform >, 3 > sliceUniforms;
@@ -148,7 +150,6 @@ void WMAASlices::initOSG()
         slices[i]->getOrCreateStateSet()->addUniform( sliceUniforms[i] );
         slices[i]->getOrCreateStateSet()->addUniform( u_color );
 
-        // attach a dragger to the slice => taken from osg example: osgmanipulators
         mT[i] = new osg::MatrixTransform();
         mT[i]->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( base[i], m_pos[i], sliceUniforms[i] ) );
         mT[i]->addChild( slices[i] );
