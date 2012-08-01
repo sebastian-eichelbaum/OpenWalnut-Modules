@@ -27,13 +27,14 @@
 
 #include <string>
 
-#include "core/kernel/WModule.h"
 #include "../WPropTransfer.h"
+#include "core/kernel/WModule.h"
 
 // forward declarations to reduce compile dependencies
-template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
+template< class T > class WItemSelectionItemTyped;
+template< class T > class WModuleInputData;
 
 /**
  * Computes contour lines (aka isolines) for the given data and render them on a 2D plane.
@@ -106,8 +107,9 @@ private:
      *
      * \param scalars The scalar data with grid giving bounding box and other information.
      * \param resolution The size of the quads used for generating line stipples.
+     * \param axis The axis selecting the slice (axial, sagittal or coronal).
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution );
+    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution, size_t axis );
 
     /**
      * Input connector for scalar data.
@@ -150,6 +152,21 @@ private:
     WPropDouble m_lineWidth;
 
     /**
+     * We need a type for numbering the axis selections. Best would be size_t as then we could directly use the selected item as axis number.
+     */
+    typedef WItemSelectionItemTyped< size_t > AxisType;
+
+    /**
+     * Selection for axis / plane or slice. Meaning whether we should draw stipples on Axial, Cornoal or Sagittal slices.
+     */
+    WPropSelection m_sliceSelection;
+
+    /**
+     * Possible axes as a property selection list.
+     */
+    boost::shared_ptr< WItemSelection > m_axes;
+
+    /**
      * Needed for recreating the geometry, incase when resolution changes.
      */
     boost::shared_ptr< WCondition > m_propCondition;
@@ -158,6 +175,11 @@ private:
      * External property controlling linear translation of the slice.
      */
     WPropDouble m_externPropSlider;
+
+    /**
+     * Controlls if the initial state. E.g. slice position.
+     */
+    bool m_first;
 };
 
 #endif  // WMISOLINES_H

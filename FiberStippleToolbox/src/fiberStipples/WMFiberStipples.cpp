@@ -269,7 +269,6 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     aVec[dim1] = 0.0;
     bVec[dim2] = 0.0;
 
-
     m_pos->setMin( minV[axis] );
     m_pos->setMax( maxV[axis] );
 

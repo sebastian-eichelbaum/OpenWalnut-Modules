@@ -26,6 +26,8 @@
 
 #include <osg/Geometry>
 
+#include "../WPropTransfer.h"
+#include "core/common/WItemSelectionItemTyped.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/graphicsEngine/callbacks/WGELinearTranslationCallback.h"
 #include "core/graphicsEngine/shaders/WGEPropertyUniform.h"
@@ -36,11 +38,11 @@
 #include "core/kernel/WModuleInputData.h"
 #include "modules/emptyIcon.xpm" // Please put a real icon here.
 #include "WMIsoLines.h"
-#include "../WPropTransfer.h"
 
 WMIsoLines::WMIsoLines():
     WModule(),
-    m_propCondition( new WCondition() )
+    m_propCondition( new WCondition() ),
+    m_first( true )
 {
 }
 
@@ -92,6 +94,13 @@ void WMIsoLines::properties()
     m_lineWidth = m_properties->addProperty( "Line Width", "The width of the isoline.", 0.1 );
     m_lineWidth->setMin( 0.0 );
     m_lineWidth->setMax( 1.0 );
+
+    m_axes = boost::shared_ptr< WItemSelection >( new WItemSelection() );
+    m_axes->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
+    m_axes->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
+    m_axes->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
+    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", m_axes->getSelector( 1 ), m_propCondition );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_sliceSelection );
 
     WModule::properties();
 }
@@ -167,7 +176,7 @@ namespace
     }
 }
 
-void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution )
+void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution, const size_t axis )
 {
     debugLog() << "Init OSG";
     m_output->clear();
@@ -179,16 +188,32 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     WVector3d sizes = ( maxV - minV );
     WVector3d midBB = minV + ( sizes * 0.5 );
 
-    // update the properties
-    m_pos->setMin( minV[1] );
-    m_pos->setMax( maxV[1] );
-    m_pos->set( midBB[1] );
+    if( axis > 2 )
+    {
+        errorLog() << "Somehow an axis >= 2 was given (" << axis << "). This is a bug! Please report at openwalnut.org. Aborting.";
+        return;
+    }
+
+    // determine other two plane vectors
+    osg::Vec3 aVec( sizes );
+    aVec[axis] = 0.0;
+    osg::Vec3 bVec( aVec );
+    size_t dim1 = ( axis == 2 ? 1 : 2 );
+    size_t dim2 = ( axis == 0 ? 1 : 0 );
+    aVec[dim1] = 0.0;
+    bVec[dim2] = 0.0;
+
+    m_pos->setMin( minV[axis] );
+    m_pos->setMax( maxV[axis] );
+
+    if( m_first )
+    {
+        m_first = false;
+        m_pos->set( midBB[axis] );
+    }
 
     // each slice is child of an transformation node
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
-
-    osg::Vec3 aVec( sizes[0], 0.0, 0.0 );
-    osg::Vec3 bVec( 0.0, 0.0, sizes[2] );
 
     osg::ref_ptr< osg::Node > slice = genQuadsPerCell( minV, aVec, bVec, scalars, resolution );
     slice->setCullingActive( false );
@@ -213,13 +238,38 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
-    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( osg::Vec3( 0.0, 1.0, 0.0 ), m_pos, u_WorldTransform ) );
+    osg::Vec3 planeNormal( 0.0, 0.0, 0.0 );
+    planeNormal[axis] = 1.0;
+    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_pos, u_WorldTransform ) );
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
     m_output->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     m_output->insert( mT );
     m_output->dirtyBound();
+}
+
+namespace
+{
+    size_t selectAxis( const std::string& name )
+    {
+        if( name == "Axial Slice" )
+        {
+            return 0;
+        }
+        else if( name == "Coronal Slice" )
+        {
+            return 1;
+        }
+        else if( name == "Sagittal Slice" )
+        {
+            return 2;
+        }
+        else // undefined
+        {
+            return wlimits::MAX_SIZE_T;
+        }
+    }
 }
 
 void WMIsoLines::moduleMain()
@@ -254,6 +304,14 @@ void WMIsoLines::moduleMain()
         {
             m_externPropSlider = m_propIC->getData()->getProperty();
             m_moduleState.add( m_externPropSlider->getCondition() );
+            if( selectAxis( m_externPropSlider->getName() ) <= 2 )
+            {
+                m_sliceSelection->set( m_axes->getSelector( selectAxis( m_externPropSlider->getName() ) ) );
+            }
+            else
+            {
+                errorLog() << "Bug! External slice property with invalid name => axis selection failed, name was: " << m_externPropSlider->getName();
+            }
             WModule::properties();
             infoLog() << "Added external slice position control.";
         }
@@ -287,7 +345,8 @@ void WMIsoLines::moduleMain()
         m_isovalue->setMin( 0.0 );
         m_isovalue->setMax( 1.0 );
 
-        initOSG( scalarData, m_resolution->get() );
+        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
+        initOSG( scalarData, m_resolution->get(), axis );
 
         wge::bindTexture( m_output, scalarData->getTexture(), 0, "u_scalarData" );
     }

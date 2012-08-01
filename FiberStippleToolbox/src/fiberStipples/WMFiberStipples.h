@@ -27,15 +27,15 @@
 
 #include <string>
 
-#include "core/kernel/WModule.h"
 #include "../WPropTransfer.h"
+#include "core/kernel/WModule.h"
 
 // forward declarations to reduce compile dependencies
-template< class T > class WModuleInputData;
-template< class T > class WItemSelectionItemTyped;
 class WDataSetScalar;
 class WDataSetVector;
 class WGEManagedGroupNode;
+template< class T > class WItemSelectionItemTyped;
+template< class T > class WModuleInputData;
 
 /**
  * Draws Fiber Stipples on slice in order to visualize probabilistic tractograms.
