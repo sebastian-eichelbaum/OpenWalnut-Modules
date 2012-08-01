@@ -27,15 +27,11 @@
 
 #include <string>
 
-#include "../WPropTransfer.h"
-#include "core/kernel/WModule.h"
+#include "../WMAbstractSliceModule.h"
 
 // forward declarations to reduce compile dependencies
 class WDataSetScalar;
 class WDataSetVector;
-class WGEManagedGroupNode;
-template< class T > class WItemSelectionItemTyped;
-template< class T > class WModuleInputData;
 
 /**
  * Draws Fiber Stipples on slice in order to visualize probabilistic tractograms.
@@ -44,7 +40,7 @@ template< class T > class WModuleInputData;
  *
  * \ingroup modules
  */
-class WMFiberStipples: public WModule
+class WMFiberStipples: public WMAbstractSliceModule
 {
 public:
     /**
@@ -116,24 +112,9 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_probIC;
 
     /**
-     * Optional input connector for informations controlling the slice and its position.
-     */
-    boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_sliceIC;
-
-    /**
      * Input connector for the largest eigen vector dataset.
      */
     boost::shared_ptr< WModuleInputData< WDataSetVector > > m_vectorIC;
-
-    /**
-     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
-     */
-    osg::ref_ptr< WGEManagedGroupNode > m_output;
-
-    /**
-     * Controls the slice position, only back and forth will be possible.
-     */
-    WPropDouble m_pos;
 
     /**
      * Color for the fiber stipples.
@@ -166,34 +147,9 @@ private:
     WPropDouble m_glyphThickness;
 
     /**
-     * We need a type for numbering the axis selections. Best would be size_t as then we could directly use the selected item as axis number.
-     */
-    typedef WItemSelectionItemTyped< size_t > AxisType;
-
-    /**
-     * Selection for axis / plane or slice. Meaning whether we should draw stipples on Axial, Cornoal or Sagittal slices.
-     */
-    WPropSelection m_sliceSelection;
-
-    /**
-     * Possible axes as a property selection list.
-     */
-    boost::shared_ptr< WItemSelection > m_axes;
-
-    /**
-     * Used for rerun the module main loop. (e.g. something substantially has changed so the whole geometry needs to be build up)
-     */
-    boost::shared_ptr< WCondition > m_propCondition;
-
-    /**
      * For initial slice positioning we need to control if the module is in intial state or not.
      */
     bool m_first;
-
-    /**
-     * Controlling the slice position from another (hence extern) module.
-     */
-    WPropDouble m_externPropSlider;
 };
 
 #endif  // WMFIBERSTIPPLES_H

@@ -47,8 +47,7 @@
 #include "WMFiberStipples.xpm"
 
 WMFiberStipples::WMFiberStipples()
-    : WModule(),
-      m_propCondition( new WCondition() ),
+    : WMAbstractSliceModule(),
       m_first( true )
 {
 }
@@ -82,21 +81,13 @@ void WMFiberStipples::connectors()
 {
     m_vectorIC = WModuleInputData< WDataSetVector >::createAndAdd( shared_from_this(), "vectors", "Principal diffusion direction." );
     m_probIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "probTract", "Probabilistic tract." );
-    m_sliceIC = WModuleInputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "slice", "Slice and its position." );
 
     // call WModule's initialization
-    WModule::connectors();
+    WMAbstractSliceModule::connectors();
 }
 
 void WMFiberStipples::properties()
 {
-//    m_sliceGroup     = m_properties->addPropertyGroup( "Slices",  "Slice based probabilistic tractogram display." );
-//
-    m_pos = m_properties->addProperty( "Slice position", "Slice position.", 0.0 );
-    // we don't know anything about data dimensions yet => make slide unusable
-    m_pos->setMax( 0 );
-    m_pos->setMin( 0 );
-
     m_color = m_properties->addProperty( "Color", "Color for the fiber stipples", WColor( 1.0, 0.0, 0.0, 1.0 ) );
     m_threshold = m_properties->addProperty( "Threshold", "Connectivity scores below this threshold will be discarded.", 0.01 );
     m_threshold->setMin( 0.0 );
@@ -118,15 +109,8 @@ void WMFiberStipples::properties()
     m_glyphSize->setMin( 0.01 );
     m_glyphSize->setMax( 10.0 );
 
-    m_axes = boost::shared_ptr< WItemSelection >( new WItemSelection() );
-    m_axes->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
-    m_axes->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
-    m_axes->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
-    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", m_axes->getSelector( 1 ), m_propCondition );
-    WPropertyHelper::PC_SELECTONLYONE::addTo( m_sliceSelection );
-
     // call WModule's initialization
-    WModule::properties();
+    WMAbstractSliceModule::properties();
 }
 
 namespace
@@ -194,51 +178,6 @@ namespace
         geode->addDrawable( geometry );
         return geode;
     }
-
-    size_t selectAxis( const std::string& name )
-    {
-        if( name == "Axial Slice" )
-        {
-            return 0;
-        }
-        else if( name == "Coronal Slice" )
-        {
-            return 1;
-        }
-        else if( name == "Sagittal Slice" )
-        {
-            return 2;
-        }
-        else // undefined
-        {
-            return wlimits::MAX_SIZE_T;
-        }
-    }
-
-    // unsigned int whichAxisAlignedPlane( const WVector3d& normal )
-    // {
-    //     int axis = 0; // the normal is no one of: (1,0,0), (0,1,0) or (0,0,1)
-    //     if( dot( normal, WVector3d( 1.0, 0.0, 0.0 ) ) != 0.0 )
-    //     {
-    //         axis += 1;
-    //     }
-    //     if( dot( normal, WVector3d( 0.0, 1.0, 0.0 ) ) != 0.0 )
-    //     {
-    //         axis += 2;
-    //     }
-    //     if( dot( normal, WVector3d( 0.0, 0.0, 1.0 ) ) != 0.0 )
-    //     {
-    //         axis += 4;
-    //     }
-    //     if( axis != 1 || axis != 2 || axis != 4 )
-    //     {
-    //         return -1;
-    //     }
-    //     else
-    //     {
-    //         return std::log( axis ) / std::log( 2 );
-    //     }
-    // }
 }
 
 void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis )

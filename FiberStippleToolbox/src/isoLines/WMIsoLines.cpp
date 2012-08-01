@@ -26,7 +26,6 @@
 
 #include <osg/Geometry>
 
-#include "../WPropTransfer.h"
 #include "core/common/WItemSelectionItemTyped.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/graphicsEngine/callbacks/WGELinearTranslationCallback.h"
@@ -40,8 +39,7 @@
 #include "WMIsoLines.h"
 
 WMIsoLines::WMIsoLines():
-    WModule(),
-    m_propCondition( new WCondition() ),
+    WMAbstractSliceModule(),
     m_first( true )
 {
 }
@@ -72,16 +70,12 @@ const std::string WMIsoLines::getDescription() const
 void WMIsoLines::connectors()
 {
     m_scalarIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "scalarData", "Scalar data." );
-    m_propIC = WModuleInputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "propData", "Slice Property." );
 
-    WModule::connectors();
+    WMAbstractSliceModule::connectors();
 }
 
 void WMIsoLines::properties()
 {
-    // Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
-    m_pos = m_properties->addProperty( "Slice Position", "Where the data shoulde be sliced for drawing contours", 0.0 );
     m_isovalue = m_properties->addProperty( "Isovalue", "Value selecting the contours", 0.0 );
     m_isovalue->setMin( 0.0 );
     m_isovalue->setMax( 0.0 ); // make it unusable at first
@@ -95,18 +89,7 @@ void WMIsoLines::properties()
     m_lineWidth->setMin( 0.0 );
     m_lineWidth->setMax( 1.0 );
 
-    m_axes = boost::shared_ptr< WItemSelection >( new WItemSelection() );
-    m_axes->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
-    m_axes->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
-    m_axes->addItem( AxisType::create( 0, "Sagittal", "yz-slice" ) );
-    m_sliceSelection = m_properties->addProperty( "Slice:",  "Which slice (axial, coronal or sagittal)?", m_axes->getSelector( 1 ), m_propCondition );
-    WPropertyHelper::PC_SELECTONLYONE::addTo( m_sliceSelection );
-
-    WModule::properties();
-}
-
-void WMIsoLines::requirements()
-{
+    WMAbstractSliceModule::properties();
 }
 
 namespace
@@ -249,35 +232,12 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     m_output->dirtyBound();
 }
 
-namespace
-{
-    size_t selectAxis( const std::string& name )
-    {
-        if( name == "Axial Slice" )
-        {
-            return 0;
-        }
-        else if( name == "Coronal Slice" )
-        {
-            return 1;
-        }
-        else if( name == "Sagittal Slice" )
-        {
-            return 2;
-        }
-        else // undefined
-        {
-            return wlimits::MAX_SIZE_T;
-        }
-    }
-}
-
 void WMIsoLines::moduleMain()
 {
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_scalarIC->getDataChangedCondition() );
-    m_moduleState.add( m_propIC->getDataChangedCondition() );
+    m_moduleState.add( m_sliceIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -300,9 +260,9 @@ void WMIsoLines::moduleMain()
             break;
         }
 
-        if( m_propIC->getData() && !m_externPropSlider )
+        if( m_sliceIC->getData() && !m_externPropSlider )
         {
-            m_externPropSlider = m_propIC->getData()->getProperty();
+            m_externPropSlider = m_sliceIC->getData()->getProperty();
             m_moduleState.add( m_externPropSlider->getCondition() );
             if( selectAxis( m_externPropSlider->getName() ) <= 2 )
             {
@@ -316,7 +276,7 @@ void WMIsoLines::moduleMain()
             infoLog() << "Added external slice position control.";
         }
 
-        if( !m_propIC->getData() && m_externPropSlider )
+        if( !m_sliceIC->getData() && m_externPropSlider )
         {
             m_moduleState.remove( m_externPropSlider->getCondition() );
             m_externPropSlider.reset();

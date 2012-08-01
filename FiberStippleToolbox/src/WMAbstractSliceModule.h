@@ -22,44 +22,47 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMISOLINES_H
-#define WMISOLINES_H
+#ifndef WMABSTRACTSLICEMODULE_H
+#define WMABSTRACTSLICEMODULE_H
 
 #include <string>
 
-#include "../WMAbstractSliceModule.h"
+#include "WPropTransfer.h"
+#include "core/kernel/WModule.h"
 
 // forward declarations to reduce compile dependencies
-class WDataSetScalar;
+class WGEManagedGroupNode;
+template< class T > class WItemSelectionItemTyped;
+template< class T > class WModuleInputData;
 
 /**
- * Computes contour lines (aka isolines) for the given data and render them on a 2D plane.
+ * Module containing convinience stuff for slice based modules.
  * \ingroup modules
  */
-class WMIsoLines: public WMAbstractSliceModule
+class WMAbstractSliceModule: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMIsoLines();
+    WMAbstractSliceModule();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMIsoLines();
+    virtual ~WMAbstractSliceModule();
 
     /**
      * Gives back the name of this module.
      * \return the module's name.
      */
-    virtual const std::string getName() const;
+    virtual const std::string getName() const = 0;
 
     /**
      * Gives back a description of this module.
      * \return description to module.
      */
-    virtual const std::string getDescription() const;
+    virtual const std::string getDescription() const = 0;
 
     /**
      * Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
@@ -67,20 +70,20 @@ public:
      *
      * \return the prototype used to create every module in OpenWalnut.
      */
-    virtual boost::shared_ptr< WModule > factory() const;
+    virtual boost::shared_ptr< WModule > factory() const = 0;
 
     /**
      * Get the icon for this module in XPM format.
      *
      * \return The icon.
      */
-    virtual const char** getXPMIcon() const;
+    virtual const char** getXPMIcon() const = 0;
 
 protected:
     /**
      * Entry point after loading the module. Runs in separate thread.
      */
-    virtual void moduleMain();
+    virtual void moduleMain() = 0;
 
     /**
      * Initialize the connectors this module is using.
@@ -92,45 +95,57 @@ protected:
      */
     virtual void properties();
 
-private:
     /**
-     * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
+     * Maps medical slice names to axis numbers, e.g. "Coronal Slice" is mapped to \e 1. This is needed to determine slice
+     * type out of a slice property name.
      *
-     * \param scalars The scalar data with grid giving bounding box and other information.
-     * \param resolution The size of the quads used for generating line stipples.
-     * \param axis The axis selecting the slice (axial, sagittal or coronal).
+     * \param name One of "Axial Slice", "Coronal Slice", "Sagittal Slice".
+     *
+     * \return 0, 1, 2 as axis numbers corresponding to the same order as given above and wlimits::SIZE_T_MAX else.
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution, size_t axis );
+    size_t selectAxis( const std::string& name ) const;
 
     /**
-     * Input connector for scalar data.
+     * Connector for external WPropDouble, so the slice type and position of this module can be controlled from another module.
      */
-    boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_scalarIC;
+    boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_sliceIC;
 
     /**
-     * The isovalue for the countour lines.
+     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
-    WPropDouble m_isovalue;
+    osg::ref_ptr< WGEManagedGroupNode > m_output;
 
     /**
-     * Color for the isoline.
+     * The position of the slice.
      */
-    WPropColor m_color;
+    WPropDouble m_pos;
 
     /**
-     * Size of the quads used for rendering the isolines, aka resolution.
+     * For numbering the axes selection.
      */
-    WPropDouble m_resolution;
+    typedef WItemSelectionItemTyped< size_t > AxisType;
 
     /**
-     * The width of the isolines.
+     * Selection for axis / plane or slice. Meaning whether we should draw stipples on Axial, Cornoal or Sagittal slices.
      */
-    WPropDouble m_lineWidth;
+    WPropSelection m_sliceSelection;
 
     /**
-     * Controlls if the initial state. E.g. slice position.
+     * Possible axes as a property selection list.
      */
-    bool m_first;
+    boost::shared_ptr< WItemSelection > m_axes;
+
+    /**
+     * Needed for recreating the geometry.
+     */
+    boost::shared_ptr< WCondition > m_propCondition;
+
+    /**
+     * External property controlling linear translation of the given slice.
+     */
+    WPropDouble m_externPropSlider;
+
+private:
 };
 
-#endif  // WMISOLINES_H
+#endif  // WMABSTRACTSLICEMODULE_H
