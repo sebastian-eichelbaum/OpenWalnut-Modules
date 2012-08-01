@@ -128,6 +128,11 @@ uniform vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
 uniform int u_numSlices;
 
 /**
+ * Scales the quad which is used later for the stipples.
+ */
+uniform float u_glyphSize;
+
+/**
  * Vertex Main. Simply transforms the geometry and computes the projected diffusion direction.
  */
 void main()
@@ -149,7 +154,7 @@ void main()
     if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numSlices  >= gl_TexCoord[2].x )
     {
          // transform position, the 4th component must be explicitly set, as otherwise they would have been scaled
-         gl_Position = gl_ModelViewProjectionMatrix * ( vec4( gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );
+         gl_Position = gl_ModelViewProjectionMatrix * ( vec4( u_glyphSize * gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );
     }
     else
     {

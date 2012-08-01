@@ -156,6 +156,11 @@ private:
     WPropDouble m_threshold;
 
     /**
+     * Determines the size of the quad used to stamp out the stipples.
+     */
+    WPropDouble m_glyphSize;
+
+    /**
      * For scale the thickness of the stipples.
      */
     WPropDouble m_glyphThickness;

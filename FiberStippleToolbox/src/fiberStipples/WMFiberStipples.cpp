@@ -114,6 +114,10 @@ void WMFiberStipples::properties()
     m_glyphThickness->setMin( 0.01 );
     m_glyphThickness->setMax( 3.0 );
 
+    m_glyphSize = m_properties->addProperty( "Glyph Size", "Size of the quad used for generating the stipples", 1.0 );
+    m_glyphSize->setMin( 0.01 );
+    m_glyphSize->setMax( 10.0 );
+
     boost::shared_ptr< WItemSelection > axis( new WItemSelection() );
     axis->addItem( AxisType::create( 2, "Axial", "xy-slice" ) );
     axis->addItem( AxisType::create( 1, "Coronal", "xz-slice" ) );
@@ -289,6 +293,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     osg::ref_ptr< osg::Uniform > u_maxConnectivityScore = new osg::Uniform( "u_maxConnectivityScore", static_cast< float >( probTract->getMax() ) );
     osg::ref_ptr< osg::Uniform > u_numSlices = new osg::Uniform( "u_numSlices", static_cast< int >( numSlices ) );
     osg::ref_ptr< osg::Uniform > u_glyphThickness = new WGEPropertyUniform< WPropDouble >( "u_glyphThickness", m_glyphThickness );
+    osg::ref_ptr< osg::Uniform > u_glyphSize = new WGEPropertyUniform< WPropDouble >( "u_glyphSize", m_glyphSize );
 
     osg::StateSet *states = m_output->getOrCreateStateSet();
     states->addUniform( u_aVec );
@@ -304,6 +309,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     states->addUniform( u_maxConnectivityScore );
     states->addUniform( u_numSlices );
     states->addUniform( u_glyphThickness );
+    states->addUniform( u_glyphSize );
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
