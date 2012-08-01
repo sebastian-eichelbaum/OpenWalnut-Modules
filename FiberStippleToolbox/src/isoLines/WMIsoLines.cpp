@@ -202,22 +202,15 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     slice->setCullingActive( false );
     mT->addChild( slice );
 
-    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
-    osg::ref_ptr< osg::Uniform > u_isovalue = new WGEPropertyUniform< WPropDouble >( "u_isovalue", m_isovalue );
-    osg::ref_ptr< osg::Uniform > u_lineWidth = new WGEPropertyUniform< WPropDouble >( "u_lineWidth", m_lineWidth );
-    osg::ref_ptr< osg::Uniform > u_color = new WGEPropertyUniform< WPropColor >( "u_color", m_color );
-    osg::ref_ptr< osg::Uniform > u_aVec = new osg::Uniform( "u_aVec", aVec );
-    osg::ref_ptr< osg::Uniform > u_bVec = new osg::Uniform( "u_bVec", bVec );
-    osg::ref_ptr< osg::Uniform > u_resolution = new osg::Uniform( "u_resolution", static_cast< float >( resolution ) );
 
-    osg::StateSet *states = m_output->getOrCreateStateSet();
-    states->addUniform( u_WorldTransform );
-    states->addUniform( u_isovalue );
-    states->addUniform( u_lineWidth );
-    states->addUniform( u_color );
-    states->addUniform( u_aVec );
-    states->addUniform( u_bVec );
-    states->addUniform( u_resolution );
+    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
+    wge::bindAsUniform( m_output, u_WorldTransform, "u_WorldTransform" );
+    wge::bindAsUniform( m_output, m_isovalue, "u_isovalue" );
+    wge::bindAsUniform( m_output, m_lineWidth, "u_lineWidth" );
+    wge::bindAsUniform( m_output, m_color, "u_color" );
+    wge::bindAsUniform( m_output, aVec, "u_aVec" );
+    wge::bindAsUniform( m_output, bVec, "u_bVec" );
+    wge::bindAsUniform( m_output, resolution, "u_resolution" );
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.

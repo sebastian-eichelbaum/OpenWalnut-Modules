@@ -232,42 +232,27 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
         mT->addChild( slice );
     }
 
-    osg::ref_ptr< osg::Uniform > u_aVec = new osg::Uniform( "u_aVec", aVec );
-    osg::ref_ptr< osg::Uniform > u_bVec = new osg::Uniform( "u_bVec", bVec );
-    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
     boost::shared_ptr< const WGridRegular3D > grid = boost::shared_dynamic_cast< const WGridRegular3D >( probTract->getGrid() );
     if( !grid )
     {
         errorLog() << "This module can only process probabilistic Tracts with regular 3D grids, Hence you may see garbage from now on.";
     }
     boost::array< double, 3 > offsets = getOffsets( grid );
-    osg::ref_ptr< osg::Uniform > u_pixelSizeX = new osg::Uniform( "u_pixelSizeX", static_cast< float >( offsets[0] ) );
-    osg::ref_ptr< osg::Uniform > u_pixelSizeY = new osg::Uniform( "u_pixelSizeY", static_cast< float >( offsets[1] ) );
-    osg::ref_ptr< osg::Uniform > u_pixelSizeZ = new osg::Uniform( "u_pixelSizeZ", static_cast< float >( offsets[2] ) );
-    osg::ref_ptr< osg::Uniform > u_color = new WGEPropertyUniform< WPropColor >( "u_color", m_color );
-    osg::ref_ptr< osg::Uniform > u_minRange = new WGEPropertyUniform< WPropDouble >( "u_minRange", m_minRange );
-    osg::ref_ptr< osg::Uniform > u_maxRange = new WGEPropertyUniform< WPropDouble >( "u_maxRange", m_maxRange );
-    osg::ref_ptr< osg::Uniform > u_threshold = new WGEPropertyUniform< WPropDouble >( "u_threshold", m_threshold );
-    osg::ref_ptr< osg::Uniform > u_maxConnectivityScore = new osg::Uniform( "u_maxConnectivityScore", static_cast< float >( probTract->getMax() ) );
-    osg::ref_ptr< osg::Uniform > u_numSlices = new osg::Uniform( "u_numSlices", static_cast< int >( numSlices ) );
-    osg::ref_ptr< osg::Uniform > u_glyphThickness = new WGEPropertyUniform< WPropDouble >( "u_glyphThickness", m_glyphThickness );
-    osg::ref_ptr< osg::Uniform > u_glyphSize = new WGEPropertyUniform< WPropDouble >( "u_glyphSize", m_glyphSize );
-
-    osg::StateSet *states = m_output->getOrCreateStateSet();
-    states->addUniform( u_aVec );
-    states->addUniform( u_bVec );
-    states->addUniform( u_WorldTransform );
-    states->addUniform( u_pixelSizeX );
-    states->addUniform( u_pixelSizeY );
-    states->addUniform( u_pixelSizeZ );
-    states->addUniform( u_color );
-    states->addUniform( u_minRange );
-    states->addUniform( u_maxRange );
-    states->addUniform( u_threshold );
-    states->addUniform( u_maxConnectivityScore );
-    states->addUniform( u_numSlices );
-    states->addUniform( u_glyphThickness );
-    states->addUniform( u_glyphSize );
+    wge::bindAsUniform( m_output, offsets[0], "u_pixelSizeX" );
+    wge::bindAsUniform( m_output, offsets[1], "u_pixelSizeY" );
+    wge::bindAsUniform( m_output, offsets[2], "u_pixelSizeZ" );
+    wge::bindAsUniform( m_output, aVec, "u_aVec" );
+    wge::bindAsUniform( m_output, bVec, "u_bVec" );
+    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
+    wge::bindAsUniform( m_output, u_WorldTransform, "u_WorldTransform" );
+    wge::bindAsUniform( m_output, m_color, "u_color" );
+    wge::bindAsUniform( m_output, m_minRange, "u_minRange" );
+    wge::bindAsUniform( m_output, m_maxRange, "u_maxRange" );
+    wge::bindAsUniform( m_output, m_threshold, "u_threshold" );
+    wge::bindAsUniform( m_output, probTract->getMax(), "u_maxConnectivityScore" );
+    wge::bindAsUniform( m_output, numSlices, "u_numSlices" );
+    wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
+    wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
 
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
