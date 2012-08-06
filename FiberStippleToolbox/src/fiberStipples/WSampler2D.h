@@ -93,7 +93,10 @@ protected:
  */
 class WSampler2DPoissonFixed : public WSampler2D
 {
-    explicit WSampler2DPoissonFixed( boost::filesystem::path path );
+public:
+    explicit WSampler2DPoissonFixed( boost::filesystem::path path, double width = 1.0, double height = 1.0 );
 };
+
+std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents );
 #endif // WSAMPLER2D_H
 

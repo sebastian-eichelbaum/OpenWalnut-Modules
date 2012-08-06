@@ -241,10 +241,25 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     // each slice (containing scattered quads) is child of an transformation node
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
     std::srand( time( NULL ) );
+
+    double aDim = static_cast< double >( sizes[ ( axis == 0 ? 1 : 0 ) ] );
+    double bDim = static_cast< double >( sizes[ ( axis == 2 ? 1 : 2 ) ] );
+    WSampler2DPoissonFixed sampler( m_localPath / "214880_in_[-1,1]^2.dat", aDim, bDim );
+    std::vector< WSampler2D > samplers = splitSampling( sampler, numSlices );
+
+    bool cool = true;
     for( size_t i = 0; i < numSlices; ++i )
     {
         debugLog() << "Generating slice: " << i;
-        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( WSampler2DUniform( 3000, 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
+        osg::ref_ptr< osg::Node > slice;
+        if( !cool )
+        {
+            slice = genScatteredDegeneratedQuads( WSampler2DUniform( 3000, 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
+        }
+        else
+        {
+            slice = genScatteredDegeneratedQuads( samplers[i], minV, aVec, bVec, i );
+        }
         slice->setCullingActive( false );
         mT->addChild( slice );
     }

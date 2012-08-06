@@ -50,7 +50,7 @@ WSampler2DUniform::WSampler2DUniform(  size_t numSamples, double width, double h
     }
 }
 
-WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path )
+WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path, double width, double height )
     : WSampler2D()
 {
     // debugLog() << ( m_localPath / "859035_in_[-1,1]^2.dat.bz2" ).c_str();
@@ -62,11 +62,39 @@ WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path )
     std::ifstream file( path.c_str() );
     double x;
     double y;
+
+    double maxX = ( width >= height ? 1.0 : width / height );
+    double maxY = ( width >= height ? height / width : 1.0 );
     while( file ) {
         file >> x >> y;
         x = ( x + 1.0 ) / 2.0;
         y = ( y + 1.0 ) / 2.0;
-        push_back( WVector2d( x, y ) );
+        if( x <= maxX && y <= maxY )
+        {
+            push_back( WVector2d( x, y ) );
+        }
     }
     file.close();
 }
+
+std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents )
+{
+    size_t numPointsEach = sampler.size() / numComponents;
+    WSampler2D points( sampler );
+    std::random_shuffle( points.begin(), points.end() );
+
+    std::vector< WSampler2D > components;
+    for( size_t i = 0; i < numComponents; ++i )
+    {
+        WSampler2D comp;
+        for( size_t j = 0; j < numPointsEach; ++j )
+        {
+
+            comp.push_back( points[ i * numPointsEach + j ] );
+        }
+        components.push_back( comp );
+    }
+    // discard points
+    return components;
+}
+
