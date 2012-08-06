@@ -28,6 +28,7 @@
 #include <string>
 
 #include "../WMAbstractSliceModule.h"
+#include "WSampler2D.h"
 
 // forward declarations to reduce compile dependencies
 class WDataSetScalar;
@@ -96,6 +97,9 @@ protected:
     virtual void properties();
 
 private:
+    osg::ref_ptr< osg::Geode > genScatteredDegeneratedQuads( const WSampler2D& glyphPositions, osg::Vec3 const& base,
+            osg::Vec3 const& a, osg::Vec3 const& b, size_t sliceNum ) const;
+
     /**
      * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
      *

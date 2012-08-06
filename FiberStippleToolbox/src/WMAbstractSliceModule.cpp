@@ -92,4 +92,3 @@ std::pair< WVector3d, WVector3d > WMAbstractSliceModule::sliceBaseVectors( const
     result.second[ axis == 0 ? 1 : 0 ] = 0.0;
     return result;
 }
-

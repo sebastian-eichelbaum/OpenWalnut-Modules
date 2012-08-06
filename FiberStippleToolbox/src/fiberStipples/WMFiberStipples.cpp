@@ -25,6 +25,12 @@
 #include <cstdlib>
 #include <cmath> // for logarithm function
 #include <string>
+#include <fstream>
+#include <iostream>
+
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
@@ -113,71 +119,66 @@ void WMFiberStipples::properties()
     WMAbstractSliceModule::properties();
 }
 
-namespace
+osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const WSampler2D& glyphPositions, osg::Vec3 const& base,
+        osg::Vec3 const& a, osg::Vec3 const& b, size_t sliceNum ) const
 {
-    osg::ref_ptr< osg::Geode > genScatteredDegeneratedQuads( size_t numSamples, osg::Vec3 const& base, osg::Vec3 const& a,
-            osg::Vec3 const& b, size_t sliceNum )
+    // the stuff needed by the OSG to create a geometry instance
+    osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array( glyphPositions.size() * 4 );
+    osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array( glyphPositions.size() * 4 );
+    osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array( glyphPositions.size() * 4 );
+    osg::ref_ptr< osg::Vec3Array > texcoords2 = new osg::Vec3Array( glyphPositions.size() * 4 );
+    osg::ref_ptr< osg::Vec3Array > normals = new osg::Vec3Array;
+    osg::ref_ptr< osg::Vec4Array > colors = new osg::Vec4Array;
+
+    osg::Vec3 aCrossB = a ^ b;
+    aCrossB.normalize();
+    osg::Vec3 aNorm = a;
+    aNorm.normalize();
+    osg::Vec3 bNorm = b;
+    bNorm.normalize();
+
+    double lambda0, lambda1;
+    for( size_t i = 0; i < glyphPositions.size(); ++i )
     {
-        // the stuff needed by the OSG to create a geometry instance
-        osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array( numSamples * 4 );
-        osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array( numSamples * 4 );
-        osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array( numSamples * 4 );
-        osg::ref_ptr< osg::Vec3Array > texcoords2 = new osg::Vec3Array( numSamples * 4 );
-        osg::ref_ptr< osg::Vec3Array > normals = new osg::Vec3Array;
-        osg::ref_ptr< osg::Vec4Array > colors = new osg::Vec4Array;
-
-        osg::Vec3 aCrossB = a ^ b;
-        aCrossB.normalize();
-        osg::Vec3 aNorm = a;
-        aNorm.normalize();
-        osg::Vec3 bNorm = b;
-        bNorm.normalize();
-
-        double lambda0, lambda1;
-        const double rndMax = RAND_MAX;
-
-        for( size_t i = 0; i < numSamples; ++i )
+        // The degenerated QUAD should have all points in its center
+        lambda0 = glyphPositions[i][0];
+        lambda1 = glyphPositions[i][1];
+        osg::Vec3 quadCenter = base + a * lambda0 + b * lambda1;
+        for( int j = 0; j < 4; ++j )
         {
-            // The degenerated QUAD should have all points in its center
-            lambda0 = rand() / rndMax; // NOLINT, we do not need thread safety here
-            lambda1 = rand() / rndMax; // NOLINT, we do not need thread safety here
-            osg::Vec3 quadCenter = base + a * lambda0 + b * lambda1;
-            for( int j = 0; j < 4; ++j )
-            {
-                vertices->push_back( quadCenter );
-                texcoords2->push_back( osg::Vec3( static_cast< double >( sliceNum ), 0.0, 0.0 ) );
-            }
-
-            texcoords0->push_back( ( -aNorm + -bNorm ) );
-            texcoords0->push_back( (  aNorm + -bNorm ) );
-            texcoords0->push_back( (  aNorm +  bNorm ) );
-            texcoords0->push_back( ( -aNorm +  bNorm ) );
-
-            texcoords1->push_back( osg::Vec3( 0.0, 0.0, 0.0 ) );
-            texcoords1->push_back( osg::Vec3( 1.0, 0.0, 0.0 ) );
-            texcoords1->push_back( osg::Vec3( 1.0, 1.0, 0.0 ) );
-            texcoords1->push_back( osg::Vec3( 0.0, 1.0, 0.0 ) );
+            vertices->push_back( quadCenter );
+            texcoords2->push_back( osg::Vec3( static_cast< double >( sliceNum ), 0.0, 0.0 ) );
         }
 
-        normals->push_back( aCrossB );
-        colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
+        texcoords0->push_back( ( -aNorm + -bNorm ) );
+        texcoords0->push_back( (  aNorm + -bNorm ) );
+        texcoords0->push_back( (  aNorm +  bNorm ) );
+        texcoords0->push_back( ( -aNorm +  bNorm ) );
 
-        // put it all together
-        osg::ref_ptr< osg::Geometry > geometry = new osg::Geometry();
-        geometry->setVertexArray( vertices );
-        geometry->setTexCoordArray( 0, texcoords0 );
-        geometry->setTexCoordArray( 1, texcoords1 );
-        geometry->setTexCoordArray( 2, texcoords2 );
-        geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-        geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
-        geometry->setNormalArray( normals );
-        geometry->setColorArray( colors );
-        geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
-
-        osg::ref_ptr< osg::Geode > geode = new osg::Geode();
-        geode->addDrawable( geometry );
-        return geode;
+        texcoords1->push_back( osg::Vec3( 0.0, 0.0, 0.0 ) );
+        texcoords1->push_back( osg::Vec3( 1.0, 0.0, 0.0 ) );
+        texcoords1->push_back( osg::Vec3( 1.0, 1.0, 0.0 ) );
+        texcoords1->push_back( osg::Vec3( 0.0, 1.0, 0.0 ) );
     }
+
+    normals->push_back( aCrossB );
+    colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
+
+    // put it all together
+    osg::ref_ptr< osg::Geometry > geometry = new osg::Geometry();
+    geometry->setVertexArray( vertices );
+    geometry->setTexCoordArray( 0, texcoords0 );
+    geometry->setTexCoordArray( 1, texcoords1 );
+    geometry->setTexCoordArray( 2, texcoords2 );
+    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
+    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+    geometry->setNormalArray( normals );
+    geometry->setColorArray( colors );
+    geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
+
+    osg::ref_ptr< osg::Geode > geode = new osg::Geode();
+    geode->addDrawable( geometry );
+    return geode;
 }
 
 void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis )
@@ -236,12 +237,14 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
     wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
 
+
     // each slice (containing scattered quads) is child of an transformation node
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
-    std::srand( time( NULL ) ); // start random number generator here, as seeding within one second might not produce different vertices
+    std::srand( time( NULL ) );
     for( size_t i = 0; i < numSlices; ++i )
     {
-        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( i / 3.0 * 3000, minV, aVec, bVec, i );
+        debugLog() << "Generating slice: " << i;
+        osg::ref_ptr< osg::Node > slice = genScatteredDegeneratedQuads( WSampler2DUniform( 3000, 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
         slice->setCullingActive( false );
         mT->addChild( slice );
     }

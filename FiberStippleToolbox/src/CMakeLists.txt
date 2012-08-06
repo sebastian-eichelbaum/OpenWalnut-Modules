@@ -59,7 +59,8 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
-FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgManipulator )
+# FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgManipulator )
+# FIND_PACKAGE( Boost 1.46.0 REQUIRED iostreams )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
