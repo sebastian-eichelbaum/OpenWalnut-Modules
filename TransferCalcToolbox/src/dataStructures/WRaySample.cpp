@@ -84,3 +84,13 @@ double& WRaySample::fracA()
 {
     return m_fracAnisotropy;
 }
+
+const double& WRaySample::angle() const
+{
+    return m_angle;
+}
+
+double& WRaySample::angle()
+{
+    return m_angle;
+}

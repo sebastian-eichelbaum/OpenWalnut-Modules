@@ -44,6 +44,7 @@
 #include "core/kernel/WModuleInputData.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/dataHandler/WDataSetScalar.h"
+#include "core/dataHandler/WDataSetVector.h"
 #include "core/common/math/linearAlgebra/WLinearAlgebra.h"
 #include "core/common/math/WMatrix.h"
 
@@ -147,6 +148,11 @@ private:
     virtual double interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid );
 
     /**
+     * Curvature calculation for given derivated dataset.
+     */
+    virtual void calculateCurvature();
+
+    /**
      * Gradient calculation for a given position in the grid.
      *
      * \param position Position for which the gradient should be determined.
@@ -203,9 +209,24 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetScalar > >  m_inputData;
 
     /**
+     * An input connector used to get the derivated dataset from the module 'Spacial Derivative'.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetVector > >  m_inputDerivation;
+
+    /**
      * An input connector used to get fractional anisotropy datasets from other modules.
      */
     boost::shared_ptr< WModuleInputData< WDataSetScalar > >  m_inputFA;
+
+    /**
+     * The output connector used to provide the calculated curvature data in mean form to other modules.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetScalar > > m_curveMeanOut;
+
+    /**
+     * The output connector used to provide the calculated curvature data in Gauss form to other modules.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetScalar > > m_curveGaussOut;
 
     /**
      * A condition used to notify about changes in several properties.
@@ -223,9 +244,19 @@ private:
     boost::shared_ptr< WDataSetScalar > m_dataSet;
 
     /**
+     * Optinal: additional dataset with derivated data.
+     */
+    boost::shared_ptr< WDataSetVector > m_deriDataSet;
+
+    /**
      * Optinal: additional dataset with fractional anisotropy data.
      */
     boost::shared_ptr< WDataSetScalar > m_FAdataSet;
+
+    /**
+     * Boolean to check if any derivated data is present and valid.
+     */
+    bool m_DeriIsValid;
 
     /**
      * Boolean to check if any FA data is present and valid.
@@ -243,6 +274,11 @@ private:
      * Current grid
      */
     boost::shared_ptr< WGridRegular3D > m_grid;
+
+    /**
+     * Current grid of derivated data
+     */
+    boost::shared_ptr< WGridRegular3D > m_deriGrid;
 
     /**
      * Current FA grid
