@@ -26,8 +26,9 @@
 
 #include <core/kernel/WModule.h>
 
-#include "lineGuidedSlice/WMLineGuidedSlice.h"
+#include "contourTree/WMContourTree.h"
 #include "hud/WMHud.h"
+#include "lineGuidedSlice/WMLineGuidedSlice.h"
 #include "writeGeometry/WMWriteGeometry.h"
 
 #include "WToolkit.h"
@@ -36,8 +37,9 @@
 // Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMLineGuidedSlice ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMContourTree ) );
     m.push_back( boost::shared_ptr< WModule >( new WMHud ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMLineGuidedSlice ) );
     m.push_back( boost::shared_ptr< WModule >( new WMWriteGeometry ) );
 }
 
