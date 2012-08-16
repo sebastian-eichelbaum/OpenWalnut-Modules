@@ -152,6 +152,10 @@ void main()
 
     // span quad incase of regions with high probablility
     if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numSlices  >= gl_TexCoord[2].x )
+    // // Debug: Draw seed points with repect to probability and their density-slice-number
+    // if( probability > u_threshold &&  1 >= gl_TexCoord[2].x )
+    // // Debug: Draw all seed points. You need to disable else
+    // if( 1 >= gl_TexCoord[2].x )
     {
          // transform position, the 4th component must be explicitly set, as otherwise they would have been scaled
          gl_Position = gl_ModelViewProjectionMatrix * ( vec4( u_glyphSize * gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );

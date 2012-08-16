@@ -154,6 +154,10 @@ private:
      * For initial slice positioning we need to control if the module is in intial state or not.
      */
     bool m_first;
+
+    // TODO(math): Remove this ugly hack as soon as possible
+    std::vector< WSampler2D > m_samplers;
+    WPropBool m_oldNew;
 };
 
 #endif  // WMFIBERSTIPPLES_H

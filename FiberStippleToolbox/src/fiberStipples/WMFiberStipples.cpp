@@ -115,6 +115,8 @@ void WMFiberStipples::properties()
     m_glyphSize->setMin( 0.01 );
     m_glyphSize->setMax( 10.0 );
 
+    m_oldNew = m_properties->addProperty( "Old|New", "Old|New", false, m_propCondition );
+
     // call WModule's initialization
     WMAbstractSliceModule::properties();
 }
@@ -123,10 +125,10 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
         osg::Vec3 const& a, osg::Vec3 const& b, size_t sliceNum ) const
 {
     // the stuff needed by the OSG to create a geometry instance
-    osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array( glyphPositions.size() * 4 );
-    osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array( glyphPositions.size() * 4 );
-    osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array( glyphPositions.size() * 4 );
-    osg::ref_ptr< osg::Vec3Array > texcoords2 = new osg::Vec3Array( glyphPositions.size() * 4 );
+    osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array;
+    osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array;
+    osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array;
+    osg::ref_ptr< osg::Vec3Array > texcoords2 = new osg::Vec3Array;
     osg::ref_ptr< osg::Vec3Array > normals = new osg::Vec3Array;
     osg::ref_ptr< osg::Vec4Array > colors = new osg::Vec4Array;
 
@@ -137,12 +139,22 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     osg::Vec3 bNorm = b;
     bNorm.normalize();
 
+    // TODO(math): remove this ugly hack
+    double width = a.length();
+    double height = b.length();
+    double maxX = ( width >= height ? 1.0 : width / height );
+    double maxY = ( width >= height ? height / width : 1.0 );
+
     double lambda0, lambda1;
     for( size_t i = 0; i < glyphPositions.size(); ++i )
     {
         // The degenerated QUAD should have all points in its center
         lambda0 = glyphPositions[i][0];
         lambda1 = glyphPositions[i][1];
+
+        // TODO(math): remove this ugly hack
+        if( lambda0 > maxX || lambda1 > maxY ) { continue; }
+
         osg::Vec3 quadCenter = base + a * lambda0 + b * lambda1;
         for( int j = 0; j < 4; ++j )
         {
@@ -242,24 +254,20 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
     std::srand( time( NULL ) );
 
-    double aDim = static_cast< double >( sizes[ ( axis == 0 ? 1 : 0 ) ] );
-    double bDim = static_cast< double >( sizes[ ( axis == 2 ? 1 : 2 ) ] );
-    WSampler2DPoissonFixed sampler( m_localPath / "214880_in_[-1,1]^2.dat", aDim, bDim );
-    std::vector< WSampler2D > samplers = splitSampling( sampler, numSlices );
-
-    bool cool = true;
+    // TODO(math): remove this hack as soon as possible
     for( size_t i = 0; i < numSlices; ++i )
     {
-        debugLog() << "Generating slice: " << i;
-        osg::ref_ptr< osg::Node > slice;
-        if( !cool )
+        osg::ref_ptr< osg::Geode > slice;
+        if( !m_oldNew->get() )
         {
-            slice = genScatteredDegeneratedQuads( WSampler2DUniform( 3000, 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
+            slice = genScatteredDegeneratedQuads( WSampler2DUniform( 10000, 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
         }
         else
         {
-            slice = genScatteredDegeneratedQuads( samplers[i], minV, aVec, bVec, i );
+            slice = genScatteredDegeneratedQuads( m_samplers[i], minV, aVec, bVec, i );
         }
+        debugLog() << "Generating slice: " << i << " with " << slice->getDrawable(0)->asGeometry()->getVertexArray()->getNumElements() / 4 << " points";
+        debugLog() << "Samples[" << i << "]: " << m_samplers[i].size();
         slice->setCullingActive( false );
         mT->addChild( slice );
     }
@@ -272,6 +280,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     // debugLog() << "Slice: " << planeNormal << " aVec: " << aVec << " bVec: " << bVec << " axis: " << axis;
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
+    m_output->getOrCreateStateSet()->setMode( GL_DEPTH_TEST, osg::StateAttribute::OFF );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
     m_output->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     m_output->insert( mT );
@@ -294,6 +303,10 @@ void WMFiberStipples::moduleMain()
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_output );
     osg::ref_ptr< WGEShader > shader = new WGEShader( "WFiberStipples", m_localPath );
     shader->apply( m_output ); // this automatically applies the shader
+
+    // TODO(math): Remove this ugly hack as soon as possible
+    WSampler2DPoissonFixed sampler( m_localPath / "214880_in_[-1,1]^2.dat" );
+    m_samplers = splitSamplingPoisson( sampler, 20 );
 
     // main loop
     while( !m_shutdownFlag() )

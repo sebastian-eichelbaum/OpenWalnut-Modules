@@ -24,6 +24,8 @@
 
 #include <fstream>
 
+#include <boost/array.hpp>
+
 #include "WSampler2D.h"
 
 // Anonymous namespace for some constants only used in here
@@ -50,7 +52,7 @@ WSampler2DUniform::WSampler2DUniform(  size_t numSamples, double width, double h
     }
 }
 
-WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path, double width, double height )
+WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path )
     : WSampler2D()
 {
     // debugLog() << ( m_localPath / "859035_in_[-1,1]^2.dat.bz2" ).c_str();
@@ -63,16 +65,12 @@ WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path, do
     double x;
     double y;
 
-    double maxX = ( width >= height ? 1.0 : width / height );
-    double maxY = ( width >= height ? height / width : 1.0 );
-    while( file ) {
+    while( file )
+    {
         file >> x >> y;
         x = ( x + 1.0 ) / 2.0;
         y = ( y + 1.0 ) / 2.0;
-        if( x <= maxX && y <= maxY )
-        {
-            push_back( WVector2d( x, y ) );
-        }
+        push_back( WVector2d( x, y ) );
     }
     file.close();
 }
@@ -97,4 +95,110 @@ std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numCo
     // discard points
     return components;
 }
+
+template <typename I>
+I random_element(I begin, I end)
+{
+    const unsigned long n = std::distance( begin, end );
+    if( n == 0 )
+    {
+        return begin;
+    }
+    const unsigned long divisor = ( RAND_MAX ) / n;
+    unsigned long k;
+    do
+    {
+        k = std::rand() / divisor;
+    }
+    while( k >= n );
+    std::advance( begin, k );
+    return begin;
+}
+
+template <typename I>
+bool valid( const WVector2d& p, I begin, I end, double radiusSquared )
+{
+    for( I it = begin; it != end; ++it )
+    {
+        if( length2( p - *it ) < radiusSquared )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool valid( const WVector2d& p, const std::vector< WSampler2D >& c, double radiusSquared )
+{
+    for( size_t i = 0; i < c.size(); ++i )
+    {
+        if( !valid( p, c[i].begin(), c[i].end(), radiusSquared ) )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// TODO(math): Remove this ugly hack as soon as possible
+std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents )
+{
+    WSampler2D points( sampler );
+    std::random_shuffle( points.begin(), points.end() );
+
+    size_t numPoints = points.size(); // we need this as we want to delete in O(1)
+    std::cout << "NumPoints: " << numPoints << std::endl;
+    std::vector< WSampler2D > components;
+    boost::array< double, 20 > coeff = {{ 7.0,
+                                          5.0,
+                                          4.0,
+                                          3.5,
+                                          3.0,
+                                          2.6,
+                                          2.3,
+                                          2.1,
+                                          2.02,
+                                          2.00001,
+                                          2.000005,
+                                          2.000001,
+                                          1.9999995,
+                                          1.999999,
+                                          1.999998,
+                                          1.999997,
+                                          1.9999955,
+                                          1.999994,
+                                          1.999992,
+                                          1.99999}};
+    for( size_t i = 0; i < numComponents; ++i )
+    {
+        std::cout << std::endl << "Next component: " << i << std::endl;
+        double r2 = 0.001 * 0.001 * coeff[i] * coeff[i];
+        std::cout << "r2: " << r2 << " r: " << std::sqrt( r2 ) << std::endl;
+        WSampler2D comp;
+
+        size_t failure = 0;
+        while( numPoints > 0 && failure < 180 )
+        {
+            size_t n = std::rand() % numPoints;
+            if( !valid( points[n], components, r2 ) || !valid( points[n], comp.begin(), comp.end(), r2 ) )
+            {
+                failure++;
+            }
+            else
+            {
+                comp.push_back( points[n] );
+                std::swap( points[n], points[ numPoints - 1 ] );
+                // std::cout << "." << std::flush;
+                numPoints -= 1;
+                failure = 0;
+            }
+        }
+        std::cout << "size: " << comp.size() << std::endl;
+        components.push_back( comp );
+    }
+    // discard points
+    return components;
+}
+
+
 
