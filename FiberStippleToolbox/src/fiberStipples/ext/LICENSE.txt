@@ -1,0 +1,15 @@
+This code was written by Daniel Dunbar, producing PoissonDisk Sampling. It is
+taken from: https://github.com/ddunbar/PDSample. We copied code only partially
+as we do not need the whole software. The software is orignially licensed this
+way:
+
+    This code is released into the public domain. You can do whatever
+    you want with it.
+
+    I do ask that you respect the authorship and credit myself (Daniel
+    Dunbar) when referencing the code. Additionally, if you use the
+    code in an interesting or integral manner I would like to hear
+    about it.
+
+So we think this compatible with LGPL. If not please contact us at:
+math{at}informatiki{dot}uni{dash}leipzig{dot}de.

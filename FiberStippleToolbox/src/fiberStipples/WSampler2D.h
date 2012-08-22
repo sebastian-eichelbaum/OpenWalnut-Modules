@@ -88,13 +88,17 @@ protected:
 };
 
 /**
- * Loads points from a fixed poission disk sampling given in a (ASCII) file where each point is in a line and each line
- * is structured: x y.
+ * Creates a Poisson Disk sampling in the [0,1]^2 domain.
+ * \note This sampling can be used as tile.
+ * \note This is very fast (~200.000pts in less than a second).
  */
-class WSampler2DPoissonFixed : public WSampler2D
+class WSampler2DPoisson : public WSampler2D
 {
 public:
-    explicit WSampler2DPoissonFixed( boost::filesystem::path path );
+    explicit WSampler2DPoisson( float radius );
+//    void scale( double width, double height );
+private:
+    float m_radius;
 };
 
 std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents );

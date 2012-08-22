@@ -26,6 +26,7 @@
 
 #include <boost/array.hpp>
 
+#include "ext/PDSampling.h"
 #include "WSampler2D.h"
 
 // Anonymous namespace for some constants only used in here
@@ -52,27 +53,22 @@ WSampler2DUniform::WSampler2DUniform(  size_t numSamples, double width, double h
     }
 }
 
-WSampler2DPoissonFixed::WSampler2DPoissonFixed( boost::filesystem::path path )
-    : WSampler2D()
+WSampler2DPoisson::WSampler2DPoisson( float radius )
+    : WSampler2D(),
+      m_radius( radius )
 {
-    // debugLog() << ( m_localPath / "859035_in_[-1,1]^2.dat.bz2" ).c_str();
-    // std::ifstream file( ( m_localPath / "859035_in_[-1,1]^2.dat.bz2" ).c_str(), std::ios_base::in | std::ios_base::binary);
-    // boost::iostreams::filtering_streambuf< boost::iostreams::input > in;
-    // in.push( boost::iostreams::bzip2_decompressor() );
-    // in.push( file );
+    boost::shared_ptr< PDSampler > sampler( new BoundarySampler( 0.002, true ) );
+    sampler->complete(); // generates PDSampling in [-1,1]^2 domain.
 
-    std::ifstream file( path.c_str() );
-    double x;
-    double y;
+    double x,y;
 
-    while( file )
+    for( size_t i = 0; i < sampler->points.size(); ++i )
     {
-        file >> x >> y;
-        x = ( x + 1.0 ) / 2.0;
-        y = ( y + 1.0 ) / 2.0;
+        // rescale to [0,1]^2 domain
+        x = ( sampler->points[i].x + 1.0 ) / 2.0;
+        y = ( sampler->points[i].y + 1.0 ) / 2.0;
         push_back( WVector2d( x, y ) );
     }
-    file.close();
 }
 
 std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents )
@@ -96,48 +92,51 @@ std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numCo
     return components;
 }
 
-template <typename I>
-I random_element(I begin, I end)
+namespace
 {
-    const unsigned long n = std::distance( begin, end );
-    if( n == 0 )
+    template <typename I>
+    I random_element(I begin, I end)
     {
+        const unsigned long n = std::distance( begin, end );
+        if( n == 0 )
+        {
+            return begin;
+        }
+        const unsigned long divisor = ( RAND_MAX ) / n;
+        unsigned long k;
+        do
+        {
+            k = std::rand() / divisor;
+        }
+        while( k >= n );
+        std::advance( begin, k );
         return begin;
     }
-    const unsigned long divisor = ( RAND_MAX ) / n;
-    unsigned long k;
-    do
-    {
-        k = std::rand() / divisor;
-    }
-    while( k >= n );
-    std::advance( begin, k );
-    return begin;
-}
 
-template <typename I>
-bool valid( const WVector2d& p, I begin, I end, double radiusSquared )
-{
-    for( I it = begin; it != end; ++it )
+    template <typename I>
+    bool valid( const WVector2d& p, I begin, I end, double radiusSquared )
     {
-        if( length2( p - *it ) < radiusSquared )
+        for( I it = begin; it != end; ++it )
         {
-            return false;
+            if( length2( p - *it ) < radiusSquared )
+            {
+                return false;
+            }
         }
+        return true;
     }
-    return true;
-}
 
-bool valid( const WVector2d& p, const std::vector< WSampler2D >& c, double radiusSquared )
-{
-    for( size_t i = 0; i < c.size(); ++i )
+    bool valid( const WVector2d& p, const std::vector< WSampler2D >& c, double radiusSquared )
     {
-        if( !valid( p, c[i].begin(), c[i].end(), radiusSquared ) )
+        for( size_t i = 0; i < c.size(); ++i )
         {
-            return false;
+            if( !valid( p, c[i].begin(), c[i].end(), radiusSquared ) )
+            {
+                return false;
+            }
         }
+        return true;
     }
-    return true;
 }
 
 // TODO(math): Remove this ugly hack as soon as possible

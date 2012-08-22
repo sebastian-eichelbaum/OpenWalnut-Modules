@@ -305,7 +305,7 @@ void WMFiberStipples::moduleMain()
     shader->apply( m_output ); // this automatically applies the shader
 
     // TODO(math): Remove this ugly hack as soon as possible
-    WSampler2DPoissonFixed sampler( m_localPath / "214880_in_[-1,1]^2.dat" );
+    WSampler2DPoisson sampler( 0.02 );
     m_samplers = splitSamplingPoisson( sampler, 20 );
 
     // main loop
