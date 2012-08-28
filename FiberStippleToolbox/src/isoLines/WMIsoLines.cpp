@@ -35,7 +35,7 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
-#include "modules/emptyIcon.xpm" // Please put a real icon here.
+#include "WMIsoLines.xpm"
 #include "WMIsoLines.h"
 
 WMIsoLines::WMIsoLines():
@@ -55,7 +55,7 @@ boost::shared_ptr< WModule > WMIsoLines::factory() const
 
 const char** WMIsoLines::getXPMIcon() const
 {
-    return emptyIcon_xpm; // Please put a real icon here.
+    return WMIsoLines_xpm;
 }
 const std::string WMIsoLines::getName() const
 {
