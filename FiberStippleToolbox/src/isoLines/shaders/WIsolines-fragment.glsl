@@ -37,6 +37,7 @@ uniform float u_lineWidth;
  */
 uniform vec4 u_color = vec4( 1.0, 0.0, 0.0, 1.0 );
 
+
 /**
  * Draws a line from point p1 to point p2 with the given width and color.
  *
@@ -69,6 +70,7 @@ void main()
     bool edge1Hit = bool( edge1Hit_f ); // OpenGL does not allow bool varyings
     bool edge2Hit = bool( edge2Hit_f ); // OpenGL does not allow bool varyings
     bool edge3Hit = bool( edge3Hit_f ); // OpenGL does not allow bool varyings
+
     if( sumHits < 15.0 )
     {
         if( edge0Hit && edge1Hit )
@@ -101,4 +103,12 @@ void main()
         drawLine( hit0Pos, hit1Pos, u_lineWidth, u_color );
         drawLine( hit2Pos, hit3Pos, u_lineWidth, u_color );
     }
+
+    // // Debug: enable this to see border in red
+    // vec2 pos = v_quadScale * gl_TexCoord[1].xy;
+    // float margin = 0.01;
+    // if( pos.x <= margin || pos.y <= margin || pos.x >= v_quadScale - margin || pos.y >= v_max - margin )
+    // {
+    //     gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+    // }
 }
