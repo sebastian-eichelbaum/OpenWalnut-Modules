@@ -108,7 +108,7 @@ private:
      * boundingbox for the scene. (Furthermore it is assumed that the vectors are also available within this BB.)
      * \param axis Selects the axis aligned plane (aka slice) by number. 0 => sagittal, 1 => coronal, 2=> axial.
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis );
+    void initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis, const size_t numDensitySlices );
 
     /**
      * The probabilistic tractogram input connector.

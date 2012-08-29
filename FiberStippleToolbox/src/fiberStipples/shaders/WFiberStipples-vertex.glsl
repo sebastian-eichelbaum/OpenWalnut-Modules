@@ -125,7 +125,7 @@ uniform vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
 /**
  * How much slices with random quads are used.
  */
-uniform int u_numSlices;
+uniform int u_numDensitySlices;
 
 /**
  * Scales the quad which is used later for the stipples.
@@ -151,7 +151,7 @@ void main()
     probability = texture3D( u_probTractSampler, texturePosition ).r;
 
     // span quad incase of regions with high probablility
-    if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numSlices  >= gl_TexCoord[2].x )
+    if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numDensitySlices  >= gl_TexCoord[2].x )
     // // Debug: Draw seed points with repect to probability and their density-slice-number
     // if( probability > u_threshold &&  1 >= gl_TexCoord[2].x )
     // // Debug: Draw all seed points. You need to disable else

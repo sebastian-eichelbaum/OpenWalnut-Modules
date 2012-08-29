@@ -26,6 +26,8 @@
 
 #include <boost/array.hpp>
 
+#include <core/common/WProgress.h>
+
 #include "ext/PDSampling.h"
 #include "WSampler2D.h"
 
@@ -140,13 +142,12 @@ namespace
 }
 
 // TODO(math): Remove this ugly hack as soon as possible
-std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents )
+std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents, boost::shared_ptr< WProgress > progress )
 {
     WSampler2D points( sampler );
     std::random_shuffle( points.begin(), points.end() );
 
     size_t numPoints = points.size(); // we need this as we want to delete in O(1)
-    std::cout << "NumPoints: " << numPoints << std::endl;
     std::vector< WSampler2D > components;
     boost::array< double, 20 > coeff = {{ 7.0,
                                           5.0,
@@ -168,11 +169,10 @@ std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_
                                           1.999994,
                                           1.999992,
                                           1.99999}};
+
     for( size_t i = 0; i < numComponents; ++i )
     {
-        std::cout << std::endl << "Next component: " << i << std::endl;
         double r2 = 0.001 * 0.001 * coeff[i] * coeff[i];
-        std::cout << "r2: " << r2 << " r: " << std::sqrt( r2 ) << std::endl;
         WSampler2D comp;
 
         size_t failure = 0;
@@ -187,14 +187,15 @@ std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_
             {
                 comp.push_back( points[n] );
                 std::swap( points[n], points[ numPoints - 1 ] );
-                // std::cout << "." << std::flush;
                 numPoints -= 1;
                 failure = 0;
             }
         }
-        std::cout << "size: " << comp.size() << std::endl;
         components.push_back( comp );
+        ++*progress;
     }
+    progress->finish();
+
     // discard points
     return components;
 }

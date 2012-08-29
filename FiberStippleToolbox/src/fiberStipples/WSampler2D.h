@@ -28,8 +28,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 
-#include "core/common/math/linearAlgebra/WVectorFixed.h" // for WVector2d
-#include "core/common/WMixinVector.h"
+#include <core/common/math/linearAlgebra/WVectorFixed.h> // for WVector2d
+#include <core/common/WMixinVector.h>
+#include <core/common/WProgress.h>
 
 /**
  * Generates random points on a two dimensional disk (aka plane, aka slice).
@@ -102,6 +103,6 @@ private:
 };
 
 std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents );
-std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents );
+std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents, boost::shared_ptr< WProgress > splitProgress );
 #endif // WSAMPLER2D_H
 

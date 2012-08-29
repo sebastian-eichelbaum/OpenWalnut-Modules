@@ -193,7 +193,7 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     return geode;
 }
 
-void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis )
+void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis, const size_t numDensitySlices )
 {
     debugLog() << "Init OSG";
 
@@ -226,7 +226,6 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
         m_pos->set( midBB[axis] );
     }
 
-    size_t numSlices = 20;
     boost::shared_ptr< const WGridRegular3D > grid = boost::shared_dynamic_cast< const WGridRegular3D >( probTract->getGrid() );
     if( !grid )
     {
@@ -245,7 +244,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, m_maxRange, "u_maxRange" );
     wge::bindAsUniform( m_output, m_threshold, "u_threshold" );
     wge::bindAsUniform( m_output, probTract->getMax(), "u_maxConnectivityScore" );
-    wge::bindAsUniform( m_output, numSlices, "u_numSlices" );
+    wge::bindAsUniform( m_output, numDensitySlices, "u_numDensitySlices" );
     wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
     wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
 
@@ -255,7 +254,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     std::srand( time( NULL ) );
 
     // TODO(math): remove this hack as soon as possible
-    for( size_t i = 0; i < numSlices; ++i )
+    for( size_t i = 0; i < numDensitySlices; ++i )
     {
         osg::ref_ptr< osg::Geode > slice;
         if( !m_oldNew->get() )
@@ -266,8 +265,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
         {
             slice = genScatteredDegeneratedQuads( m_samplers[i], minV, aVec, bVec, i );
         }
-        debugLog() << "Generating slice: " << i << " with " << slice->getDrawable(0)->asGeometry()->getVertexArray()->getNumElements() / 4 << " points";
-        debugLog() << "Samples[" << i << "]: " << m_samplers[i].size();
+        debugLog() << "Density slice " << i << ": " << slice->getDrawable(0)->asGeometry()->getVertexArray()->getNumElements() / 4 << " points";
         slice->setCullingActive( false );
         mT->addChild( slice );
     }
@@ -305,8 +303,11 @@ void WMFiberStipples::moduleMain()
     shader->apply( m_output ); // this automatically applies the shader
 
     // TODO(math): Remove this ugly hack as soon as possible
+    const size_t numDensitySlices = 20;
     WSampler2DPoisson sampler( 0.02 );
-    m_samplers = splitSamplingPoisson( sampler, 20 );
+    boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
+    m_progress->addSubProgress( splitProgress );
+    m_samplers = splitSamplingPoisson( sampler, 20, splitProgress );
 
     // main loop
     while( !m_shutdownFlag() )
@@ -362,7 +363,7 @@ void WMFiberStipples::moduleMain()
         }
 
         size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
-        initOSG( probTract, axis );
+        initOSG( probTract, axis, numDensitySlices );
 
         wge::bindTexture( m_output, vectors->getTexture(), 0, "u_vectors" );
         wge::bindTexture( m_output, probTract->getTexture(), 1, "u_probTract" );

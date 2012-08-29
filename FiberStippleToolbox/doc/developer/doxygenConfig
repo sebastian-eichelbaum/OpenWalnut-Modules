@@ -614,7 +614,8 @@ RECURSIVE              = YES
 
 EXCLUDE                = src/modules/data/ext \
                          src/modules/lic/fibernavigator \
-                         src/modules/lic/fantom
+                         src/modules/lic/fantom \
+                         src/fiberStipples/ext
 
 # The EXCLUDE_SYMLINKS tag can be used select whether or not files or
 # directories that are symbolic links (a Unix filesystem feature) are excluded
