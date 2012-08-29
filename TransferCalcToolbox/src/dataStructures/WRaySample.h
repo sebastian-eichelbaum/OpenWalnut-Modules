@@ -114,6 +114,20 @@ public:
      */
     double& fracA();
 
+    /**
+     * Access the angle between ray and gradient of the sample point.
+     *
+     * \return the angle reference.
+     */
+    const double& angle() const;
+
+    /**
+     * Access the angle between ray and gradient of the sample point.
+     *
+     * \return the angle reference.
+     */
+    double& angle();
+
 protected:
 private:
     /**
@@ -140,6 +154,11 @@ private:
      * The fractional anisotropy at this sample point.
      */
     double m_fracAnisotropy;
+
+    /**
+     * The angle between ray and gradient at this sample point.
+     */
+    double m_angle;
 };
 
 #endif  // WRAYSAMPLE_H

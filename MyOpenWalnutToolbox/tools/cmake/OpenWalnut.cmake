@@ -61,13 +61,30 @@ ENDIF()
 #
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+# 1: some needed path setup for version headers. This is needed for searching OW.
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+# where to put the header
+SET( OW_VERSION_HEADER_DIRECTORY_RELATIVE "versionHeader" )
+
+# this is the name of the INTERNAL OpenWalnut version header. It is needed for searching OW. Do not mix this up with the version header filename
+# you use for the toolbox (external module building).
+SET( OW_INTERNAL_VERSION_HEADER_FILENAME "core/WVersion.h" )
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+# 2: start build system and either search OW or use it internally.
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+MESSAGE( STATUS "----------------------------------------------------------------------" )
+MESSAGE( STATUS "Welcome! This is OpenWalnut Build System." )
+
 # if this is included for external module building, find OpenWalnut.
 IF( NOT ${OW_EXTERNAL_MODULE} )
     # to allow non-core code to access core and ext absolutely
-    MESSAGE( STATUS "This is OpenWalnut Build System." )   
     INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR} )
 ELSE()
-    MESSAGE( STATUS "This is OpenWalnut Build System configured for external use." )   
+    MESSAGE( STATUS "Searching OpenWalnut ..." )   
 
     FIND_PATH( OPENWALNUT_INCLUDE_DIR core/kernel/WKernel.h ${OPENWALNUT_INCLUDEDIR} $ENV{OPENWALNUT_INCLUDEDIR} /usr/include/openwalnut /usr/local/include/openwalnut )
     FIND_LIBRARY( OPENWALNUT_LIBRARIES NAMES ${OW_LIB_OPENWALNUT} lib${OW_LIB_OPENWALNUT} HINTS 
@@ -81,10 +98,22 @@ ELSE()
                   /usr/local/OpenWalnut
                   $ENV{PROGRAMFILES}/OpenWalnut )
 
+    # find the version header. There are two possibilities here: 
+    # 1: we find it inside the include dir -- this is the case if we found an installed OW
+    # 2: we find it inside the lib/../versionHeader dir -- this is the case if we found a local build of OW
+    # NOTE: this relies on OPENWALNUT_INCLUDE_DIR which is filled above. If it is empty, no OW was found so it is not bad to not find the version
+    # header.
+    FIND_PATH( OPENWALNUT_VERSIONHEADER_DIR ${OW_INTERNAL_VERSION_HEADER_FILENAME} 
+                # 1: we search in the hopefully found include dir:    
+                ${OPENWALNUT_INCLUDE_DIR}
+                # 2: we search in the build dir
+                "$ENV{OPENWALNUT_LIBDIR}/../${OW_VERSION_HEADER_DIRECTORY_RELATIVE}" 
+             )
     SET( OPENWALNUT_FOUND FALSE )
 
     # do not confuse the user with this
     MARK_AS_ADVANCED( FORCE OPENWALNUT_INCLUDE_DIR )
+    MARK_AS_ADVANCED( FORCE OPENWALNUT_VERSIONHEADER_DIR )
     MARK_AS_ADVANCED( FORCE OPENWALNUT_LIBRARIES )
     MARK_AS_ADVANCED( FORCE OPENWALNUT_FOUND )
 
@@ -92,22 +121,68 @@ ELSE()
     IF( OPENWALNUT_INCLUDE_DIR )
       MESSAGE( STATUS "Found OpenWalnut include files in ${OPENWALNUT_INCLUDE_DIR}." )
     ENDIF()
+    IF( OPENWALNUT_VERSIONHEADER_DIR )
+      MESSAGE( STATUS "Found OpenWalnut version header in ${OPENWALNUT_VERSIONHEADER_DIR}." )
+    ENDIF()
     IF( OPENWALNUT_LIBRARIES )
       MESSAGE( STATUS "Found OpenWalnut libs in ${OPENWALNUT_LIBRARIES}." )
     ENDIF()
 
     # really found?
-    IF( OPENWALNUT_INCLUDE_DIR AND OPENWALNUT_LIBRARIES )
+    IF( OPENWALNUT_INCLUDE_DIR AND OPENWALNUT_LIBRARIES AND OPENWALNUT_VERSIONHEADER_DIR )
         SET( OPENWALNUT_FOUND TRUE )
         MESSAGE( STATUS "Found OpenWalnut." )
     ELSE()
-        MESSAGE( FATAL_ERROR "Could not find OpenWalnut." )
+        MESSAGE( FATAL_ERROR "Could not find OpenWalnut. You can use the environment variables OPENWALNUT_INCLUDEDIR and  OPENWALNUT_LIBDIR to point to your OpenWalnut installation." )
     ENDIF()
 
     # include
     INCLUDE_DIRECTORIES( ${OPENWALNUT_INCLUDE_DIR} )
+    INCLUDE_DIRECTORIES( ${OPENWALNUT_VERSIONHEADER_DIR} )
     SET( OW_LIB_OPENWALNUT ${OPENWALNUT_LIBRARIES} )
 ENDIF()
+
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+# 3: version header setup for the external module or OpenWalnut (depending on OW_EXTERNAL_MODULE)
+# ---------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Generate needed headers
+# NOTE: add a line ADD_DEPENDENCIES( XYZ OW_generate_version_header ) to your target XYZ if you need the header!
+
+# Call the file differently depending on internal or external build
+IF( NOT ${OW_EXTERNAL_MODULE} )
+    # if we build OW, we want the version header to be placed in core later on. We use the internal version header filename directly
+    SET( OW_VERSION_HEADER_FILENAME ${OW_INTERNAL_VERSION_HEADER_FILENAME} )
+    SET( OW_VERSION_HEADER_PREFIX "W" )
+ELSE()
+    # if this is for external use, the module might want to use its own version header
+    # if we build OW, we want the version header to be placed in core later on
+    SET( OW_VERSION_HEADER_FILENAME "WToolboxVersion.h" )
+    SET( OW_VERSION_HEADER_PREFIX "WTOOLBOX" )
+ENDIF()
+
+# the complete header filename:
+SET( OW_VERSION_HEADER_DIRECTORY ${PROJECT_BINARY_DIR}/${OW_VERSION_HEADER_DIRECTORY_RELATIVE} )
+SET( OW_VERSION_HEADER ${OW_VERSION_HEADER_DIRECTORY}/${OW_VERSION_HEADER_FILENAME} )
+
+# to allow all those targets to find the header:
+INCLUDE_DIRECTORIES( ${OW_VERSION_HEADER_DIRECTORY} )
+# Setup the target
+SETUP_VERSION_HEADER( ${OW_VERSION_HEADER} ${OW_VERSION_HEADER_PREFIX} )
+
+# Set the OW version string. This can be used by others for setting target versions during compilation.
+GET_VERSION_STRING( OW_VERSION OW_LIB_VERSION )
+IF( NOT ${OW_EXTERNAL_MODULE} )
+    MESSAGE( STATUS "OW Version: \"${OW_VERSION}\"; OW Lib Version: \"${OW_LIB_VERSION}\"." )
+ELSE()
+    MESSAGE( STATUS "OW Toolbox Version: \"${OW_VERSION}\"; OW Toolbox Lib Version: \"${OW_LIB_VERSION}\"." )
+ENDIF()
+
+# We need a SOVERSION too. This somehow describes the API compatibility. We use the major number here.
+SPLIT_VERSION_STRING( ${OW_LIB_VERSION} OW_VERSION_MAJOR OW_VERSION_MINOR OW_VERSION_PATCH )
+SET( OW_SOVERSION ${OW_VERSION_MAJOR} )
+
+MESSAGE( STATUS "----------------------------------------------------------------------" )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -165,27 +240,35 @@ FUNCTION( BUILD_SYSTEM_COMPILER )
     SET( CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "" FORCE )
     SET( CMAKE_CXX_FLAGS_DEBUG "-g -DDEBUG -O0" CACHE STRING "" FORCE )
     SET( CMAKE_CXX_FLAGS_RELWITHDEBINFO "-g -DDEBUG -O2" CACHE STRING "" FORCE )
+
+    # Allow injection of other flags
+    # NOTE: do not set these variables somewhere in cmake. They are intended to be used when calling CMake from the command line.
+    # Utilize this to append build flags from external systems (like dpkg-buildflags).
+    SET( CMAKE_EXE_LINKER_FLAGS "${OW_LD_FLAGS_INJECT} ${CMAKE_EXE_LINKER_FLAGS}" CACHE STRING "" FORCE )
+    SET( CMAKE_MODULE_LINKER_FLAGS "${OW_LD_FLAGS_INJECT} ${CMAKE_MODULE_LINKER_FLAGS}" CACHE STRING "" FORCE )
+    SET( CMAKE_SHARED_LINKER_FLAGS "${OW_LD_FLAGS_INJECT} ${CMAKE_SHARED_LINKER_FLAGS}" CACHE STRING "" FORCE )
+    SET( CMAKE_CXX_FLAGS "${OW_CXX_FLAGS_INJECT} ${CMAKE_CXX_FLAGS}" CACHE STRING "" FORCE )
+    SET( CMAKE_C_FLAGS "${OW_C_FLAGS_INJECT} ${CMAKE_C_FLAGS}" CACHE STRING "" FORCE )
+
+    # This can be useful for debugging
+    # MESSAGE( STATUS "CMAKE_EXE_LINKER_FLAGS = ${CMAKE_EXE_LINKER_FLAGS}" )
+    # MESSAGE( STATUS "CMAKE_MODULE_LINKER_FLAGS = ${CMAKE_MODULE_LINKER_FLAGS}" )
+    # MESSAGE( STATUS "CMAKE_SHARED_LINKER_FLAGS = ${CMAKE_SHARED_LINKER_FLAGS}" )
+    # MESSAGE( STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}" )
+    # MESSAGE( STATUS "CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}" )
+
 ENDFUNCTION( BUILD_SYSTEM_COMPILER )
 
 # GCC 4.7 requires us to explicitly link against libstdc++ and libm. CMake offers a variable for this called "CMAKE_STANDARD_LIBRARIES".
 # Unfortunately, this variable is empty. We fill it here and hopefully this is fixed in the near future.
 LIST( APPEND CMAKE_STANDARD_LIBRARIES "stdc++" "m" )
 
-# Allow injection of other flags
-# NOTE: do not set these variables somewhere in cmake. They are intended to be used when calling CMake from the command line.
-# Utilize this to append build flags from external systems (like dpkg-buildflags).
-SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OW_LD_FLAGS_INJECT}" CACHE STRING "" FORCE )
-SET( CMAKE_MODULE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OW_LD_FLAGS_INJECT}" CACHE STRING "" FORCE )
-SET( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OW_LD_FLAGS_INJECT}" CACHE STRING "" FORCE )
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OW_CXX_FLAGS_INJECT}" CACHE STRING "" FORCE )
-SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OW_C_FLAGS_INJECT}" CACHE STRING "" FORCE )
-ADD_DEFINITIONS( ${OW_CPP_FLAGS_INJECT} )
-
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # Compiler setup
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 BUILD_SYSTEM_COMPILER()
+ADD_DEFINITIONS( ${OW_CPP_FLAGS_INJECT} )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 # OpenWalnut specific options
@@ -207,27 +290,6 @@ IF( OW_PACKAGE_BUILD )
     OPTION( OW_PACKAGE_NOCOPY_LICENSE "Disable to copy our licensing information. Enabling this can be useful for package maintainer since several packaging systems have their own licence mechanism (i.e. Debian)." OFF )
     OPTION( OW_PACKAGE_NOCOPY_COREFONTS "Enable this if you have liberation fonts installed on your system. They will be linked. If disabled, our fonts are copied." OFF )
 ENDIF()
-
-# ---------------------------------------------------------------------------------------------------------------------------------------------------
-# The openwalnut executable should print the revision/tag
-# ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-# Generate needed headers
-# NOTE: add a line ADD_DEPENDENCIES( XYZ OW_generate_version_header ) to your target XYZ if you need the header!
-SET( OW_VERSION_HEADER_DIRECTORY ${PROJECT_BINARY_DIR}/versionHeader )
-SET( OW_VERSION_HEADER ${OW_VERSION_HEADER_DIRECTORY}/WVersion.h )
-# to allow all those targets to find the header:
-INCLUDE_DIRECTORIES( ${OW_VERSION_HEADER_DIRECTORY} )
-# Setup the target
-SETUP_VERSION_HEADER( ${OW_VERSION_HEADER} )
-
-# Set the OW version string. This can be used by others for setting target versions during compilation.
-GET_VERSION_STRING( OW_VERSION OW_LIB_VERSION )
-MESSAGE( STATUS "OW Version: \"${OW_VERSION}\"; OW Lib Version: \"${OW_LIB_VERSION}\"." )
-
-# We need a SOVERSION too. This somehow describes the API compatibility. We use the major number here.
-SPLIT_VERSION_STRING( ${OW_LIB_VERSION} OW_VERSION_MAJOR OW_VERSION_MINOR OW_VERSION_PATCH )
-SET( OW_SOVERSION ${OW_VERSION_MAJOR} )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -264,6 +326,7 @@ IF( ANDROID )
   SET( OPENGL_FOUND ON )
   # link against GLES 2
   SET( OPENGL_LIBRARIES "GLESv2" )
+  SET( OPENGL_gl_LIBRARY "GLESv2" )
 ELSE()
   FIND_PACKAGE( OpenGL REQUIRED )
   # include the OpenGL header paths
@@ -276,9 +339,31 @@ ENDIF()
 
 # find the needed packages
 SET( MIN_OSG_VERSION 2.8.0 )
-FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgDB osgUtil osgGA osgViewer osgSim osgWidget osgText )
+FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgWidget osgViewer osgText osgSim osgGA osgDB osgUtil )
 IF( OPENSCENEGRAPH_FOUND )
     INCLUDE_DIRECTORIES( ${OPENSCENEGRAPH_INCLUDE_DIRS} )
+
+    # is the OSG linked statically? If yes, we need to take care that all the osgdb plugins are linked too.
+    STRING( REGEX MATCH "osgDB\\.a" OPENSCENEGRAPH_STATIC "${OPENSCENEGRAPH_LIBRARIES}" )
+    IF( OPENSCENEGRAPH_STATIC )
+      MESSAGE( STATUS "Found static OpenSceneGraph! Adding all osgDB plugins." )
+      ADD_DEFINITIONS( -DOSG_LIBRARY_STATIC )
+
+      # we need to find the path. Unfortunately, the OSG find scripts do not provide these info
+      LIST( GET OPENSCENEGRAPH_LIBRARIES 0, firstElement )
+      GET_FILENAME_COMPONENT( firstElementPath ${firstElement} PATH )
+
+      # hopefully all static osgdb plugins reside in this directory
+      FILE( GLOB plugInLibs "${firstElementPath}/*osgdb_*.a" )
+      LIST( SORT plugInLibs )
+      SET( OPENSCENEGRAPH_OSGDB_LIBS "" )
+      FOREACH( plugIn ${plugInLibs} )
+        LIST( APPEND OPENSCENEGRAPH_OSGDB_LIBS ${plugIn} )
+      ENDFOREACH()
+
+      # The osgDB plugins need to be linked BEFORE osg and osgDB
+      LIST( INSERT OPENSCENEGRAPH_LIBRARIES 0 ${OPENSCENEGRAPH_OSGDB_LIBS} )
+    ENDIF()
 ENDIF()
 
 # NOTE: sorry but this is needed since those vars spam the ccmake. The user should find the important options fast!
