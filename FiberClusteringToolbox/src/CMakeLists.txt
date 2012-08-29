@@ -59,6 +59,10 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
+FIND_PACKAGE( CUDA )
+FILE( GLOB_RECURSE CUDA_SRC "detTractClustering/*.cu" )
+# CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
 # Setup all modules
@@ -74,7 +78,7 @@ INCLUDE( OpenWalnut )
 SETUP_MODULE( 
     ${PROJECT_NAME}   # use project name as module(-toolbox) name
     "."               # where to find the sources
-    ""                # no additonal dependencies
+    "${CUDA_LIBRARIES}"                # no additonal dependencies
     ""                # no sources to exclude
 )
 

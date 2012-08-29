@@ -27,7 +27,6 @@
 #include <utility>
 #include <vector>
 
-#include "../../emptyIcon.xpm" // Please put a real icon here.
 #include "core/common/datastructures/WDendrogram.h"
 #include "core/common/datastructures/WUnionFind.h"
 #include "core/common/WLimits.h"
@@ -50,7 +49,7 @@ boost::shared_ptr< WModule > WMDetTractClusteringGP::factory() const
 
 const char** WMDetTractClusteringGP::getXPMIcon() const
 {
-    return emptyIcon_xpm; // Please put a real icon here.
+    return NULL; // Please put a real icon here.
 }
 const std::string WMDetTractClusteringGP::getName() const
 {

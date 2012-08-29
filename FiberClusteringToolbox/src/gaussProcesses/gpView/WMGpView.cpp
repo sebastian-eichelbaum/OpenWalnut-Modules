@@ -29,7 +29,6 @@
 #include "core/graphicsEngine/WGEGeodeUtils.h"
 #include "core/graphicsEngine/callbacks/WGEFunctorCallback.h"
 #include "core/kernel/WKernel.h"
-#include "../../emptyIcon.xpm" // Please put a real icon here.
 
 #include "WMGpView.h"
 
@@ -50,7 +49,7 @@ boost::shared_ptr< WModule > WMGpView::factory() const
 
 const char** WMGpView::getXPMIcon() const
 {
-    return emptyIcon_xpm; // Please put a real icon here.
+    return NULL; // Please put a real icon here.
 }
 const std::string WMGpView::getName() const
 {
