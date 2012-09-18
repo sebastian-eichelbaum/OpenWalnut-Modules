@@ -25,7 +25,8 @@
 #include "WRaySample.h"
 
 WRaySample::WRaySample():
-    m_value( 0.0 ), m_distance( -1.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ), m_gradWeight( -1.0 ), m_fracAnisotropy( -1.0 )
+    m_position( WVector4d( 0.0, 0.0, 0.0, -1.0 ) ), m_value( 0.0 ), m_distance( -1.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ), 
+    m_gradWeight( -1.0 ), m_fracAnisotropy( -1.0 ), m_angle( 0.0 ), m_meanCurv( 0.0 ), m_gaussCurv( 0.0 )
 {
     // initialize members
 }
@@ -33,6 +34,16 @@ WRaySample::WRaySample():
 WRaySample::~WRaySample()
 {
     // cleanup
+}
+
+const WVector4d& WRaySample::position() const
+{
+    return m_position;
+}
+
+WVector4d& WRaySample::position()
+{
+    return m_position;
 }
 
 const double& WRaySample::value() const
@@ -93,4 +104,24 @@ const double& WRaySample::angle() const
 double& WRaySample::angle()
 {
     return m_angle;
+}
+
+const double& WRaySample::meanCurv() const
+{
+    return m_meanCurv;
+}
+
+double& WRaySample::meanCurv()
+{
+    return m_meanCurv;
+}
+
+const double& WRaySample::gaussCurv() const
+{
+    return m_gaussCurv;
+}
+
+double& WRaySample::gaussCurv()
+{
+    return m_gaussCurv;
 }

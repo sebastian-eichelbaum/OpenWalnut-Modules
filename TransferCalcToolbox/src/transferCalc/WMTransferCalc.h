@@ -47,6 +47,9 @@
 #include "core/dataHandler/WDataSetVector.h"
 #include "core/common/math/linearAlgebra/WLinearAlgebra.h"
 #include "core/common/math/WMatrix.h"
+#include "core/common/WItemSelector.h"
+#include "core/common/WItemSelection.h"
+#include "core/common/WItemSelectionItemTyped.h"
 
 #include "../dataStructures/WRay.h"
 #include "../dataStructures/WRaySample.h"
@@ -145,7 +148,7 @@ private:
      *
      * \return interpolated value
      */
-    virtual double interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid );
+    virtual double interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid, boost::shared_ptr< WDataSetScalar > inter_dataSet );
 
     /**
      * Curvature calculation for given derivated dataset.
@@ -254,6 +257,16 @@ private:
     boost::shared_ptr< WDataSetScalar > m_FAdataSet;
 
     /**
+     * Calculated dataset with mean curvature. Just set if additional dataset with derivated data already processed.
+     */
+    boost::shared_ptr< WDataSetScalar > m_meanCurvDataSet;
+
+    /**
+     * Calculated dataset with gaussian curvature. Just set if additional dataset with derivated data already processed.
+     */
+    boost::shared_ptr< WDataSetScalar > m_gaussCurvDataSet;
+
+    /**
      * Boolean to check if any derivated data is present and valid.
      */
     bool m_DeriIsValid;
@@ -311,19 +324,24 @@ private:
     WPropTrigger  m_saveTrigger;
 
     /**
-     * x position of the ray origin.
+     * Typedef for the used item type (for code shortening).
      */
-    WPropDouble   m_xPos;
+    typedef WItemSelectionItemTyped< int > MyItemType;
 
     /**
-     * y position of the ray origin.
+     * List of the plottable data that can be selected using this property.
      */
-    WPropDouble   m_yPos;
+    boost::shared_ptr< WItemSelection > m_plotDataSelection;
 
     /**
-     * z position of the ray origin.
+     * A property allowing the user to select multiple items.
      */
-    WPropDouble   m_zPos;
+    WPropSelection m_multiPlotDataSelection;
+    
+    /**
+     * Enumeration of selection properties to use for switch-case.
+     */
+    enum SelectVal {VALUE = 3, WEIGHT = 7, FA, ANGLE, MEAN, GAUSS};
 
     /**
      * Interval for sampling rays.

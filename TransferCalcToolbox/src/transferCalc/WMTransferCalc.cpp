@@ -56,6 +56,10 @@
 #include "core/common/WPropertyHelper.h"
 #include "core/common/math/WMatrix.h"
 #include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/WItemSelection.h"
+#include "core/common/WItemSelectionItem.h"
+#include "core/common/WItemSelectionItemTyped.h"
+#include "core/common/WItemSelector.h"
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
@@ -123,11 +127,22 @@ void WMTransferCalc::connectors()
 void WMTransferCalc::properties()
 {
     m_propCondition   = boost::shared_ptr< WCondition >( new WCondition() );
-    m_color           = m_properties->addProperty(  "Color", "Color of the orbs.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
+    m_color           = m_properties->addProperty(  "Color", "Color of the ray.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
-//     m_xPos            = m_properties->addProperty( "X position", "X coordinate of the ray origin.", 0.0, m_propCondition );
-//     m_yPos            = m_properties->addProperty( "Y position", "Y coordinate of the ray origin.", 0.0, m_propCondition );
-//     m_zPos            = m_properties->addProperty( "Z position", "Z coordinate of the ray origin.", 0.0, m_propCondition );
+    m_plotDataSelection = WItemSelection::SPtr( new WItemSelection() );
+    //m_plotDataSelection->addItem( MyItemType::create( 2, "Plot distance t.", "Chooses 't' data for plotting." ) );
+    m_plotDataSelection->addItem( MyItemType::create( 3, "Plot value.", "Chooses 'value' data for plotting." ) );
+    //m_plotDataSelection->addItem( MyItemType::create( 4, "Plot x value of the gradient.", "Chooses 'x component' of the gradient data for plotting." ) );
+    //m_plotDataSelection->addItem( MyItemType::create( 5, "Plot y value of the gradient.", "Chooses 'y component' of the gradient data for plotting." ) );
+    //m_plotDataSelection->addItem( MyItemType::create( 6, "Plot z value of the gradient.", "Chooses 'z component' of the gradient data for plotting." ) );
+    m_plotDataSelection->addItem( MyItemType::create( 7, "Plot gradient weight.", "Chooses 'gradient weight' data for plotting." ) );
+    m_plotDataSelection->addItem( MyItemType::create( 8, "Plot FA value.", "Chooses 'fractional anisotropy' data for plotting." ) );
+    m_plotDataSelection->addItem( MyItemType::create( 9, "Plot angle.", "Chooses 'angle between ray direction and gradient' for plotting." ) );
+    m_plotDataSelection->addItem( MyItemType::create( 10, "Plot mean curvature.", "Chooses 'mean curvature' data for plotting." ) );
+    m_plotDataSelection->addItem( MyItemType::create( 11, "Plot gaussian curvature.", "Chooses 'Gaussian curvature' data for plotting." ) );
+    
+    m_multiPlotDataSelection = m_properties->addProperty( "Choose plot data", "Choose one of these for data plotting.",
+                                                              m_plotDataSelection->getSelectorFirst(), m_propCondition );
 
     m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.33, m_propCondition );
     m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted.", 10, m_propCondition );
@@ -139,6 +154,7 @@ void WMTransferCalc::properties()
 
     WPropertyHelper::PC_PATHEXISTS::addTo( m_RaySaveFilePath );
     WPropertyHelper::PC_ISDIRECTORY::addTo( m_RaySaveFilePath );
+    WPropertyHelper::PC_NOTEMPTY::addTo( m_multiPlotDataSelection );
 
     WModule::properties();
 }
@@ -159,7 +175,7 @@ bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename,
 
     std::ofstream savefile( ( path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
     savefile << "# RayProfile data for OpenWalnut TransferCalcModule" << std::endl;
-    savefile << "# ID \t dist \t value \t grad_x \t grad_y \t grad_z \t gradW \t FA \t angle" << std::endl;
+    savefile << "# ID \t dist \t value \t grad_x \t grad_y \t grad_z \t gradW \t FA \t angle \t mean \t gauss" << std::endl;
     for( size_t sample = 0; sample < prof->size(); sample++ )
     {
         savefile << sample + 1 << "\t";                         // print id
@@ -171,6 +187,8 @@ bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename,
         savefile << (*prof)[sample].gradWeight() << "\t";       // print weight of gradient
         savefile << (*prof)[sample].fracA() << "\t";            // print fractional anisotropy
         savefile << (*prof)[sample].angle() << "\t";            // print angle between gradient and ray
+        savefile << (*prof)[sample].meanCurv() << "\t";         // print mean curvature
+        savefile << (*prof)[sample].gaussCurv() << "\t";        // print gauss curvature
         savefile << std::endl;
     }
     savefile.close();
@@ -217,6 +235,18 @@ void WMTransferCalc::moduleMain()
             break;
         }
 
+//         // This checks the selection.
+//         if( m_multiPlotDataSelection->changed() )
+//         {
+//             // The multi property allows the selection of several items. So, iteration needs to be done here:
+//             WItemSelector s = m_multiPlotDataSelection->get( true );
+//             for( size_t i = 0; i < s.size(); ++i )
+//             {
+//                 infoLog() << "The user chose " << s.at( i )->getName()
+//                           << " with the value " << s.at( i )->getAs< MyItemType >()->getValue();
+//             }
+//         }
+
         // activates if user pushes save button to save current RayProfile
         if( m_saveTrigger->get( true ) == WPVBaseTypes::PV_TRIGGER_TRIGGERED )
         {
@@ -225,39 +255,25 @@ void WMTransferCalc::moduleMain()
             boost::shared_ptr< WProgress > saving = boost::shared_ptr< WProgress >( new WProgress( "Saving calculated RayProfiles." ) );
             m_progress->addSubProgress( saving );
 
-            std::stringstream prepGNUPlotScript;
-            prepGNUPlotScript << "# Measured RayProfile data" << std::endl
-                              << "#====================================" << std::endl << std::endl
-                              << "set title 'RayProfile data'" << std::endl
-                              << "set pointsize 0.5" << std::endl
-                              << "set grid" << std::endl
-                              << "set xlabel 'distance to click point'" << std::endl;
-
-            bool plotValues = true;
-            std::string usingParam;
-            if( plotValues )
-            {
-                prepGNUPlotScript << "set ylabel 'value'" << std::endl << std::endl;
-                usingParam = " using 2:3";
-            }
-            else // plot gradient weight
-            {
-                prepGNUPlotScript << "set ylabel 'gradient weight'" << std::endl << std::endl;
-                usingParam = " using 2:7";
-            }
-
+            // save plot file for every profile
             unsigned int nrProfiles = m_profiles.size();
-            if( nrProfiles != 0 )
-            {
-                prepGNUPlotScript << "plot ";
-            }
-
             for( unsigned int id = 0; id < nrProfiles; id++ )
             {
+                // generate initialization
+                std::stringstream prepGNUPlotScript;
+                prepGNUPlotScript << "# Measured RayProfile data for Profile "<< id + 1 << std::endl
+                                << "#===========================================" << std::endl << std::endl
+                                << "set title 'RayProfile " << id + 1 << "'" << std::endl
+                                << "set pointsize 0.5" << std::endl
+                                << "set grid" << std::endl
+                                << "set xlabel 'uniform distance on ray'" << std::endl;
+                
+                // generate filename of data file
                 std::stringstream prepFilename;
                 prepFilename << "RayProfile" << id + 1 << ".dat";
                 std::string filename( prepFilename.str() );
 
+                // save data which will be plotted with the plot script
                 bool success = saveRayProfileTo( m_RaySaveFilePath, filename, &m_profiles[id] );
                 if( !success )
                 {
@@ -265,19 +281,78 @@ void WMTransferCalc::moduleMain()
                 }
                 else
                 {
-                    prepGNUPlotScript << "'" << prepFilename.str() << "'" << usingParam << " title 'RayProfile " << id + 1 << "' with points";
-                    if( id + 1 < nrProfiles )
+                    WItemSelector s = m_multiPlotDataSelection->get( true );
+                    unsigned int count = s.size();
+                    prepGNUPlotScript << "plot ";
+                    for( size_t i = 0; i < s.size(); ++i )
                     {
-                        prepGNUPlotScript << ", \\" << std::endl;
+                        infoLog() << "The user chose " << s.at( i )->getName()
+                                << " with the value " << s.at( i )->getAs< MyItemType >()->getValue();
+
+                        switch( s.at( i )->getAs< MyItemType >()->getValue() )
+                        {
+                            case VALUE:
+                                prepGNUPlotScript << "'" << filename << "' using 2:3 title 'value' with points";
+                                if( count - 1 != 0 )
+                                {
+                                    prepGNUPlotScript << ", \\" << std::endl;
+                                }
+                                count--;
+                                break;
+                            case WEIGHT:
+                                prepGNUPlotScript << "'" << filename << "' using 2:7 title 'gradient weight' with points";
+                                if( count - 1 != 0 )
+                                {
+                                    prepGNUPlotScript << ", \\" << std::endl;
+                                }
+                                count--;
+                                break;
+                            case FA:
+                                prepGNUPlotScript << "'" << filename << "' using 2:8 title 'FA value' with points";
+                                if( count - 1 != 0 )
+                                {
+                                    prepGNUPlotScript << ", \\" << std::endl;
+                                }
+                                count--;
+                                break;
+                            case ANGLE:
+                                prepGNUPlotScript << "'" << filename << "' using 2:($9*(180/3.14159265)) title 'angle' with points";
+                                if( count - 1 != 0 )
+                                {
+                                    prepGNUPlotScript << ", \\" << std::endl;
+                                }
+                                count--;
+                                break;
+                            case MEAN:
+                                prepGNUPlotScript << "'" << filename << "' using 2:10 title 'mean curvature' with points";
+                                if( count - 1 != 0 )
+                                {
+                                    prepGNUPlotScript << ", \\" << std::endl;
+                                }
+                                count--;
+                                break;
+                            case GAUSS:
+                                prepGNUPlotScript << "'" << filename << "' using 2:11 title 'gaussian curvature' with points";
+                                if( count - 1 != 0 )
+                                {
+                                    prepGNUPlotScript << ", \\" << std::endl;
+                                }
+                                count--;
+                                break;
+                            default:
+                                errorLog() << "No properties selected!";
+                        }
                     }
+                    std::stringstream prepPlotFilename;
+                    prepPlotFilename << "/plot" << id + 1 << ".gsc";
+                    std::string plotfilename( prepPlotFilename.str() );
+                    //std::string plotScript( prepGNUPlotScript.str() );
+                    //debugLog() << plotScript;
+                    std::ofstream plotFile( ( m_RaySaveFilePath->get( true ).string() + plotfilename ).c_str() );
+                    plotFile << prepGNUPlotScript.str();
+                    plotFile.close();
                 }
             }
-            //std::string plotScript( prepGNUPlotScript.str() );
-            //debugLog() << plotScript;
-            std::ofstream plotFile( ( m_RaySaveFilePath->get( true ).string() + "/GNUPlotScript.gsc" ).c_str() );
-            plotFile << prepGNUPlotScript.str();
-            plotFile.close();
-
             saving->finish();
             m_progress->removeSubProgress( saving );
 
@@ -339,8 +414,8 @@ void WMTransferCalc::moduleMain()
                     m_DeriIsValid = false;
                 }
             }
-
-            //TODO(fjacob) calculate curvature parameter
+            m_meanCurvDataSet.reset();
+            m_gaussCurvDataSet.reset();
             calculateCurvature();
         }
 
@@ -620,18 +695,27 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     for( double sample_t = start_t; sample_t <= end_t; sample_t += interval )
     {
         WVector4d current = ray.getSpot( sample_t );
+        WVector3d cur3D = getAs3D( current );
+
+        // do not calculate anything for vectors outside of the data grid
+        if( !m_grid->encloses( cur3D ) )
+        {
+            //debugLog() << "continue...";
+            continue;
+        }
+        
+        double vox_x = static_cast< double >( m_grid->getVoxelNum( cur3D ) );
+        double vox_y = static_cast< double >( m_grid->getVoxelNum( cur3D ) );
+        double vox_z = static_cast< double >( m_grid->getVoxelNum( cur3D ) );
+        curProfile[sampleCount].position() = WVector4d( vox_x, vox_y, vox_z, 1 );
+
+        // set start Vector in data grid for drawing the arrow
         if( sample_t == start_t )
         {
             geodeStartVec = current;
         }
 
-        // do not calculate anything for vectors outside of the data grid
-        if( !m_grid->encloses( getAs3D( current ) ) )
-        {
-            //debugLog() << "continue...";
-            continue;
-        }
-        double val = interpolate( current, m_grid );
+        double val = interpolate( current, m_grid, m_dataSet );
         // save value
         curProfile[sampleCount].value() = val;
         // save distance
@@ -639,11 +723,25 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
 
         if( m_FAisValid )
         {
-            if( m_FAgrid->encloses( getAs3D( current ) ) )
+            if( m_FAgrid->encloses( cur3D ) )
             {
-                double FA_val = interpolate( current, m_FAgrid );
                 // save fractional anisotropy
-                curProfile[sampleCount].fracA() = FA_val;
+                curProfile[sampleCount].fracA() = interpolate( current, m_FAgrid, m_FAdataSet );
+            }
+        }
+        
+        if( m_DeriIsValid )
+        {
+            if( m_deriGrid->encloses( cur3D ) )
+            {
+                if( m_meanCurvDataSet )
+                {
+                    curProfile[sampleCount].meanCurv() = interpolate( current, m_deriGrid, m_meanCurvDataSet );
+                }
+                if( m_gaussCurvDataSet )
+                {
+                    curProfile[sampleCount].gaussCurv() = interpolate( current, m_deriGrid, m_gaussCurvDataSet );
+                }
             }
         }
 
@@ -663,9 +761,9 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
         Eigen::Vector3d gradVec( curProfile[sampleCount].gradient()[0], curProfile[sampleCount].gradient()[1],
                                     curProfile[sampleCount].gradient()[2] );
         Eigen::Vector3d rayVec( ray.direction()[0], ray.direction()[1], ray.direction()[2] );
-        curProfile[sampleCount].angle() = std::min( std::acos( gradVec.dot( rayVec ) ),
-                                                    std::acos( gradVec.dot( rayVec * -1 ) ) );
-                                                    //TODO(fjacob) check both directions?
+//         curProfile[sampleCount].angle() = std::min( std::acos( gradVec.dot( rayVec ) ),
+//                                                     std::acos( gradVec.dot( rayVec * -1 ) ) );
+        curProfile[sampleCount].angle() = std::acos( gradVec.dot( rayVec * -1 ) );
 
         if( sample_t + interval <= end_t )
         {
@@ -768,17 +866,17 @@ WVector4d WMTransferCalc::getGradient( const WVector4d& position )
     double dist_z = m_grid->getOffsetZ();
     double x_val, y_val, z_val;
 
-    x_val = ( ( interpolate( position + WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid ) )
-            - ( interpolate( position - WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid ) ) ) / dist_x;
-    y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid ) ) ) / dist_y;
-    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ), m_grid ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ), m_grid ) ) ) / dist_z;
+    x_val = ( ( interpolate( position + WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) )
+            - ( interpolate( position - WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) / dist_x;
+    y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) / dist_y;
+    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ), m_grid, m_dataSet ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ), m_grid, m_dataSet ) ) ) / dist_z;
 
     return WVector4d( x_val, y_val, z_val, 0 );
 }
 
-double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid  )
+double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid, boost::shared_ptr< WDataSetScalar > inter_dataSet )
 {
     double vox_x = static_cast< double >( inter_grid->getXVoxelCoord( getAs3D( position ) ) );
     double vox_y = static_cast< double >( inter_grid->getYVoxelCoord( getAs3D( position ) ) );
@@ -794,7 +892,7 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Calculating all relevant neighbours for the interpolation
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // vector with all 8 neighbours to the position
+    // vector with all 8 direct neighbours to the position
     std::vector< WVector4d > neighbours( 8 );
     // vectors with min / max coordinates of neighbours
     // { min_x, min_y, min_z }
@@ -1001,7 +1099,7 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
         }
         else
         {
-            values[i] = m_dataSet->getValueSet()->getScalarDouble( inter_grid->getVoxelNum( getAs3D( neighbours[i] ) ) );
+            values[i] = inter_dataSet->getValueSet()->getScalarDouble( inter_grid->getVoxelNum( getAs3D( neighbours[i] ) ) );
         }
     }
 
@@ -1024,6 +1122,11 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
 
 void WMTransferCalc::calculateCurvature()
 {
+    boost::shared_ptr< WProgress > calcCurvProg = boost::shared_ptr< WProgress >( new WProgress( "Calculating curvature values." ) );
+    m_progress->addSubProgress( calcCurvProg );
+
+    //bool useEigenvalues = true; // if this is false, the method of the paper will be used
+
     double x_scale = m_deriGrid->getNbCoordsX();
     double y_scale = m_deriGrid->getNbCoordsY();
     double z_scale = m_deriGrid->getNbCoordsZ();
@@ -1031,60 +1134,141 @@ void WMTransferCalc::calculateCurvature()
     double dist_y  = m_deriGrid->getOffsetY();
     double dist_z  = m_deriGrid->getOffsetZ();
 
+    boost::shared_ptr< std::vector< double > > mean_values = boost::shared_ptr< std::vector< double > >(
+                                                            new std::vector< double >( m_deriDataSet->getValueSet()->size(), 0.0 )
+                                                        );
+    boost::shared_ptr< std::vector< double > > gauss_values = boost::shared_ptr< std::vector< double > >(
+                                                            new std::vector< double >( m_deriDataSet->getValueSet()->size(), 0.0 )
+                                                        );
+    double k1, k2, k3;
+    size_t id = 0;
+    std::vector< WVector3d > derivDirection( 6 );
+    std::vector< int > derivIds( 6 );
+
     //debugLog() << "Test " << x_scale << " - " << y_scale << " - " << z_scale ;
     //debugLog() << "Size: " << m_deriDataSet->getValueSet()->size();
     //debugLog() << "Rawsize: " << m_deriDataSet->getValueSet()->rawSize();
     //debugLog() << "Distances: " << dist_x << "-" << dist_x << "-" << dist_x;
 
-    WVector3d position( 0.5 * x_scale + 1, 0.5 * y_scale, 0.5 * z_scale );
-    WVector3d curGradient = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( m_deriGrid->getVoxelNum( position ) ) );
-    //debugLog() << m_deriDataSet->getValueSet()->getWVector( id );
-    size_t id = m_deriGrid->getVoxelNum( position );
+    for( unsigned int zdir = 0; zdir < z_scale; zdir++ )
+    {
+        for( unsigned int ydir = 0; ydir < y_scale; ydir++ )
+        {
+            for( unsigned int xdir = 0; xdir < x_scale; xdir++ )
+            {
+                WVector3d position( xdir, ydir, zdir );
+                WVector3d curGrad = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( id ) );
+                if( length( curGrad ) == 0 ) 
+                {
+                    id++;
+                    continue;
+                }
+                //size_t id = m_deriGrid->getVoxelNum( position );
+                //debugLog() << id;
 
-    std::vector< WVector3d > derivDirection( 6 );
-    std::vector< int > derivIds( 6 );
+                derivIds[0] = m_deriGrid->getVoxelNum( position + WVector3d( -dist_x,  0,  0 ) );
+                derivIds[1] = m_deriGrid->getVoxelNum( position + WVector3d(  dist_x,  0,  0 ) );
+                derivIds[2] = m_deriGrid->getVoxelNum( position + WVector3d(  0, -dist_y,  0 ) );
+                derivIds[3] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  dist_y,  0 ) );
+                derivIds[4] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0, -dist_z ) );
+                derivIds[5] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0,  dist_z ) );
 
-    derivIds[0] = m_deriGrid->getVoxelNum( position + WVector3d( -dist_x,  0,  0 ) );
-    derivIds[1] = m_deriGrid->getVoxelNum( position + WVector3d(  dist_x,  0,  0 ) );
-    derivIds[2] = m_deriGrid->getVoxelNum( position + WVector3d(  0, -dist_y,  0 ) );
-    derivIds[3] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  dist_y,  0 ) );
-    derivIds[4] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0, -dist_z ) );
-    derivIds[5] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0,  dist_z ) );
+                derivDirection[0] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
+                derivDirection[1] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
+                derivDirection[2] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
+                derivDirection[3] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[3] == -1 ) ? id : derivIds[3] ) );
+                derivDirection[4] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
+                derivDirection[5] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
 
-    derivDirection[0] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
-    derivDirection[1] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
-    derivDirection[2] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
-    derivDirection[3] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[3] == -1 ) ? id : derivIds[3] ) );
-    derivDirection[4] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
-    derivDirection[5] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
+                Eigen::Matrix3d hesse;
+                            // x-values form x,y,z direction
+                hesse <<    ( derivDirection[1][0] - derivDirection[0][0] ) / 2.0 * dist_x,
+                            ( derivDirection[3][0] - derivDirection[2][0] ) / 2.0 * dist_y,
+                            ( derivDirection[5][0] - derivDirection[4][0] ) / 2.0 * dist_z,
+                            // y-values form x,y,z direction
+                            ( derivDirection[1][1] - derivDirection[0][1] ) / 2.0 * dist_x,
+                            ( derivDirection[3][1] - derivDirection[2][1] ) / 2.0 * dist_y,
+                            ( derivDirection[5][1] - derivDirection[4][1] ) / 2.0 * dist_z,
+                            // z-values form x,y,z direction
+                            ( derivDirection[1][2] - derivDirection[0][2] ) / 2.0 * dist_x,
+                            ( derivDirection[3][2] - derivDirection[2][2] ) / 2.0 * dist_y,
+                            ( derivDirection[5][2] - derivDirection[4][2] ) / 2.0 * dist_z;
+                //debugLog() << hesse;
 
-    Eigen::Matrix3d hesse;
-                // x-values form x,y,z direction
-    hesse <<    ( derivDirection[1][0] - derivDirection[0][0] ) / 2.0 * dist_x,
-                ( derivDirection[3][0] - derivDirection[2][0] ) / 2.0 * dist_y,
-                ( derivDirection[5][0] - derivDirection[4][0] ) / 2.0 * dist_z,
-                // y-values form x,y,z direction
-                ( derivDirection[1][1] - derivDirection[0][1] ) / 2.0 * dist_x,
-                ( derivDirection[3][1] - derivDirection[2][1] ) / 2.0 * dist_y,
-                ( derivDirection[5][1] - derivDirection[4][1] ) / 2.0 * dist_z,
-                // z-values form x,y,z direction
-                ( derivDirection[1][2] - derivDirection[0][2] ) / 2.0 * dist_x,
-                ( derivDirection[3][2] - derivDirection[2][2] ) / 2.0 * dist_y,
-                ( derivDirection[5][2] - derivDirection[4][2] ) / 2.0 * dist_z;
-    debugLog() << hesse;
-    Eigen::EigenSolver< Eigen::Matrix3d > eigenResults( hesse, false );
-    debugLog()  << "The eigenvalues of the 3x3 matrix are:"
-                << std::endl << eigenResults.eigenvalues();
+                if( true /*useEigenvalues*/ )
+                {
+                    Eigen::EigenSolver< Eigen::Matrix3d > eigenResults( hesse, false );
+//                     debugLog()  << "The eigenvalues of the 3x3 matrix are:"
+//                                 << std::endl << eigenResults.eigenvalues()
+//                                 << std::endl << std::endl << eigenResults.eigenvalues()[0].real();
+                    k1 = eigenResults.eigenvalues()[0].real();
+                    k2 = eigenResults.eigenvalues()[1].real();
+                    k3 = eigenResults.eigenvalues()[2].real();
+                    
+                    if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
+                    if( std::abs( k2 ) <= std::abs( k3 ) ) std::swap( k2, k3 );
+                    if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
+                    
+                    //debugLog() << k1 << " - " << k2 << " - " << k3;
 
-    boost::shared_ptr< std::vector< double > > values = boost::shared_ptr< std::vector< double > >(
-                                                            new std::vector< double >( m_deriDataSet->getValueSet()->size(), 0.0 )
+                    (*mean_values)[id] = ( k1 + k2 ) * 0.5;
+                    (*gauss_values)[id] =  k1 * k2;
+                    id++;
+                }
+                else
+                {
+                    // method of the paper
+                    // we need:
+                    //      current gradient g
+                    //      normal n = -g/|g|
+                    //      P = E - nn^T
+                    //      nabla-n^T = -PH / |g|   (where H is the hessian matrix)
+                    //      G = nabla-n^T*P
+                    WVector3d g = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( m_deriGrid->getVoxelNum( position ) ) );
+                    double g_weight = length( g );
+                    WVector3d n = ( g * -1 ) / g_weight;
+                    Eigen::Matrix3d E, nnT, P, nabla_nT, G, help;
+                    E <<    1,0,0,
+                            0,1,0,
+                            0,0,1;
+                    help << 1,0,0,
+                            0,1,0,
+                            0,0,0;
+                    nnT <<  n[0] * n[0], n[0] * n[1], n[0] * n[2],
+                            n[1] * n[0], n[1] * n[1], n[1] * n[2],
+                            n[2] * n[0], n[2] * n[1], n[2] * n[2];
+                    P = E - nnT;
+                    nabla_nT = ( P * hesse ) * ( -1 / g_weight );
+                    G = nabla_nT * help;
+                    
+                    debugLog()  << "g  : " << g << std::endl
+                                << "g_l: " << g_weight << std::endl
+                                << "n  : " << n << std::endl
+                                << "E  : " << E << std::endl
+                                << "nnT: " << nnT << std::endl
+                                << "P  : " << P << std::endl
+                                << "nab: " << nabla_nT << std::endl
+                                << "G  : " << G << std::endl;
+                }
+            }
+        }
+    }
+
+    boost::shared_ptr< WValueSet< double > > mean_valueset = boost::shared_ptr< WValueSet< double > >(
+                                                            new WValueSet< double >( 0, 1, mean_values, W_DT_DOUBLE )
                                                         );
-    boost::shared_ptr< WValueSet< double > > valueset = boost::shared_ptr< WValueSet< double > >(
-                                                            new WValueSet< double >( 0, 1, values, W_DT_DOUBLE )
+    boost::shared_ptr< WValueSet< double > > gauss_valueset = boost::shared_ptr< WValueSet< double > >(
+                                                            new WValueSet< double >( 0, 1, gauss_values, W_DT_DOUBLE )
                                                         );
 
-    m_curveMeanOut->updateData( boost::shared_ptr< WDataSetScalar >( new WDataSetScalar( valueset, m_deriGrid ) ) );
-    m_curveGaussOut->updateData( boost::shared_ptr< WDataSetScalar >( new WDataSetScalar( valueset, m_deriGrid ) ) );
+    m_meanCurvDataSet = boost::shared_ptr< WDataSetScalar >( new WDataSetScalar( mean_valueset, m_deriGrid ) );
+    m_curveMeanOut->updateData( m_meanCurvDataSet );
+    
+    m_gaussCurvDataSet = boost::shared_ptr< WDataSetScalar >( new WDataSetScalar( gauss_valueset, m_deriGrid ) );
+    m_curveGaussOut->updateData( m_gaussCurvDataSet );
+    
+    calcCurvProg->finish();
+    m_progress->removeSubProgress( calcCurvProg );
 }
 
 void WMTransferCalc::SafeUpdateCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
