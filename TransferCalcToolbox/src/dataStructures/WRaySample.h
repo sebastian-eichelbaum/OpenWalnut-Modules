@@ -176,7 +176,7 @@ private:
      * The position of this sample point in the data grid.
      */
     WVector4d m_position;
-    
+
     /**
      * The value at this sample point.
      */

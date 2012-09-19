@@ -25,7 +25,7 @@
 #include "WRaySample.h"
 
 WRaySample::WRaySample():
-    m_position( WVector4d( 0.0, 0.0, 0.0, -1.0 ) ), m_value( 0.0 ), m_distance( -1.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ), 
+    m_position( WVector4d( 0.0, 0.0, 0.0, -1.0 ) ), m_value( 0.0 ), m_distance( -1.0 ), m_gradient( WVector4d( 0.0, 0.0, 0.0, 0.0 ) ),
     m_gradWeight( -1.0 ), m_fracAnisotropy( -1.0 ), m_angle( 0.0 ), m_meanCurv( 0.0 ), m_gaussCurv( 0.0 )
 {
     // initialize members

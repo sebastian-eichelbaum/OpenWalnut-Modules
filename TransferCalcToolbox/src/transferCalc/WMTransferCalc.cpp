@@ -130,26 +130,23 @@ void WMTransferCalc::properties()
     m_color           = m_properties->addProperty(  "Color", "Color of the ray.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
     m_plotDataSelection = WItemSelection::SPtr( new WItemSelection() );
-    //m_plotDataSelection->addItem( MyItemType::create( 2, "Plot distance t.", "Chooses 't' data for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 3, "Plot value.", "Chooses 'value' data for plotting." ) );
-    //m_plotDataSelection->addItem( MyItemType::create( 4, "Plot x value of the gradient.", "Chooses 'x component' of the gradient data for plotting." ) );
-    //m_plotDataSelection->addItem( MyItemType::create( 5, "Plot y value of the gradient.", "Chooses 'y component' of the gradient data for plotting." ) );
-    //m_plotDataSelection->addItem( MyItemType::create( 6, "Plot z value of the gradient.", "Chooses 'z component' of the gradient data for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 7, "Plot gradient weight.", "Chooses 'gradient weight' data for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 8, "Plot FA value.", "Chooses 'fractional anisotropy' data for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 9, "Plot angle.", "Chooses 'angle between ray direction and gradient' for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 10, "Plot mean curvature.", "Chooses 'mean curvature' data for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 11, "Plot gaussian curvature.", "Chooses 'Gaussian curvature' data for plotting." ) );
-    
+
     m_multiPlotDataSelection = m_properties->addProperty( "Choose plot data", "Choose one of these for data plotting.",
                                                               m_plotDataSelection->getSelectorFirst(), m_propCondition );
 
     m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.33, m_propCondition );
-    m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted.", 10, m_propCondition );
+    m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted with one click.", 10, m_propCondition );
     m_radius          = m_properties->addProperty( "Radius", "Radius for circular vicinity in which the rays shall be casted.",
                                                    2, m_propCondition );
 
-    m_RaySaveFilePath = m_properties->addProperty( "Save RayProfile to:", "Savefile for RayProfile.", WPathHelper::getAppPath(), m_propCondition );
+    m_RaySaveFilePath = m_properties->addProperty( "Save RayProfile to Folder:",
+                                                   "Savefile for RayProfile.", WPathHelper::getAppPath(), m_propCondition );
     m_saveTrigger     = m_properties->addProperty( "Save", "Save RayProfile to given directory.", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
     WPropertyHelper::PC_PATHEXISTS::addTo( m_RaySaveFilePath );
@@ -167,15 +164,29 @@ void WMTransferCalc::requirements()
 bool WMTransferCalc::saveRayProfileTo( WPropFilename path, std::string filename, WRayProfile *profile )
 {
     WRayProfile *prof;
-    ( profile == NULL ) ? prof = &m_mainProfile : prof = profile;
+    if( profile == NULL )
+    {
+        // if no profile is given, the main profile will be used as default
+        prof = &m_mainProfile;
+    }
+    else
+    {
+        // use given profile
+        prof = profile;
+    }
+    //( profile == NULL ) ? prof = &m_mainProfile : prof = profile;
+
     if( prof->size() == 0 )
     {
-        return false; //empty profile
+        return false; //  empty profiles will not be saved
     }
 
+    // compose context of the soon-to-be-saved file which will be saved in given path with given filename
     std::ofstream savefile( ( path->get( true ).string() + "/" + filename ).c_str() /*, ios::app */ );
+    // heading
     savefile << "# RayProfile data for OpenWalnut TransferCalcModule" << std::endl;
     savefile << "# ID \t dist \t value \t grad_x \t grad_y \t grad_z \t gradW \t FA \t angle \t mean \t gauss" << std::endl;
+    // save data of each sample point
     for( size_t sample = 0; sample < prof->size(); sample++ )
     {
         savefile << sample + 1 << "\t";                         // print id
@@ -199,6 +210,7 @@ void WMTransferCalc::moduleMain()
 {
     debugLog() << "moduleMain started...";
 
+    // init observation of properties
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_inputData->getDataChangedCondition() );
     m_moduleState.add( m_inputDerivation->getDataChangedCondition() );
@@ -235,31 +247,21 @@ void WMTransferCalc::moduleMain()
             break;
         }
 
-//         // This checks the selection.
-//         if( m_multiPlotDataSelection->changed() )
-//         {
-//             // The multi property allows the selection of several items. So, iteration needs to be done here:
-//             WItemSelector s = m_multiPlotDataSelection->get( true );
-//             for( size_t i = 0; i < s.size(); ++i )
-//             {
-//                 infoLog() << "The user chose " << s.at( i )->getName()
-//                           << " with the value " << s.at( i )->getAs< MyItemType >()->getValue();
-//             }
-//         }
-
         // activates if user pushes save button to save current RayProfile
         if( m_saveTrigger->get( true ) == WPVBaseTypes::PV_TRIGGER_TRIGGERED )
         {
             debugLog() << "User saves RayProfile(s).";
 
+            // start progress for GUI
             boost::shared_ptr< WProgress > saving = boost::shared_ptr< WProgress >( new WProgress( "Saving calculated RayProfiles." ) );
             m_progress->addSubProgress( saving );
 
-            // save plot file for every profile
+            // save data and plot file for every profile
             unsigned int nrProfiles = m_profiles.size();
             for( unsigned int id = 0; id < nrProfiles; id++ )
             {
-                // generate initialization
+                // generate header
+                // first a general header for setting default options
                 std::stringstream prepGNUPlotScript;
                 prepGNUPlotScript << "# Measured RayProfile data for Profile "<< id + 1 << std::endl
                                 << "#===========================================" << std::endl << std::endl
@@ -267,28 +269,31 @@ void WMTransferCalc::moduleMain()
                                 << "set pointsize 0.5" << std::endl
                                 << "set grid" << std::endl
                                 << "set xlabel 'uniform distance on ray'" << std::endl;
-                
+
                 // generate filename of data file
                 std::stringstream prepFilename;
                 prepFilename << "RayProfile" << id + 1 << ".dat";
                 std::string filename( prepFilename.str() );
 
-                // save data which will be plotted with the plot script
+                // save data which will be plotted with the plot script with this method
                 bool success = saveRayProfileTo( m_RaySaveFilePath, filename, &m_profiles[id] );
                 if( !success )
                 {
                     errorLog() << "RayProfile " << id + 1 << " was empty or could not be saved.";
                 }
-                else
+                else // saving successful
                 {
+                    // check selector for the chosen data to plot
                     WItemSelector s = m_multiPlotDataSelection->get( true );
                     unsigned int count = s.size();
                     prepGNUPlotScript << "plot ";
+                    // each selected option gets an individual command line in the later script
                     for( size_t i = 0; i < s.size(); ++i )
                     {
-                        infoLog() << "The user chose " << s.at( i )->getName()
-                                << " with the value " << s.at( i )->getAs< MyItemType >()->getValue();
+//                         infoLog() << "The user chose " << s.at( i )->getName()
+//                                 << " with the value " << s.at( i )->getAs< MyItemType >()->getValue();
 
+                        // switch works with an enumeration
                         switch( s.at( i )->getAs< MyItemType >()->getValue() )
                         {
                             case VALUE:
@@ -343,22 +348,24 @@ void WMTransferCalc::moduleMain()
                                 errorLog() << "No properties selected!";
                         }
                     }
+                    // generate filename for plot script
                     std::stringstream prepPlotFilename;
                     prepPlotFilename << "/plot" << id + 1 << ".gsc";
                     std::string plotfilename( prepPlotFilename.str() );
-                    //std::string plotScript( prepGNUPlotScript.str() );
-                    //debugLog() << plotScript;
+                    // save plot script
                     std::ofstream plotFile( ( m_RaySaveFilePath->get( true ).string() + plotfilename ).c_str() );
                     plotFile << prepGNUPlotScript.str();
                     plotFile.close();
                 }
             }
+            // end progress
             saving->finish();
             m_progress->removeSubProgress( saving );
-
+            // reactivate trigger
             m_saveTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, false );
         }
 
+        // check input connectors for new datasets
         bool dataChanged = ( m_inputData->getData() != m_dataSet );
         bool additionalData = ( m_inputFA->getData() != m_FAdataSet );
         bool newDerivative = ( m_inputDerivation->getData() != m_deriDataSet );
@@ -366,7 +373,7 @@ void WMTransferCalc::moduleMain()
         m_DeriIsValid = ( m_deriDataSet );
         m_FAisValid  = ( m_FAdataSet );
 
-        if( dataChanged )
+        if( dataChanged ) // main data, compulsory
         {
             m_dataSet = m_inputData->getData();
             dataValid = ( m_dataSet );
@@ -390,7 +397,7 @@ void WMTransferCalc::moduleMain()
             }
         }
 
-        if( newDerivative )
+        if( newDerivative ) // optional: dataset with derivated data
         {
             m_deriDataSet = m_inputDerivation->getData();
             m_DeriIsValid = ( m_deriDataSet );
@@ -414,12 +421,18 @@ void WMTransferCalc::moduleMain()
                     m_DeriIsValid = false;
                 }
             }
-            m_meanCurvDataSet.reset();
-            m_gaussCurvDataSet.reset();
-            calculateCurvature();
+
+            if( m_DeriIsValid )
+            {
+                // reset old calculations
+                m_meanCurvDataSet.reset();
+                m_gaussCurvDataSet.reset();
+                // this may take some time, depending on the data
+                calculateCurvature();
+            }
         }
 
-        if( additionalData )
+        if( additionalData ) // optional: fractional anisotropy data
         {
             m_FAdataSet = m_inputFA->getData();
             m_FAisValid = ( m_FAdataSet );
@@ -444,8 +457,9 @@ void WMTransferCalc::moduleMain()
         }
 
         bool propsChanged = m_interval->changed() || m_rayNumber->changed() || m_radius->changed();
-                            //m_xPos->changed() || m_yPos->changed() || m_zPos->changed()  ||
 
+        // observes properties and connectors
+        // main calculation of the module starts in onClick function
         if( ( propsChanged || dataChanged ) && dataValid )
         {
             debugLog() << "Data or properties changed.";
@@ -478,13 +492,12 @@ void WMTransferCalc::moduleMain()
                 bounding_box[6] = WVector4d( 0,       y_scale, z_scale, 1 );
                 bounding_box[7] = WVector4d( x_scale, y_scale, z_scale, 1 );
 
-                //std::vector< WVector4d > outer_bounding( 2,  bounding_box[0] );
                 // BoundingBox parallel to the screen (just min and max)
                 m_outer_bounding.resize( 2 );
                 m_outer_bounding[0] = bounding_box[0];
                 m_outer_bounding[1] = bounding_box[0];
 
-                for( unsigned int k = 0; k < 8; k++)
+                for( unsigned int k = 0; k < 8; k++ )
                 {
                     // minimal point in BoundingBox
                     m_outer_bounding[0][0] = std::min( bounding_box[k][0], m_outer_bounding[0][0] ); // x-min
@@ -500,11 +513,9 @@ void WMTransferCalc::moduleMain()
     //                  debugLog() << "max-vec:" << m_outer_bounding[1];
                 }
             }
-
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            // Getting Data and setting Properties
+            // Getting Data and setting Properties for GUI
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
             m_interval->setMin( 0.0 );
             m_interval->setMax( 1.0 );
             //m_interval->setMax( length( WVector4d( dist_x, dist_y, dist_z, 0.0 ) ) );
@@ -515,11 +526,9 @@ void WMTransferCalc::moduleMain()
 
             m_radius->setMin( 1 );
             m_radius->setRecommendedValue( 2 );
-
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             // Drawing current position of the future ray from properties (debugging)
             //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
             if( false ) //just for debugging
             {
                 osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
@@ -559,7 +568,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     debugLog() << "Viewport: " << m_matrixCallback->getViewportX()->get() << ", " << m_matrixCallback->getViewportY()->get() << ", "
                                << m_matrixCallback->getViewportWidth()->get() << ", " << m_matrixCallback->getViewportHeight()->get();
 */
-    // get the both matrices inverted
+    // get both matrices inverted
     WMatrix4d projectionMatrixInverted = invert( m_matrixCallback->getProjectionMatrix()->get() );
     WMatrix4d modelviewMatrixInverted = invert( m_matrixCallback->getModelViewMatrix()->get() );
 
@@ -586,30 +595,24 @@ void WMTransferCalc::onClick( WVector2i mousePos )
 //     debugLog() << pInWorldSpace << " --- " << pInObjectSpace;
 //     debugLog() << dirInWorldSpace << " --- " << dirInObjectSpace;
 
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Ray Casting
-    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-//     // start point in Object Coordinates
-//     WVector4d start( m_xPos->get( true ), m_yPos->get( true ), 0.0, 1.0 );
-//     WVector4d dir( 0.0, 0.0, 1.0, 0.0 );
-//     // ray object - ray = start + t * direction
-//     WRay ray( start, dir );
-
-    // ray object - ray = start + t * direction
-    WRay ray( pInObjectSpace, dirInObjectSpace );
-
     // debug "vector"
-    osg::ref_ptr< osg::Geode > debugGeode = new osg::Geode();
+/*    osg::ref_ptr< osg::Geode > debugGeode = new osg::Geode();
     debugGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
     debugGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 2.5f ) ) );
     debugGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace + dirInObjectSpace, true ), 5.0f ) ) );
     m_rootNode->clear();
     m_rootNode->insert( debugGeode );
+*/
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    // Ray Casting
+    //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
+    // ray object calculated from click position: ray = start + t * direction
+    WRay ray( pInObjectSpace, dirInObjectSpace );
     // delete old profiles
     m_profiles.clear();
 
+    // get user defined properties
     double interval = m_interval->get( true );
     unsigned int samplesInVicinity = static_cast<unsigned int>( m_rayNumber->get( true ) );
     unsigned int radi = static_cast<unsigned int>( m_radius->get( true ) );
@@ -617,7 +620,9 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
 
+    // seed for random
     std::srand( time( 0 ) );
+    // cast additional rays if user defined more than one ray in properties
     for( unsigned int n = 0; n < samplesInVicinity; n++ )
     {
         if( n == 0 ) // the initial profile
@@ -641,12 +646,15 @@ void WMTransferCalc::onClick( WVector2i mousePos )
                 random_rad = dis;
             }
             // create orthogonal plane to ray for calculating rays in vicinity
+            // (the ray gets transformed and scaled before this step,
+            // so we have to calculate this plane to get a uniform scale for the radius)
             double coord = std::max( ray.direction().x(), std::max( ray.direction().y(), ray.direction().z() ) );
             WVector3d helper( coord, coord, coord );
             WVector3d ax1 = cross( getAs3D( ray.direction(), true ), helper );
             WVector3d ax2 = cross( getAs3D( ray.direction(), true ), ax1 );
             ax1 = normalize( ax1 );
             ax2 = normalize( ax2 );
+            // base vectors of the calculated plane
             WVector4d ax1_4( ax1.x(), ax1.y(), ax1.z(), 0.0 );
             WVector4d ax2_4( ax2.x(), ax2.y(), ax2.z(), 0.0 );
 
@@ -662,10 +670,9 @@ void WMTransferCalc::onClick( WVector2i mousePos )
 WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< osg::Geode > rayGeode )
 {
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // Calculating a single profile with samples
+    // Calculating a single profile with all samples
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-    // progress
+    // start progress for GUI
     boost::shared_ptr< WProgress > prog = boost::shared_ptr< WProgress >( new WProgress( "Casting ray." ) );
     m_progress->addSubProgress( prog );
 
@@ -674,6 +681,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     WRayProfile curProfile( max_nbSamples );
 //   debugLog() << "Max samples: " << max_nbSamples;
 
+    // BoxIntersecParameter contains two values, the first and second intersection parameter with the grid
     struct BoxIntersecParameter bounds = rayIntersectsBox( ray );
     if( bounds.isNull ) //no intersection with data grid
     {
@@ -684,11 +692,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     double start_t = bounds.minimum_t;
     double end_t   = bounds.maximum_t;
 
-/*    debugLog() << start_t << " - " << end_t;
-    prog->finish();
-    m_progress->removeSubProgress( prog );
-    return curProfile;
-*/
+    // helpers for visualization
     WVector4d geodeStartVec, geodeEndVec, cylinderVec;
 
     size_t sampleCount = 0;
@@ -698,29 +702,32 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
         WVector3d cur3D = getAs3D( current );
 
         // do not calculate anything for vectors outside of the data grid
+        // (should not be neccessary anymore, though)
         if( !m_grid->encloses( cur3D ) )
         {
             //debugLog() << "continue...";
             continue;
         }
-        
+        // save position of the sample point in profile
         double vox_x = static_cast< double >( m_grid->getVoxelNum( cur3D ) );
         double vox_y = static_cast< double >( m_grid->getVoxelNum( cur3D ) );
         double vox_z = static_cast< double >( m_grid->getVoxelNum( cur3D ) );
         curProfile[sampleCount].position() = WVector4d( vox_x, vox_y, vox_z, 1 );
 
-        // set start Vector in data grid for drawing the arrow
+        // set start vector for drawing the ray
         if( sample_t == start_t )
         {
             geodeStartVec = current;
         }
 
+        // get interpolated value at current sample point
         double val = interpolate( current, m_grid, m_dataSet );
         // save value
         curProfile[sampleCount].value() = val;
-        // save distance
+        // save distance t
         curProfile[sampleCount].distance() = sample_t;
 
+        // if there is any FA data available, save it
         if( m_FAisValid )
         {
             if( m_FAgrid->encloses( cur3D ) )
@@ -729,7 +736,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
                 curProfile[sampleCount].fracA() = interpolate( current, m_FAgrid, m_FAdataSet );
             }
         }
-        
+        // if there is any derivated data available, save calculated curvature
         if( m_DeriIsValid )
         {
             if( m_deriGrid->encloses( cur3D ) )
@@ -750,7 +757,8 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
         double weight = length( grad );
         // save gradient weight
         curProfile[sampleCount].gradWeight() = weight;
-        if( weight != 0 ) //normalize
+        // normalize
+        if( weight != 0 )
         {
             // save gradient
             curProfile[sampleCount].gradient() = grad * ( 1 / weight );
@@ -765,6 +773,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
 //                                                     std::acos( gradVec.dot( rayVec * -1 ) ) );
         curProfile[sampleCount].angle() = std::acos( gradVec.dot( rayVec * -1 ) );
 
+        // set helper for visualization
         if( sample_t + interval <= end_t )
         {
             geodeEndVec = current;
@@ -772,21 +781,27 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
         sampleCount++;
     }
     // draw ray (a cylinder and a cone)
+    // (it is a little tricky because osg does not support
+    // native rotation of its drawables on initialization)
     cylinderVec = geodeEndVec - geodeStartVec;
 
+    // set cylinder center in the middle of the ray (will be rotation center)
     osg::Cylinder* cylinder = new osg::Cylinder( getAs3D( geodeStartVec + ( 0.5 * cylinderVec ) ), 0.5f, length( cylinderVec ) );
     osg::Cone* cone = new osg::Cone( getAs3D( geodeEndVec ), 1.0f, 5.0f );
 
-    osg::Quat rot;
-    rot.makeRotate( osg::Vec3d( 0.0, 0.0, 1.0 ),
+    // let osg calculate the neccessary rotation matrix and rotate the shapes
+    osg::Quat rotation;
+    rotation.makeRotate( osg::Vec3d( 0.0, 0.0, 1.0 ),
                     osg::Vec3d( ray.direction().x(), ray.direction().y(), ray.direction().z() )
                 );
-    cylinder->setRotation( rot );
-    cone->setRotation( rot );
+    cylinder->setRotation( rotation );
+    cone->setRotation( rotation );
 
+    // draw it
     rayGeode->addDrawable( new osg::ShapeDrawable( cylinder ) );
     rayGeode->addDrawable( new osg::ShapeDrawable( cone ) );
 
+    // end progress
     prog->finish();
     m_progress->removeSubProgress( prog );
 
@@ -805,11 +820,11 @@ struct BoxIntersecParameter WMTransferCalc::rayIntersectsBox( WRay ray )
 
     for( unsigned int coord = 0; coord < 3; coord++ ) // for x,y,z
     {
-        if( ray.direction()[coord] == 0 ) // ray parallel to the min/max coord-planes
+        if( ray.direction()[coord] == 0 ) // ray parallel to the min/max coordinate planes
         {
             if( ray.start()[coord] < m_outer_bounding[0][coord] || ray.start()[coord] > m_outer_bounding[1][coord] )
             {
-                return result;
+                return result; // ray not within min and max values of current coordinate
             }
         }
         else // ray not parallel, so calculate intersections
@@ -836,7 +851,7 @@ struct BoxIntersecParameter WMTransferCalc::rayIntersectsBox( WRay ray )
             }
             /*if( tfar < 0 )
             {
-                 return result; // cube behind ray - possible case
+                 return result; // cube behind ray - possible case here (because of unknown click position)
             }*/
         }
     }
@@ -860,12 +875,19 @@ WVector3d WMTransferCalc::getAs3D( const WVector4d& vec, bool disregardW )
 
 WVector4d WMTransferCalc::getGradient( const WVector4d& position )
 {
-    // voxeldistance in each direction (usually 1)
+//     if( m_DeriIsValid )
+//     {
+//         // not usable yet (has to be interpolated)
+//         return static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( getAs3D( position ) ) );
+//     }
+
+    // voxel distance in each direction (usually 1)
     double dist_x = m_grid->getOffsetX();
     double dist_y = m_grid->getOffsetY();
     double dist_z = m_grid->getOffsetZ();
     double x_val, y_val, z_val;
 
+    // central difference quotient in each direction
     x_val = ( ( interpolate( position + WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) )
             - ( interpolate( position - WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) / dist_x;
     y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) )
@@ -876,14 +898,16 @@ WVector4d WMTransferCalc::getGradient( const WVector4d& position )
     return WVector4d( x_val, y_val, z_val, 0 );
 }
 
-double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid, boost::shared_ptr< WDataSetScalar > inter_dataSet )
+double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid,
+                                                               boost::shared_ptr< WDataSetScalar > inter_dataSet )
 {
+    // determine center of hit voxel
     double vox_x = static_cast< double >( inter_grid->getXVoxelCoord( getAs3D( position ) ) );
     double vox_y = static_cast< double >( inter_grid->getYVoxelCoord( getAs3D( position ) ) );
     double vox_z = static_cast< double >( inter_grid->getZVoxelCoord( getAs3D( position ) ) );
     WVector4d voxel_center( vox_x, vox_y, vox_z, 1 );
 
-    // distance between voxels in each direction
+    // distance between voxels in each direction (usually 1)
     double x_offset = inter_grid->getOffsetX();
     double y_offset = inter_grid->getOffsetY();
     double z_offset = inter_grid->getOffsetZ();
@@ -892,13 +916,13 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Calculating all relevant neighbours for the interpolation
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-    // vector with all 8 direct neighbours to the position
+    // vector with all 8 direct neighbours
     std::vector< WVector4d > neighbours( 8 );
-    // vectors with min / max coordinates of neighbours
-    // { min_x, min_y, min_z }
+    // vectors with min / max coordinates of neighbours { min_x, min_y, min_z }
     std::vector< double > min_val( 3 );
     std::vector< double > max_val( 3 );
 
+    // determine quadrant for trilinear interpolation to choose right neighbours
     // positive x direction
     if( position[0] >= voxel_center[0] )
     {
@@ -1090,12 +1114,12 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
     // for storing the values of the 8 neighbours
     std::vector< double > values( 8 );
 
-    // check, if all neighbours are inside the grid
+    // check, if all neighbours are inside the grid and get the corresponding value
     for( unsigned int i = 0; i < neighbours.size(); i++)
     {
         if( !inter_grid->encloses( getAs3D( neighbours[i] ) ) )
         {
-            values[i] = 0;  // TODO(fjacob): any better?
+            values[i] = 0;  // temporary solution
         }
         else
         {
@@ -1104,7 +1128,6 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
     }
 
     // trilinear interpolation from wikipedia
-
     double x_dif = ( position[0] - min_val[0] ) / ( max_val[0] - min_val[0] );
     double y_dif = ( position[1] - min_val[1] ) / ( max_val[1] - min_val[1] );
     double z_dif = ( position[2] - min_val[2] ) / ( max_val[2] - min_val[2] );
@@ -1122,27 +1145,42 @@ double WMTransferCalc::interpolate( const WVector4d& position, boost::shared_ptr
 
 void WMTransferCalc::calculateCurvature()
 {
+    // additional data for derivation must be available
+    if( !m_DeriIsValid )
+    {
+        return;
+    }
+    // init progress for GUI
     boost::shared_ptr< WProgress > calcCurvProg = boost::shared_ptr< WProgress >( new WProgress( "Calculating curvature values." ) );
     m_progress->addSubProgress( calcCurvProg );
 
-    //bool useEigenvalues = true; // if this is false, the method of the paper will be used
+    // if this is false, the method of the paper will be used
+    //bool useEigenvalues = true; //TODO(fjacob): not working right now
 
+    // scales of the current grid
     double x_scale = m_deriGrid->getNbCoordsX();
     double y_scale = m_deriGrid->getNbCoordsY();
     double z_scale = m_deriGrid->getNbCoordsZ();
+    // voxel dimensions (usually 1 in each direction)
     double dist_x  = m_deriGrid->getOffsetX();
     double dist_y  = m_deriGrid->getOffsetY();
     double dist_z  = m_deriGrid->getOffsetZ();
 
+    // vector for creating dataset with the calculated mean curvature values
     boost::shared_ptr< std::vector< double > > mean_values = boost::shared_ptr< std::vector< double > >(
                                                             new std::vector< double >( m_deriDataSet->getValueSet()->size(), 0.0 )
                                                         );
+    // vector for creating dataset with the calculated gaussian curvature values
     boost::shared_ptr< std::vector< double > > gauss_values = boost::shared_ptr< std::vector< double > >(
                                                             new std::vector< double >( m_deriDataSet->getValueSet()->size(), 0.0 )
                                                         );
+    // eigenvalues which will be calculated
     double k1, k2, k3;
+    // index of current position in the grid to adopt the same position in the new datagrid
     size_t id = 0;
+    // vectors for all neighbour positions for derivation (in x/y/z direction)
     std::vector< WVector3d > derivDirection( 6 );
+    // calculated position in the current grid (negative, if outside grid)
     std::vector< int > derivIds( 6 );
 
     //debugLog() << "Test " << x_scale << " - " << y_scale << " - " << z_scale ;
@@ -1150,6 +1188,7 @@ void WMTransferCalc::calculateCurvature()
     //debugLog() << "Rawsize: " << m_deriDataSet->getValueSet()->rawSize();
     //debugLog() << "Distances: " << dist_x << "-" << dist_x << "-" << dist_x;
 
+    // traverse dataset/grid
     for( unsigned int zdir = 0; zdir < z_scale; zdir++ )
     {
         for( unsigned int ydir = 0; ydir < y_scale; ydir++ )
@@ -1157,8 +1196,10 @@ void WMTransferCalc::calculateCurvature()
             for( unsigned int xdir = 0; xdir < x_scale; xdir++ )
             {
                 WVector3d position( xdir, ydir, zdir );
+                // get gradient of current position
                 WVector3d curGrad = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( id ) );
-                if( length( curGrad ) == 0 ) 
+                // skip grid point, if there is no gradient
+                if( length( curGrad ) == 0 )
                 {
                     id++;
                     continue;
@@ -1166,13 +1207,14 @@ void WMTransferCalc::calculateCurvature()
                 //size_t id = m_deriGrid->getVoxelNum( position );
                 //debugLog() << id;
 
+                // calculate grid ids of neighbours (will be -1 if outside of the grid)
                 derivIds[0] = m_deriGrid->getVoxelNum( position + WVector3d( -dist_x,  0,  0 ) );
                 derivIds[1] = m_deriGrid->getVoxelNum( position + WVector3d(  dist_x,  0,  0 ) );
                 derivIds[2] = m_deriGrid->getVoxelNum( position + WVector3d(  0, -dist_y,  0 ) );
                 derivIds[3] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  dist_y,  0 ) );
                 derivIds[4] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0, -dist_z ) );
                 derivIds[5] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0,  dist_z ) );
-
+                // get gradient vectors for each neighbour if this neighbour is inside the grid
                 derivDirection[0] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
                 derivDirection[1] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
                 derivDirection[2] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
@@ -1180,6 +1222,7 @@ void WMTransferCalc::calculateCurvature()
                 derivDirection[4] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
                 derivDirection[5] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
 
+                // derivate in each direction again (central differential quotient) to get hessian matrix
                 Eigen::Matrix3d hesse;
                             // x-values form x,y,z direction
                 hesse <<    ( derivDirection[1][0] - derivDirection[0][0] ) / 2.0 * dist_x,
@@ -1195,8 +1238,10 @@ void WMTransferCalc::calculateCurvature()
                             ( derivDirection[5][2] - derivDirection[4][2] ) / 2.0 * dist_z;
                 //debugLog() << hesse;
 
+                // currently not working in another way
                 if( true /*useEigenvalues*/ )
                 {
+                    // let Eigen calculate eigen values
                     Eigen::EigenSolver< Eigen::Matrix3d > eigenResults( hesse, false );
 //                     debugLog()  << "The eigenvalues of the 3x3 matrix are:"
 //                                 << std::endl << eigenResults.eigenvalues()
@@ -1204,13 +1249,13 @@ void WMTransferCalc::calculateCurvature()
                     k1 = eigenResults.eigenvalues()[0].real();
                     k2 = eigenResults.eigenvalues()[1].real();
                     k3 = eigenResults.eigenvalues()[2].real();
-                    
+                    // sort absolute eigenvalues
                     if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
                     if( std::abs( k2 ) <= std::abs( k3 ) ) std::swap( k2, k3 );
                     if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
-                    
                     //debugLog() << k1 << " - " << k2 << " - " << k3;
 
+                    // calculate mean and gaussian curvature
                     (*mean_values)[id] = ( k1 + k2 ) * 0.5;
                     (*gauss_values)[id] =  k1 * k2;
                     id++;
@@ -1228,19 +1273,19 @@ void WMTransferCalc::calculateCurvature()
                     double g_weight = length( g );
                     WVector3d n = ( g * -1 ) / g_weight;
                     Eigen::Matrix3d E, nnT, P, nabla_nT, G, help;
-                    E <<    1,0,0,
-                            0,1,0,
-                            0,0,1;
-                    help << 1,0,0,
-                            0,1,0,
-                            0,0,0;
+                    E <<    1, 0, 0,
+                            0, 1, 0,
+                            0, 0, 1;
+                    help << 1, 0, 0,
+                            0, 1, 0,
+                            0, 0, 0;
                     nnT <<  n[0] * n[0], n[0] * n[1], n[0] * n[2],
                             n[1] * n[0], n[1] * n[1], n[1] * n[2],
                             n[2] * n[0], n[2] * n[1], n[2] * n[2];
                     P = E - nnT;
                     nabla_nT = ( P * hesse ) * ( -1 / g_weight );
                     G = nabla_nT * help;
-                    
+
                     debugLog()  << "g  : " << g << std::endl
                                 << "g_l: " << g_weight << std::endl
                                 << "n  : " << n << std::endl
@@ -1253,24 +1298,26 @@ void WMTransferCalc::calculateCurvature()
             }
         }
     }
-
+    // corresponding valueset to calculated list of values for mean curvature
     boost::shared_ptr< WValueSet< double > > mean_valueset = boost::shared_ptr< WValueSet< double > >(
                                                             new WValueSet< double >( 0, 1, mean_values, W_DT_DOUBLE )
                                                         );
+    // corresponding valueset to calculated list of values for gaussian curvature
     boost::shared_ptr< WValueSet< double > > gauss_valueset = boost::shared_ptr< WValueSet< double > >(
                                                             new WValueSet< double >( 0, 1, gauss_values, W_DT_DOUBLE )
                                                         );
-
+    // create mean curvature output data with calculated valueset
     m_meanCurvDataSet = boost::shared_ptr< WDataSetScalar >( new WDataSetScalar( mean_valueset, m_deriGrid ) );
     m_curveMeanOut->updateData( m_meanCurvDataSet );
-    
+    // create gaussian curvature output data with calculated valueset
     m_gaussCurvDataSet = boost::shared_ptr< WDataSetScalar >( new WDataSetScalar( gauss_valueset, m_deriGrid ) );
     m_curveGaussOut->updateData( m_gaussCurvDataSet );
-    
+    // end progress
     calcCurvProg->finish();
     m_progress->removeSubProgress( calcCurvProg );
 }
 
+// not in use right now, but maybe later
 void WMTransferCalc::SafeUpdateCallback::operator()( osg::Node* node, osg::NodeVisitor* nv )
 {
     // One note about m_aColor: As you might have notices, changing one of the properties, which recreate the OSG node, causes the material to be
