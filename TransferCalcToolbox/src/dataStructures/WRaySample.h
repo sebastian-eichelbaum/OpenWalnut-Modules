@@ -45,6 +45,20 @@ public:
     virtual ~WRaySample();
 
     /**
+     * Access the position of the sample point.
+     *
+     * \return the position reference.
+     */
+    const WVector4d& position() const;
+
+    /**
+     * Access the position of the sample point.
+     *
+     * \return the position reference.
+     */
+    WVector4d& position();
+
+    /**
      * Access the value of the sample point.
      *
      * \return the value reference.
@@ -128,8 +142,41 @@ public:
      */
     double& angle();
 
+    /**
+     * Access the mean curvature at the sample point.
+     *
+     * \return the mean curvature.
+     */
+    const double& meanCurv() const;
+
+    /**
+     * Access the mean curvature at the sample point.
+     *
+     * \return the mean curvature.
+     */
+    double& meanCurv();
+
+    /**
+     * Access the gauss curvature at the sample point.
+     *
+     * \return the gauss curvature.
+     */
+    const double& gaussCurv() const;
+
+    /**
+     * Access the gauss curvature at the sample point.
+     *
+     * \return the gauss curvature.
+     */
+    double& gaussCurv();
+
 protected:
 private:
+    /**
+     * The position of this sample point in the data grid.
+     */
+    WVector4d m_position;
+
     /**
      * The value at this sample point.
      */
@@ -159,6 +206,16 @@ private:
      * The angle between ray and gradient at this sample point.
      */
     double m_angle;
+
+    /**
+     * The mean curvature at this sample point.
+     */
+    double m_meanCurv;
+
+    /**
+     * The gauss curvature at this sample point.
+     */
+    double m_gaussCurv;
 };
 
 #endif  // WRAYSAMPLE_H
