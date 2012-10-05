@@ -129,6 +129,11 @@ void WMTransferCalc::properties()
     m_propCondition   = boost::shared_ptr< WCondition >( new WCondition() );
     m_color           = m_properties->addProperty(  "Color", "Color of the ray.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
+    m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.33, m_propCondition );
+    m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted with one click.", 10, m_propCondition );
+    m_radius          = m_properties->addProperty( "Radius", "Radius for circular vicinity in which the rays shall be casted.",
+                                                   2, m_propCondition );
+
     m_plotDataSelection = WItemSelection::SPtr( new WItemSelection() );
     m_plotDataSelection->addItem( MyItemType::create( 3, "Plot value.", "Chooses 'value' data for plotting." ) );
     m_plotDataSelection->addItem( MyItemType::create( 7, "Plot gradient weight.", "Chooses 'gradient weight' data for plotting." ) );
@@ -140,10 +145,6 @@ void WMTransferCalc::properties()
     m_multiPlotDataSelection = m_properties->addProperty( "Choose plot data", "Choose one of these for data plotting.",
                                                               m_plotDataSelection->getSelectorFirst(), m_propCondition );
 
-    m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.33, m_propCondition );
-    m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted with one click.", 10, m_propCondition );
-    m_radius          = m_properties->addProperty( "Radius", "Radius for circular vicinity in which the rays shall be casted.",
-                                                   2, m_propCondition );
 
     m_RaySaveFilePath = m_properties->addProperty( "Save RayProfile to Folder:",
                                                    "Savefile for RayProfile.", WPathHelper::getAppPath(), m_propCondition );
@@ -297,7 +298,7 @@ void WMTransferCalc::moduleMain()
                         switch( s.at( i )->getAs< MyItemType >()->getValue() )
                         {
                             case VALUE:
-                                prepGNUPlotScript << "'" << filename << "' using 2:3 title 'value' with points";
+                                prepGNUPlotScript << "'" << filename << "' using 2:3 title 'value' with linespoints";
                                 if( count - 1 != 0 )
                                 {
                                     prepGNUPlotScript << ", \\" << std::endl;
@@ -305,7 +306,7 @@ void WMTransferCalc::moduleMain()
                                 count--;
                                 break;
                             case WEIGHT:
-                                prepGNUPlotScript << "'" << filename << "' using 2:7 title 'gradient weight' with points";
+                                prepGNUPlotScript << "'" << filename << "' using 2:7 title 'gradient weight' with linespoints";
                                 if( count - 1 != 0 )
                                 {
                                     prepGNUPlotScript << ", \\" << std::endl;
@@ -313,7 +314,7 @@ void WMTransferCalc::moduleMain()
                                 count--;
                                 break;
                             case FA:
-                                prepGNUPlotScript << "'" << filename << "' using 2:8 title 'FA value' with points";
+                                prepGNUPlotScript << "'" << filename << "' using 2:($8*100) title 'FA value' with linespoints";
                                 if( count - 1 != 0 )
                                 {
                                     prepGNUPlotScript << ", \\" << std::endl;
@@ -321,7 +322,7 @@ void WMTransferCalc::moduleMain()
                                 count--;
                                 break;
                             case ANGLE:
-                                prepGNUPlotScript << "'" << filename << "' using 2:($9*(180/3.14159265)) title 'angle' with points";
+                                prepGNUPlotScript << "'" << filename << "' using 2:($9*(180/3.14159265)) title 'angle' with linespoints";
                                 if( count - 1 != 0 )
                                 {
                                     prepGNUPlotScript << ", \\" << std::endl;
@@ -329,7 +330,7 @@ void WMTransferCalc::moduleMain()
                                 count--;
                                 break;
                             case MEAN:
-                                prepGNUPlotScript << "'" << filename << "' using 2:10 title 'mean curvature' with points";
+                                prepGNUPlotScript << "'" << filename << "' using 2:($10*100) title 'mean curvature' with linespoints";
                                 if( count - 1 != 0 )
                                 {
                                     prepGNUPlotScript << ", \\" << std::endl;
@@ -337,7 +338,7 @@ void WMTransferCalc::moduleMain()
                                 count--;
                                 break;
                             case GAUSS:
-                                prepGNUPlotScript << "'" << filename << "' using 2:11 title 'gaussian curvature' with points";
+                                prepGNUPlotScript << "'" << filename << "' using 2:($11*100) title 'gaussian curvature' with linespoints";
                                 if( count - 1 != 0 )
                                 {
                                     prepGNUPlotScript << ", \\" << std::endl;
@@ -596,13 +597,13 @@ void WMTransferCalc::onClick( WVector2i mousePos )
 //     debugLog() << dirInWorldSpace << " --- " << dirInObjectSpace;
 
     // debug "vector"
-/*    osg::ref_ptr< osg::Geode > debugGeode = new osg::Geode();
+    osg::ref_ptr< osg::Geode > debugGeode = new osg::Geode();
     debugGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
     debugGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace, true ), 2.5f ) ) );
     debugGeode->addDrawable( new osg::ShapeDrawable( new osg::Sphere( getAs3D( pInObjectSpace + dirInObjectSpace, true ), 5.0f ) ) );
     m_rootNode->clear();
     m_rootNode->insert( debugGeode );
-*/
+
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     // Ray Casting
     //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -691,9 +692,12 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     }
     double start_t = bounds.minimum_t;
     double end_t   = bounds.maximum_t;
+    
+    debugLog() << "Start:" << start_t;
+    debugLog() << "End  :" << end_t;
 
     // helpers for visualization
-    WVector4d geodeStartVec, geodeEndVec, cylinderVec;
+    WVector3d geodeStartVec, geodeEndVec, cylinderVec;
 
     size_t sampleCount = 0;
     for( double sample_t = start_t; sample_t <= end_t; sample_t += interval )
@@ -715,9 +719,9 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
         curProfile[sampleCount].position() = WVector4d( vox_x, vox_y, vox_z, 1 );
 
         // set start vector for drawing the ray
-        if( sample_t == start_t )
+        if( sampleCount == 0 )
         {
-            geodeStartVec = current;
+            geodeStartVec = cur3D;
         }
 
         // get interpolated value at current sample point
@@ -774,10 +778,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
         curProfile[sampleCount].angle() = std::acos( gradVec.dot( rayVec * -1 ) );
 
         // set helper for visualization
-        if( sample_t + interval <= end_t )
-        {
-            geodeEndVec = current;
-        }
+        geodeEndVec = cur3D;
         sampleCount++;
     }
     // draw ray (a cylinder and a cone)
@@ -786,8 +787,8 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     cylinderVec = geodeEndVec - geodeStartVec;
 
     // set cylinder center in the middle of the ray (will be rotation center)
-    osg::Cylinder* cylinder = new osg::Cylinder( getAs3D( geodeStartVec + ( 0.5 * cylinderVec ) ), 0.5f, length( cylinderVec ) );
-    osg::Cone* cone = new osg::Cone( getAs3D( geodeEndVec ), 1.0f, 5.0f );
+    osg::Cylinder* cylinder = new osg::Cylinder( geodeStartVec + ( 0.5 * cylinderVec ), 0.5f, length( cylinderVec ) );
+    osg::Cone* cone = new osg::Cone( geodeEndVec, 1.0f, 5.0f );
 
     // let osg calculate the neccessary rotation matrix and rotate the shapes
     osg::Quat rotation;
