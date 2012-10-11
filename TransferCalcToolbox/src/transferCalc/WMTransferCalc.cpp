@@ -29,6 +29,7 @@
 //    * External Lib headers (like OSG or Boost headers)
 //    * headers of other classes inside OpenWalnut
 //    * your own header file
+#define _USE_MATH_DEFINES 
 
 #include <string>
 #include <sstream>
@@ -36,8 +37,12 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
 #include <limits>
 #include <cmath>
+#include <math.h>
 #include <iostream>
 #include <fstream>
 
@@ -129,7 +134,7 @@ void WMTransferCalc::properties()
     m_propCondition   = boost::shared_ptr< WCondition >( new WCondition() );
     m_color           = m_properties->addProperty(  "Color", "Color of the ray.", WColor( 1.0, 0.0, 0.0, 1.0 ), m_propCondition );
 
-    m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.33, m_propCondition );
+    m_interval        = m_properties->addProperty( "Interval", "Interval for sampling rays.", 0.30, m_propCondition );
     m_rayNumber       = m_properties->addProperty( "# of Rays", "Number of rays being casted with one click.", 10, m_propCondition );
     m_radius          = m_properties->addProperty( "Radius", "Radius for circular vicinity in which the rays shall be casted.",
                                                    2, m_propCondition );
@@ -520,7 +525,7 @@ void WMTransferCalc::moduleMain()
             m_interval->setMin( 0.0 );
             m_interval->setMax( 1.0 );
             //m_interval->setMax( length( WVector4d( dist_x, dist_y, dist_z, 0.0 ) ) );
-            m_interval->setRecommendedValue( 0.33 );
+            m_interval->setRecommendedValue( 0.30 );
 
             m_rayNumber->setMin( 1 );
             m_rayNumber->setRecommendedValue( 1 );
@@ -616,7 +621,7 @@ void WMTransferCalc::onClick( WVector2i mousePos )
     // get user defined properties
     double interval = m_interval->get( true );
     unsigned int samplesInVicinity = static_cast<unsigned int>( m_rayNumber->get( true ) );
-    unsigned int radi = static_cast<unsigned int>( m_radius->get( true ) );
+    unsigned int radius = static_cast<unsigned int>( m_radius->get( true ) );
 
     osg::ref_ptr< osg::Geode > rayGeode = new osg::Geode();
     rayGeode->addUpdateCallback( new SafeUpdateCallback( this ) );
@@ -633,19 +638,11 @@ void WMTransferCalc::onClick( WVector2i mousePos )
         }
         else // random profiles in vicinity
         {
-            // http://stackoverflow.com/questions/5837572/generate-a-random-point-within-a-circle-uniformly
-            double angle = static_cast< double >( ( std::rand() % 255 + 1 ) / 255.0 ) * 360.0;
-            double dis = static_cast< double >( ( std::rand() % 255 + 1 ) / 255.0 ) * radi +
-                         static_cast< double >( ( std::rand() % 255 + 1 ) / 255.0 ) * radi;
-            double random_rad;
-            if( dis > radi )
-            {
-                random_rad = ( 2 * radi ) - dis;
-            }
-            else
-            {
-                random_rad = dis;
-            }
+            // calculate random angle in [0,2pi]
+            double angle = 2 * M_PI * rand() / ( static_cast< double >( RAND_MAX ) );
+            // calculate random radius in [0,1]
+            double random_rad = rand() / ( static_cast< double >( RAND_MAX ) );
+
             // create orthogonal plane to ray for calculating rays in vicinity
             // (the ray gets transformed and scaled before this step,
             // so we have to calculate this plane to get a uniform scale for the radius)
@@ -659,7 +656,10 @@ void WMTransferCalc::onClick( WVector2i mousePos )
             WVector4d ax1_4( ax1.x(), ax1.y(), ax1.z(), 0.0 );
             WVector4d ax2_4( ax2.x(), ax2.y(), ax2.z(), 0.0 );
 
-            WVector4d vicPoint = ray.start() + ( ax1_4 * random_rad * std::cos( angle ) ) + ( ax2_4 * random_rad * std::sin( angle ) );
+            // calculate random ray
+            WVector4d vicPoint = ray.start() + 
+                                ( ax1_4 * sqrt( random_rad ) * std::cos( angle ) * radius ) + 
+                                ( ax2_4 * sqrt( random_rad ) * std::sin( angle ) * radius );
             WRay vicinity( vicPoint, ray.direction() );
             m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
         }
@@ -693,8 +693,8 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     double start_t = bounds.minimum_t;
     double end_t   = bounds.maximum_t;
     
-    debugLog() << "Start:" << start_t;
-    debugLog() << "End  :" << end_t;
+//    debugLog() << "Start:" << start_t;
+//    debugLog() << "End  :" << end_t;
 
     // helpers for visualization
     WVector3d geodeStartVec, geodeEndVec, cylinderVec;
@@ -889,12 +889,15 @@ WVector4d WMTransferCalc::getGradient( const WVector4d& position )
     double x_val, y_val, z_val;
 
     // central difference quotient in each direction
-    x_val = ( ( interpolate( position + WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) )
-            - ( interpolate( position - WVector4d( 0.5 * dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) / dist_x;
-    y_val = ( ( interpolate( position + WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.5 * dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) / dist_y;
-    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ), m_grid, m_dataSet ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.0, 0.5 * dist_z, 0.0 ), m_grid, m_dataSet ) ) ) / dist_z;
+    x_val = ( ( interpolate( position + WVector4d( dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) )
+            - ( interpolate( position - WVector4d( dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) 
+            / 2 * dist_x;
+    y_val = ( ( interpolate( position + WVector4d( 0.0, dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) )
+            - ( interpolate( position - WVector4d( 0.0, dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) 
+            / 2 * dist_y;
+    z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, dist_z, 0.0 ), m_grid, m_dataSet ) )
+            - ( interpolate( position - WVector4d( 0.0, 0.0, dist_z, 0.0 ), m_grid, m_dataSet ) ) ) 
+            / 2 * dist_z;
 
     return WVector4d( x_val, y_val, z_val, 0 );
 }
@@ -1155,9 +1158,6 @@ void WMTransferCalc::calculateCurvature()
     boost::shared_ptr< WProgress > calcCurvProg = boost::shared_ptr< WProgress >( new WProgress( "Calculating curvature values." ) );
     m_progress->addSubProgress( calcCurvProg );
 
-    // if this is false, the method of the paper will be used
-    //bool useEigenvalues = true; //TODO(fjacob): not working right now
-
     // scales of the current grid
     double x_scale = m_deriGrid->getNbCoordsX();
     double y_scale = m_deriGrid->getNbCoordsY();
@@ -1205,8 +1205,6 @@ void WMTransferCalc::calculateCurvature()
                     id++;
                     continue;
                 }
-                //size_t id = m_deriGrid->getVoxelNum( position );
-                //debugLog() << id;
 
                 // calculate grid ids of neighbours (will be -1 if outside of the grid)
                 derivIds[0] = m_deriGrid->getVoxelNum( position + WVector3d( -dist_x,  0,  0 ) );
@@ -1239,63 +1237,40 @@ void WMTransferCalc::calculateCurvature()
                             ( derivDirection[5][2] - derivDirection[4][2] ) / 2.0 * dist_z;
                 //debugLog() << hesse;
 
-                // currently not working in another way
-                if( true /*useEigenvalues*/ )
-                {
-                    // let Eigen calculate eigen values
-                    Eigen::EigenSolver< Eigen::Matrix3d > eigenResults( hesse, false );
-//                     debugLog()  << "The eigenvalues of the 3x3 matrix are:"
-//                                 << std::endl << eigenResults.eigenvalues()
-//                                 << std::endl << std::endl << eigenResults.eigenvalues()[0].real();
-                    k1 = eigenResults.eigenvalues()[0].real();
-                    k2 = eigenResults.eigenvalues()[1].real();
-                    k3 = eigenResults.eigenvalues()[2].real();
-                    // sort absolute eigenvalues
-                    if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
-                    if( std::abs( k2 ) <= std::abs( k3 ) ) std::swap( k2, k3 );
-                    if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
-                    //debugLog() << k1 << " - " << k2 << " - " << k3;
+                // method of the paper
+                // we need:
+                //      current gradient g
+                //      normal n = -g/|g|
+                //      P = E - nn^T
+                //      nabla-n^T = -PH / |g|   (where H is the hessian matrix)
+                WVector3d g = static_cast< WVector3d >( 
+                        m_deriDataSet->getValueSet()->getWVector( m_deriGrid->getVoxelNum( position ) ) 
+                );
+                double g_weight = length( g );
+                WVector3d n = ( g * -1 ) / g_weight;
+                Eigen::Matrix3d E, nnT, nabla_nT;
+                E <<    1, 0, 0,
+                        0, 1, 0,
+                        0, 0, 1;
+                nnT <<  n[0] * n[0], n[0] * n[1], n[0] * n[2],
+                        n[1] * n[0], n[1] * n[1], n[1] * n[2],
+                        n[2] * n[0], n[2] * n[1], n[2] * n[2];
+                nabla_nT = ( ( E - nnT ) * hesse ) * ( -1 / g_weight );
 
-                    // calculate mean and gaussian curvature
-                    (*mean_values)[id] = ( k1 + k2 ) * 0.5;
-                    (*gauss_values)[id] =  k1 * k2;
-                    id++;
-                }
-                else
-                {
-                    // method of the paper
-                    // we need:
-                    //      current gradient g
-                    //      normal n = -g/|g|
-                    //      P = E - nn^T
-                    //      nabla-n^T = -PH / |g|   (where H is the hessian matrix)
-                    //      G = nabla-n^T*P
-                    WVector3d g = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( m_deriGrid->getVoxelNum( position ) ) );
-                    double g_weight = length( g );
-                    WVector3d n = ( g * -1 ) / g_weight;
-                    Eigen::Matrix3d E, nnT, P, nabla_nT, G, help;
-                    E <<    1, 0, 0,
-                            0, 1, 0,
-                            0, 0, 1;
-                    help << 1, 0, 0,
-                            0, 1, 0,
-                            0, 0, 0;
-                    nnT <<  n[0] * n[0], n[0] * n[1], n[0] * n[2],
-                            n[1] * n[0], n[1] * n[1], n[1] * n[2],
-                            n[2] * n[0], n[2] * n[1], n[2] * n[2];
-                    P = E - nnT;
-                    nabla_nT = ( P * hesse ) * ( -1 / g_weight );
-                    G = nabla_nT * help;
+                Eigen::EigenSolver< Eigen::Matrix3d > eigenResults( nabla_nT, false );
+                k1 = eigenResults.eigenvalues()[0].real();
+                k2 = eigenResults.eigenvalues()[1].real();
+                k3 = eigenResults.eigenvalues()[2].real();
 
-                    debugLog()  << "g  : " << g << std::endl
-                                << "g_l: " << g_weight << std::endl
-                                << "n  : " << n << std::endl
-                                << "E  : " << E << std::endl
-                                << "nnT: " << nnT << std::endl
-                                << "P  : " << P << std::endl
-                                << "nab: " << nabla_nT << std::endl
-                                << "G  : " << G << std::endl;
-                }
+                // sort absolute eigenvalues ( because one will be 0 )
+                if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
+                if( std::abs( k2 ) <= std::abs( k3 ) ) std::swap( k2, k3 );
+                if( std::abs( k1 ) <= std::abs( k2 ) ) std::swap( k1, k2 );
+
+                // calculate mean and gaussian curvature
+                (*mean_values)[id] = ( k1 + k2 ) * 0.5;
+                (*gauss_values)[id] =  k1 * k2;
+                id++;
             }
         }
     }
