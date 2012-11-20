@@ -77,7 +77,8 @@ bool initDLtTableCuda( boost::shared_ptr< WMatrixSym > dLtTable,
     ProgressWrapper *progress = new ProgressWrapper( &progressData );
 
     float* distmat = new float[ntracts * ntracts];
-    bool result = distCuda( distmat, ncoords, coords, ntracts, offsets, lengths, proximity_threshold, progress );
+    // TODO(math): This is disabled as CUDA code won't compile anymore with the new CMakeProjects
+    bool result; // = distCuda( distmat, ncoords, coords, ntracts, offsets, lengths, proximity_threshold, progress );
 
     // copy results to OpenWalnut structure
     for( size_t q = 0; q < ntracts; ++q )

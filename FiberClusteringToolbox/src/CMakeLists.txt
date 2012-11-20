@@ -61,7 +61,7 @@ INCLUDE( OpenWalnut )
 
 FIND_PACKAGE( CUDA )
 FILE( GLOB_RECURSE CUDA_SRC "detTractClustering/*.cu" )
-CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
+#CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #

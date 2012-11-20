@@ -35,7 +35,6 @@
 #include "WMDetTractCulling.xpm"
 
 // This line is needed by the module loader to actually find your module.
-W_LOADABLE_MODULE( WMDetTractCulling )
 
 WMDetTractCulling::WMDetTractCulling()
     : WModule(),
