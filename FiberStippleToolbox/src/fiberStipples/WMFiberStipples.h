@@ -141,6 +141,11 @@ private:
     WPropDouble m_threshold;
 
     /**
+     * All probabilities below this probability are highlighted to the color of this probability.
+     */
+    WPropDouble m_colorThreshold;
+
+    /**
      * Determines the size of the quad used to stamp out the stipples.
      */
     WPropDouble m_glyphSize;

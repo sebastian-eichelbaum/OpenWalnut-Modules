@@ -99,6 +99,10 @@ void WMFiberStipples::properties()
     m_threshold->setMin( 0.0 );
     m_threshold->setMax( 1.0 );
 
+    m_colorThreshold = m_properties->addProperty( "Color Threshold", "Colors of connectivity scores below this threshold will be maped to colors representing this probability.", 0.00 );
+    m_colorThreshold->setMin( 0.0 );
+    m_colorThreshold->setMax( 1.0 );
+
     m_minRange = m_properties->addProperty( "Min Range", "Minimal stipple density", 0.0 );
     m_minRange->setMin( 0.0 );
     m_minRange->setMax( 1.0 );
@@ -247,6 +251,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, numDensitySlices, "u_numDensitySlices" );
     wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
     wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
+    wge::bindAsUniform( m_output, m_colorThreshold, "u_colorThreshold" );
 
 
     // each slice (containing scattered quads) is child of an transformation node

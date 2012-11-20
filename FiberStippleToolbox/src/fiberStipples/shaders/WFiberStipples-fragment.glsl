@@ -42,6 +42,11 @@ uniform vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
  */
 uniform float u_glyphThickness;
 
+/**
+ * All probabilities below this probability are highlighted to the color of this probability.
+ */
+uniform float u_colorThreshold;
+
 void main()
 {
     // generally the area of a line stipple is a circle with radius R (each half for the endings of the line stipple) plus
@@ -85,7 +90,8 @@ void main()
 
     if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < radius )
     {
-        gl_FragColor = u_color * probability;
+        gl_FragColor = u_color * pow( probability, 1.0 / (10.0 * u_colorThreshold) );
+//        gl_FragColor = clamp( u_color * clamp( u_colorThreshold + probability, 0.0, 1.0 ) - vec4( 0.0, 0.0, 0.0, 0.2 ), 0.0, 1.0 );
     }
     else
     {
