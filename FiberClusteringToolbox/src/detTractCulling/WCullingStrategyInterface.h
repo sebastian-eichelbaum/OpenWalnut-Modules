@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS, Copyright 2010 RRZK University of Cologne
+// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,27 +22,34 @@
 //
 //---------------------------------------------------------------------------
 
-#include <cuda.h>
-#include <cuda_runtime_api.h>
+#ifndef WCULLINGSTRATEGYINTERFACE_H
+#define WCULLINGSTRATEGYINTERFACE_H
 
-#include "core/common/WLogger.h"
+#include <utility>
 
-bool checkCudaError( bool *success, cudaError_t err, const char *msg = NULL )
+#include "core/common/WProgress.h"
+#include "core/dataHandler/WDataSetFibers.h"
+
+/**
+ * Every fiber culling strategy must implement this interface inorder to be used within the culling module.
+ */
+class WCullingStrategyInterface
 {
-    if( err == cudaSuccess )
-        return *success;
+public:
+    /**
+     * Sort out fibers.
+     *
+     * \param fibers Fibers to check.
+     * \param progress Progress object to report back the progress to the module.
+     *
+     * \return First dataset contains all remaining fibers which survied, second all fibers which were sorted out.
+     */
+    virtual std::pair< WDataSetFibers::SPtr, WDataSetFibers::SPtr > operator()( WDataSetFibers::SPtr fibers, WProgress::SPtr progress ) = 0;
 
-    wlog::WStreamedLogger errorLog( "Deterministic Tract Clustering (CUDA)", LL_ERROR );
-    if( msg )
-    {
-        errorLog << msg << ": " << cudaGetErrorString( err );
-    }
-    else
-    {
-        errorLog << "CUDA error: " << cudaGetErrorString( err );
-    }
+    /**
+     * Destructor.
+     */
+    virtual ~WCullingStrategyInterface();
+};
 
-    *success = false;
-
-    return *success;
-}
+#endif  // WCULLINGSTRATEGYINTERFACE_H

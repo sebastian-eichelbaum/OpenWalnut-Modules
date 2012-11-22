@@ -30,7 +30,10 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "core/common/WStrategyHelper.h"
+#include "core/common/WObjectNDIP.h"
 #include "core/kernel/WModule.h"
+#include "WCullingStrategyInterface.h"
 
 class WDataSetFiberVector;
 class WDataSetFibers;
@@ -38,9 +41,7 @@ template<class T> class WModuleInputData;
 template<class T> class WModuleOutputData;
 
 /**
- * Removes deterministic tracts and therefore implements a preprocessing step
- * for the deterministic tract clustering ala Zhang http://dx.doi.org/10.1109/TVCG.2008.52 .
- * It removes tracts which are considered to be not much useful for this special clustering approach.
+ * Removes deterministic tracts (aka fibers) on various criteria.
  *
  * \ingroup modules
  */
@@ -100,14 +101,14 @@ protected:
      */
     virtual void moduleMain();
 
-    /**
-     * Detect and removes tracts that have a short distance in terms of the
-     * dSt metric and are below the threshold given via the member
-     * m_dSt_culling_t.
-     *
-     * \note This might take a while with 70,000 tracts approx 2h.
-     */
-    virtual void cullOutTracts();
+//    /**
+//     * Detect and removes tracts that have a short distance in terms of the
+//     * dSt metric and are below the threshold given via the member
+//     * m_dSt_culling_t.
+//     *
+//     * \note This might take a while with 70,000 tracts approx 2h.
+//     */
+//    virtual void cullOutTracts();
 
     /**
      * Input connector for a tract dataset.
@@ -115,46 +116,39 @@ protected:
     boost::shared_ptr< WModuleInputData< WDataSetFibers > >  m_tractIC;
 
     /**
-     * Output connector for the culled tracts
+     * Output connector for the remaining tracts
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetFibers > > m_tractOC;
+    boost::shared_ptr< WModuleOutputData< WDataSetFibers > > m_remainingTractsOC;
 
     /**
-     * Pointer to the tract data set in WDataSetFiberVector format
+     * Output connector for the culled tracts
      */
-    boost::shared_ptr< WDataSetFiberVector > m_dataset;
+    boost::shared_ptr< WModuleOutputData< WDataSetFibers > > m_culledTractsOC;
 
     /**
      * Pointer to the tract data set in WDataSetFibers format
      */
-    boost::shared_ptr< WDataSetFibers > m_rawDataset;
+    boost::shared_ptr< WDataSetFibers > m_dataset;
+
+//     /**
+//      * Minimum distance of two different tracts. If below, the shorter tract is culled out
+//      */
+//     WPropDouble m_dSt_culling_t;
+//
+//     /**
+//      * Minimum distance of points of two tracts which should be considered
+//      */
+//     WPropDouble m_proximity_t;
 
     /**
-     * A condition which indicates complete recomputation
+     * Culling strategies
      */
-    boost::shared_ptr< WCondition > m_recompute;
+    WStrategyHelper< WObjectNDIP< WCullingStrategyInterface > > m_strategy;
 
     /**
-     * Minimum distance of two different tracts. If below, the shorter tract is culled out
+     * A condition used to notify about changes in several properties.
      */
-    WPropDouble m_dSt_culling_t;
-
-    /**
-     * Minimum distance of points of two tracts which should be considered
-     */
-    WPropDouble m_proximity_t;
-
-    /**
-     * Displays the number of tracts which are processed
-     */
-    WPropInt m_numTracts;
-
-    /**
-     * Displays the number of tracts which were removed
-     */
-    WPropInt m_numRemovedTracts;
-
-
+    boost::shared_ptr< WCondition > m_propCondition;
 private:
 };
 
