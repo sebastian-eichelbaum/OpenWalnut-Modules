@@ -6,6 +6,17 @@
 #include "PDSampling.h"
 #include "RangeList.h"
 
+// this is just a hack as this is an external lib which our module loader tries to load OW will report a stack trace. However
+// with this hack OW just will report that it is not able to create a prototype instance. If we want to omit this too we need
+// to create an non empty WModuleList which does nothing.
+class WModuleList;
+void WLoadModule( WModuleList&m );
+namespace
+{
+    extern "C"                       void WLoadModule( WModuleList& /* m */ ) { }
+}
+// end of the WModule symbol hacking stuff
+
 PDSampler::PDSampler(float _radius, bool _isTiled, bool usesGrid) :
 	radius(_radius),
 	isTiled(_isTiled)
