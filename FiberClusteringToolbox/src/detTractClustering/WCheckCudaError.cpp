@@ -34,9 +34,13 @@ bool checkCudaError( bool *success, cudaError_t err, const char *msg = NULL )
 
     wlog::WStreamedLogger errorLog( "Deterministic Tract Clustering (CUDA)", LL_ERROR );
     if( msg )
+    {
         errorLog << msg << ": " << cudaGetErrorString( err );
+    }
     else
+    {
         errorLog << "CUDA error: " << cudaGetErrorString( err );
+    }
 
     *success = false;
 

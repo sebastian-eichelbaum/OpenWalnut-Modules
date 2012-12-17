@@ -22,15 +22,34 @@
 //
 //---------------------------------------------------------------------------
 
-#include "core/kernel/WModule.h"
-#include "detTract2GPConvert/WMDetTract2GPConvert.h"
-#include "detTractClusteringGP/WMDetTractClusteringGP.h"
-#include "gpView/WMGpView.h"
-#include "WGaussProcessesMain.h"
+#ifndef WCULLINGSTRATEGYINTERFACE_H
+#define WCULLINGSTRATEGYINTERFACE_H
 
-extern "C" void WLoadModule( WModuleList& m ) // NOLINT const ref
+#include <utility>
+
+#include "core/common/WProgress.h"
+#include "core/dataHandler/WDataSetFibers.h"
+
+/**
+ * Every fiber culling strategy must implement this interface inorder to be used within the culling module.
+ */
+class WCullingStrategyInterface
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMDetTract2GPConvert ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMGpView ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMDetTractClusteringGP ) );
-}
+public:
+    /**
+     * Sort out fibers.
+     *
+     * \param fibers Fibers to check.
+     * \param progress Progress object to report back the progress to the module.
+     *
+     * \return First dataset contains all remaining fibers which survied, second all fibers which were sorted out.
+     */
+    virtual std::pair< WDataSetFibers::SPtr, WDataSetFibers::SPtr > operator()( WDataSetFibers::SPtr fibers, WProgress::SPtr progress ) = 0;
+
+    /**
+     * Destructor.
+     */
+    virtual ~WCullingStrategyInterface();
+};
+
+#endif  // WCULLINGSTRATEGYINTERFACE_H

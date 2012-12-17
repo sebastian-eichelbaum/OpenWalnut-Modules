@@ -60,8 +60,8 @@ INCLUDE( OpenWalnut )
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
 FIND_PACKAGE( CUDA )
-FILE( GLOB_RECURSE CUDA_SRC "detTractClustering/*.cu" )
-CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
+# FILE( GLOB_RECURSE CUDA_SRC "detTractClustering/*.cu" )
+# CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -69,18 +69,50 @@ CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} $
 #
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-# Here, you can add your own targets, call ADD_MODULE provided by OpenWalnut or a combination of it. When using ADD_MODULE or SETUP_MODULE, the
-# OpenWalnut CMake scripts manages proper resource handling, test compilation and similar. You should use it whenever possible. More details on
-# how to develop external modules, have a look at http://www.openwalnut.org. You can have a look at OpenWalnut.cmake if you want to modify
-# the default behaviour.
+# SETUP_MODULE(
+#     ${PROJECT_NAME}     # use project name as module(-toolbox) name
+#     "."                 # where to find the sources
+#     "${CUDA_LIBRARIES}" # no additonal dependencies
+#     ""                  # no sources to exclude
+# )
 
-# Please see the documentation of SETUP_MODULE as it shows how to add custom dependencies (third-party libs)
-SETUP_MODULE( 
-    ${PROJECT_NAME}   # use project name as module(-toolbox) name
-    "."               # where to find the sources
-    "${CUDA_LIBRARIES}"                # no additonal dependencies
-    ""                # no sources to exclude
-)
+# The follwoing code is taken from SETUP_MODULE OW-Cmake function as there was no way for integrating ADD_CUDA_LIBRARY over parameters
+SET( MODULE_NAME "ClusteringToolbox" ) # as all modules will be integrated into this "module" we call it toolbox
+SET( MODULE_TARGET_DIR_RELATIVE ${OW_MODULE_DIR_RELATIVE}/${MODULE_NAME} )
+SET( MODULE_TARGET_RESOURCE_DIR_RELATIVE ${OW_SHARE_DIR_RELATIVE}/modules/${MODULE_NAME} )
+SET( MODULE_TARGET_DIR ${PROJECT_BINARY_DIR}/${MODULE_TARGET_DIR_RELATIVE} )
+SET( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${MODULE_TARGET_DIR} )
+SET( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MODULE_TARGET_DIR} )
+SET( MODULE_SOURCE_DIR "." ) # use current directory
+
+COLLECT_COMPILE_FILES( "${MODULE_SOURCE_DIR}" TARGET_CPP_FILES TARGET_H_FILES TARGET_TEST_FILES )
+
+IF( CUDA_FOUND )
+    FILE( GLOB_RECURSE CUDA_SRC "*.cu" )
+    CUDA_ADD_LIBRARY( ${MODULE_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
+    TARGET_LINK_LIBRARIES( ${MODULE_NAME} ${CMAKE_STANDARD_LIBRARIES} ${OW_LIB_OPENWALNUT} ${Boost_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${CUDA_LIBRARIES} )
+ELSE()
+    LIST( REMOVE_ITEM TARGET_H_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WCheckCudaError.h )
+    LIST( REMOVE_ITEM TARGET_H_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WMDetTractClusteringCudaKernel.h )
+    LIST( REMOVE_ITEM TARGET_H_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WMDetTractClusteringCudaInterface.h )
+    LIST( REMOVE_ITEM TARGET_CPP_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WCheckCudaError.cpp )
+    LIST( REMOVE_ITEM TARGET_CPP_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WMDetTractClusteringCudaInterface.cpp )
+
+    ADD_LIBRARY( ${MODULE_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} )
+    TARGET_LINK_LIBRARIES( ${MODULE_NAME} ${CMAKE_STANDARD_LIBRARIES} ${OW_LIB_OPENWALNUT} ${Boost_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} )
+ENDIF()
+
+SET_TARGET_PROPERTIES( ${MODULE_NAME} PROPERTIES VERSION ${OW_LIB_VERSION} SOVERSION ${OW_SOVERSION} )
+
+SETUP_LIB_INSTALL( ${MODULE_NAME} ${MODULE_TARGET_DIR_RELATIVE} "MODULES" )
+SETUP_TESTS( "${TARGET_TEST_FILES}" "${MODULE_NAME}" "${CUDA_LIBRARIES}" )
+COLLECT_SHADER_FILES( ${MODULE_SOURCE_DIR} TARGET_GLSL_FILES )
+SETUP_SHADERS( "${TARGET_GLSL_FILES}" "${MODULE_TARGET_RESOURCE_DIR_RELATIVE}/shaders" "MODULES" )
+SETUP_RESOURCES_GENERIC( "${MODULE_SOURCE_DIR}/resources" ${MODULE_TARGET_RESOURCE_DIR_RELATIVE} "${MODULE_NAME}" "MODULES" )
+SETUP_STYLECHECKER( "${MODULE_NAME}"
+    "${TARGET_CPP_FILES};${TARGET_H_FILES};${TARGET_TEST_FILES};${TARGET_GLSL_FILES}"  # add all these files to the stylechecker
+    "${_MODULE_STYLE_EXCLUDES}" )                                                      # exlude some ugly files
+
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #

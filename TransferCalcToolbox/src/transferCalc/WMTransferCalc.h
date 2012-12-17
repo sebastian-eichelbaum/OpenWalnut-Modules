@@ -47,6 +47,9 @@
 #include "core/dataHandler/WDataSetVector.h"
 #include "core/common/math/linearAlgebra/WLinearAlgebra.h"
 #include "core/common/math/WMatrix.h"
+#include "core/common/WItemSelector.h"
+#include "core/common/WItemSelection.h"
+#include "core/common/WItemSelectionItemTyped.h"
 
 #include "../dataStructures/WRay.h"
 #include "../dataStructures/WRaySample.h"
@@ -131,24 +134,27 @@ protected:
 
 private:
     /**
-     * Handle click events in the main view
+     * Handle click events in the main view.
      *
      * \param mousePos the mouse position
      */
     void onClick( WVector2i mousePos );
 
     /**
-     * Trilinear interpolation within the grid for a given position
+     * Trilinear interpolation within a grid for a given position.
      *
      * \param position Position for which the value should be determined.
-     * \param grid Pointer to the grid, which shall be the base for the interpolation.
+     * \param inter_grid Pointer to the grid, which shall be the base for the interpolation.
+     * \param inter_dataSet Pointer to the dataset, which shall be the base for the interpolation.
      *
      * \return interpolated value
      */
-    virtual double interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid );
+    virtual double interpolate( const WVector4d& position, boost::shared_ptr< WGridRegular3D > inter_grid,
+                                                           boost::shared_ptr< WDataSetScalar > inter_dataSet );
 
     /**
      * Curvature calculation for given derivated dataset.
+     * Can just be called, it derivated dataset is available.
      */
     virtual void calculateCurvature();
 
@@ -163,6 +169,10 @@ private:
 
     /**
      * Cast a single ray through the current data.
+     * Casts a ray (described by the ray object) into the dataset
+     * and calculates all neccessary data at the sample points along the ray
+     * in the given intervall.
+     * The given geode will be used for visualization of that ray.
      *
      * \param ray WRay object which holds the start and direction vector of the ray.
      * \param interval Interval for taking the samples on the ray.
@@ -195,7 +205,7 @@ private:
     bool saveRayProfileTo( WPropFilename path, std::string filename, WRayProfile *profile = NULL );
 
     /**
-     * Calculating a WVector3d out of a given WVector4d
+     * Calculates a WVector3d out of a given WVector4d
      *
      * \param vec 4D vector which shall be transfered to 3D
      *
@@ -204,7 +214,7 @@ private:
     WVector3d getAs3D( const WVector4d& vec, bool disregardW = false );
 
     /**
-     * An input connector used to get datasets from other modules.
+     * An input connector used to get datasets from other modules (main input).
      */
     boost::shared_ptr< WModuleInputData< WDataSetScalar > >  m_inputData;
 
@@ -224,7 +234,7 @@ private:
     boost::shared_ptr< WModuleOutputData< WDataSetScalar > > m_curveMeanOut;
 
     /**
-     * The output connector used to provide the calculated curvature data in Gauss form to other modules.
+     * The output connector used to provide the calculated curvature data in Gaussian form to other modules.
      */
     boost::shared_ptr< WModuleOutputData< WDataSetScalar > > m_curveGaussOut;
 
@@ -232,11 +242,6 @@ private:
      * A condition used to notify about changes in several properties.
      */
     boost::shared_ptr< WCondition > m_propCondition;
-
-//     /**
-//      * All profiles of the current dataset.
-//      */
-//     std::vector<WRayProfile> m_dataRays;
 
     /**
      * Current dataset
@@ -252,6 +257,16 @@ private:
      * Optinal: additional dataset with fractional anisotropy data.
      */
     boost::shared_ptr< WDataSetScalar > m_FAdataSet;
+
+    /**
+     * Calculated dataset with mean curvature. Just set if additional dataset with derivated data already processed.
+     */
+    boost::shared_ptr< WDataSetScalar > m_meanCurvDataSet;
+
+    /**
+     * Calculated dataset with gaussian curvature. Just set if additional dataset with derivated data already processed.
+     */
+    boost::shared_ptr< WDataSetScalar > m_gaussCurvDataSet;
 
     /**
      * Boolean to check if any derivated data is present and valid.
@@ -291,7 +306,7 @@ private:
     std::vector< WRayProfile > m_profiles;
 
     /**
-     * Latest calculated RayProfile.
+     * Calculated RayProfile of the main ray (not of the rays in its vicinity).
      */
     WRayProfile m_mainProfile;
 
@@ -311,19 +326,32 @@ private:
     WPropTrigger  m_saveTrigger;
 
     /**
-     * x position of the ray origin.
+     * Typedef for the used item type (for code shortening).
      */
-    WPropDouble   m_xPos;
+    typedef WItemSelectionItemTyped< int > MyItemType;
 
     /**
-     * y position of the ray origin.
+     * A property allowing the user to select multiple items.
      */
-    WPropDouble   m_yPos;
+    WPropSelection m_multiPlotDataSelection;
 
     /**
-     * z position of the ray origin.
+     * List of the plottable data that can be selected using this property.
      */
-    WPropDouble   m_zPos;
+    boost::shared_ptr< WItemSelection > m_plotDataSelection;
+
+    /**
+     * Enumeration of selection properties to use for switch-case.
+     */
+    enum SelectVal
+    {
+        VALUE = 3,
+        WEIGHT = 7,
+        FA,
+        ANGLE,
+        MEAN,
+        GAUSS
+    };
 
     /**
      * Interval for sampling rays.
@@ -331,7 +359,7 @@ private:
     WPropDouble   m_interval;
 
     /**
-     * Number of rays being casted.
+     * Number of rays being casted with one click.
      */
     WPropInt   m_rayNumber;
 
@@ -341,13 +369,13 @@ private:
     WPropInt   m_radius;
 
     /**
-     * A color.
+     * Color of the visualized ray (a cylinder and a cone).
      */
     WPropColor  m_color;
 
     /**
-     * Node callback to change the color of the shapes inside the root node. For more details on this class, refer to the documentation in
-     * moduleMain().
+     * Node callback to change the color of the shapes inside the root node. For more details on this class, 
+     * refer to the documentation in moduleMain().
      */
     class SafeUpdateCallback : public osg::NodeCallback
     {

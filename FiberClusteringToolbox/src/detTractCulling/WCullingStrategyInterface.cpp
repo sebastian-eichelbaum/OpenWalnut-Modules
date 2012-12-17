@@ -22,7 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WGAUSSPROCESSESMAIN_H
-#define WGAUSSPROCESSESMAIN_H
+#include "WCullingStrategyInterface.h"
 
-#endif  // WGAUSSPROCESSESMAIN_H
+WCullingStrategyInterface::~WCullingStrategyInterface()
+{
+}
