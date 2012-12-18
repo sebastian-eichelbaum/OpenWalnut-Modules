@@ -59,9 +59,42 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
-FIND_PACKAGE( CUDA )
-# FILE( GLOB_RECURSE CUDA_SRC "detTractClustering/*.cu" )
-# CUDA_ADD_LIBRARY( ${PROJECT_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
+FIND_PACKAGE( CUDA QUIET )
+IF( CUDA_FOUND )
+    OPTION( OW_USE_CUDA "Enable Cuda support." )
+    IF( OW_USE_CUDA )
+        # BugFix: Subsequent calls don't set CUDA_VERSION_MAJOR or .._MINOR variables, so we have to extract them from CUDA_VERSION variable
+        STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+).*" "\\1" CUDA_VERSION_MAJOR ${CUDA_VERSION})
+        STRING(REGEX REPLACE "([0-9]+)\\.([0-9]+).*" "\\2" CUDA_VERSION_MINOR ${CUDA_VERSION})
+
+        # Enforce at least CUDA version 2.3, since the detTractClustering is know to require this at least
+        SET( OW_MIN_CUDA_MAJOR_VERSION 2 )
+        SET( OW_MIN_CUDA_MINOR_VERSION 3 )
+
+        IF( CUDA_VERSION_MAJOR LESS OW_MIN_CUDA_MAJOR_VERSION )
+            SET( CUDA_FOUND_BUT_LOW_VERSION 1 )
+        ELSEIF( CUDA_VERSION_MAJOR EQUAL OW_MIN_CUDA_MAJOR_VERSION )
+            IF( CUDA_VERSION_MINOR LESS OW_MIN_CUDA_MINOR_VERSION )
+                SET( CUDA_FOUND_BUT_LOW_VERSION 1 )
+            ENDIF()
+        ENDIF()
+
+        # abort incase invalid version of CUDA was found.
+        IF( CUDA_FOUND_BUT_LOW_VERSION )
+            MESSAGE( FATAL_ERROR "You have selected to use CUDA but an insufficent version: ${CUDA_VERSION_MAJOR}.${CUDA_VERSION_MINOR} was found, but ${OW_MIN_CUDA_MAJOR_VERSION}.${OW_MIN_CUDA_MINOR_VERSION} is required." )
+        ENDIF()
+        MESSAGE( STATUS "CUDA version: ${CUDA_VERSION_MAJOR}.${CUDA_VERSION_MINOR} was found." )
+
+        # set some common options
+        ADD_DEFINITIONS( -DCUDA_FOUND )
+        set( CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE ON )
+        set( BUILD_SHARED_LIBS ON )
+        set( CUDA_NVCC_FLAGS --compiler-options -fno-inline --ptxas-options=-v -arch=sm_12 )
+        set( CUDA_PROPAGATE_HOST_FLAGS OFF )
+        INCLUDE_DIRECTORIES( ${CUDA_TOOLKIT_INCLUDE} )
+        INCLUDE_DIRECTORIES( "${CUDA_SDK_ROOT_DIR}/common/inc" )
+    ENDIF( OW_USE_CUDA )
+ENDIF( CUDA_FOUND )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -87,17 +120,15 @@ SET( MODULE_SOURCE_DIR "." ) # use current directory
 
 COLLECT_COMPILE_FILES( "${MODULE_SOURCE_DIR}" TARGET_CPP_FILES TARGET_H_FILES TARGET_TEST_FILES )
 
-IF( CUDA_FOUND )
+IF( CUDA_FOUND AND OW_USE_CUDA )
     FILE( GLOB_RECURSE CUDA_SRC "*.cu" )
     CUDA_ADD_LIBRARY( ${MODULE_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} ${CUDA_SRC} )
     TARGET_LINK_LIBRARIES( ${MODULE_NAME} ${CMAKE_STANDARD_LIBRARIES} ${OW_LIB_OPENWALNUT} ${Boost_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} ${CUDA_LIBRARIES} )
 ELSE()
-    LIST( REMOVE_ITEM TARGET_H_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WCheckCudaError.h )
-    LIST( REMOVE_ITEM TARGET_H_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WMDetTractClusteringCudaKernel.h )
-    LIST( REMOVE_ITEM TARGET_H_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WMDetTractClusteringCudaInterface.h )
-    LIST( REMOVE_ITEM TARGET_CPP_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WCheckCudaError.cpp )
-    LIST( REMOVE_ITEM TARGET_CPP_FILES ${MODULE_SOURCE_DIR}/detTractClustering/WMDetTractClusteringCudaInterface.cpp )
-
+    FILE( GLOB_RECURSE CUDA_CPP_FILES ${MODULE_SOURCE_DIR}/*Cuda*.cpp )
+    FILE( GLOB_RECURSE CUDA_H_FILES   ${MODULE_SOURCE_DIR}/*Cuda*.h )
+    LIST( REMOVE_ITEM TARGET_H_FILES ${CUDA_H_FILES} )
+    LIST( REMOVE_ITEM TARGET_CPP_FILES ${CUDA_CPP_FILES} )
     ADD_LIBRARY( ${MODULE_NAME} SHARED ${TARGET_CPP_FILES} ${TARGET_H_FILES} )
     TARGET_LINK_LIBRARIES( ${MODULE_NAME} ${CMAKE_STANDARD_LIBRARIES} ${OW_LIB_OPENWALNUT} ${Boost_LIBRARIES} ${OPENGL_gl_LIBRARY} ${OPENSCENEGRAPH_LIBRARIES} )
 ENDIF()
