@@ -145,7 +145,7 @@ ENDIF()
 
 COLLECT_SHADER_FILES( ${MODULE_SOURCE_DIR} TARGET_GLSL_FILES )
 SETUP_SHADERS( "${TARGET_GLSL_FILES}" "${MODULE_TARGET_RESOURCE_DIR_RELATIVE}/shaders" "MODULES" )
-SETUP_RESOURCES_GENERIC( "${MODULE_SOURCE_DIR}/resources" ${MODULE_TARGET_RESOURCE_DIR_RELATIVE} "${MODULE_NAME}" "MODULES" )
+SETUP_RESOURCES_GENERIC( "${MODULE_SOURCE_DIR}/../resources/FiberClusteringResources" ${MODULE_TARGET_RESOURCE_DIR_RELATIVE} "${MODULE_NAME}" "MODULES" )
 SETUP_STYLECHECKER( "${MODULE_NAME}"
     "${TARGET_CPP_FILES};${TARGET_H_FILES};${TARGET_TEST_FILES};${TARGET_GLSL_FILES}"  # add all these files to the stylechecker
     "${_MODULE_STYLE_EXCLUDES}" )                                                      # exlude some ugly files
@@ -163,4 +163,4 @@ SETUP_STYLECHECKER( "${MODULE_NAME}"
 #
 # NOTE: The first parameter of SETUP_MODULE is not allowed as component name here because SETUP_MODULE already registers this component. Simply
 # append some string.
-SETUP_GLOBAL_RESOURCES( "MyGlobalResources" ${PROJECT_NAME}_Global )
+#SETUP_GLOBAL_RESOURCES( "FiberClusteringResources" ${MODULE_NAME}_Global )
