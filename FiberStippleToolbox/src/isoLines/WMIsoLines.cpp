@@ -119,7 +119,7 @@ namespace
         osg::Vec3 bNorm = b;
         bNorm.normalize();
 
-        boost::shared_ptr< WGridRegular3D > grid = boost::shared_dynamic_cast< WGridRegular3D >( data->getGrid() );
+        boost::shared_ptr< WGridRegular3D > grid = boost::dynamic_pointer_cast< WGridRegular3D >( data->getGrid() );
 
         if( grid )
         {
