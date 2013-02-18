@@ -234,7 +234,7 @@ WValue< double > WMClusterSlicer::meanParameter( boost::shared_ptr< std::set< WP
     std::vector< double > samples;
     samples.reserve( samplePoints->size() );
 
-    boost::shared_ptr< WGridRegular3D > grid = boost::shared_dynamic_cast< WGridRegular3D >( m_clusterDS->getGrid() );
+    boost::shared_ptr< WGridRegular3D > grid = boost::dynamic_pointer_cast< WGridRegular3D >( m_clusterDS->getGrid() );
     assert( grid != 0 );
 
     for( std::set< WPosition >::iterator pos = samplePoints->begin(); pos != samplePoints->end(); )
@@ -575,7 +575,7 @@ void WMClusterSlicer::updateDisplay( bool force )
 osg::ref_ptr< osg::Geode > WMClusterSlicer::generateIsoVoxelGeode() const
 {
     boost::shared_ptr< std::set< WPosition > > points( new std::set< WPosition > );
-    boost::shared_ptr< WGridRegular3D > grid = boost::shared_dynamic_cast< WGridRegular3D >( m_clusterDS->getGrid() );
+    boost::shared_ptr< WGridRegular3D > grid = boost::dynamic_pointer_cast< WGridRegular3D >( m_clusterDS->getGrid() );
     assert( grid != 0 );
     for( std::set< size_t >::const_iterator cit = m_isoVoxels->begin(); cit != m_isoVoxels->end(); ++cit )
     {
