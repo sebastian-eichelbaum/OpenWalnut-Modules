@@ -394,7 +394,7 @@ void WMTransferCalc::moduleMain()
             else
             {
                 // grab the grid
-                m_grid = boost::shared_dynamic_cast< WGridRegular3D >( m_dataSet->getGrid() );
+                m_grid = boost::dynamic_pointer_cast< WGridRegular3D >( m_dataSet->getGrid() );
                 if( !m_grid )
                 {
                     errorLog() << "The dataset does not provide a regular grid. Ignoring dataset.";
@@ -420,7 +420,7 @@ void WMTransferCalc::moduleMain()
             else
             {
                 // grab the grid
-                m_deriGrid = boost::shared_dynamic_cast< WGridRegular3D >( m_deriDataSet->getGrid() );
+                m_deriGrid = boost::dynamic_pointer_cast< WGridRegular3D >( m_deriDataSet->getGrid() );
                 if( !m_deriGrid )
                 {
                     errorLog() << "The derivated dataset does not provide a regular grid. Ignoring dataset.";
@@ -453,7 +453,7 @@ void WMTransferCalc::moduleMain()
             else
             {
                 // grab the grid
-                m_FAgrid = boost::shared_dynamic_cast< WGridRegular3D >( m_FAdataSet->getGrid() );
+                m_FAgrid = boost::dynamic_pointer_cast< WGridRegular3D >( m_FAdataSet->getGrid() );
                 if( !m_FAgrid )
                 {
                     errorLog() << "The FA dataset does not provide a regular grid. Ignoring dataset.";

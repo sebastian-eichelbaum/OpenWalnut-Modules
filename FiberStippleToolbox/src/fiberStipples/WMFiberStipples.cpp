@@ -230,7 +230,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
         m_pos->set( midBB[axis] );
     }
 
-    boost::shared_ptr< const WGridRegular3D > grid = boost::shared_dynamic_cast< const WGridRegular3D >( probTract->getGrid() );
+    boost::shared_ptr< const WGridRegular3D > grid = boost::dynamic_pointer_cast< const WGridRegular3D >( probTract->getGrid() );
     if( !grid )
     {
         errorLog() << "This module can only process probabilistic Tracts with regular 3D grids, Hence you may see garbage from now on.";
@@ -362,7 +362,7 @@ void WMFiberStipples::moduleMain()
         boost::shared_ptr< WDataSetVector > vectors = m_vectorIC->getData();
         boost::shared_ptr< WDataSetScalar > probTract = m_probIC->getData();
 
-        if( !( vectors && probTract ) || !boost::shared_dynamic_cast< WGridRegular3D >( probTract->getGrid() ) ) // if data valid
+        if( !( vectors && probTract ) || !boost::dynamic_pointer_cast< WGridRegular3D >( probTract->getGrid() ) ) // if data valid
         {
             continue;
         }
