@@ -33,6 +33,9 @@
 #include "gaussProcesses/detTract2GPConvert/WMDetTract2GPConvert.h"
 #include "gaussProcesses/detTractClusteringGP/WMDetTractClusteringGP.h"
 #include "gaussProcesses/gpView/WMGpView.h"
+#include "loadClusters/WMLoadClusters.h"
+#include "writeClusters/WMWriteClusters.h"
+
 #include "WToolkit.h"
 
 // This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
@@ -46,5 +49,7 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
     m.push_back( boost::shared_ptr< WModule >( new WMDetTractClusteringGP ) );
     m.push_back( boost::shared_ptr< WModule >( new WMDetTractCulling ) );
     m.push_back( boost::shared_ptr< WModule >( new WMGpView ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMLoadClusters ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMWriteClusters ) );
 }
 
