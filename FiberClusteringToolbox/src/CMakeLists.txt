@@ -61,11 +61,12 @@ INCLUDE( OpenWalnut )
 
 # OpenCL: http://www.khronos.org/opencl
 # mandatory requirement, as there are module not working without OpenCL
-FIND_PACKAGE( OpenCL QUIET )
+FIND_PACKAGE( OpenCL )
 IF( OPENCL_FOUND )
     OPTION( OW_USE_OPENCL "Enable OpenCL support." )
     IF( OW_USE_OPENCL )
-        INCLUDE_DIRECTORIES( AFTER ${OPENCL_INCLUDE_DIR} )
+        INCLUDE_DIRECTORIES( ${OPENCL_INCLUDE_DIR} )
+        INCLUDE_DIRECTORIES( ${OPENCL_CPP_INCLUDE_DIR} )
     ENDIF()
 ENDIF()
 
