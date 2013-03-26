@@ -41,8 +41,6 @@ class WLengthCulling : public WObjectNDIP< WCullingStrategyInterface >
 public:
     /**
      * Default constructor.
-     *
-     * \param recompute When the property changes this condition tells the module back, that this culling is outdated again and need recomputation.
      */
     WLengthCulling();
 

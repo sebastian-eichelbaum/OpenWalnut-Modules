@@ -102,7 +102,7 @@ protected:
     /**
      * Computes the distant matrix for all pairs of Gaussian processes.
      *
-     * \warning This function may leave an invalid matrix when the \ref m_shutdownFlag becomes true!
+     * \warning This function may leave an invalid matrix when the \c m_shutdownFlag becomes true!
      *
      * \param dataSet The dataset of Gaussian processes.
      *
@@ -114,7 +114,7 @@ protected:
      * Constructs a dendrogram out of the m_similarity matrix. Please note that this member function needs a valid similarity
      * matrix to operate correctly and it will leave an invalid matrix afterwards!
      *
-     * \warning This function may return and leave an invalid matrix when the \ref m_shutdownFlag becomes true!
+     * \warning This function may return and leave an invalid matrix when the \c m_shutdownFlag becomes true!
      *
      * \param n How many tracts
      *

@@ -81,17 +81,17 @@ public:
     const Eigen::VectorXd& getCff1lProduct() const;
 
     /**
-     * Generates with the help of the \ref WDataSetFibers and the \ref m_tractID a \ref WFiber
+     * Generates with the help of the \c WDataSetFibers and the \ref m_tractID a \c WFiber
      * instance, for easily accessing the points sequently.
      *
      * \note: This may be time and space consuming! Be careful!
      *
-     * \return Copy of the \ref WFiber instance reffered by \ref m_tractID
+     * \return Copy of the \c WFiber instance reffered by \ref m_tractID
      */
     WFiber generateTract() const;
 
     /**
-     * As each Gaussian process is associated with a WFiber it also hat the maximal segment length,
+     * As each Gaussian process is associated with a \c WFiber it also hat the maximal segment length,
      * used as width for the Gaussian kernels around the base points.
      *
      * \return Copy of the maximal segment length this Gauss process is associated with.
@@ -163,7 +163,7 @@ private:
     double cov( const WPosition& p1, const WPosition& p2 ) const;
 
     /**
-     * The id of the tract inside the \ref WDataSetFibers this Gaussian process is representing.
+     * The id of the tract inside the \c WDataSetFibers this Gaussian process is representing.
      * This is needed since the sample points of a tract will be needed for mean computation. (\f$
      * S_f(p) \f$ will need all \f$ f_i \f$i)
      *
