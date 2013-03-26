@@ -52,7 +52,8 @@ WBundlerCPU::~WBundlerCPU()
 {
 }
 
-WDataSetFibers::SPtr WBundlerCPU::operator()( WProgress::SPtr progress, WBoolFlag const & shutdown, WDataSetFibers::SPtr fibers, WDataSetScalar::SPtr mask )
+WDataSetFibers::SPtr WBundlerCPU::operator()( WProgress::SPtr progress, WBoolFlag const & shutdown, WDataSetFibers::SPtr fibers,
+                                              WDataSetScalar::SPtr mask )
 {
     WDataSetFibers::SPtr result( new WDataSetFibers() );
     return result;

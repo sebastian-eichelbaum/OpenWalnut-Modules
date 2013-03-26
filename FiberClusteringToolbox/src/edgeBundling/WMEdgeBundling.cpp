@@ -66,7 +66,7 @@ const std::string WMEdgeBundling::getDescription() const
 void WMEdgeBundling::connectors()
 {
     m_fibersIC = WModuleInputData< WDataSetFibers >::createAndAdd( shared_from_this(), "fibers", "The line data to bundle." );
-    m_maskIC   = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "mask", "Optional mask, specifying valid positions for segments" );
+    m_maskIC   = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "mask", "Optional mask, specifies valid space for segments" );
     m_fibersOC = WModuleOutputData< WDataSetFibers >::createAndAdd( shared_from_this(), "bundledFibers", "The bundled line data." );
 
 
