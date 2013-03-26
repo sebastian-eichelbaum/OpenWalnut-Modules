@@ -22,40 +22,32 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMDETTRACTCLUSTERINGGP_H
-#define WMDETTRACTCLUSTERINGGP_H
+#ifndef WMWRITECLUSTERS_H
+#define WMWRITECLUSTERS_H
 
 #include <string>
-#include <map>
-#include <utility>
 
-#include <osg/Geode>
+#include <core/kernel/WModule.h>
+#include <core/kernel/WModuleInputData.h>
+#include <core/kernel/WModuleOutputData.h>
 
-#include "core/common/math/WMatrixSym.h"
-#include "core/kernel/WModule.h"
-#include "core/kernel/WModuleInputData.h"
-#include "core/kernel/WModuleOutputData.h"
-#include "../WDataSetGP.h"
-
-class WDendrogram;
+#include <core/dataHandler/WDataSetFiberClustering.h>
 
 /**
- * Module for clustering Gaussian processes which representing deterministic tracts.
- *
- * \ingroup modules
+ * Writes a WDataSetFiberClustering to a file.
  */
-class WMDetTractClusteringGP: public WModule
+class WMWriteClusters : public WModule
 {
 public:
     /**
-     * Constructs a new clustering instance.
+     * Constructor.
      */
-    WMDetTractClusteringGP();
+    WMWriteClusters();
 
     /**
-     * Destructs this.
+     * Destructor.
      */
-    virtual ~WMDetTractClusteringGP();
+    virtual ~WMWriteClusters();
 
     /**
      * Gives back the name of this module.
@@ -79,7 +71,7 @@ public:
 
     /**
      * Get the icon for this module in XPM format.
-     * \return The icon.
+     * \return the icon.
      */
     virtual const char** getXPMIcon() const;
 
@@ -99,45 +91,18 @@ protected:
      */
     virtual void properties();
 
-    /**
-     * Computes the distant matrix for all pairs of Gaussian processes.
-     *
-     * \warning This function may leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param dataSet The dataset of Gaussian processes.
-     *
-     * \return The similarity or also called distant matrix.
-     */
-    void computeDistanceMatrix( boost::shared_ptr< const WDataSetGP > dataSet );
-
-    /**
-     * Constructs a dendrogram out of the m_similarity matrix. Please note that this member function needs a valid similarity
-     * matrix to operate correctly and it will leave an invalid matrix afterwards!
-     *
-     * \warning This function may return and leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param n How many tracts
-     *
-     * \return The dendrogram.
-     */
-    boost::shared_ptr< WDendrogram > computeDendrogram( size_t n );
-
-    /**
-     * Input Connector for the Gaussian processes which are about to be clustered.
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetGP > > m_gpIC;
-
-    /**
-     * Output Connector for the dendrogram which is about to be created with this module.
-     */
-    boost::shared_ptr< WModuleOutputData< WDendrogram > > m_dendOC;
-
-    /**
-     * Distant matrix of all pairs of Gaussian processes. This is float to save more space!
-     */
-    WMatrixSymFLT m_similarities;
-
 private:
+    //! The condition used by properties.
+    boost::shared_ptr< WCondition > m_propCondition;
+
+    //! The path to the file to save to.
+    WPropFilename m_propFilename;
+
+    //! The trigger that initiates the writing.
+    WPropTrigger m_writeTrigger;
+
+    //! The input cluster data.
+    boost::shared_ptr< WModuleInputData< WDataSetFiberClustering > > m_input;
 };
 
-#endif  // WMDETTRACTCLUSTERINGGP_H
+#endif  // WMWRITECLUSTERS_H

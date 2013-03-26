@@ -22,40 +22,38 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMDETTRACTCLUSTERINGGP_H
-#define WMDETTRACTCLUSTERINGGP_H
+#ifndef WMEDGEBUNDLING_H
+#define WMEDGEBUNDLING_H
 
 #include <string>
-#include <map>
-#include <utility>
 
-#include <osg/Geode>
+#include <core/common/WStrategyHelper.h>
+#include <core/common/WObjectNDIP.h>
+#include <core/kernel/WModule.h>
 
-#include "core/common/math/WMatrixSym.h"
-#include "core/kernel/WModule.h"
-#include "core/kernel/WModuleInputData.h"
-#include "core/kernel/WModuleOutputData.h"
-#include "../WDataSetGP.h"
+template< class T > class WModuleInputData;
+template< class T > class WModuleOutputData;
+class WDataSetFibers;
+class WDataSetScalar;
 
-class WDendrogram;
+#include "WEdgeBundlingInterface.h"
 
 /**
- * Module for clustering Gaussian processes which representing deterministic tracts.
- *
+ * Bundles lines (aka fibers, tracts, streamlines, etc) using a force directed edge bundling method.
  * \ingroup modules
  */
-class WMDetTractClusteringGP: public WModule
+class WMEdgeBundling: public WModule
 {
 public:
     /**
-     * Constructs a new clustering instance.
+     * Creates a edge bundling module for fiber datasets.
      */
-    WMDetTractClusteringGP();
+    WMEdgeBundling();
 
     /**
-     * Destructs this.
+     * Cleans up!
      */
-    virtual ~WMDetTractClusteringGP();
+    virtual ~WMEdgeBundling();
 
     /**
      * Gives back the name of this module.
@@ -77,12 +75,6 @@ public:
      */
     virtual boost::shared_ptr< WModule > factory() const;
 
-    /**
-     * Get the icon for this module in XPM format.
-     * \return The icon.
-     */
-    virtual const char** getXPMIcon() const;
-
 protected:
     /**
      * Entry point after loading the module. Runs in separate thread.
@@ -100,44 +92,31 @@ protected:
     virtual void properties();
 
     /**
-     * Computes the distant matrix for all pairs of Gaussian processes.
-     *
-     * \warning This function may leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param dataSet The dataset of Gaussian processes.
-     *
-     * \return The similarity or also called distant matrix.
+     * Initialize requirements for this module.
      */
-    void computeDistanceMatrix( boost::shared_ptr< const WDataSetGP > dataSet );
+    virtual void requirements();
 
-    /**
-     * Constructs a dendrogram out of the m_similarity matrix. Please note that this member function needs a valid similarity
-     * matrix to operate correctly and it will leave an invalid matrix afterwards!
-     *
-     * \warning This function may return and leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param n How many tracts
-     *
-     * \return The dendrogram.
-     */
-    boost::shared_ptr< WDendrogram > computeDendrogram( size_t n );
-
-    /**
-     * Input Connector for the Gaussian processes which are about to be clustered.
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetGP > > m_gpIC;
-
-    /**
-     * Output Connector for the dendrogram which is about to be created with this module.
-     */
-    boost::shared_ptr< WModuleOutputData< WDendrogram > > m_dendOC;
-
-    /**
-     * Distant matrix of all pairs of Gaussian processes. This is float to save more space!
-     */
-    WMatrixSymFLT m_similarities;
 
 private:
+    /**
+     * Dataset of unbundled fibers.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetFibers > > m_fibersIC;
+
+    /**
+     * Dataset of bundled fibers.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetFibers > > m_fibersOC;
+
+    /**
+     * Dataset used as mask which fiber must not leave. Usually this is a white matter mask of the brain.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_maskIC;
+
+    /**
+     * Incorporates strategies for edege bundling.
+     */
+    WStrategyHelper< WObjectNDIP< WEdgeBundlingInterface > > m_strategy;
 };
 
-#endif  // WMDETTRACTCLUSTERINGGP_H
+#endif  // WMEDGEBUNDLING_H

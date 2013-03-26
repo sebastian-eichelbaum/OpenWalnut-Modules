@@ -30,21 +30,29 @@
 #include "clusterSlicer/WMClusterSlicer.h"
 #include "detTractClustering/WMDetTractClustering.h"
 #include "detTractCulling/WMDetTractCulling.h"
+#include "directionHistogram/WMDirectionHistogram.h"
+#include "edgeBundling/WMEdgeBundling.h"
 #include "gaussProcesses/detTract2GPConvert/WMDetTract2GPConvert.h"
 #include "gaussProcesses/detTractClusteringGP/WMDetTractClusteringGP.h"
 #include "gaussProcesses/gpView/WMGpView.h"
+#include "loadClusters/WMLoadClusters.h"
+#include "writeClusters/WMWriteClusters.h"
 #include "WToolkit.h"
 
 // This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
 // Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMClusterParamDisplay ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMClusterSlicer ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMDetTract2GPConvert ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMDetTractClustering ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMDetTractClusteringGP ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMDetTractCulling ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMGpView ) );
+    m.push_back( WModule::SPtr( new WMClusterParamDisplay ) );
+    m.push_back( WModule::SPtr( new WMClusterSlicer ) );
+    m.push_back( WModule::SPtr( new WMDetTract2GPConvert ) );
+    m.push_back( WModule::SPtr( new WMDetTractClustering ) );
+    m.push_back( WModule::SPtr( new WMDetTractClusteringGP ) );
+    m.push_back( WModule::SPtr( new WMDetTractCulling ) );
+    m.push_back( WModule::SPtr( new WMDirectionHistogram ) );
+    m.push_back( WModule::SPtr( new WMEdgeBundling ) );
+    m.push_back( WModule::SPtr( new WMGpView ) );
+    m.push_back( WModule::SPtr( new WMLoadClusters ) );
+    m.push_back( WModule::SPtr( new WMWriteClusters ) );
 }
 

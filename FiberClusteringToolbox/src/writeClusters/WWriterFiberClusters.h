@@ -22,20 +22,35 @@
 //
 //---------------------------------------------------------------------------
 
-#include <boost/shared_ptr.hpp>
+#ifndef WWRITERFIBERCLUSTERS_H
+#define WWRITERFIBERCLUSTERS_H
 
-#include <core/kernel/WModule.h>
+#include <string>
 
-#include "MyNewModule/WMMyNewModule.h"
-#include "AnotherModule/WMAnotherModule.h"
+#include <core/dataHandler/io/WWriter.h>
 
-#include "WToolkit.h"
+#include <core/dataHandler/WDataSetFiberClustering.h>
 
-// This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
-// Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
-extern "C" void WLoadModule( WModuleList& m ) // NOLINT
+/**
+ * A writer for fiber clusterings.
+ */
+class WWriterFiberClusters : public WWriter
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMMyNewModule ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMAnotherModule ) );
-}
+public:
+    /**
+     * Constructor.
+     *
+     * \param fname The filename to write to.
+     * \param overwrite Whether to overwrite the file if it exists.
+     */
+    WWriterFiberClusters( std::string const& fname, bool overwrite = false );
 
+    /**
+     * Write the data to the file.
+     *
+     * \param clusters The cluster data to write.
+     */
+    void writeClusters( boost::shared_ptr< WDataSetFiberClustering > const& clusters );
+};
+
+#endif  // WWRITERFIBERCLUSTERS_H

@@ -22,40 +22,34 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMDETTRACTCLUSTERINGGP_H
-#define WMDETTRACTCLUSTERINGGP_H
+#ifndef WMDIRECTIONHISTOGRAM_H
+#define WMDIRECTIONHISTOGRAM_H
 
 #include <string>
-#include <map>
-#include <utility>
 
 #include <osg/Geode>
 
-#include "core/common/math/WMatrixSym.h"
 #include "core/kernel/WModule.h"
-#include "core/kernel/WModuleInputData.h"
-#include "core/kernel/WModuleOutputData.h"
-#include "../WDataSetGP.h"
 
-class WDendrogram;
+template< class T > class WModuleInputData;
+class WDataSetFibers;
 
 /**
- * Module for clustering Gaussian processes which representing deterministic tracts.
- *
+ * For each line (aka fiber, tract, streamline, etc.) the start and end point is take to compute its direction which is rendered on a sphere.
  * \ingroup modules
  */
-class WMDetTractClusteringGP: public WModule
+class WMDirectionHistogram: public WModule
 {
 public:
     /**
-     * Constructs a new clustering instance.
+     * Creates an module calculating the distribution of directions of a line dataset.
      */
-    WMDetTractClusteringGP();
+    WMDirectionHistogram();
 
     /**
-     * Destructs this.
+     * Cleans up!
      */
-    virtual ~WMDetTractClusteringGP();
+    virtual ~WMDirectionHistogram();
 
     /**
      * Gives back the name of this module.
@@ -77,12 +71,6 @@ public:
      */
     virtual boost::shared_ptr< WModule > factory() const;
 
-    /**
-     * Get the icon for this module in XPM format.
-     * \return The icon.
-     */
-    virtual const char** getXPMIcon() const;
-
 protected:
     /**
      * Entry point after loading the module. Runs in separate thread.
@@ -100,44 +88,16 @@ protected:
     virtual void properties();
 
     /**
-     * Computes the distant matrix for all pairs of Gaussian processes.
-     *
-     * \warning This function may leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param dataSet The dataset of Gaussian processes.
-     *
-     * \return The similarity or also called distant matrix.
+     * Initialize requirements for this module.
      */
-    void computeDistanceMatrix( boost::shared_ptr< const WDataSetGP > dataSet );
+    virtual void requirements();
 
-    /**
-     * Constructs a dendrogram out of the m_similarity matrix. Please note that this member function needs a valid similarity
-     * matrix to operate correctly and it will leave an invalid matrix afterwards!
-     *
-     * \warning This function may return and leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param n How many tracts
-     *
-     * \return The dendrogram.
-     */
-    boost::shared_ptr< WDendrogram > computeDendrogram( size_t n );
-
-    /**
-     * Input Connector for the Gaussian processes which are about to be clustered.
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetGP > > m_gpIC;
-
-    /**
-     * Output Connector for the dendrogram which is about to be created with this module.
-     */
-    boost::shared_ptr< WModuleOutputData< WDendrogram > > m_dendOC;
-
-    /**
-     * Distant matrix of all pairs of Gaussian processes. This is float to save more space!
-     */
-    WMatrixSymFLT m_similarities;
 
 private:
+    /**
+     * Dataset containing line data.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetFibers > > m_fibersIC;
 };
 
-#endif  // WMDETTRACTCLUSTERINGGP_H
+#endif  // WMDIRECTIONHISTOGRAM_H

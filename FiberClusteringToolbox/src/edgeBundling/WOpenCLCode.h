@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,20 +22,38 @@
 //
 //---------------------------------------------------------------------------
 
-#include <boost/shared_ptr.hpp>
+#ifndef WOPENCLCODE_H
+#define WOPENCLCODE_H
 
-#include <core/kernel/WModule.h>
+#include <boost/filesystem.hpp>
 
-#include "MyNewModule/WMMyNewModule.h"
-#include "AnotherModule/WMAnotherModule.h"
+#define __CL_ENABLE_EXCEPTIONS
+#include <CL/cl.hpp>
 
-#include "WToolkit.h"
+#include <core/common/WLogger.h>
 
-// This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
-// Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
-extern "C" void WLoadModule( WModuleList& m ) // NOLINT
+/**
+ * Wrapps initialization and code binding for OpenCL kernels into an handy OW class.
+ */
+class WOpenCLCode
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMMyNewModule ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMAnotherModule ) );
-}
+//public:
+//    explicit WOpenCLCode( boost::filesystem::path path );
+//
+//protected:
+//    wlog::WStreamedLogger debugLog() const;
+//
+//
+//private:
+//    void initDevice();
+//
+////    static void clErrorLog( const char * errorinfo, const void * private_info_size, ::size_t cb, void * user_data );
+//
+//    std::vector< cl::Device > m_clDevices;
+//    cl::Context m_clContext;
+//
+//    cl_int m_err;
+//    boost::filesystem::path m_kernelSource;
+};
 
+#endif  // WOPENCLCODE_H

@@ -1,0 +1,89 @@
+//---------------------------------------------------------------------------
+//
+// Project: OpenWalnut ( http://www.openwalnut.org )
+//
+// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
+// For more information see http://www.openwalnut.org/copying
+//
+// This file is part of OpenWalnut.
+//
+// OpenWalnut is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// OpenWalnut is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with OpenWalnut. If not, see <http://www.gnu.org/licenses/>.
+//
+//---------------------------------------------------------------------------
+
+"Direction Histogram"
+{
+  icon="WMDirectionHistogram.png";
+
+  website = "http://www.openwalnut.org";
+
+  description = "This module computes the histogram of direction on line data using start and end pints (global coloring scheme)";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "global coloring";
+  tag = "distribution";
+  tag = "direction histogram";
+};
+
+"Edge Bundling"
+{
+  icon="WMEdgeBundling.png";
+
+  website = "http://www.openwalnut.org";
+
+  description = "This module allows to perform edge bundling on line data such as fiber tracts or streamlines.";
+
+  author = "Mathias Goldau";
+  author = "Christian Heine";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "Christian Heine"
+  {
+      url="http://www.scivis.ethz.ch/people/cheine";
+      email="christian.heine@inf.ethz.ch";
+      what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "edge bundling";
+  tag = "clustering";
+};
+

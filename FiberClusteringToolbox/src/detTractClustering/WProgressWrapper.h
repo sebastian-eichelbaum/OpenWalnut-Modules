@@ -28,7 +28,7 @@
 struct ProgressWrapperData;
 
 /**
- * Wraps the \ref WProgressCombiner and \ref WProgress classes so the cuda kernel does not need to
+ * Wraps the  \c WProgressCombiner and \c WProgress classes so the cuda kernel does not need to
  * include \c boost::shared_ptr.
  */
 class ProgressWrapper
@@ -37,8 +37,7 @@ public:
     /**
      * Constructs a wrapper instance
      *
-     * \param d The data with the \ref WProgressCombiner and a member variable for placing the \ref
-     * WProgress \c boost::shared_ptr.
+     * \param d The data with the \c WProgressCombiner and a member variable for placing the \c WProgress \c boost::shared_ptr.
      */
     explicit ProgressWrapper( ProgressWrapperData *d );
 
