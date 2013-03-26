@@ -28,46 +28,46 @@
 #include <boost/filesystem.hpp>
 #include <boost/bind.hpp>
 
-#include <core/common/WLogger.h>
-
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
+#include <core/common/WLogger.h>
+
 #include "WOpenCLCode.h"
 
-WOpenCLCode::WOpenCLCode( boost::filesystem::path path )
-{
-    initDevice();
-}
-
-void WOpenCLCode::initDevice()
-{
-    //cl::Context context( CL_DEVICE_TYPE_GPU, &WOpenCLCode::clErrorLog );
-    //m_devices = context.getInfo< CL_CONTEXT_DEVICES >();
-    //cl_int                      ret;
-    //std::string value;
-    //std::vector< cl::Platform > platforms;
-    //cl::Platform::get( &platforms );
-    //for( std::vector< cl::Platform >::const_iterator cit = platforms.begin(); cit != platforms.end(); ++cit )
-    //{
-    //    cit->getInfo( CL_PLATFORM_PROFILE, &value );
-    //    debugLog() << "CL_PLATFORM_PROFILE: " << value;
-    //    cit->getInfo( CL_PLATFORM_VERSION, &value );
-    //    debugLog() << "CL_PLATFORM_VERSION: " << value;
-    //    cit->getInfo( CL_PLATFORM_NAME , &value );
-    //    debugLog() << "CL_PLATFORM_NAME: " << value;
-    //    cit->getInfo( CL_PLATFORM_VENDOR , &value );
-    //    debugLog() << "CL_PLATFORM_VENDOR: " << value;
-    //    cit->getInfo( CL_PLATFORM_EXTENSIONS, &value );
-    //    debugLog() << "CL_PLATFORM_EXTENSIONS: " << value;
-    //}
-
-}
-
-wlog::WStreamedLogger WOpenCLCode::debugLog() const
-{
-    return wlog::debug( "WOpenCLCode" );
-}
+//WOpenCLCode::WOpenCLCode( boost::filesystem::path path )
+//{
+//    initDevice();
+//}
+//
+//void WOpenCLCode::initDevice()
+//{
+//    //cl::Context context( CL_DEVICE_TYPE_GPU, &WOpenCLCode::clErrorLog );
+//    //m_devices = context.getInfo< CL_CONTEXT_DEVICES >();
+//    //cl_int                      ret;
+//    //std::string value;
+//    //std::vector< cl::Platform > platforms;
+//    //cl::Platform::get( &platforms );
+//    //for( std::vector< cl::Platform >::const_iterator cit = platforms.begin(); cit != platforms.end(); ++cit )
+//    //{
+//    //    cit->getInfo( CL_PLATFORM_PROFILE, &value );
+//    //    debugLog() << "CL_PLATFORM_PROFILE: " << value;
+//    //    cit->getInfo( CL_PLATFORM_VERSION, &value );
+//    //    debugLog() << "CL_PLATFORM_VERSION: " << value;
+//    //    cit->getInfo( CL_PLATFORM_NAME , &value );
+//    //    debugLog() << "CL_PLATFORM_NAME: " << value;
+//    //    cit->getInfo( CL_PLATFORM_VENDOR , &value );
+//    //    debugLog() << "CL_PLATFORM_VENDOR: " << value;
+//    //    cit->getInfo( CL_PLATFORM_EXTENSIONS, &value );
+//    //    debugLog() << "CL_PLATFORM_EXTENSIONS: " << value;
+//    //}
+//
+//}
+//
+//wlog::WStreamedLogger WOpenCLCode::debugLog() const
+//{
+//    return wlog::debug( "WOpenCLCode" );
+//}
 
 //void WOpenCLCode::clErrorLog( const char * errorinfo, const void * private_info_size, ::size_t cb, void * user_data )
 //{

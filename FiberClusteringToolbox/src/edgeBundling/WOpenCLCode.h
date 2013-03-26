@@ -27,30 +27,33 @@
 
 #include <boost/filesystem.hpp>
 
-#include <core/common/WLogger.h>
-
 #define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
+#include <core/common/WLogger.h>
+
+/**
+ * Wrapps initialization and code binding for OpenCL kernels into an handy OW class.
+ */
 class WOpenCLCode
 {
-public:
-    explicit WOpenCLCode( boost::filesystem::path path );
-
-protected:
-    wlog::WStreamedLogger debugLog() const;
-
-
-private:
-    void initDevice();
-
-//    static void clErrorLog( const char * errorinfo, const void * private_info_size, ::size_t cb, void * user_data );
-
-    std::vector< cl::Device > m_clDevices;
-    cl::Context m_clContext;
-
-    cl_int m_err;
-    boost::filesystem::path m_kernelSource;
+//public:
+//    explicit WOpenCLCode( boost::filesystem::path path );
+//
+//protected:
+//    wlog::WStreamedLogger debugLog() const;
+//
+//
+//private:
+//    void initDevice();
+//
+////    static void clErrorLog( const char * errorinfo, const void * private_info_size, ::size_t cb, void * user_data );
+//
+//    std::vector< cl::Device > m_clDevices;
+//    cl::Context m_clContext;
+//
+//    cl_int m_err;
+//    boost::filesystem::path m_kernelSource;
 };
 
 #endif  // WOPENCLCODE_H
