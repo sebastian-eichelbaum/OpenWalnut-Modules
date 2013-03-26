@@ -22,22 +22,37 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WEDGEBUNDLINGCPU_H
-#define WEDGEBUNDLINGCPU_H
+#ifndef WBUNDLERCPU_H
+#define WBUNDLERCPU_H
 
 #include <core/common/WObjectNDIP.h>
 #include <core/common/WProperties.h>
 
 #include "WEdgeBundlingInterface.h"
 
-class WEdgeBundlingCPU : public WObjectNDIP< WEdgeBundlingInterface >
+/**
+ * Implementation of edge bundling for 3D fibers on CPU.
+ */
+class WBundlerCPU : public WObjectNDIP< WEdgeBundlingInterface >
 {
 public:
-    WEdgeBundlingCPU();
+    /**
+     * Constructor.
+     */
+    WBundlerCPU();
 
-    virtual ~WEdgeBundlingCPU();
+    /**
+     * Destructor.
+     */
+    virtual ~WBundlerCPU();
 
-    virtual WDataSetFibers::SPtr operator()( WProgress::SPtr progress, WBoolFlag const &shutdown, WDataSetFibers::SPtr fibers, WDataSetScalar::SPtr mask );
+    /**
+     * Implements edge bundling on CPU.
+     *
+     * \copydetails WEdgeBundlingInterface::operator()()
+     */
+    virtual WDataSetFibers::SPtr operator()( WProgress::SPtr progress, WBoolFlag const &shutdown, WDataSetFibers::SPtr fibers,
+                                             WDataSetScalar::SPtr mask );
 protected:
 private:
     /**
@@ -51,7 +66,7 @@ private:
     WPropBool m_fixedEndings;
 
     /**
-     * Maximal allowed curvature between a number of segments. 0 means, only straight segments are allowed, 1 means every possible cuvature is allowed.
+     * Maximal allowed curvature between a number of segments. 0 means, only straight segments are allowed, 1 means every possb. cuvature is allowed.
      */
     WPropDouble m_maxCurvature;
 
@@ -85,7 +100,6 @@ private:
      * Strength of angle based attraction.
      */
     WPropDouble m_angleBasedAttraction;
-
 };
 
-#endif  // WEDGEBUNDLINGCPU_H
+#endif  // WBUNDLERCPU_H

@@ -22,9 +22,9 @@
 //
 //---------------------------------------------------------------------------
 
-#include "WEdgeBundlingCPU.h"
+#include "WBundlerCPU.h"
 
-WEdgeBundlingCPU::WEdgeBundlingCPU()
+WBundlerCPU::WBundlerCPU()
     : WObjectNDIP< WEdgeBundlingInterface >( "Edge Bundler CPU", "Bundles edges of fibers (CPU implementation)" )
 {
     m_stiffness      = m_properties->addProperty( "Stiffness", "Variability of fiber sample points", 0.5 );
@@ -48,11 +48,11 @@ WEdgeBundlingCPU::WEdgeBundlingCPU()
     m_maxRadius->setMin( 0.0 );
 }
 
-WEdgeBundlingCPU::~WEdgeBundlingCPU()
+WBundlerCPU::~WBundlerCPU()
 {
 }
 
-WDataSetFibers::SPtr WEdgeBundlingCPU::operator()( WProgress::SPtr progress, WBoolFlag const & shutdown, WDataSetFibers::SPtr fibers, WDataSetScalar::SPtr mask )
+WDataSetFibers::SPtr WBundlerCPU::operator()( WProgress::SPtr progress, WBoolFlag const & shutdown, WDataSetFibers::SPtr fibers, WDataSetScalar::SPtr mask )
 {
     WDataSetFibers::SPtr result( new WDataSetFibers() );
     return result;

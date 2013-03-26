@@ -34,14 +34,14 @@
 // For now we will implement a CPU version first and later do OpenCL implementation
 // #include "WOpenCLCode.h"
 #include "WMEdgeBundling.h"
-#include "WEdgeBundlingCPU.h"
+#include "WBundlerCPU.h"
 
 WMEdgeBundling::WMEdgeBundling():
     WModule(),
     m_strategy( "Edge Bundling Algorithms", "Select one algorithm to bundle fibers via edge bundling", NULL,
                 "Bundler", "A list of all known bundling strategies" )
 {
-    m_strategy.addStrategy( WEdgeBundlingCPU::SPtr( new WEdgeBundlingCPU() ) );
+    m_strategy.addStrategy( WBundlerCPU::SPtr( new WBundlerCPU() ) );
 }
 
 WMEdgeBundling::~WMEdgeBundling()

@@ -30,11 +30,28 @@
 #include <core/dataHandler/WDataSetFibers.h>
 #include <core/dataHandler/WDataSetScalar.h>
 
+/**
+ * Interface all edge bundling algorithms for 3D fibers should follow.
+ */
 class WEdgeBundlingInterface
 {
 public:
-    virtual WDataSetFibers::SPtr operator()( WProgress::SPtr progress, WBoolFlag const &shutdown, WDataSetFibers::SPtr fiber, WDataSetScalar::SPtr mask ) = 0;
+    /**
+     * Applies edge bundling on the given fibers.
+     *
+     * \param progress This will indicate bundling progress.
+     * \param shutdown While computing bundling, it should abort also in case of shutdown.
+     * \param fibers The fibers which should be bundled.
+     * \param mask Optional mask defining allowed space within segments may be shifted.
+     *
+     * \return Bundled fibers
+     */
+    virtual WDataSetFibers::SPtr operator()( WProgress::SPtr progress, WBoolFlag const &shutdown, WDataSetFibers::SPtr fibers,
+                                             WDataSetScalar::SPtr mask ) = 0;
 
+    /**
+     * Destructor.
+     */
     virtual ~WEdgeBundlingInterface();
 protected:
 private:
