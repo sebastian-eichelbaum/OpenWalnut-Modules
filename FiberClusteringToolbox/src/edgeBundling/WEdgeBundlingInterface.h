@@ -22,47 +22,39 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WLENGTHCULLING_H
-#define WLENGTHCULLING_H
-
-#include <utility>
+#ifndef WEDGEBUNDLINGINTERFACE_H
+#define WEDGEBUNDLINGINTERFACE_H
 
 #include <core/common/WProgress.h>
+#include <core/common/WFlag.h>
 #include <core/dataHandler/WDataSetFibers.h>
-#include <core/common/WObjectNDIP.h>
-
-#include "WCullingStrategyInterface.h"
+#include <core/dataHandler/WDataSetScalar.h>
 
 /**
- * All fibers which does not match a certain length criteria are sorted out.
+ * Interface all edge bundling algorithms for 3D fibers should follow.
  */
-class WLengthCulling : public WObjectNDIP< WCullingStrategyInterface >
+class WEdgeBundlingInterface
 {
 public:
     /**
-     * Default constructor.
+     * Applies edge bundling on the given fibers.
+     *
+     * \param progress This will indicate bundling progress.
+     * \param shutdown While computing bundling, it should abort also in case of shutdown.
+     * \param fibers The fibers which should be bundled.
+     * \param mask Optional mask defining allowed space within segments may be shifted.
+     *
+     * \return Bundled fibers
      */
-    WLengthCulling();
+    virtual WDataSetFibers::SPtr operator()( WProgress::SPtr progress, WBoolFlag const &shutdown, WDataSetFibers::SPtr fibers,
+                                             WDataSetScalar::SPtr mask ) = 0;
 
     /**
      * Destructor.
      */
-    virtual ~WLengthCulling();
-
-    /**
-     * Sort out fibers.
-     *
-     * \param fibers Fibers to check.
-     * \param progress Progress object to report back the progress to the module
-     *
-     * \return First dataset contains all remaining fibers which survied, second all fibers which were sorted out.
-     */
-    virtual std::pair< WDataSetFibers::SPtr, WDataSetFibers::SPtr > operator()( WDataSetFibers::SPtr fibers, WProgress::SPtr progress );
+    virtual ~WEdgeBundlingInterface();
 protected:
-    /**
-     * All fibers below this length are sorted out.
-     */
-    WPropDouble m_minLength;
+private:
 };
 
-#endif  // WLENGTHCULLING_H
+#endif  // WEDGEBUNDLINGINTERFACE_H

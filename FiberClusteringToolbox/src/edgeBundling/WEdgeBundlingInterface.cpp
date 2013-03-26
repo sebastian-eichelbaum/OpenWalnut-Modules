@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,20 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#include <boost/shared_ptr.hpp>
+#include "WEdgeBundlingInterface.h"
 
-#include <core/kernel/WModule.h>
-
-#include "MyNewModule/WMMyNewModule.h"
-#include "AnotherModule/WMAnotherModule.h"
-
-#include "WToolkit.h"
-
-// This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
-// Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
-extern "C" void WLoadModule( WModuleList& m ) // NOLINT
+WEdgeBundlingInterface::~WEdgeBundlingInterface()
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMMyNewModule ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMAnotherModule ) );
 }
-
