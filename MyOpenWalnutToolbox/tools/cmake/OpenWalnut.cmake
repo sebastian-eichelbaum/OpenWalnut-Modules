@@ -257,6 +257,9 @@ FUNCTION( BUILD_SYSTEM_COMPILER )
     # MESSAGE( STATUS "CMAKE_CXX_FLAGS = ${CMAKE_CXX_FLAGS}" )
     # MESSAGE( STATUS "CMAKE_C_FLAGS = ${CMAKE_C_FLAGS}" )
 
+    # Supress compilation warnings from includes residing in system paths, see #230 for further details.
+    SET( CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem" CACHE STRING "" FORCE )
+
 ENDFUNCTION( BUILD_SYSTEM_COMPILER )
 
 # GCC 4.7 requires us to explicitly link against libstdc++ and libm. CMake offers a variable for this called "CMAKE_STANDARD_LIBRARIES".
@@ -279,7 +282,7 @@ ADD_DEFINITIONS( ${OW_CPP_FLAGS_INJECT} )
 # sorry, linking not available properly on windows, Cygwin supports this but we do not want special rules for thousands of environments.
 # ==> keep it clean
 IF( NOT CMAKE_HOST_SYSTEM MATCHES "Windows" )
-    OPTION( OW_LINK_SHADERS "If turned on, shaders do not get copied. They get linked. This is a nice option for developers." OFF )
+    OPTION( OW_LINK_SHADERS "If turned on, shaders will not be copied but will be linked. This is a nice option for developers." OFF )
 ENDIF()
 
 # Provide several options to control some aspects of resource copy.
@@ -305,12 +308,17 @@ ENDIF()
 
 # Setup boost options
 SET( Boost_USE_MULTITHREAD ON )
+OPTION( BUILD_PYTHON_INTERPRETER OFF )
 
 # find the boost packages
-FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex )
+IF( BUILD_PYTHON_INTERPRETER )
+    FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex python )
+ELSE()
+    FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex )
+ENDIF() #BUILD_SCRIPTENGINE
 
 # include the boost headers
-INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+INCLUDE_DIRECTORIES( SYSTEM ${Boost_INCLUDE_DIR} )
 
 # avoid filesystem 2 stuff
 ADD_DEFINITIONS( "-DBOOST_FILESYSTEM_VERSION=3" )
@@ -330,7 +338,7 @@ IF( ANDROID )
 ELSE()
   FIND_PACKAGE( OpenGL REQUIRED )
   # include the OpenGL header paths
-  INCLUDE_DIRECTORIES( ${OPENGL_INCLUDE_DIR} )
+  INCLUDE_DIRECTORIES( SYSTEM ${OPENGL_INCLUDE_DIR} )
 ENDIF()
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------
@@ -341,7 +349,7 @@ ENDIF()
 SET( MIN_OSG_VERSION 2.8.0 )
 FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgWidget osgViewer osgText osgSim osgGA osgDB osgUtil )
 IF( OPENSCENEGRAPH_FOUND )
-    INCLUDE_DIRECTORIES( ${OPENSCENEGRAPH_INCLUDE_DIRS} )
+    INCLUDE_DIRECTORIES( SYSTEM ${OPENSCENEGRAPH_INCLUDE_DIRS} )
 
     # is the OSG linked statically? If yes, we need to take care that all the osgdb plugins are linked too.
     STRING( REGEX MATCH "osgDB\\.a" OPENSCENEGRAPH_STATIC "${OPENSCENEGRAPH_LIBRARIES}" )
@@ -404,7 +412,7 @@ MARK_AS_ADVANCED( FORCE OPENTHREADS_LIBRARY_DEBUG )
 
 FIND_PACKAGE( eigen3 REQUIRED )
 IF( EIGEN3_FOUND )
-    INCLUDE_DIRECTORIES( ${EIGEN3_INCLUDE_DIR} )
+    INCLUDE_DIRECTORIES( SYSTEM ${EIGEN3_INCLUDE_DIR} )
 
     # NOTE: this is included in ext. But we need to set several definitions to make this work on 32 Bit machines due to alignment problems
     SET( EIGEN3_DEFINES -DEIGEN_DONT_VECTORIZE -DEIGEN_DONT_ALIGN -DEIGEN_DISABLE_UNALIGNED_ARRAY_ASSERT )
@@ -426,8 +434,8 @@ FIND_PACKAGE( CxxTest QUIET )
 IF( CXXTEST_FOUND )
   # To enable testing
   OPTION( OW_USE_TESTS "This enables compilation of tests" ON )
-  INCLUDE_DIRECTORIES( ${CXXTEST_INCLUDE_DIRS} )
-  INCLUDE_DIRECTORIES( ${CXXTEST_INCLUDE_DIR} ) # NOTE: old FindCXXTest versions used this name
+  INCLUDE_DIRECTORIES( SYSTEM ${CXXTEST_INCLUDE_DIRS} )
+  INCLUDE_DIRECTORIES( SYSTEM ${CXXTEST_INCLUDE_DIR} ) # NOTE: old FindCXXTest versions used this name
   IF( OW_USE_TESTS )
     SET( OW_COMPILE_TESTS ON ) #We need this variable because this is tested more often.
     # Package settings:
