@@ -100,6 +100,11 @@ private:
      * Strength of angle based attraction.
      */
     WPropDouble m_angleBasedAttraction;
+
+    /**
+     * Maximum number of iterations for computing the force directed layout. 0 means disabled and another criteria must be implemented to abort computation.
+     */
+    WPropInt m_maxIter;
 };
 
 #endif  // WBUNDLERCPU_H
