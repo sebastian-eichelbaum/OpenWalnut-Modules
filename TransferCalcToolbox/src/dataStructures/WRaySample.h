@@ -26,7 +26,7 @@
 #define WRAYSAMPLE_H
 
 #include "core/common/math/WMatrix.h"
-#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/math/linearAlgebra/WVectorFixed.h"
 
 /**
  * Encapsulates all the possible sample data on a ray.

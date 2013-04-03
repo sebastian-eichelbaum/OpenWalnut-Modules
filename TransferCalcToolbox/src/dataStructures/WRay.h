@@ -26,7 +26,7 @@
 #define WRAY_H
 
 #include "core/common/math/WMatrix.h"
-#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/math/linearAlgebra/WVectorFixed.h"
 
 /**
  * class to implement a simple ray

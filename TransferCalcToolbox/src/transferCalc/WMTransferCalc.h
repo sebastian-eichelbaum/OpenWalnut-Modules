@@ -45,7 +45,7 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/dataHandler/WDataSetVector.h"
-#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/math/linearAlgebra/WVectorFixed.h"
 #include "core/common/math/WMatrix.h"
 #include "core/common/WItemSelector.h"
 #include "core/common/WItemSelection.h"

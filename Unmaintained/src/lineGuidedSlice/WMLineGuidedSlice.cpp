@@ -26,7 +26,8 @@
 #include <vector>
 #include <utility>
 
-#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/math/linearAlgebra/WPosition.h"
+#include "core/common/math/linearAlgebra/WVectorFixed.h"
 #include "core/common/WAssert.h"
 #include "core/common/WLogger.h"
 #include "core/dataHandler/datastructures/WFiberCluster.h"

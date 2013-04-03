@@ -60,7 +60,8 @@
 #include "core/common/WPathHelper.h"
 #include "core/common/WPropertyHelper.h"
 #include "core/common/math/WMatrix.h"
-#include "core/common/math/linearAlgebra/WLinearAlgebra.h"
+#include "core/common/math/linearAlgebra/WMatrixFixed.h"
+#include "core/common/math/linearAlgebra/WVectorFixed.h"
 #include "core/common/WItemSelection.h"
 #include "core/common/WItemSelectionItem.h"
 #include "core/common/WItemSelectionItemTyped.h"
@@ -879,7 +880,7 @@ WVector4d WMTransferCalc::getGradient( const WVector4d& position )
 //     if( m_DeriIsValid )
 //     {
 //         // not usable yet (has to be interpolated)
-//         return static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( getAs3D( position ) ) );
+//         return static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( getAs3D( position ) ) );
 //     }
 
     // voxel distance in each direction (usually 1)
@@ -1198,7 +1199,7 @@ void WMTransferCalc::calculateCurvature()
             {
                 WVector3d position( xdir, ydir, zdir );
                 // get gradient of current position
-                WVector3d curGrad = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( id ) );
+                WVector3d curGrad = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( id ) );
                 // skip grid point, if there is no gradient
                 if( length( curGrad ) == 0 )
                 {
@@ -1214,12 +1215,12 @@ void WMTransferCalc::calculateCurvature()
                 derivIds[4] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0, -dist_z ) );
                 derivIds[5] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0,  dist_z ) );
                 // get gradient vectors for each neighbour if this neighbour is inside the grid
-                derivDirection[0] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
-                derivDirection[1] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
-                derivDirection[2] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
-                derivDirection[3] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[3] == -1 ) ? id : derivIds[3] ) );
-                derivDirection[4] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
-                derivDirection[5] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWVector( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
+                derivDirection[0] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
+                derivDirection[1] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
+                derivDirection[2] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
+                derivDirection[3] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[3] == -1 ) ? id : derivIds[3] ) );
+                derivDirection[4] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
+                derivDirection[5] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
 
                 // derivate in each direction again (central differential quotient) to get hessian matrix
                 Eigen::Matrix3d hesse;
@@ -1244,7 +1245,7 @@ void WMTransferCalc::calculateCurvature()
                 //      P = E - nn^T
                 //      nabla-n^T = -PH / |g|   (where H is the hessian matrix)
                 WVector3d g = static_cast< WVector3d >( 
-                        m_deriDataSet->getValueSet()->getWVector( m_deriGrid->getVoxelNum( position ) ) 
+                        m_deriDataSet->getValueSet()->getWValueDouble( m_deriGrid->getVoxelNum( position ) ) 
                 );
                 double g_weight = length( g );
                 WVector3d n = ( g * -1 ) / g_weight;
