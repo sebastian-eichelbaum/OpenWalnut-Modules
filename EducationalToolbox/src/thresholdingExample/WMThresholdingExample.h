@@ -101,14 +101,6 @@ protected:
 
 private:
     /**
-     * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
-     *
-     * \param scalars The scalar data with grid giving bounding box and other information.
-     * \param resolution The size of the quads used for generating line stipples.
-     */
-    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution );
-
-    /**
      * Input connector for scalar data.
      */
     boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_scalarIC;
@@ -116,32 +108,7 @@ private:
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
-    osg::ref_ptr< WGEManagedGroupNode > m_output;
-
-    /**
-     * The isovalue for the countour lines.
-     */
-    WPropDouble m_isovalue;
-
-    /**
-     * The position of the slice.
-     */
-    WPropDouble m_Pos;
-
-    /**
-     * Color for the isoline.
-     */
-    WPropColor m_color;
-
-    /**
-     * Size of the quads used for rendering the isolines, aka resolution.
-     */
-    WPropDouble m_resolution;
-
-    /**
-     * The width of the isolines.
-     */
-    WPropDouble m_lineWidth;
+    osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
 
     /**
      * Needed for recreating the geometry, incase when resolution changes.
