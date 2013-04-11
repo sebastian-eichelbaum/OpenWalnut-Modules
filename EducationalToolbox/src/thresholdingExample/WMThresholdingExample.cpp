@@ -75,7 +75,7 @@ void WMThresholdingExample::connectors()
 
 void WMThresholdingExample::properties()
 {
-    // Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
+    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
     WModule::properties();
 }
@@ -119,17 +119,8 @@ void WMThresholdingExample::moduleMain()
             continue;
         }
 
-        m_isovalue->setMin( 0.0 );
-        m_isovalue->setMax( 1.0 );
-        // m_isovalue->setMin( scalarData->getMin() );
-        // m_isovalue->setMax( scalarData->getMax() );
-
-        initOSG( scalarData, m_resolution->get() );
-
-        wge::bindTexture( m_output, scalarData->getTexture(), 0, "u_scalarData" );
-
-        // TODO(math): unbind textures, so we have a clean OSG root node for this module again
+        // ---> Insert code doing the real stuff here
     }
 
-    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_output );
+    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
