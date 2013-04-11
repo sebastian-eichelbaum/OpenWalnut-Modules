@@ -1,0 +1,13 @@
+* This is a toolbox with some template modules that can be used
+  to provide people new to OpenWalnut (e.g. stduents) starting points
+  for implementing data processing and visualization modules
+
+* You should have a look at our WIKI for further details under
+  http://www.openwalnut.org/projects/openwalnut/wiki/Module_ExternalDevelopment
+
+* It is/has been developed to support students of the lecture 
+  "Wissenschaftliche Visualisierung" (scientific visualization) held
+  at Coburg University of Applied Sciences in summer 2013
+
+If you have question please contact Alexander Wiebel
+--> http://research.awmw.org
