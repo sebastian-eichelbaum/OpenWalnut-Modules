@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMISOLINES_H
-#define WMISOLINES_H
+#ifndef WMTHRESHOLDINGEXAMPLE_H
+#define WMTHRESHOLDINGEXAMPLE_H
 
 #include <string>
 
@@ -38,18 +38,18 @@ class WGEManagedGroupNode;
  * Computes contour lines (aka isolines) for the given data and render them on a 2D plane.
  * \ingroup modules
  */
-class WMIsoLines: public WModule
+class WMThresholdingExample: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMIsoLines();
+    WMThresholdingExample();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMIsoLines();
+    virtual ~WMThresholdingExample();
 
     /**
      * Gives back the name of this module.
@@ -149,4 +149,4 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 };
 
-#endif  // WMISOLINES_H
+#endif  // WMTHRESHOLDINGEXAMPLE_H

@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -34,46 +34,46 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
-#include "WIsoLines.xpm" // Please put a real icon here.
-#include "WMIsoLines.h"
+#include "WMThresholdingExample.xpm"
+#include "WMThresholdingExample.h"
 
-WMIsoLines::WMIsoLines():
+WMThresholdingExample::WMThresholdingExample():
     WModule(),
     m_propCondition( new WCondition() )
 {
 }
 
-WMIsoLines::~WMIsoLines()
+WMThresholdingExample::~WMThresholdingExample()
 {
 }
 
-boost::shared_ptr< WModule > WMIsoLines::factory() const
+boost::shared_ptr< WModule > WMThresholdingExample::factory() const
 {
-    return boost::shared_ptr< WModule >( new WMIsoLines() );
+    return boost::shared_ptr< WModule >( new WMThresholdingExample() );
 }
 
-const char** WMIsoLines::getXPMIcon() const
+const char** WMThresholdingExample::getXPMIcon() const
 {
     return WIsoLines_xpm; // Please put a real icon here.
 }
-const std::string WMIsoLines::getName() const
+const std::string WMThresholdingExample::getName() const
 {
-    return "Isoline";
+    return "[EDU] Thresholding Example";
 }
 
-const std::string WMIsoLines::getDescription() const
+const std::string WMThresholdingExample::getDescription() const
 {
-    return "Renders isolines in a specific color.";
+    return "Should draw values above some threshold.";
 }
 
-void WMIsoLines::connectors()
+void WMThresholdingExample::connectors()
 {
     m_scalarIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "scalarData", "Scalar data." );
 
     WModule::connectors();
 }
 
-void WMIsoLines::properties()
+void WMThresholdingExample::properties()
 {
     // Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
@@ -94,7 +94,7 @@ void WMIsoLines::properties()
     WModule::properties();
 }
 
-void WMIsoLines::requirements()
+void WMThresholdingExample::requirements()
 {
 }
 
@@ -165,7 +165,7 @@ namespace
     }
 }
 
-void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution )
+void WMThresholdingExample::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution )
 {
     debugLog() << "Init OSG";
     m_output->clear();
@@ -220,7 +220,7 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     m_output->dirtyBound();
 }
 
-void WMIsoLines::moduleMain()
+void WMThresholdingExample::moduleMain()
 {
     // get notified about data changes
     m_moduleState.setResetable( true, true );
