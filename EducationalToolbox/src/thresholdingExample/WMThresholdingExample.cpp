@@ -54,7 +54,7 @@ boost::shared_ptr< WModule > WMThresholdingExample::factory() const
 
 const char** WMThresholdingExample::getXPMIcon() const
 {
-    return WIsoLines_xpm; // Please put a real icon here.
+    return WMThresholdingExample_xpm;
 }
 const std::string WMThresholdingExample::getName() const
 {
