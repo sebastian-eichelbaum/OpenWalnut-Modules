@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,21 +22,14 @@
 //
 //---------------------------------------------------------------------------
 
-#include <boost/shared_ptr.hpp>
+#version 120
 
-#include <core/kernel/WModule.h>
+/**
+ * Color for this slice.
+ */
+uniform vec4 u_color;
 
-#include "aaSlices/WMAASlices.h"
-#include "fiberStipples/WMFiberStipples.h"
-#include "isoLines/WMIsoLines.h"
-#include "WToolkit.h"
-
-// This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
-// Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
-extern "C" void WLoadModule( WModuleList& m ) // NOLINT
+void main()
 {
-    m.push_back( boost::shared_ptr< WModule >( new WMIsoLines ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMFiberStipples ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMAASlices ) );
+    gl_FragColor = u_color;
 }
-

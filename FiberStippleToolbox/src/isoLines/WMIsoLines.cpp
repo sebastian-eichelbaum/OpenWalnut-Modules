@@ -26,6 +26,7 @@
 
 #include <osg/Geometry>
 
+#include "core/common/WItemSelectionItemTyped.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/graphicsEngine/callbacks/WGELinearTranslationCallback.h"
 #include "core/graphicsEngine/shaders/WGEPropertyUniform.h"
@@ -34,12 +35,12 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
-#include "WIsoLines.xpm" // Please put a real icon here.
+#include "WMIsoLines.xpm"
 #include "WMIsoLines.h"
 
 WMIsoLines::WMIsoLines():
-    WModule(),
-    m_propCondition( new WCondition() )
+    WMAbstractSliceModule(),
+    m_first( true )
 {
 }
 
@@ -54,7 +55,7 @@ boost::shared_ptr< WModule > WMIsoLines::factory() const
 
 const char** WMIsoLines::getXPMIcon() const
 {
-    return WIsoLines_xpm; // Please put a real icon here.
+    return WMIsoLines_xpm;
 }
 const std::string WMIsoLines::getName() const
 {
@@ -70,14 +71,11 @@ void WMIsoLines::connectors()
 {
     m_scalarIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "scalarData", "Scalar data." );
 
-    WModule::connectors();
+    WMAbstractSliceModule::connectors();
 }
 
 void WMIsoLines::properties()
 {
-    // Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
-    m_Pos = m_properties->addProperty( "Slice Position", "Where the data shoulde be sliced for drawing contours", 0.0 );
     m_isovalue = m_properties->addProperty( "Isovalue", "Value selecting the contours", 0.0 );
     m_isovalue->setMin( 0.0 );
     m_isovalue->setMax( 0.0 ); // make it unusable at first
@@ -91,11 +89,7 @@ void WMIsoLines::properties()
     m_lineWidth->setMin( 0.0 );
     m_lineWidth->setMax( 1.0 );
 
-    WModule::properties();
-}
-
-void WMIsoLines::requirements()
-{
+    WMAbstractSliceModule::properties();
 }
 
 namespace
@@ -165,7 +159,7 @@ namespace
     }
 }
 
-void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution )
+void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution, const size_t axis )
 {
     debugLog() << "Init OSG";
     m_output->clear();
@@ -177,41 +171,45 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     WVector3d sizes = ( maxV - minV );
     WVector3d midBB = minV + ( sizes * 0.5 );
 
-    // update the properties
-    m_Pos->setMin( minV[1] );
-    m_Pos->setMax( maxV[1] );
-    m_Pos->set( midBB[1] );
+    if( axis > 2 )
+    {
+        errorLog() << "Somehow an axis >= 2 was given (" << axis << "). This is a bug! Please report at openwalnut.org. Aborting.";
+        return;
+    }
+
+    // determine other two plane vectors
+    osg::Vec3 aVec( sliceBaseVectors( sizes, axis ).first );
+    osg::Vec3 bVec( sliceBaseVectors( sizes, axis ).second );
+
+    m_pos->setMin( minV[axis] );
+    m_pos->setMax( maxV[axis] );
+
+    if( m_first && !m_externPropSlider )
+    {
+        m_first = false;
+        m_pos->set( midBB[axis] );
+    }
+
+    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
+    wge::bindAsUniform( m_output, u_WorldTransform, "u_WorldTransform" );
+    wge::bindAsUniform( m_output, m_isovalue, "u_isovalue" );
+    wge::bindAsUniform( m_output, m_lineWidth, "u_lineWidth" );
+    wge::bindAsUniform( m_output, m_color, "u_color" );
+    wge::bindAsUniform( m_output, aVec, "u_aVec" );
+    wge::bindAsUniform( m_output, bVec, "u_bVec" );
+    wge::bindAsUniform( m_output, resolution, "u_resolution" );
 
     // each slice is child of an transformation node
     osg::ref_ptr< osg::MatrixTransform > mT = new osg::MatrixTransform();
-
-    osg::Vec3 aVec( sizes[0], 0.0, 0.0 );
-    osg::Vec3 bVec( 0.0, 0.0, sizes[2] );
-
     osg::ref_ptr< osg::Node > slice = genQuadsPerCell( minV, aVec, bVec, scalars, resolution );
     slice->setCullingActive( false );
     mT->addChild( slice );
 
-    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
-    osg::ref_ptr< osg::Uniform > u_isovalue = new WGEPropertyUniform< WPropDouble >( "u_isovalue", m_isovalue );
-    osg::ref_ptr< osg::Uniform > u_lineWidth = new WGEPropertyUniform< WPropDouble >( "u_lineWidth", m_lineWidth );
-    osg::ref_ptr< osg::Uniform > u_color = new WGEPropertyUniform< WPropColor >( "u_color", m_color );
-    osg::ref_ptr< osg::Uniform > u_aVec = new osg::Uniform( "u_aVec", aVec );
-    osg::ref_ptr< osg::Uniform > u_bVec = new osg::Uniform( "u_bVec", bVec );
-    osg::ref_ptr< osg::Uniform > u_resolution = new osg::Uniform( "u_resolution", static_cast< float >( resolution ) );
-
-    osg::StateSet *states = m_output->getOrCreateStateSet();
-    states->addUniform( u_WorldTransform );
-    states->addUniform( u_isovalue );
-    states->addUniform( u_lineWidth );
-    states->addUniform( u_color );
-    states->addUniform( u_aVec );
-    states->addUniform( u_bVec );
-    states->addUniform( u_resolution );
-
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
-    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( osg::Vec3( 0.0, 1.0, 0.0 ), m_Pos, u_WorldTransform ) );
+    osg::Vec3 planeNormal( 0.0, 0.0, 0.0 );
+    planeNormal[axis] = 1.0;
+    mT->addUpdateCallback( new WGELinearTranslationCallback< WPropDouble >( planeNormal, m_pos, u_WorldTransform ) );
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
@@ -225,6 +223,7 @@ void WMIsoLines::moduleMain()
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_scalarIC->getDataChangedCondition() );
+    m_moduleState.add( m_sliceIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -247,6 +246,37 @@ void WMIsoLines::moduleMain()
             break;
         }
 
+        if( m_sliceIC->getData() && !m_externPropSlider )
+        {
+            m_externPropSlider = m_sliceIC->getData()->getProperty();
+            m_moduleState.add( m_externPropSlider->getCondition() );
+            if( selectAxis( m_externPropSlider->getName() ) <= 2 )
+            {
+                m_sliceSelection->set( m_axes->getSelector( selectAxis( m_externPropSlider->getName() ) ) );
+            }
+            else
+            {
+                errorLog() << "Bug! External slice property with invalid name => axis selection failed, name was: " << m_externPropSlider->getName();
+            }
+            WModule::properties();
+            infoLog() << "Added external slice position control.";
+        }
+
+        if( !m_sliceIC->getData() && m_externPropSlider )
+        {
+            m_moduleState.remove( m_externPropSlider->getCondition() );
+            m_externPropSlider.reset();
+            infoLog() << "Removed external slice position control.";
+        }
+
+        if( m_externPropSlider && m_externPropSlider->changed() )
+        {
+            // update slice position
+            debugLog() << "External slice position has changed.";
+            m_pos->set( m_externPropSlider->get( true ) );
+            continue; // do not regenerate geometry incase of slide updates
+        }
+
         // save data behind connectors since it might change during processing
         boost::shared_ptr< WDataSetScalar > scalarData = m_scalarIC->getData();
 
@@ -255,16 +285,16 @@ void WMIsoLines::moduleMain()
             continue;
         }
 
+        // now something different has happened: We need to create new geometry
+        debugLog() << "Handle scalar data update, regenerate geometry.";
+
         m_isovalue->setMin( 0.0 );
         m_isovalue->setMax( 1.0 );
-        // m_isovalue->setMin( scalarData->getMin() );
-        // m_isovalue->setMax( scalarData->getMax() );
 
-        initOSG( scalarData, m_resolution->get() );
+        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
+        initOSG( scalarData, m_resolution->get(), axis );
 
         wge::bindTexture( m_output, scalarData->getTexture(), 0, "u_scalarData" );
-
-        // TODO(math): unbind textures, so we have a clean OSG root node for this module again
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_output );

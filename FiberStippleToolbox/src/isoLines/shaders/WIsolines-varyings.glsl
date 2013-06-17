@@ -73,4 +73,8 @@ varying float edge2Hit_f;
  */
 varying float edge3Hit_f;
 
+/**
+ * Scale factor to increase quad so they overlap and reduce artifacts with bold iso lines.
+ */
+varying float v_quadScale;
 
