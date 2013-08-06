@@ -59,6 +59,17 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
+# FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgManipulator )
+# FIND_PACKAGE( Boost 1.46.0 REQUIRED iostreams )
+
+SET( OWExtPDSampleName    "openwalnut_pdsample" )
+
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/fiberStipples/ext )
+
+# build external libs in ext/
+ADD_SUBDIRECTORY( fiberStipples/ext ) # The needed external libraries
+
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
 # Setup all modules
@@ -71,12 +82,11 @@ INCLUDE( OpenWalnut )
 # the default behaviour.
 
 # Please see the documentation of SETUP_MODULE as it shows how to add custom dependencies (third-party libs)
-
 SETUP_MODULE( 
     ${PROJECT_NAME}   # use project name as module(-toolbox) name
     "."               # where to find the sources
-    ""                # no additonal dependencies
-    ""                # no sources to exclude
+    "${OWExtPDSampleName}" # no additonal dependencies
+    "ext"             # no sources to exclude
 )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------

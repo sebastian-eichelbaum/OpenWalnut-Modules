@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,32 +22,36 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMISOLINES_H
-#define WMISOLINES_H
+#ifndef WMAASLICES_H
+#define WMAASLICES_H
 
 #include <string>
 
-#include "../WMAbstractSliceModule.h"
+#include "core/kernel/WModule.h"
+#include "../WPropTransfer.h"
 
 // forward declarations to reduce compile dependencies
-class WDataSetScalar;
+template< class T > class WModuleInputData;
+class WGEManagedGroupNode;
 
 /**
- * Computes contour lines (aka isolines) for the given data and render them on a 2D plane.
+ * Interactive axis aligned planes (aka axial-, sagittal- or coronal slices).
+ * Serves as selection principle to other modules.
+ *
  * \ingroup modules
  */
-class WMIsoLines: public WMAbstractSliceModule
+class WMAASlices: public WModule
 {
 public:
     /**
-     * Creates the module for drawing contour lines.
+     * Default constructor.
      */
-    WMIsoLines();
+    WMAASlices();
 
     /**
-     * Destroys this module.
+     * Destructor.
      */
-    virtual ~WMIsoLines();
+    virtual ~WMAASlices();
 
     /**
      * Gives back the name of this module.
@@ -71,7 +75,6 @@ public:
 
     /**
      * Get the icon for this module in XPM format.
-     *
      * \return The icon.
      */
     virtual const char** getXPMIcon() const;
@@ -95,42 +98,33 @@ protected:
 private:
     /**
      * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
-     *
-     * \param scalars The scalar data with grid giving bounding box and other information.
-     * \param resolution The size of the quads used for generating line stipples.
-     * \param axis The axis selecting the slice (axial, sagittal or coronal).
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution, size_t axis );
+    void initOSG();
 
     /**
-     * Input connector for scalar data.
+     * For each axis aligned slice an output with the property controlling the corresponding slice position.
      */
-    boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_scalarIC;
+    boost::array< boost::shared_ptr< WModuleOutputData< WPropDoubleTransfer > >, 3 > m_propOC;
 
     /**
-     * The isovalue for the countour lines.
+     * Flags to trigger visibility of slices on or off.
      */
-    WPropDouble m_isovalue;
+    boost::array< WPropBool, 3 > m_showSlice;
 
     /**
-     * Color for the isoline.
+     * Controlling the slice position on its axis.
      */
-    WPropColor m_color;
+    boost::array< WPropDouble, 3 > m_pos;
 
     /**
-     * Size of the quads used for rendering the isolines, aka resolution.
+     * Color for each slice.
      */
-    WPropDouble m_resolution;
+    boost::array< WPropColor, 3 > m_color;
 
     /**
-     * The width of the isolines.
+     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
-    WPropDouble m_lineWidth;
-
-    /**
-     * Controlls if the initial state. E.g. slice position.
-     */
-    bool m_first;
+    osg::ref_ptr< WGEManagedGroupNode > m_output;
 };
 
-#endif  // WMISOLINES_H
+#endif  // WMAASLICES_H

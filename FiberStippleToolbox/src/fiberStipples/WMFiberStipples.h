@@ -27,13 +27,12 @@
 
 #include <string>
 
-#include "core/kernel/WModule.h"
+#include "../WMAbstractSliceModule.h"
+#include "WSampler2D.h"
 
 // forward declarations to reduce compile dependencies
-template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WDataSetVector;
-class WGEManagedGroupNode;
 
 /**
  * Draws Fiber Stipples on slice in order to visualize probabilistic tractograms.
@@ -42,7 +41,7 @@ class WGEManagedGroupNode;
  *
  * \ingroup modules
  */
-class WMFiberStipples: public WModule
+class WMFiberStipples: public WMAbstractSliceModule
 {
 public:
     /**
@@ -98,14 +97,18 @@ protected:
     virtual void properties();
 
 private:
+    osg::ref_ptr< osg::Geode > genScatteredDegeneratedQuads( const WSampler2D& glyphPositions, osg::Vec3 const& base,
+            osg::Vec3 const& a, osg::Vec3 const& b, size_t sliceNum ) const;
+
     /**
      * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
      *
      * \param probTract Pointer to dataset containing the connectivity scores or probabilities. We need this for two things:
      * First, determine the maxium of connectivity scores to, scale the tracts between 0.0...1.0 and secondly to determine the
      * boundingbox for the scene. (Furthermore it is assumed that the vectors are also available within this BB.)
+     * \param axis Selects the axis aligned plane (aka slice) by number. 0 => sagittal, 1 => coronal, 2=> axial.
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > probTract );
+    void initOSG( boost::shared_ptr< WDataSetScalar > probTract, const size_t axis, const size_t numDensitySlices );
 
     /**
      * The probabilistic tractogram input connector.
@@ -118,24 +121,34 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetVector > > m_vectorIC;
 
     /**
-     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
-     */
-    osg::ref_ptr< WGEManagedGroupNode > m_output;
-
-    /**
-     * Controls the slice position, only back and forth will be possible.
-     */
-    WPropDouble m_Pos;
-
-    /**
      * Color for the fiber stipples.
      */
     WPropColor m_color;
 
     /**
+     * Minimal density of the fiberstipples.
+     */
+    WPropDouble m_minRange;
+
+    /**
+     * Maximal density of the fiberstipples.
+     */
+    WPropDouble m_maxRange;
+
+    /**
      * Connectivity scores below that threshold will not be rendered.
      */
     WPropDouble m_threshold;
+
+    /**
+     * All probabilities below this probability are highlighted to the color of this probability.
+     */
+    WPropDouble m_colorThreshold;
+
+    /**
+     * Determines the size of the quad used to stamp out the stipples.
+     */
+    WPropDouble m_glyphSize;
 
     /**
      * For scale the thickness of the stipples.
@@ -146,6 +159,10 @@ private:
      * For initial slice positioning we need to control if the module is in intial state or not.
      */
     bool m_first;
+
+    // TODO(math): Remove this ugly hack as soon as possible
+    std::vector< WSampler2D > m_samplers;
+    WPropBool m_oldNew;
 };
 
 #endif  // WMFIBERSTIPPLES_H

@@ -107,6 +107,16 @@ uniform float u_maxConnectivityScore;
 uniform float u_threshold;
 
 /**
+ * Minimal density of the fiber stipples.
+ */
+uniform float u_minRange;
+
+/**
+ * Maximal density of the fiber stipples.
+ */
+uniform float u_maxRange;
+
+/**
  * Middle point of the quad in texture coordinates, needed for scaling the
  * projection of the principal diffusion direction to fit inside quad.
  */
@@ -115,7 +125,12 @@ uniform vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
 /**
  * How much slices with random quads are used.
  */
-uniform int u_numSlices;
+uniform int u_numDensitySlices;
+
+/**
+ * Scales the quad which is used later for the stipples.
+ */
+uniform float u_glyphSize;
 
 /**
  * Vertex Main. Simply transforms the geometry and computes the projected diffusion direction.
@@ -136,10 +151,14 @@ void main()
     probability = texture3D( u_probTractSampler, texturePosition ).r;
 
     // span quad incase of regions with high probablility
-    if( probability > u_threshold && probability * u_numSlices >= gl_TexCoord[2].x )
+    if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numDensitySlices  >= gl_TexCoord[2].x )
+    // // Debug: Draw seed points with repect to probability and their density-slice-number
+    // if( probability > u_threshold &&  1 >= gl_TexCoord[2].x )
+    // // Debug: Draw all seed points. You need to disable else
+    // if( 1 >= gl_TexCoord[2].x )
     {
          // transform position, the 4th component must be explicitly set, as otherwise they would have been scaled
-         gl_Position = gl_ModelViewProjectionMatrix * ( vec4( gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );
+         gl_Position = gl_ModelViewProjectionMatrix * ( vec4( u_glyphSize * gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );
     }
     else
     {
@@ -147,19 +166,15 @@ void main()
     }
 
     // get principal diffusion direction
-    vec3 diffusionDirection = abs( texture3DUnscaled( u_vectorsSampler, texturePosition, u_vectorsMin, u_vectorsScale ).xyz );
-    diffusionDirection = normalize( diffusionDirection );
+    vec3 diffusionDirection = normalize( texture3DUnscaled( u_vectorsSampler, texturePosition, u_vectorsMin, u_vectorsScale ).xyz );
 
     // project into plane (given by two vectors aVec and bVec)
-    vec3 normal = normalize( cross( u_aVec, u_bVec ) );
-    vec3 projectedDirection = diffusionDirection - dot( diffusionDirection, normal ) * normal;
+    vec3 aVecNorm = normalize( u_aVec );
+    vec3 bVecNorm = normalize( u_bVec );
+    vec3 projectedDirectionTextCoords = 0.5 * vec3( dot( aVecNorm, diffusionDirection ), dot( bVecNorm, diffusionDirection ), 0.0 );
 
-    vec3 projectedDirectionTextCoords = 0.5 * vec3( dot( normalize( u_aVec ), projectedDirection ),
-                                                    dot( normalize( u_bVec ), projectedDirection ),
-                                                    0.0 );
     scaledFocalPoint1 = middlePoint_tex + scale * projectedDirectionTextCoords;
     scaledFocalPoint2 = middlePoint_tex - scale * projectedDirectionTextCoords;
-    // but scale directions to fit 1x1 unit square, these 0.8 are just arbitrary choosen
     focalPoint1 = middlePoint_tex + projectedDirectionTextCoords;
     focalPoint2 = middlePoint_tex - projectedDirectionTextCoords;
 }

@@ -42,6 +42,11 @@ uniform vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
  */
 uniform float u_glyphThickness;
 
+/**
+ * All probabilities below this probability are highlighted to the color of this probability.
+ */
+uniform float u_colorThreshold;
+
 void main()
 {
     // generally the area of a line stipple is a circle with radius R (each half for the endings of the line stipple) plus
@@ -59,9 +64,34 @@ void main()
     float r2 = p2 - sqrt( p2 * p2 + q );
     float radius = max( r1, r2 ) * u_glyphThickness;
 
+    // // debug positions: This will draw only a circle if you want to see the positions. You need to disable all other stuff
+    // vec4 color;
+    // if( gl_TexCoord[2].x == 0 )
+    // {
+    //     color = vec4( 107.0 / 255.0, 138.0 / 255.0, 67.0 / 255.0, 1.0 );
+    // }
+    // else if( gl_TexCoord[2].x == 1 )
+    // {
+    //     color = vec4( 28.0 / 255.0, 74.0 / 255.0, 147.0 / 255.0, 1.0 );
+    // }
+    // else if( gl_TexCoord[2].x == 2 )
+    // {
+    //     color = vec4( 226.0 / 255.0, 180.0 / 255.0, 55.0 / 255.0, 1.0 );
+    // }
+    // else if( gl_TexCoord[2].x == 3 )
+    // {
+    //     color = vec4( 173.0 / 255.0, 72.0 / 255.0, 34.0 / 255.0, 1.0 );
+    // }
+    // float lp = distance( gl_TexCoord[1].xyz, middlePoint_tex );
+    // if( lp < 0.5 )
+    // {
+    //     gl_FragColor = color;
+    // }
+
     if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < radius )
     {
-        gl_FragColor = u_color * probability;
+        gl_FragColor = u_color * pow( probability, 1.0 / (10.0 * u_colorThreshold) );
+//        gl_FragColor = clamp( u_color * clamp( u_colorThreshold + probability, 0.0, 1.0 ) - vec4( 0.0, 0.0, 0.0, 0.2 ), 0.0, 1.0 );
     }
     else
     {
@@ -75,14 +105,13 @@ void main()
         // // Draw quad and inner cricle
         // gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
         // float lp = distance( gl_TexCoord[1].xyz, middlePoint_tex );
-        // if( lp >= 0.5 )
+        // if( lp < 0.5 )
         // {
         //     gl_FragColor = vec4( 0.7, 0.7, 1.0, 1.0 ); // discard;
         // }
     }
 
-
-    // // Color debugging facilities
+    // // Draw Line and focal points
     // if( distancePointLineSegment( gl_TexCoord[1].xyz, focalPoint1, focalPoint2 ) < 0.01 )
     // {
     //     if( l <= 1.1 )
