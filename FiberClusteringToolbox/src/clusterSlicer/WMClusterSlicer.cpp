@@ -332,7 +332,7 @@ void WMClusterSlicer::generateSlices()
         m_slices->push_back( std::make_pair( mean, WPlane( *p ) ) );
         if( m_drawSlices->get( true ) )
         {
-            m_samplePointsGeode->insert( wge::genPointBlobs( samplePoints, 0.1 ) );
+            m_samplePointsGeode->insert( genPointBlobs( samplePoints, 0.1 ) );
         }
     }
     infoLog() << "Max-Mean: " << m_maxMean;
@@ -581,7 +581,7 @@ osg::ref_ptr< osg::Geode > WMClusterSlicer::generateIsoVoxelGeode() const
     {
         points->insert( grid->getPosition( *cit ) );
     }
-    return wge::genPointBlobs< std::set< WPosition > >( points, grid->getOffsetX() );
+    return genPointBlobs< std::set< WPosition > >( points, grid->getOffsetX() );
 }
 
 

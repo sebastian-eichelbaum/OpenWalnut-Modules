@@ -167,6 +167,20 @@ private:
             traverse( node, nv );
         }
     };
+
+
+    /**
+     * Generates a line geode with thickness and color as parameters.
+     *
+     * \param line sequence of points
+     * \param thickness How thick the line strip should be
+     * \param color If present this color is used for the whole line, otherwise local coloring is used
+     *
+     * \return The new assembled geode for this line
+     */
+    osg::ref_ptr< osg::Geode > generateLineStripGeode( const WLine& line,
+                                                       const float thickness = 3.0f,
+                                                       const WColor& color = WColor( 0, 0, 0, 0 ) );
 };
 
 #endif  // WMLINEGUIDEDSLICE_H
