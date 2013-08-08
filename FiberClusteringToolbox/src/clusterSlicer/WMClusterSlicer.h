@@ -38,6 +38,7 @@
 #include "core/dataHandler/datastructures/WJoinContourTree.h"
 #include "core/dataHandler/WDataSetScalar.h"
 #include "core/graphicsEngine/WGEGroupNode.h"
+#include "core/graphicsEngine/WGEGeometryUtils.h"
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/kernel/WModule.h"
 #include "core/kernel/WModuleInputData.h"
@@ -402,7 +403,65 @@ private:
      * \return A number between 0 and 1.
      */
     double mapMeanOntoScale( double meanValue ) const;
+
+    /**
+     * For each points in the STL container generate small cubes.
+     *
+     * \param points Center point of the cubes
+     * \param size The size of the cubes
+     * \param color The color of the cubes
+     * \tparam An STL container with WPositions as elements ( don't try it with different than vector, set, list or queue )
+     *
+     * \return Geode with as many cubes as points in the container where each cube is around a certain position.
+     */
+    template< class Container > osg::ref_ptr< osg::Geode > genPointBlobs( boost::shared_ptr< Container > points,
+                                                                          double size,
+                                                                          const WColor& color = WColor( 1.0, 0.0, 0.0, 1.0 ) );
 };
+
+
+template< class Container > inline osg::ref_ptr< osg::Geode > wge::genPointBlobs( boost::shared_ptr< Container > points,
+                                                                                  double size,
+                                                                                  const WColor& color )
+{
+    osg::ref_ptr< osg::Vec3Array > vertices = osg::ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
+    osg::ref_ptr< osg::Vec4Array > colors   = osg::ref_ptr< osg::Vec4Array >( new osg::Vec4Array );
+    osg::ref_ptr< osg::Geometry >  geometry = osg::ref_ptr< osg::Geometry >( new osg::Geometry );
+    osg::ref_ptr< osg::Vec3Array > normals  = osg::ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
+
+    for( typename Container::const_iterator point = points->begin(); point != points->end(); ++point )
+    {
+        const WPosition& pos = *point;
+        std::vector< WPosition > corners;
+        corners.reserve( 8 );
+        double halfSize = size / 2.0;
+        corners.push_back( WPosition( pos[0] - halfSize, pos[1] - halfSize, pos[2] - halfSize ) );
+        corners.push_back( WPosition( pos[0] + halfSize, pos[1] - halfSize, pos[2] - halfSize ) );
+        corners.push_back( WPosition( pos[0] + halfSize, pos[1] - halfSize, pos[2] + halfSize ) );
+        corners.push_back( WPosition( pos[0] - halfSize, pos[1] - halfSize, pos[2] + halfSize ) );
+        corners.push_back( WPosition( pos[0] - halfSize, pos[1] + halfSize, pos[2] - halfSize ) );
+        corners.push_back( WPosition( pos[0] + halfSize, pos[1] + halfSize, pos[2] - halfSize ) );
+        corners.push_back( WPosition( pos[0] + halfSize, pos[1] + halfSize, pos[2] + halfSize ) );
+        corners.push_back( WPosition( pos[0] - halfSize, pos[1] + halfSize, pos[2] + halfSize ) );
+
+        osg::ref_ptr< osg::Vec3Array > ver = generateCuboidQuads( corners );
+        vertices->insert( vertices->end(), ver->begin(), ver->end() );
+        osg::ref_ptr< osg::Vec3Array > nor = generateCuboidQuadNormals( corners );
+        normals->insert( normals->end(), nor->begin(), nor->end() );
+        geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, vertices->size() - ver->size(), ver->size() ) );
+    }
+
+    geometry->setVertexArray( vertices );
+    colors->push_back( color );
+    geometry->setColorArray( colors );
+    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+    geometry->setNormalArray( normals );
+    geometry->setNormalBinding( osg::Geometry::BIND_PER_PRIMITIVE );    // this will not compile on OSG 3.2. Please use osg::Shape for creating
+                                                                        // boxes
+    osg::ref_ptr< osg::Geode > geode = osg::ref_ptr< osg::Geode >( new osg::Geode );
+    geode->addDrawable( geometry );
+    return geode;
+}
 
 #endif  // WMCLUSTERSLICER_H
 

@@ -61,9 +61,10 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
  *
  * \param localPath this is the path to the toolkit. Our build system ensures, that your resources and shaders get placed there.
  */
-extern "C" void WRegisterArbitrary( const boost::filesystem::path& /*localPath*/ )
+extern "C" void WRegisterArbitrary( const boost::filesystem::path& localPath )
 {
     // Example for registering your own postprocessor:
     // WGEPostprocessor::addPostprocessor( WGEPostprocessor::SPtr( new MyStylishPostprocessing( localPath ) ) );
+    wlog::info( "MyModuleToolbox - Arbitrary Extension" ) << "My resource path is: " << localPath.string();
 }
 
