@@ -31,6 +31,8 @@
 #include <utility>
 #include <vector>
 
+#include <osg/Geometry>
+
 #include "core/common/datastructures/WColoredVertices.h"
 #include "core/common/math/WPlane.h"
 #include "core/common/WCondition.h"
@@ -416,13 +418,13 @@ private:
      */
     template< class Container > osg::ref_ptr< osg::Geode > genPointBlobs( boost::shared_ptr< Container > points,
                                                                           double size,
-                                                                          const WColor& color = WColor( 1.0, 0.0, 0.0, 1.0 ) );
+                                                                          const WColor& color = WColor( 1.0, 0.0, 0.0, 1.0 ) ) const;
 };
 
 
-template< class Container > inline osg::ref_ptr< osg::Geode > wge::genPointBlobs( boost::shared_ptr< Container > points,
-                                                                                  double size,
-                                                                                  const WColor& color )
+template< class Container > inline osg::ref_ptr< osg::Geode > WMClusterSlicer::genPointBlobs( boost::shared_ptr< Container > points,
+                                                                             double size,
+                                                                             const WColor& color ) const
 {
     osg::ref_ptr< osg::Vec3Array > vertices = osg::ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
     osg::ref_ptr< osg::Vec4Array > colors   = osg::ref_ptr< osg::Vec4Array >( new osg::Vec4Array );
@@ -444,9 +446,9 @@ template< class Container > inline osg::ref_ptr< osg::Geode > wge::genPointBlobs
         corners.push_back( WPosition( pos[0] + halfSize, pos[1] + halfSize, pos[2] + halfSize ) );
         corners.push_back( WPosition( pos[0] - halfSize, pos[1] + halfSize, pos[2] + halfSize ) );
 
-        osg::ref_ptr< osg::Vec3Array > ver = generateCuboidQuads( corners );
+        osg::ref_ptr< osg::Vec3Array > ver = wge::generateCuboidQuads( corners ); // do not use. use osg::Shape for boxes
         vertices->insert( vertices->end(), ver->begin(), ver->end() );
-        osg::ref_ptr< osg::Vec3Array > nor = generateCuboidQuadNormals( corners );
+        osg::ref_ptr< osg::Vec3Array > nor = wge::generateCuboidQuadNormals( corners );
         normals->insert( normals->end(), nor->begin(), nor->end() );
         geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, vertices->size() - ver->size(), ver->size() ) );
     }
