@@ -26,6 +26,8 @@
 #include <vector>
 #include <utility>
 
+#include <osg/LineWidth>
+
 #include "core/common/math/linearAlgebra/WPosition.h"
 #include "core/common/math/linearAlgebra/WVectorFixed.h"
 #include "core/common/WAssert.h"
@@ -138,7 +140,7 @@ void WMLineGuidedSlice::updateCenterLine()
     if( m_centerLine )
     {
         debugLog() << "Draw center line representation." << pathLength( *m_centerLine );
-        m_centerLineGeode = wge::generateLineStripGeode( *m_centerLine, 2.f );
+        m_centerLineGeode = generateLineStripGeode( *m_centerLine, 2.f );
     }
     else
     {

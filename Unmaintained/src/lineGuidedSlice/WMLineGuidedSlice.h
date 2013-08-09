@@ -31,6 +31,7 @@
 
 #include <osg/Node>
 
+#include "core/common/math/WLine.h"
 #include "core/kernel/WModule.h"
 #include "core/kernel/WModuleInputData.h"
 #include "core/kernel/WModuleOutputData.h"
