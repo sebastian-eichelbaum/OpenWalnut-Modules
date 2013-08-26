@@ -32,6 +32,7 @@
 #include "hud/WMHud.h"
 #include "lineGuidedSlice/WMLineGuidedSlice.h"
 #include "writeGeometry/WMWriteGeometry.h"
+#include "sliceContext/WMSliceContext.h"
 
 #include "WToolkit.h"
 
@@ -45,5 +46,6 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
     m.push_back( boost::shared_ptr< WModule >( new WMHud ) );
     m.push_back( boost::shared_ptr< WModule >( new WMLineGuidedSlice ) );
     m.push_back( boost::shared_ptr< WModule >( new WMWriteGeometry ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMSliceContext ) );
 }
 
