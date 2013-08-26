@@ -36,6 +36,8 @@
 #include "core/kernel/WModuleInputData.h"
 #include "core/kernel/WModuleOutputData.h"
 #include "core/kernel/WSelectionManager.h"
+#include "core/dataHandler/WDataSetFibers.h"
+#include "core/common/math/linearAlgebra/WPosition.h"
 
 /**
  * Someone should add some documentation here.
