@@ -62,13 +62,15 @@ INCLUDE( OpenWalnut )
 # FIND_PACKAGE( OpenSceneGraph ${MIN_OSG_VERSION} REQUIRED osgManipulator )
 # FIND_PACKAGE( Boost 1.46.0 REQUIRED iostreams )
 
-SET( OWExtPDSampleName    "openwalnut_pdsample" )
+FIND_PACKAGE( CGAL )
+include(${CGAL_USE_FILE})
 
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/fiberStipples/ext )
+SET( OWExtPDSampleName "openwalnut_pdsample" )
+
+INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/fiberStipples/ext ${CGAL_INCLUDE_DIRS} )
 
 # build external libs in ext/
 ADD_SUBDIRECTORY( fiberStipples/ext ) # The needed external libraries
-
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -85,7 +87,7 @@ ADD_SUBDIRECTORY( fiberStipples/ext ) # The needed external libraries
 SETUP_MODULE( 
     ${PROJECT_NAME}   # use project name as module(-toolbox) name
     "."               # where to find the sources
-    "${OWExtPDSampleName}" # no additonal dependencies
+    "${OWExtPDSampleName};${CGAL_LIBRARIES}" # no additonal dependencies
     "ext"             # no sources to exclude
 )
 

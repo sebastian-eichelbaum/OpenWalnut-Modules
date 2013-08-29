@@ -27,6 +27,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -34,6 +35,9 @@
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_2.h>
 
 #include "core/common/math/WMath.h"
 #include "core/common/WItemSelectionItemTyped.h"
@@ -133,6 +137,7 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array;
     osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array;
     osg::ref_ptr< osg::Vec3Array > texcoords2 = new osg::Vec3Array;
+    osg::ref_ptr< osg::Vec3Array > texcoords3 = new osg::Vec3Array;
     osg::ref_ptr< osg::Vec3Array > normals = new osg::Vec3Array;
     osg::ref_ptr< osg::Vec4Array > colors = new osg::Vec4Array;
 
@@ -159,11 +164,17 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
         // TODO(math): remove this ugly hack
         if( lambda0 > maxX || lambda1 > maxY ) { continue; }
 
+        double inSliceNumber = static_cast< double >( std::rand() ) / static_cast< double >( RAND_MAX );
+//        inSliceNumber *= 10000;
+//        inSliceNumer = static_cast<size_t>( inSliceNumber );
+//        inSliceNumer = static_cast< double >( inSliceNumber ) / 10000;
+
         osg::Vec3 quadCenter = base + a * lambda0 + b * lambda1;
         for( int j = 0; j < 4; ++j )
         {
             vertices->push_back( quadCenter );
             texcoords2->push_back( osg::Vec3( static_cast< double >( sliceNum ), 0.0, 0.0 ) );
+            texcoords3->push_back( osg::Vec3( inSliceNumber, 0.0, 0.0 ) );
         }
 
         texcoords0->push_back( ( -aNorm + -bNorm ) );
@@ -175,6 +186,7 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
         texcoords1->push_back( osg::Vec3( 1.0, 0.0, 0.0 ) );
         texcoords1->push_back( osg::Vec3( 1.0, 1.0, 0.0 ) );
         texcoords1->push_back( osg::Vec3( 0.0, 1.0, 0.0 ) );
+
     }
 
     normals->push_back( aCrossB );
@@ -186,6 +198,7 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     geometry->setTexCoordArray( 0, texcoords0 );
     geometry->setTexCoordArray( 1, texcoords1 );
     geometry->setTexCoordArray( 2, texcoords2 );
+    geometry->setTexCoordArray( 3, texcoords3 );
     geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
     geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
     geometry->setNormalArray( normals );
@@ -275,6 +288,23 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
         mT->addChild( slice );
     }
 
+    /************************* delauny ************************/
+
+    WSampler2DPoisson sampler( 0.02 );
+    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+    typedef CGAL::Delaunay_triangulation_2<K> Delaunay;
+    typedef K::Point_2 Point;
+    std::vector<Point> points;
+    for( WSampler2DPoisson::const_iterator it = sampler.begin(); it != sampler.end(); ++it )
+    {
+        points.push_back( Point( (*it)[0], (*it)[1] ) );
+    }
+
+    Delaunay dt;
+    dt.insert(points.begin(),points.end());
+
+    /**********************************************************/
+
     // Control transformation node by properties. We use an additional uniform here to provide the shader
     // the transformation matrix used to translate the slice.
     osg::Vec3 planeNormal( 0.0, 0.0, 0.0 );
@@ -286,6 +316,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_output->getOrCreateStateSet()->setMode( GL_DEPTH_TEST, osg::StateAttribute::OFF );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
     m_output->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+    m_output->getOrCreateStateSet()->setMode( GL_FRAMEBUFFER_SRGB_EXT, osg::StateAttribute::ON );
     m_output->insert( mT );
     m_output->dirtyBound();
 }

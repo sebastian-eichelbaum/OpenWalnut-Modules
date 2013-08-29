@@ -65,23 +65,23 @@ void main()
     float radius = max( r1, r2 ) * u_glyphThickness;
 
     // // debug positions: This will draw only a circle if you want to see the positions. You need to disable all other stuff
-    // vec4 color;
-    // if( gl_TexCoord[2].x == 0 )
-    // {
-    //     color = vec4( 107.0 / 255.0, 138.0 / 255.0, 67.0 / 255.0, 1.0 );
-    // }
-    // else if( gl_TexCoord[2].x == 1 )
-    // {
-    //     color = vec4( 28.0 / 255.0, 74.0 / 255.0, 147.0 / 255.0, 1.0 );
-    // }
-    // else if( gl_TexCoord[2].x == 2 )
-    // {
-    //     color = vec4( 226.0 / 255.0, 180.0 / 255.0, 55.0 / 255.0, 1.0 );
-    // }
-    // else if( gl_TexCoord[2].x == 3 )
-    // {
-    //     color = vec4( 173.0 / 255.0, 72.0 / 255.0, 34.0 / 255.0, 1.0 );
-    // }
+    // vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
+    // // if( gl_TexCoord[2].x == 0 )
+    // // {
+    // //     color = vec4( 107.0 / 255.0, 138.0 / 255.0, 67.0 / 255.0, 1.0 );
+    // // }
+    // // else if( gl_TexCoord[2].x == 1 )
+    // // {
+    // //     color = vec4( 28.0 / 255.0, 74.0 / 255.0, 147.0 / 255.0, 1.0 );
+    // // }
+    // // else if( gl_TexCoord[2].x == 2 )
+    // // {
+    // //     color = vec4( 226.0 / 255.0, 180.0 / 255.0, 55.0 / 255.0, 1.0 );
+    // // }
+    // // else if( gl_TexCoord[2].x == 3 )
+    // // {
+    // //     color = vec4( 173.0 / 255.0, 72.0 / 255.0, 34.0 / 255.0, 1.0 );
+    // // }
     // float lp = distance( gl_TexCoord[1].xyz, middlePoint_tex );
     // if( lp < 0.5 )
     // {
