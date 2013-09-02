@@ -36,8 +36,8 @@
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
 
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Delaunay_triangulation_2.h>
+//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+//#include <CGAL/Delaunay_triangulation_2.h>
 
 #include "core/common/math/WMath.h"
 #include "core/common/WItemSelectionItemTyped.h"
@@ -103,7 +103,7 @@ void WMFiberStipples::properties()
     m_threshold->setMin( 0.0 );
     m_threshold->setMax( 1.0 );
 
-    m_colorThreshold = m_properties->addProperty( "Color Threshold", "Colors of connectivity scores below this threshold will be maped to colors representing this probability.", 0.00 );
+    m_colorThreshold = m_properties->addProperty( "Color Threshold", "Colors of connectivity scores below this threshold will be maped to colors representing this probability.", 0.1 );
     m_colorThreshold->setMin( 0.0 );
     m_colorThreshold->setMax( 1.0 );
 
@@ -123,7 +123,7 @@ void WMFiberStipples::properties()
     m_glyphSize->setMin( 0.01 );
     m_glyphSize->setMax( 10.0 );
 
-    m_oldNew = m_properties->addProperty( "Old|New", "Old|New", false, m_propCondition );
+    m_oldNew = m_properties->addProperty( "Old|New", "Old|New", true, m_propCondition );
 
     // call WModule's initialization
     WMAbstractSliceModule::properties();
@@ -290,18 +290,18 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
 
     /************************* delauny ************************/
 
-    WSampler2DPoisson sampler( 0.02 );
-    typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-    typedef CGAL::Delaunay_triangulation_2<K> Delaunay;
-    typedef K::Point_2 Point;
-    std::vector<Point> points;
-    for( WSampler2DPoisson::const_iterator it = sampler.begin(); it != sampler.end(); ++it )
-    {
-        points.push_back( Point( (*it)[0], (*it)[1] ) );
-    }
+    // WSampler2DPoisson sampler( 0.02 );
+    // typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+    // typedef CGAL::Delaunay_triangulation_2<K> Delaunay;
+    // typedef K::Point_2 Point;
+    // std::vector<Point> points;
+    // for( WSampler2DPoisson::const_iterator it = sampler.begin(); it != sampler.end(); ++it )
+    // {
+    //     points.push_back( Point( (*it)[0], (*it)[1] ) );
+    // }
 
-    Delaunay dt;
-    dt.insert(points.begin(),points.end());
+    // Delaunay dt;
+    // dt.insert(points.begin(),points.end());
 
     /**********************************************************/
 
@@ -316,7 +316,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_output->getOrCreateStateSet()->setMode( GL_DEPTH_TEST, osg::StateAttribute::OFF );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
     m_output->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
-    m_output->getOrCreateStateSet()->setMode( GL_FRAMEBUFFER_SRGB_EXT, osg::StateAttribute::ON );
+    // m_output->getOrCreateStateSet()->setMode( GL_FRAMEBUFFER_SRGB_EXT, osg::StateAttribute::ON );
     m_output->insert( mT );
     m_output->dirtyBound();
 }
@@ -343,7 +343,7 @@ void WMFiberStipples::moduleMain()
     WSampler2DPoisson sampler( 0.02 );
     boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
     m_progress->addSubProgress( splitProgress );
-    m_samplers = splitSamplingPoisson( sampler, 20, splitProgress );
+    m_samplers = splitSamplingPoisson( sampler, numDensitySlices, splitProgress );
 
     // main loop
     while( !m_shutdownFlag() )

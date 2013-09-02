@@ -312,9 +312,9 @@ OPTION( BUILD_PYTHON_INTERPRETER OFF )
 
 # find the boost packages
 IF( BUILD_PYTHON_INTERPRETER )
-    FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex python )
+    FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex python serialization )
 ELSE()
-    FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex )
+    FIND_PACKAGE( Boost 1.46.0 REQUIRED program_options thread filesystem date_time system signals regex serialization )
 ENDIF() #BUILD_SCRIPTENGINE
 
 # include the boost headers

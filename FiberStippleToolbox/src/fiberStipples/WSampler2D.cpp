@@ -25,8 +25,11 @@
 #include <fstream>
 
 #include <boost/array.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/archive/text_iarchive.hpp>
 
 #include <core/common/WProgress.h>
+#include <core/common/WIOTools.h>
 
 #include "ext/PDSampling.h"
 #include "WSampler2D.h"
@@ -141,59 +144,90 @@ namespace
     }
 }
 
+namespace {
+
+void saveHierarchy( std::vector< WSampler2D >& hier, std::string fname ) {
+    Hierarchy h( hier );
+    std::ofstream ofs( fname.c_str() );
+    {
+        boost::archive::text_oarchive oa(ofs);
+        oa << h;
+    }
+}
+
+std::vector< WSampler2D > loadHierarchy( std::string fname ) {
+    Hierarchy h;
+    std::ifstream ifs( fname.c_str() );
+    {
+        boost::archive::text_iarchive ia(ifs);
+        ia >> h;
+    }
+    return h.get();
+}
+}
+
 // TODO(math): Remove this ugly hack as soon as possible
 std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents, boost::shared_ptr< WProgress > progress )
 {
-    WSampler2D points( sampler );
-    std::random_shuffle( points.begin(), points.end() );
+   std::vector< WSampler2D > components;
 
-    size_t numPoints = points.size(); // we need this as we want to delete in O(1)
-    std::vector< WSampler2D > components;
-    boost::array< double, 20 > coeff = {{ 7.0,
-                                          5.0,
-                                          4.0,
-                                          3.5,
-                                          3.0,
-                                          2.6,
-                                          2.3,
-                                          2.1,
-                                          2.02,
-                                          2.00001,
-                                          2.000005,
-                                          2.000001,
-                                          1.9999995,
-                                          1.999999,
-                                          1.999998,
-                                          1.999997,
-                                          1.9999955,
-                                          1.999994,
-                                          1.999992,
-                                          1.99999}};
-
-    for( size_t i = 0; i < numComponents; ++i )
-    {
-        double r2 = 0.001 * 0.001 * coeff[i] * coeff[i];
-        WSampler2D comp;
-
-        size_t failure = 0;
-        while( numPoints > 0 && failure < 180 )
-        {
-            size_t n = std::rand() % numPoints;
-            if( !valid( points[n], components, r2 ) || !valid( points[n], comp.begin(), comp.end(), r2 ) )
-            {
-                failure++;
-            }
-            else
-            {
-                comp.push_back( points[n] );
-                std::swap( points[n], points[ numPoints - 1 ] );
-                numPoints -= 1;
-                failure = 0;
-            }
-        }
-        components.push_back( comp );
-        ++*progress;
+    std::string cache( "/tmp/klaus" );
+    if( fileExists( cache ) ) {
+        components = loadHierarchy( cache );
     }
+    else {
+        WSampler2D points( sampler );
+        std::random_shuffle( points.begin(), points.end() );
+        size_t numPoints = points.size(); // we need this as we want to delete in O(1)
+        boost::array< double, 20 > coeff = {{ 7.0,
+                                              5.0,
+                                              4.0,
+                                              3.5,
+                                              3.0,
+                                              2.6,
+                                              2.3,
+                                              2.1,
+                                              2.02,
+                                              2.00001,
+                                              2.000005,
+                                              2.000001,
+                                              1.9999995,
+                                              1.999999,
+                                              1.999998,
+                                              1.999997,
+                                              1.9999955,
+                                              1.999994,
+                                              1.999992,
+                                              1.99999}};
+
+        for( size_t i = 0; i < numComponents; ++i )
+        {
+            double r2 = 0.001 * 0.001 * coeff[i] * coeff[i];
+            WSampler2D comp;
+
+            size_t failure = 0;
+            while( numPoints > 0 && failure < 180 )
+            {
+                size_t n = std::rand() % numPoints;
+                if( !valid( points[n], components, r2 ) || !valid( points[n], comp.begin(), comp.end(), r2 ) )
+                {
+                    failure++;
+                }
+                else
+                {
+                    comp.push_back( points[n] );
+                    std::swap( points[n], points[ numPoints - 1 ] );
+                    numPoints -= 1;
+                    failure = 0;
+                }
+            }
+            components.push_back( comp );
+            ++*progress;
+        }
+    }
+
+    saveHierarchy( components, "/tmp/klaus" );
+
     progress->finish();
 
     // discard points

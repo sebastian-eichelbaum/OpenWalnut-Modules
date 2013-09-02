@@ -27,6 +27,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include <core/common/math/linearAlgebra/WVectorFixed.h> // for WVector2d
 #include <core/common/WMixinVector.h>
@@ -42,6 +43,15 @@ public:
      * Shortcut for boost shared pointers on that objects.
      */
     typedef boost::shared_ptr< WSampler2D > SPtr;
+
+    WSampler2D() {}
+
+    explicit WSampler2D( std::vector< WVector2d > v ) {
+        for( size_t i = 0; i < v.size(); ++i )
+        {
+            push_back( v[i] );
+        }
+    }
 
 };
 
@@ -100,6 +110,63 @@ public:
 //    void scale( double width, double height );
 private:
     float m_radius;
+};
+
+class Hierarchy {
+private:
+    friend class boost::serialization::access;
+    struct Point2d {
+        Point2d() {}
+        Point2d( WVector2d v ) {
+            x = v[0];
+            y = v[1];
+        }
+        double x;
+        double y;
+        WVector2d get() {
+            return WVector2d( x, y );
+        }
+        template<class Archive> void serialize(Archive & ar, const unsigned int /* version */)
+        {
+            ar & x;
+            ar & y;
+        }
+    };
+    std::vector< std::vector< Point2d > > m_h;
+    template<class Archive> void serialize(Archive & ar, const unsigned int /* version */)
+    {
+        ar & m_h;
+    }
+public:
+    Hierarchy() {
+    }
+
+    explicit Hierarchy( std::vector< WSampler2D >& h ) {
+        set( h );
+    }
+
+    void set( std::vector< WSampler2D >& h ) {
+        for( size_t i = 0; i < h.size(); ++i ) {
+            std::vector< Point2d > l;
+            for( size_t j = 0; j < h[i].size(); ++j ) {
+                l.push_back( Point2d( h[i][j] ) );
+            }
+            m_h.push_back( l );
+        }
+    }
+
+    std::vector< WSampler2D > get() {
+        std::vector< WSampler2D > result;
+        for( size_t i = 0; i < m_h.size(); ++i ) {
+            std::vector< WVector2d > l;
+            for( size_t j = 0; j < m_h[i].size(); ++j ) {
+                l.push_back( WVector2d( m_h[i][j].x, m_h[i][j].y ) );
+            }
+            WSampler2D s( l );
+            result.push_back( s );
+        }
+        return result;
+    }
 };
 
 std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents );
