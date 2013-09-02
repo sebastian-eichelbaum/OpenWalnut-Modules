@@ -47,6 +47,44 @@ uniform float u_glyphThickness;
  */
 uniform float u_colorThreshold;
 
+/**
+ * Pseudo random number generator: http://stackoverflow.com/questions/12964279/whats-the-origin-of-this-glsl-rand-one-liner
+ */
+float rand(vec2 co){
+  return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+/**
+ * Converts HSL colors to RGB colors. This is used in this shader later to draw from a single random, a whole color (hue).
+ */
+vec4 hsv_to_rgb(float h, float s, float v, float a)
+{
+    float c = v * s;
+    h = mod((h * 6.0), 6.0);
+    float x = c * (1.0 - abs(mod(h, 2.0) - 1.0));
+    vec4 color;
+
+    if (0.0 <= h && h < 1.0) {
+        color = vec4(c, x, 0.0, a);
+    } else if (1.0 <= h && h < 2.0) {
+        color = vec4(x, c, 0.0, a);
+    } else if (2.0 <= h && h < 3.0) {
+        color = vec4(0.0, c, x, a);
+    } else if (3.0 <= h && h < 4.0) {
+        color = vec4(0.0, x, c, a);
+    } else if (4.0 <= h && h < 5.0) {
+        color = vec4(x, 0.0, c, a);
+    } else if (5.0 <= h && h < 6.0) {
+        color = vec4(c, 0.0, x, a);
+    } else {
+        color = vec4(0.0, 0.0, 0.0, a);
+    }
+
+    color.rgb += v - c;
+
+    return color;
+}
+
 void main()
 {
     // generally the area of a line stipple is a circle with radius R (each half for the endings of the line stipple) plus
@@ -88,19 +126,47 @@ void main()
     //     gl_FragColor = color;
     // }
 
+    vec4 white = vec4( 1, 1, 1, 1 );
+    vec4 black = vec4( 0, 0, 0, 1 );
+
+    vec4 c = u_color * pow( probability, 1.0 / (10.0 * u_colorThreshold) );
+    // vec4 c = white;
+    // // Debug: random color
+    // float r = rand( vec2( scaledFocalPoint1.xy ) );
+    // vec4 c = hsv_to_rgb( r, 1, 1, 1 );
     if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < radius )
     {
-        gl_FragColor = u_color * pow( probability, 1.0 / (10.0 * u_colorThreshold) );
-//        gl_FragColor = clamp( u_color * clamp( u_colorThreshold + probability, 0.0, 1.0 ) - vec4( 0.0, 0.0, 0.0, 0.2 ), 0.0, 1.0 );
+        // gl_FragColor = c;
     }
     else
     {
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.01 ) )
-        // {
-        //     gl_FragColor = vec4( 1.0, 1.0, 1.0, gl_Color.w );
-        // }
+        vec4 bordercolor = white;
 
-        discard;
+        // Debug: Enable fade to black
+        float gray = 1.0;
+        float alpha = probability + 0.5;
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.040 ) ) { float gg = gray - 0.9; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.7 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.035 ) ) { float gg = gray - 0.7; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.6 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.030 ) ) { float gg = gray - 0.5; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.5 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.025 ) ) { float gg = gray - 0.4; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.4 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.020 ) ) { float gg = gray - 0.3; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.3 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.015 ) ) { float gg = gray - 0.2; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.2 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.010 ) ) { float gg = gray - 0.1; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.1 ); }
+        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.005 ) ) { float gg = gray - 0.0; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.0 ); }
+
+        // // Debug: Enable fade to black
+        // float gray = 1.0;
+        // float alpha = probability + 0.5;
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.040 ) ) { float gg = gray - 0.0; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.7 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.035 ) ) { float gg = gray - 0.1; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.6 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.030 ) ) { float gg = gray - 0.2; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.5 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.025 ) ) { float gg = gray - 0.3; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.4 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.020 ) ) { float gg = gray - 0.4; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.3 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.015 ) ) { float gg = gray - 0.5; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.2 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.010 ) ) { float gg = gray - 0.7; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.1 ); }
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.005 ) ) { float gg = gray - 0.9; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.0 ); }
+
+        // discard;
 
         // // Draw quad and inner cricle
         // gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
