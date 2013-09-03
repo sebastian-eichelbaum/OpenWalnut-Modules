@@ -31,6 +31,7 @@
 #include <map>
 
 #include <osg/Geode>
+#include <osg/Uniform>
 
 #include "core/kernel/WModule.h"
 #include "core/kernel/WModuleInputData.h"
@@ -38,6 +39,7 @@
 
 #include "core/graphicsEngine/WGEGroupNode.h"
 #include "core/graphicsEngine/WTriangleMesh.h"
+#include "core/graphicsEngine/shaders/WGEShader.h"
 
 class WDataSetScalar;
 
@@ -185,6 +187,12 @@ private:
     boost::shared_ptr< WItemSelection > m_possibleSelections;
 
     WPropTrigger  m_propCreateRoiTrigger; //!< This property triggers the actual reading,
+    WPropInt m_opacityProp; //!< Property holding the opacity valueassigned to the surface
+    /**
+     * The shader
+     */
+    osg::ref_ptr< WGEShader > m_shader;
+
 };
 
 #endif  // WMATLASSURFACES_H

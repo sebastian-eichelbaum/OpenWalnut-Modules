@@ -116,6 +116,10 @@ void WMAtlasSurfaces::properties()
 
     m_propCreateRoiTrigger = m_properties->addProperty( "Create Roi",  "Press!", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
+    m_opacityProp = m_properties->addProperty( "Opacity %", "Opaqueness of surface.", 100 );
+    m_opacityProp->setMin( 0 );
+    m_opacityProp->setMax( 100 );
+
     WModule::properties();
 }
 
@@ -268,7 +272,7 @@ void WMAtlasSurfaces::createSurfaces()
     }
 
     m_properties->removeProperty( m_aMultiSelection ); // clear before re-adding
-    m_aMultiSelection  = m_properties->addProperty( "Regions", "Regions", m_possibleSelections->getSelectorAll(),
+    m_aMultiSelection  = m_properties->addProperty( "Regions", "Regions", m_possibleSelections->getSelectorFirst(),
                                                                         m_propCondition );
 }
 
@@ -318,9 +322,17 @@ void WMAtlasSurfaces::createOSGNode()
         lightModel->setTwoSided( true );
         state->setAttributeAndModes( lightModel.get(), osg::StateAttribute::ON );
         state->setMode(  GL_BLEND, osg::StateAttribute::ON );
+        state->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
+        state->setRenderBinDetails( 6001 + i, "RenderBin" );
+        state->addUniform( new WGEPropertyUniform< WPropInt >( "u_opacity", m_opacityProp ) );
+        m_moduleNode->insert( outputGeode );
 
         m_moduleNode->insert( outputGeode );
     }
+    m_shader = osg::ref_ptr< WGEShader >( new WGEShader( "WMAtlasSurfaces", m_localPath ) );
+    m_shader->apply( m_moduleNode );
+
+
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_moduleNode );
     m_moduleNode->addUpdateCallback( new WGEFunctorCallback< osg::Node >( boost::bind( &WMAtlasSurfaces::updateGraphics, this ) ) );
 }
