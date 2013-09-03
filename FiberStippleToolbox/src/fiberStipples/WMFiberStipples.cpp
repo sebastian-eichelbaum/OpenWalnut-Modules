@@ -313,7 +313,8 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     // debugLog() << "Slice: " << planeNormal << " aVec: " << aVec << " bVec: " << bVec << " axis: " << axis;
 
     m_output->getOrCreateStateSet()->setRenderingHint( osg::StateSet::TRANSPARENT_BIN );
-    m_output->getOrCreateStateSet()->setMode( GL_DEPTH_TEST, osg::StateAttribute::OFF );
+    m_output->getOrCreateStateSet()->setRenderBinDetails( 5001, "RenderBin" );
+//    m_output->getOrCreateStateSet()->setMode( GL_DEPTH_TEST, osg::StateAttribute::OFF );
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
     m_output->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     // m_output->getOrCreateStateSet()->setMode( GL_FRAMEBUFFER_SRGB_EXT, osg::StateAttribute::ON );
