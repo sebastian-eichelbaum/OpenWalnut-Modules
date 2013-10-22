@@ -85,6 +85,72 @@ vec4 hsv_to_rgb(float h, float s, float v, float a)
     return color;
 }
 
+vec4 hotIron( in float value )
+{
+    vec4 color8  = vec4( 255.0 / 255.0, 255.0 / 255.0, 204.0 / 255.0, 1.0 );
+    vec4 color7  = vec4( 255.0 / 255.0, 237.0 / 255.0, 160.0 / 255.0, 1.0 );
+    vec4 color6  = vec4( 254.0 / 255.0, 217.0 / 255.0, 118.0 / 255.0, 1.0 );
+    vec4 color5  = vec4( 254.0 / 255.0, 178.0 / 255.0,  76.0 / 255.0, 1.0 );
+    vec4 color4  = vec4( 253.0 / 255.0, 141.0 / 255.0,  60.0 / 255.0, 1.0 );
+    vec4 color3  = vec4( 252.0 / 255.0,  78.0 / 255.0,  42.0 / 255.0, 1.0 );
+    vec4 color2  = vec4( 227.0 / 255.0,  26.0 / 255.0,  28.0 / 255.0, 1.0 );
+    vec4 color1  = vec4( 189.0 / 255.0,   0.0 / 255.0,  38.0 / 255.0, 1.0 );
+    vec4 color0  = vec4( 128.0 / 255.0,   0.0 / 255.0,  38.0 / 255.0, 1.0 );
+
+    float colorValue = value * 8.0;
+    int sel = int( floor( colorValue ) );
+
+    if( sel >= 8 )
+    {
+        return color0;
+    }
+    else if( sel < 0 )
+    {
+        return color0;
+    }
+    else
+    {
+        colorValue -= float( sel );
+
+        if( sel < 1 )
+        {
+            return ( color1 * colorValue + color0 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 2 )
+        {
+            return ( color2 * colorValue + color1 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 3 )
+        {
+            return ( color3 * colorValue + color2 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 4 )
+        {
+            return ( color4 * colorValue + color3 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 5 )
+        {
+            return ( color5 * colorValue + color4 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 6 )
+        {
+            return ( color6 * colorValue + color5 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 7 )
+        {
+            return ( color7 * colorValue + color6 * ( 1.0 - colorValue ) );
+        }
+        else if( sel < 8 )
+        {
+            return ( color8 * colorValue + color7 * ( 1.0 - colorValue ) );
+        }
+        else
+        {
+            return color0;
+        }
+    }
+}
+
 void main()
 {
     // generally the area of a line stipple is a circle with radius R (each half for the endings of the line stipple) plus
@@ -129,12 +195,35 @@ void main()
     vec4 white = vec4( 1, 1, 1, 1 );
     vec4 black = vec4( 0, 0, 0, 1 );
 
+    // // opacity filtered color (default)
     vec4 c = u_color * pow( probability, 1.0 / (10.0 * u_colorThreshold) );
+
+    // pure color
+    // vec4 c = u_color;
+    // mod: dark stipples in bright regions, bright stipples in dark regions
+    // c.r = c.r - 0.1 + 0.1 * ( 1 - 2.0 * col );
+
+    // // Debug: hotIron colormapping of the probability.
+    // vec4 c = hotIron( 1.0 - probability );
+
+    // // Feature: enable this if you want fiber stipples color from separate texture (where 'col' variable is refferring to).
+    // vec4 c = hotIron( 1 - col );
+    //
+    // // if you want thresholding
+    // if( col < 0.51 )
+    //     c = vec4(0,0,0.8, 1 );
+    // else
+    //     c = hotIron( col * 2 - 1.0 );
+    // c.a = 0.2 + probability;
+
     // vec4 c = white;
+
     // vec4 c = black;
+
     // // Debug: random color
     // float r = rand( vec2( scaledFocalPoint1.xy ) );
     // vec4 c = hsv_to_rgb( r, 1, 1, 1 );
+
     if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < radius )
     {
         gl_FragColor = c;
@@ -167,9 +256,9 @@ void main()
         // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.010 ) ) { float gg = gray - 0.7; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.1 ); }
         // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.005 ) ) { float gg = gray - 0.9; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.0 ); }
 
-        if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) > ( radius + 0.040 ) ) { 
+        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) > ( radius + 0.040 ) ) { 
         discard;
-        }
+        // }
         // // Draw quad and inner cricle
         // gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
         // float lp = distance( gl_TexCoord[1].xyz, middlePoint_tex );

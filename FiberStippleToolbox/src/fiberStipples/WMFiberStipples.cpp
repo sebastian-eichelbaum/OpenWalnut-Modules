@@ -35,6 +35,7 @@
 
 #include <osg/Geometry>
 #include <osg/MatrixTransform>
+#include <osg/Depth>
 
 //#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 //#include <CGAL/Delaunay_triangulation_2.h>
@@ -91,6 +92,7 @@ void WMFiberStipples::connectors()
 {
     m_vectorIC = WModuleInputData< WDataSetVector >::createAndAdd( shared_from_this(), "vectors", "Principal diffusion direction." );
     m_probIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "probTract", "Probabilistic tract." );
+    m_colIC = WModuleInputData< WDataSetScalar >::createAndAdd( shared_from_this(), "col", "Col tract." );
 
     // call WModule's initialization
     WMAbstractSliceModule::connectors();
@@ -318,6 +320,9 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_output->getOrCreateStateSet()->setMode( GL_BLEND, osg::StateAttribute::ON );
     m_output->getOrCreateStateSet()->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
     // m_output->getOrCreateStateSet()->setMode( GL_FRAMEBUFFER_SRGB_EXT, osg::StateAttribute::ON );
+    osg::Depth* depth = new osg::Depth;
+    depth->setWriteMask( false );
+    m_output->getOrCreateStateSet()->setAttributeAndModes( depth, osg::StateAttribute::ON );
     m_output->insert( mT );
     m_output->dirtyBound();
 }
@@ -327,6 +332,7 @@ void WMFiberStipples::moduleMain()
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_probIC->getDataChangedCondition() );
+    m_moduleState.add( m_colIC->getDataChangedCondition() );
     m_moduleState.add( m_vectorIC->getDataChangedCondition() );
     m_moduleState.add( m_sliceIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
@@ -393,8 +399,9 @@ void WMFiberStipples::moduleMain()
         // save data behind connectors since it might change during processing
         boost::shared_ptr< WDataSetVector > vectors = m_vectorIC->getData();
         boost::shared_ptr< WDataSetScalar > probTract = m_probIC->getData();
+        boost::shared_ptr< WDataSetScalar > col = m_colIC->getData();
 
-        if( !( vectors && probTract ) || !boost::dynamic_pointer_cast< WGridRegular3D >( probTract->getGrid() ) ) // if data valid
+        if( !( vectors && probTract && col ) || !boost::dynamic_pointer_cast< WGridRegular3D >( probTract->getGrid() ) ) // if data valid
         {
             continue;
         }
@@ -404,6 +411,7 @@ void WMFiberStipples::moduleMain()
 
         wge::bindTexture( m_output, vectors->getTexture(), 0, "u_vectors" );
         wge::bindTexture( m_output, probTract->getTexture(), 1, "u_probTract" );
+        wge::bindTexture( m_output, col->getTexture(), 2, "u_col" );
     }
 
     m_output->clear();

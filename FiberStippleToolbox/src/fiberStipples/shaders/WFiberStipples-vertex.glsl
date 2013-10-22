@@ -26,6 +26,8 @@
 
 #include "WGETextureTools.glsl"
 #include "WFiberStipples-varyings.glsl"
+// #include "WGEColormapping-vertex.glsl"
+// #include "WGETransformationTools.glsl"
 
 /**
  * These two uniforms are needed to transform the vectors out of their texture
@@ -48,6 +50,8 @@ uniform sampler3D u_vectorsSampler;
  * Probabilistic tract as texture.
  */
 uniform sampler3D u_probTractSampler;
+
+uniform sampler3D u_colSampler;
 
 /**
  * Number of voxels in X direction.
@@ -150,6 +154,7 @@ void main()
 
     // get connectivity score from probTract (please not, it is already scaled between 0.0...1.0 from WDataTexture3D::createTexture
     probability = texture3D( u_probTractSampler, texturePosition ).r;
+    col  = texture3D( u_colSampler, texturePosition ).r;
 
     // span quad incase of regions with high probablility
     if( probability > u_threshold && ( u_minRange + probability ) * u_maxRange * u_numDensitySlices >= gl_TexCoord[2].x + gl_TexCoord[3].x )

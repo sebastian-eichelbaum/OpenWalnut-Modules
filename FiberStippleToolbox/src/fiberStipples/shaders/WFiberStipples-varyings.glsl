@@ -48,3 +48,5 @@ varying vec3 scaledFocalPoint2;
  * Scaled connectivity score; now between 0.0...1.0.
  */
 varying float probability;
+
+varying float col;

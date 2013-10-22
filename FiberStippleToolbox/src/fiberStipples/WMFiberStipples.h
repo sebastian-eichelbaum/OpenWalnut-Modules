@@ -115,6 +115,8 @@ private:
      */
     boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_probIC;
 
+    boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_colIC;
+
     /**
      * Input connector for the largest eigen vector dataset.
      */
