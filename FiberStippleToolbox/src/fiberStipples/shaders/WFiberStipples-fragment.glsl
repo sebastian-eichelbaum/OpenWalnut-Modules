@@ -87,6 +87,18 @@ vec4 hsv_to_rgb(float h, float s, float v, float a)
 
 vec4 hotIron( in float value )
 {
+    // // BLUE <-> RED
+    // vec4 color8  = vec4( 255.0 / 255.0, 255.0 / 255.0, 204.0 / 255.0, 1.0 );
+    // vec4 color7  = vec4( 255.0 / 255.0, 237.0 / 255.0, 160.0 / 255.0, 1.0 );
+    // vec4 color6  = vec4( 254.0 / 255.0, 217.0 / 255.0, 118.0 / 255.0, 1.0 );
+    // vec4 color5  = vec4( 254.0 / 255.0, 178.0 / 255.0,  76.0 / 255.0, 1.0 );
+    // vec4 color4  = vec4( 253.0 / 255.0, 141.0 / 255.0,  60.0 / 255.0, 1.0 );
+    // vec4 color3  = vec4( 252.0 / 255.0,  78.0 / 255.0,  42.0 / 255.0, 1.0 );
+    // vec4 color2  = vec4( 205.0 / 255.0, 000.0 / 255.0, 000.0 / 255.0, 1.0 );
+    // vec4 color1  = vec4( 180.0 / 255.0,  85.0 / 255.0, 255.0 / 255.0, 1.0 );
+    // vec4 color0  = vec4( 000.0 / 255.0, 150.0 / 255.0, 255.0 / 255.0, 1.0 );
+
+    // HOT IRON
     vec4 color8  = vec4( 255.0 / 255.0, 255.0 / 255.0, 204.0 / 255.0, 1.0 );
     vec4 color7  = vec4( 255.0 / 255.0, 237.0 / 255.0, 160.0 / 255.0, 1.0 );
     vec4 color6  = vec4( 254.0 / 255.0, 217.0 / 255.0, 118.0 / 255.0, 1.0 );
@@ -97,10 +109,18 @@ vec4 hotIron( in float value )
     vec4 color1  = vec4( 189.0 / 255.0,   0.0 / 255.0,  38.0 / 255.0, 1.0 );
     vec4 color0  = vec4( 128.0 / 255.0,   0.0 / 255.0,  38.0 / 255.0, 1.0 );
 
-    float colorValue = value * 8.0;
+    // In order to use a different color map use the colors in the BLUE <-> RED section above from color0 to colorN.
+    // Depending on how much colors you need, set then the colorNum to e.g. 2 when using only two colors.
+    //
+    // // HOT IRON
+    int colorNum = 8;
+    // // BLUE <-> RED
+    // int colorNum = 3;
+
+    float colorValue = value * float( colorNum );
     int sel = int( floor( colorValue ) );
 
-    if( sel >= 8 )
+    if( sel >= colorNum )
     {
         return color0;
     }
@@ -166,7 +186,7 @@ void main()
     float q = area / 3.14159265;
     float r1 = p2 + sqrt( p2 * p2 + q );
     float r2 = p2 - sqrt( p2 * p2 + q );
-    float radius = max( r1, r2 ) * u_glyphThickness;
+    float radius = max( r1, r2 ) * u_glyphThickness;// - 0.05;
 
     // // debug positions: This will draw only a circle if you want to see the positions. You need to disable all other stuff
     // vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
@@ -195,10 +215,10 @@ void main()
     vec4 white = vec4( 1, 1, 1, 1 );
     vec4 black = vec4( 0, 0, 0, 1 );
 
-    // // opacity filtered color (default)
+    // opacity filtered color (default)
     vec4 c = u_color * pow( probability, 1.0 / (10.0 * u_colorThreshold) );
 
-    // pure color
+    // // pure color
     // vec4 c = u_color;
     // mod: dark stipples in bright regions, bright stipples in dark regions
     // c.r = c.r - 0.1 + 0.1 * ( 1 - 2.0 * col );
@@ -206,9 +226,11 @@ void main()
     // // Debug: hotIron colormapping of the probability.
     // vec4 c = hotIron( 1.0 - probability );
 
-    // // Feature: enable this if you want fiber stipples color from separate texture (where 'col' variable is refferring to).
-    // vec4 c = hotIron( 1 - col );
-    //
+    // Feature: enable this if you want fiber stipples color from separate texture (where 'col' variable is refferring to).
+    // vec4 c = hotIron( col );
+    // // with opacity or with out
+    // c.a = probability;
+
     // // if you want thresholding
     // if( col < 0.51 )
     //     c = vec4(0,0,0.8, 1 );
@@ -231,34 +253,43 @@ void main()
     else
     {
         vec4 bordercolor = white;
+        bool outline = false;
+        // bool outline = true;
+        if( outline )
+        {
+            // Debug: Enable fade to black
+            float gray = 1.0;
+            float alpha = probability + 0.5;
+            float outlinedelta = 0.009;
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 8.0 * outlinedelta ) ) { float gg = gray - 0.9; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.7 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 7.0 * outlinedelta ) ) { float gg = gray - 0.7; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.6 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 6.0 * outlinedelta ) ) { float gg = gray - 0.5; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.5 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 5.0 * outlinedelta ) ) { float gg = gray - 0.4; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.4 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 4.0 * outlinedelta ) ) { float gg = gray - 0.3; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.3 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 3.0 * outlinedelta ) ) { float gg = gray - 0.2; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.2 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 2.0 * outlinedelta ) ) { float gg = gray - 0.1; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.1 ); }
+            if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.0 + 1.0 * outlinedelta ) ) { float gg = gray - 0.0; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.0 ); }
 
-        // // Debug: Enable fade to black
-        // float gray = 1.0;
-        // float alpha = probability + 0.5;
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.040 ) ) { float gg = gray - 0.9; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.7 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.035 ) ) { float gg = gray - 0.7; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.6 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.030 ) ) { float gg = gray - 0.5; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.5 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.025 ) ) { float gg = gray - 0.4; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.4 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.020 ) ) { float gg = gray - 0.3; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.3 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.015 ) ) { float gg = gray - 0.2; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.2 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.010 ) ) { float gg = gray - 0.1; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.1 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.005 ) ) { float gg = gray - 0.0; gl_FragColor = vec4( c * gg ) + vec4( 0,0,0, 0.0 ); }
+           // // Debug: Enable fade to black
+           // float gray = 1.0;
+           // float alpha = probability + 0.5;
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.040 ) ) { float gg = gray - 0.0; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.7 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.035 ) ) { float gg = gray - 0.1; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.6 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.030 ) ) { float gg = gray - 0.2; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.5 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.025 ) ) { float gg = gray - 0.3; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.4 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.020 ) ) { float gg = gray - 0.4; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.3 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.015 ) ) { float gg = gray - 0.5; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.2 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.010 ) ) { float gg = gray - 0.7; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.1 ); }
+           // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.005 ) ) { float gg = gray - 0.9; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.0 ); }
 
-        // // Debug: Enable fade to black
-        // float gray = 1.0;
-        // float alpha = probability + 0.5;
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.040 ) ) { float gg = gray - 0.0; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.7 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.035 ) ) { float gg = gray - 0.1; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.6 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.030 ) ) { float gg = gray - 0.2; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.5 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.025 ) ) { float gg = gray - 0.3; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.4 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.020 ) ) { float gg = gray - 0.4; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.3 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.015 ) ) { float gg = gray - 0.5; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.2 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.010 ) ) { float gg = gray - 0.7; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.1 ); }
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) < ( radius + 0.005 ) ) { float gg = gray - 0.9; gl_FragColor = vec4( white * gg ) + vec4( 0,0,0, 0.0 ); }
+           if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) > ( radius + 8 * outlinedelta ) ) { 
+               discard;
+           }
+        }
+        else {
+            discard;
+        }
 
-        // if( distancePointLineSegment( gl_TexCoord[1].xyz, scaledFocalPoint1, scaledFocalPoint2 ) > ( radius + 0.040 ) ) { 
-        discard;
-        // }
         // // Draw quad and inner cricle
         // gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0 );
         // float lp = distance( gl_TexCoord[1].xyz, middlePoint_tex );
