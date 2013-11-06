@@ -1,15 +1,17 @@
 #!/bin/bash
 
-PARAM1=$1
-PARAM2=$2
+INTERNAL_LIBDIR=$1
+INTERNAL_INCLUDEDIR=$2
 PARAM3=$3
-if [ "$PARAM1" -a "$PARAM2" ]; # Test for empty strings
+if [ "$INTERNAL_LIBDIR" -a "$INTERNAL_INCLUDEDIR" ]; # Test for empty strings
 then
-    echo OPENWALNUT_LIBDIR $PARAM1
-    echo OPENWALNUT_INCLUDE_DIR $PARAM2
+    echo OPENWALNUT_LIBDIR $INTERNAL_LIBDIR
+    echo OPENWALNUT_INCLUDEDIR $INTERNAL_INCLUDEDIR
     echo
 else
-    echo "Usage: makeAllToolboxes <OPENWALNUT_LIBDIR> <OPENWALNUT_INCLUDE_DIR> [number of threads]"
+    echo "Usage: makeAllToolboxes <OPENWALNUT_LIBDIR> <OPENWALNUT_INCLUDEDIR> [number of threads]"
+    echo "Example: ./makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/"
+    echo
     echo "Not enough parameters given, exiting."
     exit;
 fi
@@ -23,11 +25,14 @@ fi
 
 for i in $(ls */ -d);
 do
-    echo $i;
+    echo
+    echo "=========================================================="
+    echo "=== " $i
+    echo "=========================================================="
     cd $i
     mkdir -p build
     cd build
-    cmake -DOPENWALNUT_LIBDIR=$PARAM1 -DOPENWALNUT_INCLUDE_DIR=$PARAM2 ../src
-    make -j$PARAM3
+    echo "========== $(pwd)"
+    OPENWALNUT_LIBDIR=$INTERNAL_LIBDIR OPENWALNUT_INCLUDEDIR=$INTERNAL_INCLUDEDIR cmake ../src && make -j$PARAM3
     cd ../..
 done
