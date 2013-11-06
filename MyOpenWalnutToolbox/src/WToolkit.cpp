@@ -22,6 +22,10 @@
 //
 //---------------------------------------------------------------------------
 
+// This file's purpose is to provide a list of modules and additional extensions as entry point for OpenWalnut's module loader.
+// Both functAdd your modules here. If you miss this step, OpenWalnut will not be able to load your modules/extensions.
+
+
 #include <boost/shared_ptr.hpp>
 
 #include <core/kernel/WModule.h>
@@ -29,13 +33,38 @@
 #include "MyNewModule/WMMyNewModule.h"
 #include "AnotherModule/WMAnotherModule.h"
 
-#include "WToolkit.h"
+// #include "WToolkit.h"
 
-// This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
-// Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
+/**
+ * This function is called by OpenWalnut, when loading your library to learn about the modules you provide. The function is called with a given
+ * list reference, where you add all of your modules. Modules which are not registered this way, cannot be used in OpenWalnut. As this is called
+ * before loading any project file or running any module, it is ensured that you can rely on the modules provided here in your project files and
+ * other modules.
+ *
+ * \note this function is optional. You can remove it if you do not need it.
+ *
+ * \param m the list of modules. Add you module instances into this list.
+ */
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
     m.push_back( boost::shared_ptr< WModule >( new WMMyNewModule ) );
     m.push_back( boost::shared_ptr< WModule >( new WMAnotherModule ) );
+}
+
+/**
+ * This function is called by OpenWalnut, when loading your module to allow registration of additional classes and implementations that are not
+ * WModule classes. At this point, OW is completely initialized, thus allowing you to register nearly everything to the sub-systems supporting
+ * this. A typical example is the postprocessing meachnism in OpenWalnut. It allows you to register your own postprocessors easily. As this
+ * function is called on start-up, before loading project files, you can rely on additional functionality in your project files and modules.
+ *
+ * \note this function is optional. You can remove it if you do not need it.
+ *
+ * \param localPath this is the path to the toolkit. Our build system ensures, that your resources and shaders get placed there.
+ */
+extern "C" void WRegisterArbitrary( const boost::filesystem::path& localPath )
+{
+    // Example for registering your own postprocessor:
+    // WGEPostprocessor::addPostprocessor( WGEPostprocessor::SPtr( new MyStylishPostprocessing( localPath ) ) );
+    wlog::info( "MyModuleToolbox - Arbitrary Extension" ) << "My resource path is: " << localPath.string();
 }
 

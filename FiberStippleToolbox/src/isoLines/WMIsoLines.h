@@ -27,18 +27,16 @@
 
 #include <string>
 
-#include "core/kernel/WModule.h"
+#include "../WMAbstractSliceModule.h"
 
 // forward declarations to reduce compile dependencies
-template< class T > class WModuleInputData;
 class WDataSetScalar;
-class WGEManagedGroupNode;
 
 /**
  * Computes contour lines (aka isolines) for the given data and render them on a 2D plane.
  * \ingroup modules
  */
-class WMIsoLines: public WModule
+class WMIsoLines: public WMAbstractSliceModule
 {
 public:
     /**
@@ -94,19 +92,15 @@ protected:
      */
     virtual void properties();
 
-    /**
-     * Initialize requirements for this module.
-     */
-    virtual void requirements();
-
 private:
     /**
      * Initialize OSG root node for this module. All other nodes from this module should be attached to this root node.
      *
      * \param scalars The scalar data with grid giving bounding box and other information.
      * \param resolution The size of the quads used for generating line stipples.
+     * \param axis The axis selecting the slice (axial, sagittal or coronal).
      */
-    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution );
+    void initOSG( boost::shared_ptr< WDataSetScalar > scalars, const double resolution, size_t axis );
 
     /**
      * Input connector for scalar data.
@@ -114,19 +108,9 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetScalar > > m_scalarIC;
 
     /**
-     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
-     */
-    osg::ref_ptr< WGEManagedGroupNode > m_output;
-
-    /**
      * The isovalue for the countour lines.
      */
     WPropDouble m_isovalue;
-
-    /**
-     * The position of the slice.
-     */
-    WPropDouble m_Pos;
 
     /**
      * Color for the isoline.
@@ -144,9 +128,9 @@ private:
     WPropDouble m_lineWidth;
 
     /**
-     * Needed for recreating the geometry, incase when resolution changes.
+     * Controlls if the initial state. E.g. slice position.
      */
-    boost::shared_ptr< WCondition > m_propCondition;
+    bool m_first;
 };
 
 #endif  // WMISOLINES_H

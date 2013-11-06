@@ -173,6 +173,17 @@ private:
      * is ready to use.
      */
     bool m_newPlaneColors;
+
+    /**
+     * Generates a plane subdivided into quads.
+     *
+     * \param resX How many quads in x-direction
+     * \param resY How many quads in y-direction
+     * \param spacing Not implement yet
+     *
+     * \return The new uncolored plane geode
+     */
+    osg::ref_ptr< WGESubdividedPlane > genUnitSubdividedPlane( size_t resX, size_t resY, double spacing = 0.01 );
 };
 
 #endif  // WMGPVIEW_H

@@ -26,6 +26,8 @@
 #include <vector>
 #include <utility>
 
+#include <osg/LineWidth>
+
 #include "core/common/math/linearAlgebra/WPosition.h"
 #include "core/common/math/linearAlgebra/WVectorFixed.h"
 #include "core/common/WAssert.h"
@@ -138,7 +140,7 @@ void WMLineGuidedSlice::updateCenterLine()
     if( m_centerLine )
     {
         debugLog() << "Draw center line representation." << pathLength( *m_centerLine );
-        m_centerLineGeode = wge::generateLineStripGeode( *m_centerLine, 2.f );
+        m_centerLineGeode = generateLineStripGeode( *m_centerLine, 2.f );
     }
     else
     {
@@ -262,3 +264,43 @@ void WMLineGuidedSlice::updateGeometry()
     slock.unlock();
 }
 
+osg::ref_ptr< osg::Geode > WMLineGuidedSlice::generateLineStripGeode( const WLine& line, const float thickness, const WColor& color )
+{
+    using osg::ref_ptr;
+    ref_ptr< osg::Vec3Array > vertices = ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
+    ref_ptr< osg::Vec4Array > colors   = ref_ptr< osg::Vec4Array >( new osg::Vec4Array );
+    ref_ptr< osg::Geometry >  geometry = ref_ptr< osg::Geometry >( new osg::Geometry );
+
+    for( size_t i = 1; i < line.size(); ++i )
+    {
+        vertices->push_back( osg::Vec3( line[i-1][0], line[i-1][1], line[i-1][2] ) );
+        colors->push_back( wge::getRGBAColorFromDirection( line[i-1], line[i] ) );
+    }
+    vertices->push_back( osg::Vec3( line.back()[0], line.back()[1], line.back()[2] ) );
+    colors->push_back( colors->back() );
+
+    geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::LINE_STRIP, 0, line.size() ) );
+    geometry->setVertexArray( vertices );
+
+    if( color != WColor( 0, 0, 0, 0 ) )
+    {
+        colors->clear();
+        colors->push_back( color );
+        geometry->setColorArray( colors );
+        geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+    }
+    else
+    {
+        geometry->setColorArray( colors );
+        geometry->setColorBinding( osg::Geometry::BIND_PER_VERTEX );    // This will not work on OSG 3.2 you should compute the color per vertex
+    }
+
+    // line width
+    osg::StateSet* stateset = geometry->getOrCreateStateSet();
+    stateset->setAttributeAndModes( new osg::LineWidth( thickness ), osg::StateAttribute::ON );
+    stateset->setMode( GL_LIGHTING, osg::StateAttribute::OFF );
+
+    osg::ref_ptr< osg::Geode > geode = osg::ref_ptr< osg::Geode >( new osg::Geode );
+    geode->addDrawable( geometry );
+    return geode;
+}

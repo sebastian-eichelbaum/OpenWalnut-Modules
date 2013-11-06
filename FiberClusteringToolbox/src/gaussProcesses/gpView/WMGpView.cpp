@@ -89,7 +89,7 @@ void WMGpView::moduleMain()
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
     debugLog() << "Insert quad-plane";
     m_rootNode->clear();
-    m_planeNode = wge::genUnitSubdividedPlane( 100, 100, 0.01 );
+    m_planeNode = genUnitSubdividedPlane( 100, 100, 0.01 );
     m_planeNode->addUpdateCallback( new WGEFunctorCallback< osg::Node >( boost::bind( &WMGpView::updatePlaneColors, this, _1 ) ) );
     m_rootNode->insert( m_planeNode );
 
@@ -167,4 +167,56 @@ void WMGpView::updatePlaneColors( osg::Node* node )
         m_newColors = osg::ref_ptr< osg::Vec4Array >( new osg::Vec4Array );
         m_newPlaneColors = false;
     }
+}
+
+osg::ref_ptr< WGESubdividedPlane > WMGpView::genUnitSubdividedPlane( size_t resX, size_t resY, double spacing )
+{
+    WAssert( resX > 0 && resY > 0, "A Plane with no quad is not supported, use another datatype for that!" );
+    double dx = ( resX > 1 ? 1.0 / ( resX - 1 ) : 1.0 );
+    double dy = ( resY > 1 ? 1.0 / ( resY - 1 ) : 1.0 );
+
+    size_t numQuads = resX * resY;
+
+    using osg::ref_ptr;
+    ref_ptr< osg::Vec3Array > vertices = ref_ptr< osg::Vec3Array >( new osg::Vec3Array( numQuads * 4 ) );
+    ref_ptr< osg::Vec3Array > centers = ref_ptr< osg::Vec3Array >( new osg::Vec3Array( numQuads ) );
+    ref_ptr< osg::Vec4Array > colors   = ref_ptr< osg::Vec4Array >( new osg::Vec4Array( numQuads ) );
+
+    for( size_t yQuad = 0; yQuad < resY; ++yQuad )
+    {
+        for( size_t xQuad = 0; xQuad < resX; ++xQuad )
+        {
+            size_t qIndex = yQuad * resX + xQuad;
+            size_t vIndex = qIndex * 4; // since there are 4 corners
+            vertices->at( vIndex     ) = osg::Vec3( xQuad * dx + spacing,      yQuad * dy + spacing,      0.0 );
+            vertices->at( vIndex + 1 ) = osg::Vec3( xQuad * dx + dx - spacing, yQuad * dy + spacing,      0.0 );
+            vertices->at( vIndex + 2 ) = osg::Vec3( xQuad * dx + dx - spacing, yQuad * dy + dy - spacing, 0.0 );
+            vertices->at( vIndex + 3 ) = osg::Vec3( xQuad * dx + spacing,      yQuad * dy + dy - spacing, 0.0 );
+            centers->at( qIndex ) = osg::Vec3( xQuad * dx + dx / 2.0, yQuad * dy + dy / 2.0, 0.0 );
+            colors->at( qIndex ) = osg::Vec4( 0.1 +  static_cast< double >( qIndex ) / numQuads * 0.6,
+                                              0.1 +  static_cast< double >( qIndex ) / numQuads * 0.6,
+                                              1.0, 1.0 );
+        }
+    }
+
+    ref_ptr< osg::Geometry >  geometry = ref_ptr< osg::Geometry >( new osg::Geometry );
+    geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
+    geometry->setVertexArray( vertices );
+    geometry->setColorArray( colors );
+    geometry->setColorBinding( osg::Geometry::BIND_PER_PRIMITIVE ); // this will not compile on OSG 3.2
+
+    ref_ptr< osg::Vec3Array > normals = ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
+    normals->push_back( osg::Vec3( 0.0, 0.0, 1.0 ) );
+    geometry->setNormalArray( normals );
+    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
+    osg::ref_ptr< WGESubdividedPlane > geode = osg::ref_ptr< WGESubdividedPlane >( new WGESubdividedPlane );
+    geode->addDrawable( geometry );
+    geode->setCenterArray( centers );
+
+    // we need to disable light, since the order of the vertices may be wrong and with lighting you won't see anything but black surfaces
+    osg::StateSet* state = geode->getOrCreateStateSet();
+    state->setMode( GL_BLEND, osg::StateAttribute::ON );
+    state->setMode( GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED );
+
+    return geode;
 }

@@ -26,6 +26,7 @@
 
 #include <core/kernel/WModule.h>
 
+#include "aaSlices/WMAASlices.h"
 #include "fiberStipples/WMFiberStipples.h"
 #include "isoLines/WMIsoLines.h"
 #include "WToolkit.h"
@@ -36,5 +37,6 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
     m.push_back( boost::shared_ptr< WModule >( new WMIsoLines ) );
     m.push_back( boost::shared_ptr< WModule >( new WMFiberStipples ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMAASlices ) );
 }
 
