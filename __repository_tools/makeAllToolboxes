@@ -11,7 +11,7 @@ then
     echo
 else
     echo "Usage: makeAllToolboxes <OPENWALNUT_LIBDIR> <OPENWALNUT_INCLUDEDIR> [number of threads]"
-    echo "Example: ./makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/"
+    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/"
     echo
     echo "Not enough parameters given, exiting."
     exit;
