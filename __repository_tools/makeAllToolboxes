@@ -28,7 +28,7 @@ fi
 INTERNAL_LIBDIR=`cd "$INTERNAL_LIBDIR"; pwd`
 INTERNAL_INCLUDEDIR=`cd "$INTERNAL_INCLUDEDIR"; pwd`
 
-for i in $(ls */ -d);
+for i in $(ls */ -d|fgrep -v "__");
 do
     echo
     echo "=========================================================="
