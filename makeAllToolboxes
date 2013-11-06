@@ -2,6 +2,8 @@
 
 INTERNAL_LIBDIR=$1
 INTERNAL_INCLUDEDIR=$2
+INTERNAL_LIBDIR=`cd "$INTERNAL_LIBDIR"; pwd`
+INTERNAL_INCLUDEDIR=`cd "$INTERNAL_INCLUDEDIR"; pwd`
 PARAM3=$3
 if [ "$INTERNAL_LIBDIR" -a "$INTERNAL_INCLUDEDIR" ]; # Test for empty strings
 then
@@ -30,9 +32,9 @@ do
     echo "=== " $i
     echo "=========================================================="
     cd $i
+    
     mkdir -p build
     cd build
-    echo "========== $(pwd)"
-    OPENWALNUT_LIBDIR=$INTERNAL_LIBDIR OPENWALNUT_INCLUDEDIR=$INTERNAL_INCLUDEDIR cmake ../src && make -j$PARAM3
+    OPENWALNUT_LIBDIR="$INTERNAL_LIBDIR" OPENWALNUT_INCLUDEDIR="$INTERNAL_INCLUDEDIR" cmake ../src && make -j$PARAM3
     cd ../..
 done
