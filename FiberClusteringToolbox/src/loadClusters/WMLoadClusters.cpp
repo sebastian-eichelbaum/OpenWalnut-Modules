@@ -41,11 +41,6 @@ boost::shared_ptr< WModule > WMLoadClusters::factory() const
     return boost::shared_ptr< WModule >( new WMLoadClusters );
 }
 
-const char** WMLoadClusters::getXPMIcon() const
-{
-    return NULL;
-}
-
 const std::string WMLoadClusters::getDescription() const
 {
     return "Loads fiber clusters from a file.";

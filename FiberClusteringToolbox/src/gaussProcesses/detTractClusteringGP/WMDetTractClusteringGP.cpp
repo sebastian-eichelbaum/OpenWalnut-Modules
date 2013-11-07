@@ -47,10 +47,6 @@ boost::shared_ptr< WModule > WMDetTractClusteringGP::factory() const
     return boost::shared_ptr< WModule >( new WMDetTractClusteringGP() );
 }
 
-const char** WMDetTractClusteringGP::getXPMIcon() const
-{
-    return NULL; // Please put a real icon here.
-}
 const std::string WMDetTractClusteringGP::getName() const
 {
     return "Deterministic Tract Clustering using Gaussian Proccesses";

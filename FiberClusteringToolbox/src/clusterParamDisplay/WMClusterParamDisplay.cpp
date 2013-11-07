@@ -28,9 +28,6 @@
 #include "core/common/WColor.h"
 #include "core/kernel/WModuleFactory.h"
 #include "WMClusterParamDisplay.h"
-#include "WMClusterParamDisplay.xpm"
-
-// This line is needed by the module loader to actually find your module.
 
 WMClusterParamDisplay::WMClusterParamDisplay()
     : WModuleContainer( "Cluster Param Display", "Displays various parameters on a cluster surface." )
@@ -44,11 +41,6 @@ WMClusterParamDisplay::~WMClusterParamDisplay()
 boost::shared_ptr< WModule > WMClusterParamDisplay::factory() const
 {
     return boost::shared_ptr< WModule >( new WMClusterParamDisplay() );
-}
-
-const char** WMClusterParamDisplay::getXPMIcon() const
-{
-    return clusterParamDisplay_xpm;
 }
 
 void WMClusterParamDisplay::connectors()

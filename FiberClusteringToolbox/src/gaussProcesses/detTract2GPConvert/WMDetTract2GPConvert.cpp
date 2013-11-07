@@ -25,7 +25,6 @@
 #include <string>
 
 #include "core/kernel/WKernel.h"
-#include "WMDetTract2GPConvert.xpm"
 #include "WMDetTract2GPConvert.h"
 
 WMDetTract2GPConvert::WMDetTract2GPConvert():
@@ -42,10 +41,6 @@ boost::shared_ptr< WModule > WMDetTract2GPConvert::factory() const
     return boost::shared_ptr< WModule >( new WMDetTract2GPConvert() );
 }
 
-const char** WMDetTract2GPConvert::getXPMIcon() const
-{
-    return WMDetTract2GPConvert_xpm;
-}
 const std::string WMDetTract2GPConvert::getName() const
 {
     return "Deterministic Tract to Gaussian Process Converter";

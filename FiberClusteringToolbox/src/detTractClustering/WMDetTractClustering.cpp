@@ -51,7 +51,6 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/kernel/WKernel.h"
 #include "WMDetTractClustering.h"
-#include "WMDetTractClustering.xpm"
 
 #ifdef CUDA_FOUND
 #include "WMDetTractClusteringCudaInterface.h"
@@ -75,11 +74,6 @@ WMDetTractClustering::~WMDetTractClustering()
 boost::shared_ptr< WModule > WMDetTractClustering::factory() const
 {
     return boost::shared_ptr< WModule >( new WMDetTractClustering() );
-}
-
-const char** WMDetTractClustering::getXPMIcon() const
-{
-    return detTractClustering_xpm;
 }
 
 void WMDetTractClustering::moduleMain()

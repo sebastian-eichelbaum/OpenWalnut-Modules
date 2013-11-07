@@ -35,7 +35,6 @@
 #include "WLengthCulling.h"
 #include "WZhangThresholdCulling.h"
 #include "WMDetTractCulling.h"
-#include "WMDetTractCulling.xpm"
 
 WMDetTractCulling::WMDetTractCulling()
     : WModule(),
@@ -53,11 +52,6 @@ WMDetTractCulling::~WMDetTractCulling()
 boost::shared_ptr< WModule > WMDetTractCulling::factory() const
 {
     return boost::shared_ptr< WModule >( new WMDetTractCulling() );
-}
-
-const char** WMDetTractCulling::getXPMIcon() const
-{
-    return detTractCulling_xpm;
 }
 
 void WMDetTractCulling::moduleMain()

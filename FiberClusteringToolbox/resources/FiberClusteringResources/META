@@ -22,6 +22,242 @@
 //
 //---------------------------------------------------------------------------
 
+"Load clusters"
+{
+  icon="WMLoadClusters.png";
+
+  description = "Load fiber clusters from file";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "load";
+  tag = "cluster";
+  tag = "tracts";
+};
+
+"Write clusters"
+{
+  icon="WMWriteClusters.png";
+
+  description = "Write fiber clusters to file";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "save";
+  tag = "cluster";
+  tag = "tracts";
+};
+
+"Gaussian Process Viewer"
+{
+  icon="WMGpView.png";
+
+  description = "Visualize gaussian process representation of fibers using a cutting plane";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "Gaussian process viewer";
+};
+
+
+"Deterministic Tract Culling"
+{
+  icon="WMDetTractCulling.png";
+
+  description = "Remove fibers based on various measures";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "fiber culling";
+};
+
+
+"Deterministic Tract Clustering using Gaussian Proccesses"
+{
+  icon="WMDetTractClusteringGP.png";
+
+  description = "Clustering deterministic tracts using Gaussian Processes method";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "deterministic tract clustering";
+};
+
+"Deterministic Tract Clustering"
+{
+  icon="WMDetTractClustering.png";
+
+  description = "Clustering deterministic tracts using Zhang distance method";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "deterministic tract clustering";
+};
+
+
+"Cluster Slicer"
+{
+  icon="WMClusterSlicer.png";
+
+  description = "Slicing a volumetric fiber cluster";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "cluster slice";
+  tag = "cluster parameter";
+};
+
+
+"Cluster Param Display"
+{
+  icon="WMClusterParamDisplay.png";
+
+  description = "This module renders a single fiber cluster, given as a bunch of fibers and computes an isosurface around which is colored with an given parameter";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "Cluster parameter";
+  tag = "Bundle parameter";
+};
+
+"Deterministic Tract to Gaussian Process Converter"
+{
+  icon=".png";
+
+  description = "";
+
+  author = "Mathias Goldau";
+
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "";
+  tag = "";
+};
+
 "Direction Histogram"
 {
   icon="WMDirectionHistogram.png";

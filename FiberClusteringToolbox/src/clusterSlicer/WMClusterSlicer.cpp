@@ -48,7 +48,6 @@
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/kernel/WKernel.h"
 #include "WMClusterSlicer.h"
-#include "WMClusterSlicer.xpm"
 
 // This line is needed by the module loader to actually find your module.
 
@@ -68,11 +67,6 @@ WMClusterSlicer::~WMClusterSlicer()
 boost::shared_ptr< WModule > WMClusterSlicer::factory() const
 {
     return boost::shared_ptr< WModule >( new WMClusterSlicer() );
-}
-
-const char** WMClusterSlicer::getXPMIcon() const
-{
-    return clusterSlicer_xpm;
 }
 
 const std::string WMClusterSlicer::getName() const

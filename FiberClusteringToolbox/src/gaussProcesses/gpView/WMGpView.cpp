@@ -47,10 +47,6 @@ boost::shared_ptr< WModule > WMGpView::factory() const
     return boost::shared_ptr< WModule >( new WMGpView() );
 }
 
-const char** WMGpView::getXPMIcon() const
-{
-    return NULL; // Please put a real icon here.
-}
 const std::string WMGpView::getName() const
 {
     return "Gaussian Process Viewer";

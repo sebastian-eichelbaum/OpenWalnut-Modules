@@ -41,11 +41,6 @@ boost::shared_ptr< WModule > WMWriteClusters::factory() const
     return boost::shared_ptr< WModule >( new WMWriteClusters );
 }
 
-const char** WMWriteClusters::getXPMIcon() const
-{
-    return NULL;
-}
-
 const std::string WMWriteClusters::getDescription() const
 {
     return "Saves fiber cluster data to a file.";
