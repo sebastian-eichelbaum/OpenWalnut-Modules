@@ -1,0 +1,43 @@
+#!/bin/bash
+
+INTERNAL_LIBDIR=$1
+INTERNAL_INCLUDEDIR=$2
+echo 
+PARAM3=$3
+if [ "$INTERNAL_LIBDIR" -a "$INTERNAL_INCLUDEDIR" ]; # Test for empty strings
+then
+    echo OPENWALNUT_LIBDIR $INTERNAL_LIBDIR
+    echo OPENWALNUT_INCLUDEDIR $INTERNAL_INCLUDEDIR
+    echo
+else
+    echo "Usage: makeAllToolboxes <OPENWALNUT_LIBDIR> <OPENWALNUT_INCLUDEDIR> [number of threads]"
+    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/"
+    echo
+    echo "Not enough parameters given, exiting."
+    exit;
+fi
+
+if [ "$PARAM3" ];
+then
+  echo Parallel compilation: $PARAM3
+else
+  PARAM3=1
+fi
+
+# Make relative paths absolute
+INTERNAL_LIBDIR=`cd "$INTERNAL_LIBDIR"; pwd`
+INTERNAL_INCLUDEDIR=`cd "$INTERNAL_INCLUDEDIR"; pwd`
+
+for i in $(ls */ -d|fgrep -v "__");
+do
+    echo
+    echo "=========================================================="
+    echo "=== " $i
+    echo "=========================================================="
+    cd $i
+    
+    mkdir -p build
+    cd build
+    OPENWALNUT_LIBDIR="$INTERNAL_LIBDIR" OPENWALNUT_INCLUDEDIR="$INTERNAL_INCLUDEDIR" cmake ../src && make -j$PARAM3
+    cd ../..
+done

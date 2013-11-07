@@ -1,0 +1,24 @@
+#!/bin/bash
+echo "count of changed lines per weekday"
+hg churn -f '%u-%a' -s
+echo "==============================================================="
+echo "count of commits per weekday"
+hg churn -f '%u-%a' -s -c
+echo "==============================================================="
+echo "count of changed lines per month"
+hg churn -f '%Y-%m' -s
+echo "==============================================================="
+echo "count of commits per month"
+hg churn -f '%Y-%m' -s -c
+echo "==============================================================="
+echo "count of changed lines per hour"
+hg churn -f '%H' -s
+echo "==============================================================="
+echo "count of commits per hour"
+hg churn -f '%H' -s -c
+echo "==============================================================="
+echo "count of changed lines for every committer"
+hg churn
+echo "==============================================================="
+echo "count of commits for every committer"
+hg churn -c
