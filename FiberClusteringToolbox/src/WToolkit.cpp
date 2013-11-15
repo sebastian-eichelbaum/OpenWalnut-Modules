@@ -32,6 +32,7 @@
 #include "detTractCulling/WMDetTractCulling.h"
 #include "directionHistogram/WMDirectionHistogram.h"
 #include "edgeBundling/WMEdgeBundling.h"
+#include "fiberColoring/WMFiberColoring.h"
 #include "gaussProcesses/detTract2GPConvert/WMDetTract2GPConvert.h"
 #include "gaussProcesses/detTractClusteringGP/WMDetTractClusteringGP.h"
 #include "gaussProcesses/gpView/WMGpView.h"
@@ -51,6 +52,7 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
     m.push_back( WModule::SPtr( new WMDetTractCulling ) );
     m.push_back( WModule::SPtr( new WMDirectionHistogram ) );
     m.push_back( WModule::SPtr( new WMEdgeBundling ) );
+    m.push_back( WModule::SPtr( new WMFiberColoring ) );
     m.push_back( WModule::SPtr( new WMGpView ) );
     m.push_back( WModule::SPtr( new WMLoadClusters ) );
     m.push_back( WModule::SPtr( new WMWriteClusters ) );
