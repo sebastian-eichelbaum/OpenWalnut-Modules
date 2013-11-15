@@ -78,7 +78,9 @@ void WMDetTract2GPConvert::moduleMain()
     {
         debugLog() << "Waiting..";
         m_moduleState.wait();
-        if( !m_tractIC->getData().get() || !m_tensorIC->getData().get() ) // ok, the output has not yet sent data
+        // Demain Wasserman said, using tensors is not realy worth its effort
+        // if( !m_tractIC->getData().get() || !m_tensorIC->getData().get() ) // ok, the output has not yet sent data
+        if( !m_tractIC->getData().get() ) // ok, the output has not yet sent data
         {
             continue;
         }
@@ -86,7 +88,9 @@ void WMDetTract2GPConvert::moduleMain()
         // bool dataUpdated = m_tractIC->handledUpdate() || m_tensorIC->handledUpdate();
         boost::shared_ptr< WDataSetFibers > tracts = m_tractIC->getData();
         boost::shared_ptr< WDataSetDTI > tensors = m_tensorIC->getData();
-        bool dataValid = tracts && tensors;
+        // Demain Wasserman said, using tensors is not realy worth its effort
+        // bool dataValid = tracts && tensors;
+        bool dataValid = tracts;
         if( !dataValid )
         {
             continue;
