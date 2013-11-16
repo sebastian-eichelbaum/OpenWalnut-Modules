@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#include <vector>
 #include <fstream>
+#include <vector>
 
 #include <boost/lexical_cast.hpp>
 
@@ -34,7 +34,7 @@
 WSimilarityColoring::WSimilarityColoring()
     : WObjectNDIP< WColoring_I >( "Similarity Coloring", "Color codes the similarity based on 2D embedding" )
 {
-    m_filename = m_properties->addProperty( "Filename", "Filename where to write the NIfTI file to.",
+    m_filename = m_properties->addProperty( "Filename", "Filename where to read the positions from.",
                                              WPathHelper::getAppPath() );
     WPropertyHelper::PC_PATHEXISTS::addTo( m_filename );
     m_loadTrigger = m_properties->addProperty( "Read fiber Positions",  "Read!", WPVBaseTypes::PV_TRIGGER_READY );
