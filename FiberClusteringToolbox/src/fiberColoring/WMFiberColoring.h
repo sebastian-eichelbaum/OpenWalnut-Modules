@@ -38,8 +38,10 @@ template< class T > class WModuleOutputData;
 class WDataSetFibers;
 class WDataSetScalar;
 
-
-// \ingroup modules
+/**
+ * Will add several colorschemes to the given fiber dataset.
+ * \ingroup modules
+ */
 class WMFiberColoring: public WModule
 {
 public:

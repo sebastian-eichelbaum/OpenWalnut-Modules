@@ -22,6 +22,30 @@
 //
 //---------------------------------------------------------------------------
 
+"Matrix Writer"
+{
+  icon="WMMatrixWriter.png";
+  description = "Writes a symmetric matrix to file";
+  author = "Mathias Goldau"
+  "Mathias Goldau"
+  {
+    url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";
+    email="math@informatik.uni-leipzig.de";
+    what="Design, Development and Bug fixing";
+  };
+
+  "OpenWalnut Project"
+  {
+    url="http://www.openwalnut.org";
+    email="contact@openwalnut.org";
+    what="Design, Development and Bug fixing";
+  };
+
+  tag = "write";
+  tag = "matrix";
+  tag = "similarites";
+};
+
 "Load clusters"
 {
   icon="WMLoadClusters.png";
