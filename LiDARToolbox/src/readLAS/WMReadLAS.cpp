@@ -42,16 +42,17 @@
 #include "core/kernel/WModuleInputData.h"
 #include "WMReadLAS.xpm"
 #include "WMReadLAS.h"
-#include "WLasTool.h"
+#include "WLasReader.h"
 
 // This line is needed by the module loader to actually find your module.
 //W_LOADABLE_MODULE( WMReadLAS )
+//TODO(aschwarzkopf): Reenable above after solving the toolbox problem
 
 WMReadLAS::WMReadLAS():
     WModule(),
     m_propCondition( new WCondition() )
 {
-    reader = laslibb::WLasTool( m_progress );
+    reader = laslibb::WLasReader( m_progress );
 }
 
 WMReadLAS::~WMReadLAS()
@@ -69,7 +70,7 @@ const char** WMReadLAS::getXPMIcon() const
 }
 const std::string WMReadLAS::getName() const
 {
-    return "[ALPHA] Read LAS";
+    return "Read LAS";
 }
 
 const std::string WMReadLAS::getDescription() const
@@ -81,7 +82,7 @@ void WMReadLAS::connectors()
 {
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
-                		shared_from_this(), "points", "The loaded points." ) );
+                        shared_from_this(), "points", "The loaded points." ) );
 
     addConnector( m_output );
     WModule::connectors();
@@ -90,12 +91,10 @@ void WMReadLAS::connectors()
 void WMReadLAS::properties()
 {
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-    m_cutoffThreshold = m_properties->addProperty( "Cutoff threshold: ",
-                        "Value that will be replaced with a dummy value.", 100, m_propCondition );
-    m_cutoffThreshold->setMin( 0 );
-    m_cutoffThreshold->setMax( 100 );
-    m_cutoffThresholdCount = m_properties->addProperty( "cutoff; kept voxels: ", "voxel count.", std::string( "--; --" ) );
-    m_cutoffThresholdCount->setPurpose( PV_PURPOSE_INFORMATION );
+    m_lasFile = m_properties->addProperty( "LiDAR file", "", WPathHelper::getAppPath() );
+    WPropertyHelper::PC_PATHEXISTS::addTo( m_lasFile );
+    m_readTriggerProp = m_properties->addProperty( "Do read",
+            "Press!", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
     WModule::properties();
 }
 
@@ -125,13 +124,21 @@ void WMReadLAS::moduleMain()
         //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
-        boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints();
+
+        m_readTriggerProp->set( WPVBaseTypes::PV_TRIGGER_READY, false );
+        const char* path = m_lasFile->get().c_str();
+//        const char* path = "/home/renegade/Dokumente/media/Dropbox/LiDAR2008/tiles/las/"
+//                "316000_233500.las";
+        boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints(
+                path );
         WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
         WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
-        m_output->updateData( tmpPointSet );
         std::cout << "placing " << points->size() << " point things\r\n";
         std::cout << "placing " << colors->size() << " color things\r\n";
         std::cout << "LAS read";
+        m_output->updateData( tmpPointSet );
+        // ready to be triggered again
+        m_readTriggerProp->set( WPVBaseTypes::PV_TRIGGER_READY, true );
 
         // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )

@@ -37,7 +37,7 @@ export OPENWALNUT_LIBDIR="./../OpenWalnut/build/lib/"
 export OPENWALNUT_INCLUDEDIR="./../OpenWalnut/src/"
 cd LiDARToolbox/build
 cmake ../src
-make -j8
+make -j4
 
 
 echo 

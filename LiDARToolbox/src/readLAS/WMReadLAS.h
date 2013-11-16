@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMLASREAD_H
-#define WMLASREAD_H
+#ifndef WMREADLAS_H
+#define WMREADLAS_H
 
 
 #include <liblas/liblas.hpp>
@@ -36,7 +36,6 @@
 
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/graphicsEngine/shaders/WGEShader.h"
-#include "core/kernel/WModule.h"
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
@@ -65,7 +64,7 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
-#include "WLasTool.h"
+#include "WLasReader.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -125,22 +124,29 @@ private:
     /**Shader unit for drawing. */
     WGEShader::RefPtr m_shader;
 
-    /**Below that ISO value vertices should be count off */
-    WPropInt      m_cutoffThreshold;
-
-    /**Voxel count that is cut off and kept regarding the ISO value. */
-    WPropString   m_cutoffThresholdCount;
-
     /**Instance for applying drawable geoms. */
     osg::ref_ptr< osg::Geode > m_geode;
 
+    /**
+     * Path of the LiDAR input file (www.liblas.org)
+     */
+    WPropFilename m_lasFile; //!< The mesh will be read from this file.
+    /**
+     * Executes the file load
+     */
+    WPropTrigger  m_readTriggerProp; //!< This property triggers the actual reading,
 
 
-    /**Drawing color. */
+
+    /**
+     * Drawing color.
+     */
     WPropColor m_aColor;
 
-
-    laslibb::WLasTool reader;
+    /**
+     * Instance that puts out a WDataSetPoints of a LiDAR file (see www.liblas.org).
+     */
+    laslibb::WLasReader reader;
 };
 
-#endif  // WMLASREAD_H
+#endif  // WMREADLAS_H
