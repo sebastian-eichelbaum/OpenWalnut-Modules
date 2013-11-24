@@ -113,6 +113,11 @@ protected:
     virtual void requirements();
 
 private:
+    /**
+     * Refreshs the minimal and maximal values of the scrollbars
+     */
+    void refreshScrollBars();
+
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;  //!< Output connector provided by this module.
 
     /**The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.*/
@@ -132,16 +137,22 @@ private:
      */
     WPropFilename m_lasFile; //!< The mesh will be read from this file.
     /**
-     * Executes the file load
+     * The maximal width of the output data.
      */
-    WPropTrigger  m_readTriggerProp; //!< This property triggers the actual reading,
-
-
-
+    WPropInt m_outputDataWidth;
     /**
-     * Drawing color.
+     * Scrollbar that changes the minimal output X value
      */
-    WPropColor m_aColor;
+    WPropInt m_scrollBarX;
+    /**
+     * Scrollbar that changes the minimal output Y value
+     */
+    WPropInt m_scrollBarY;
+    /**
+     * Enables to put the output data to the coordinate system center
+     */
+    WPropBool m_translateDataToCenter;
+
 
     /**
      * Instance that puts out a WDataSetPoints of a LiDAR file (see www.liblas.org).

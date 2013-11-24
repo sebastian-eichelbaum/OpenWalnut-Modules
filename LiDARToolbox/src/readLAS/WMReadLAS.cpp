@@ -93,8 +93,25 @@ void WMReadLAS::properties()
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     m_lasFile = m_properties->addProperty( "LiDAR file", "", WPathHelper::getAppPath() );
     WPropertyHelper::PC_PATHEXISTS::addTo( m_lasFile );
-    m_readTriggerProp = m_properties->addProperty( "Do read",
-            "Press!", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
+
+    m_outputDataWidth = m_properties->addProperty( "Data set width: ",
+                            "Outpt area size which is of the area input*input meters^2.",
+                            200, m_propCondition );
+    m_outputDataWidth->setMin( 0 );
+
+    m_scrollBarX = m_properties->addProperty( "Scope selection X: ",
+                            "X range will be drawn between input and input+'Data set "
+                            "width'.", 0, m_propCondition );
+
+    m_scrollBarY = m_properties->addProperty( "Scope selection Y: ",
+                            "Y range will be drawn between input and input+'Data set "
+                            "width'.", 0, m_propCondition );
+
+    m_translateDataToCenter = m_properties->addProperty( "Translate to center: ",
+                            "Translates X and Y coordinates to center. Minimal and maximal "
+                            "possible coordinates are -/+'Data set width'/2."
+                            ".", true, m_propCondition );
+
     WModule::properties();
 }
 
@@ -124,23 +141,23 @@ void WMReadLAS::moduleMain()
         //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
+        std::cout << "cycle" << std::endl;
 
-        m_readTriggerProp->set( WPVBaseTypes::PV_TRIGGER_READY, false );
-        const char* path = m_lasFile->get().c_str();
-//        const char* path = "/home/renegade/Dokumente/media/Dropbox/LiDAR2008/tiles/las/"
-//                "316000_233500.las";
-        boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints(
-                path );
-        WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
-        WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
-        std::cout << "placing " << points->size() << " point things\r\n";
-        std::cout << "placing " << colors->size() << " color things\r\n";
-        std::cout << "LAS read";
-        m_output->updateData( tmpPointSet );
-        // ready to be triggered again
-        m_readTriggerProp->set( WPVBaseTypes::PV_TRIGGER_READY, true );
+        reader.setInputFilePath( m_lasFile->get().c_str() );
+        try
+        {
+            boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints(
+                    m_scrollBarX->get( true ), m_scrollBarY->get( true ), m_outputDataWidth->get( true ),
+                    m_translateDataToCenter->get( true ) );
+            WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
+            WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
+            m_output->updateData( tmpPointSet );
+        } catch( ... )
+        {
+        }
+        refreshScrollBars();
 
-        // woke up since the module is requested to finish?
+//         woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )
         {
             break;
@@ -150,4 +167,28 @@ void WMReadLAS::moduleMain()
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
+}
+void WMReadLAS::refreshScrollBars()
+{
+    size_t dataWidth = ( m_outputDataWidth->get() + 1 ) / 2;
+    m_outputDataWidth->set( dataWidth = dataWidth * 2 );
+//    double x = m_scrollBarX->get();
+//    double y = m_scrollBarY->get();
+
+    if  ( m_outputDataWidth == 0 ) return;
+
+    size_t dividend = reader.getXMin() / dataWidth;
+    m_scrollBarX->setMin( dividend * dataWidth );
+    dividend = reader.getXMax() / dataWidth;
+    m_scrollBarX->setMax( dividend * dataWidth );
+
+    dividend = reader.getYMin() / dataWidth;
+    m_scrollBarY->setMin( dividend * dataWidth );
+    dividend = reader.getYMax() / dataWidth;
+    m_scrollBarY->setMax( dividend * dataWidth );
+
+//    m_scrollBarX->set( x );
+//    m_scrollBarY->set( y );
+    m_scrollBarX->get( true );
+    m_scrollBarY->get( true );
 }

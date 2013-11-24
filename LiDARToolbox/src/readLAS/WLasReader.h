@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WLASTOOL_H
-#define WLASTOOL_H
+#ifndef WLASREADER_H
+#define WLASREADER_H
 
 #include <fstream>  // std::ifstream
 #include <iostream> // std::cout
@@ -49,48 +49,109 @@ namespace laslibb
     class WLasReader
     {
     public:
-	/**
-	 * Instance to get the reader not using a module.
-	 */
+        /**
+         * Instance to get the reader not using a module.
+         */
         WLasReader();
-	
-	/**
-	 * Instance to get the reader using a module.
-	 * \param progress Associated progress status bar.
-	 */
+
+        /**
+         * Instance to get the reader using a module.
+         * \param progress Associated progress status bar.
+         */
         explicit WLasReader( boost::shared_ptr< WProgressCombiner > progress );
-	
-	/**
-	 * Reader object destructor.
-	 */
+
+        /**
+         * Reader object destructor.
+         */
         virtual ~WLasReader();
-	
-	/**
-	 * Returns the read LiDAR data set points.
-	 * \param filePath LiDAR (*.las) file path to read.
-	 * \return LiDAR data set points containing intensities/colors.
-	 */
-        boost::shared_ptr< WDataSetPoints > getPoints( const char* filePath );
+
+        /**
+         * Sets the LAS input file path.
+         * \param path Path of the read LAS file.
+         */
+        void setInputFilePath( const char* path );
+
+        /**
+         * Returns the read LiDAR data set points.
+         * \param fromX The minimal read X coordinate.
+         * \param fromY The minimal read Y coordinate.
+         * \param dataSetWidth The width of the read daat set.
+         *         No cropping is applied using the value 0.
+         * \param moveToCenter Move the data to the center of the coordinate system.
+         * \return LiDAR data set points containing intensities/colors.
+         */
+        boost::shared_ptr< WDataSetPoints > getPoints(
+                size_t fromX, size_t fromY, size_t dataSetWidth, bool moveToCenter );
+
+        /**
+         * Returns the minimal X coordinate.
+         * \return The minimal X coordinate.
+         */
+        float getXMin();
+        /**
+         * Returns the maximal X coordinate.
+         * \return The maximal X coordinate.
+         */
+        float getXMax();
+        /**
+         * Returns the minimal Y coordinate.
+         * \return The minimal Y coordinate.
+         */
+        float getYMin();
+        /**
+         * Returns the maximal Y coordinate.
+         * \return The maximal Y coordinate.
+         */
+        float getYMax();
 
     private:
         /**
          * Sets the linked module progress bar settings.
-	 * \param steps Points count as reference to the progress bar.
-	 */
+         * \param steps Points count as reference to the progress bar.
+         */
         void setProgressSettings( size_t steps );
 
-	/**
-	 * Field to output the WDataSetPoints points data.
-	 */
+        /**
+         * Field to output the WDataSetPoints points data.
+         */
         boost::shared_ptr< WDataSetPoints > m_outputPoints;
-	/**
-	 * Linkd module progress bar.
-	 */
+        /**
+         * Linkd module progress bar.
+         */
         boost::shared_ptr< WProgressCombiner > m_associatedProgressCombiner;
-	/**
-	 * Progress bar status.
-	 */
+        /**
+         * Progress bar status.
+         */
         boost::shared_ptr< WProgress > m_progressStatus;
+
+        /**
+         * Input LAS file path.
+         */
+        const char* filePath;
+        /**
+         * Minimal X coordinate in LAS file.
+         */
+        float xMin;
+        /**
+         * Maximal X coordinate in LAS file.
+         */
+        float xMax;
+        /**
+         * Minimal Y coordinate in LAS file.
+         */
+        float yMin;
+        /**
+         * Maximal Y coordinate in LAS file.
+         */
+        float yMax;
+        /**
+         * Minimal Z coordinate in LAS file.
+         */
+        float zMin;
+        /**
+         * Maximal Z coordinate in LAS file.
+         */
+        float zMax;
     };
 } /* namespace butterfly */
-#endif  // WLASTOOL_H
+#endif  // WLASREADER_H

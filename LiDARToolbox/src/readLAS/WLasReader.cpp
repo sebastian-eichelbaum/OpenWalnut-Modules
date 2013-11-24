@@ -23,8 +23,6 @@
 //---------------------------------------------------------------------------
 
 #include <liblas/liblas.hpp>
-#include <liblas/point.hpp>
-#include <liblas/capi/liblas.h>
 #include <fstream>  // std::ifstream
 #include <iostream> // std::cout
 
@@ -39,11 +37,21 @@ namespace laslibb
 {
     WLasReader::WLasReader()
     {
+        xMin = 0;
+        xMax = 0;
+        yMin = 0;
+        yMax = 0;
+        filePath = 0;
     }
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
     }
+    WLasReader::~WLasReader()
+    {
+        // TODO(schwarzkopf): Auto-generated destructor stub
+    }
+
     void WLasReader::setProgressSettings( size_t steps )
     {
         m_associatedProgressCombiner->removeSubProgress( m_progressStatus );
@@ -52,15 +60,18 @@ namespace laslibb
         m_associatedProgressCombiner->addSubProgress( m_progressStatus );
     }
 
+    void WLasReader::setInputFilePath( const char* path )
+    {
+        filePath = path;
+    }
 
-    boost::shared_ptr< WDataSetPoints > WLasReader::getPoints( const char* filePath )
+    boost::shared_ptr< WDataSetPoints > WLasReader::getPoints(
+            size_t fromX, size_t fromY, size_t dataSetWidth, bool moveToCenter )
     {
         WDataSetPoints::VertexArray vertices(
                 new WDataSetPoints::VertexArray::element_type() );
         WDataSetPoints::ColorArray colors(
                 new WDataSetPoints::ColorArray::element_type() );
-
-        std::cout << "this is lasLibb:\r\n";
 
         std::ifstream ifs;
         ifs.open( filePath, std::ios::in | std::ios::binary );
@@ -75,8 +86,10 @@ namespace laslibb
         size_t count = header.GetPointRecordsCount();
 //        count = 100000;
         setProgressSettings( count );
-        float xMin = 0, xMax = 0, yMin = 0, yMax = 0, zMin = 0, zMax = 0;
-        int vMin = 0, vMax = 0;
+        size_t addedPoints = 0;
+        float xOffset = fromX + dataSetWidth / 2;
+        float yOffset = fromY + dataSetWidth / 2;
+        float zOffset = ( zMax - zMin ) / 2;
         for  ( size_t i = 0; i < count; i++ )
         {
             double x, y, z;
@@ -87,12 +100,6 @@ namespace laslibb
             x = point.GetX();
             y = point.GetY();
             z = point.GetZ();
-            vertices->push_back( x );
-            vertices->push_back( y );
-            vertices->push_back( z );
-            v = point.GetIntensity();
-            for  ( int color = 0; color < 3; color++ )
-                colors->push_back( v );
             if  ( i == 0 )
             {
                 xMin = x;
@@ -101,8 +108,6 @@ namespace laslibb
                 yMax = y;
                 zMin = z;
                 zMax = z;
-                vMin = z;
-                vMax = z;
             }
             if  ( x < xMin ) xMin = x;
             if  ( x > xMax ) xMax = x;
@@ -110,31 +115,59 @@ namespace laslibb
             if  ( y > yMax ) yMax = y;
             if  ( z < zMin ) zMin = z;
             if  ( z > zMax ) zMax = z;
-            if  ( v < vMin ) vMin = v;
-            if  ( v > vMax ) vMax = v;
+
+            if  ( dataSetWidth == 0 || ( x >= fromX && x < fromX+dataSetWidth
+                    && y >= fromY && y < fromY+dataSetWidth ) )
+            {
+                if  ( moveToCenter )
+                {
+                    x -= xOffset;
+                    y -= yOffset;
+                    z -= zOffset;
+                }
+                vertices->push_back( x );
+                vertices->push_back( y );
+                vertices->push_back( z );
+                v = point.GetIntensity();
+                for  ( int color = 0; color < 3; color++ )
+                    colors->push_back( v );
+                addedPoints++;
+            }
 //            std::cout << i << ": " << x << " " << " " << y << " " << z << " " << v << "\r\n";
             m_progressStatus->increment( 1 );
         }
         m_progressStatus->finish();
-        std::cout << "X: " << xMin << " - " << xMax << "\r\n";
-        std::cout << "Y: " << yMin << " - " << yMax << "\r\n";
-        std::cout << "Z: " << zMin << " - " << zMax << "\r\n";
-        std::cout << "V: " << vMin << " - " << vMax << "\r\n";
-        std::cout << "Sets: " << count << "\r\n";
+        std::cout << "Added points: " << addedPoints << std::endl;
 
-        std::cout << "Data set count = " << count << "\r\n";
-
-
-
+        if  ( addedPoints == 0 )
+        {
+            //TODO(aschwarzkopf): Handle the problem in other way. When no points exist then the program crashes.
+            for  ( size_t lfd = 0; lfd < 3; lfd++)
+            {
+                vertices->push_back( 0 );
+                colors->push_back( 0 );
+            }
+        }
         boost::shared_ptr< WDataSetPoints > outputPoints(
                 new WDataSetPoints( vertices, colors ) );
         m_outputPoints = outputPoints;
 
         return m_outputPoints;
     }
-
-    WLasReader::~WLasReader()
+    float WLasReader::getXMin()
     {
-        // TODO(schwarzkopf): Auto-generated destructor stub
+        return xMin;
+    }
+    float WLasReader::getXMax()
+    {
+        return xMax;
+    }
+    float WLasReader::getYMin()
+    {
+        return yMin;
+    }
+    float WLasReader::getYMax()
+    {
+        return yMax;
     }
 } /* namespace std */
