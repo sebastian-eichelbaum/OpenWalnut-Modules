@@ -37,7 +37,6 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/graphicsEngine/shaders/WGEShader.h"
 #include "core/graphicsEngine/WTriangleMesh.h"
-#include "core/kernel/WModule.h"
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
@@ -72,79 +71,120 @@ template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
-/**Draws cubes where a value is at least as big as the preset ISO value
- * \ingroup modules*/
+/**
+ * Draws cubes where a value is at least as big as the preset ISO value
+ * \ingroup modules
+ */
 class WMBuildingsDetection: public WModule
 {
 public:
-    /**Creates the module for drawing contour lines.*/
+    /**
+     * Creates the module for drawing contour lines.
+     */
     WMBuildingsDetection();
 
-    /**Destroys this module.*/
+    /**
+     * Destroys this module.
+     */
     virtual ~WMBuildingsDetection();
 
-    /**Gives back the name of this module.
-     * \return the module's name.*/
+    /**
+     * Gives back the name of this module.
+     * \return the module's name.
+     */
     virtual const std::string getName() const;
 
-    /**Gives back a description of this module.
-     * \return description to module.*/
+    /**
+     * Gives back a description of this module.
+     * \return description to module.
+     */
     virtual const std::string getDescription() const;
 
-    /**Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
+    /**
+     * Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
      * should never be initialized or modified in some other way. A simple new instance is required.
-     * \return the prototype used to create every module in OpenWalnut.*/
+     * \return the prototype used to create every module in OpenWalnut.
+     */
     virtual boost::shared_ptr< WModule > factory() const;
 
-    /**Get the icon for this module in XPM format.
-     * \return The icon.*/
+    /**
+     * Get the icon for this module in XPM format.
+     * \return The icon.
+     */
     virtual const char** getXPMIcon() const;
 
 protected:
-    /**Entry point after loading the module. Runs in separate thread.*/
+    /**
+     * Entry point after loading the module. Runs in separate thread.
+     */
     virtual void moduleMain();
 
-    /**Initialize the connectors this module is using.*/
+    /**
+     *Initialize the connectors this module is using.
+     */
     virtual void connectors();
 
-    /**Initialize the properties for this module.*/
+    /**
+     * Initialize the properties for this module.
+     */
     virtual void properties();
 
-    /**Initialize requirements for this module.*/
+    /**
+     * Initialize requirements for this module.
+     */
     virtual void requirements();
 
 private:
+    /**
+     * Initializes progress bar settings.
+     * \param steps Points count as reference to the progress bar.
+     */
     void setProgressSettings( size_t steps );
 
+    /**
+     * WDataSetPoints data input (proposed for LiDAR data).
+     */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
 
-    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_output;  //!< Output connector provided by this module.
+    /**
+     * WDataSetPoints data output as tetraeders.
+     */
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_output;
 
-    /**The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.*/
+    /**
+     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
+     */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
 
-    /**Needed for recreating the geometry, incase when resolution changes.*/
+    /**
+     * Needed for recreating the geometry, incase when resolution changes.
+     */
     boost::shared_ptr< WCondition > m_propCondition;
 
-    /**Shader unit for drawing. */
+    /**
+     * Shader unit for drawing.
+     */
     WGEShader::RefPtr m_shader;
 
-    /**Below that ISO value vertices should be count off */
-    WPropInt      m_cutoffThreshold;
-
-    /**Voxel count that is cut off and kept regarding the ISO value. */
+    /**
+     * Voxel count that is cut off and kept regarding the ISO value.
+     */
     WPropDouble m_stubSize;
 
-    /**Instance for applying drawable geoms. */
+    /**
+     * Voxel count that is cut off and kept regarding the ISO value.
+     */
+    WPropDouble m_contrast;
+
+    /**
+     * Instance for applying drawable geoms.
+     */
     osg::ref_ptr< osg::Geode > m_geode;
 
-
+    /**
+     * Plugin progress status that is shared with the reader.
+     */
     boost::shared_ptr< WProgress > m_progressStatus;
-
-
-
-    /**Drawing color. */
-    WPropColor m_aColor;
 };
 
 #endif  // WMBUILDINGSDETECTION_H
