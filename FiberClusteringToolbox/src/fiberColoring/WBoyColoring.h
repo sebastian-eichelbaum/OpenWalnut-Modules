@@ -50,7 +50,7 @@ public:
     virtual WDataSetFibers::SPtr operator()( WProgress::SPtr progress, WBoolFlag const &shutdown, WDataSetFibers::SPtr fibers );
 protected:
 private:
-    WDataSetFibers::ColorArray m_BoyColors;
+    WDataSetFibers::ColorArray m_boyColors;
 };
 
 #endif  // WBOYCOLORING_H
