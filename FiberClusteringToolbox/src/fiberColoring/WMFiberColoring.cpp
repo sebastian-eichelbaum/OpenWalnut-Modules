@@ -33,12 +33,14 @@
 
 #include "WMFiberColoring.h"
 #include "WSimilarityColoring.h"
+#include "WBoyColoring.h"
 
 WMFiberColoring::WMFiberColoring():
     WModule(),
     m_strategy( "Fiber Coloring Algorithms", "Select one algorithm to color fibers", NULL,
                 "FiberColor", "A list of all known bundling strategies" )
 {
+    m_strategy.addStrategy( WBoyColoring::SPtr( new WBoyColoring() ) );
     m_strategy.addStrategy( WSimilarityColoring::SPtr( new WSimilarityColoring() ) );
 }
 
