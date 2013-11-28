@@ -62,6 +62,8 @@ void WMDetTractClusteringGP::connectors()
 {
     m_gpIC = WModuleInputData< WDataSetGP >::createAndAdd( shared_from_this(), "gpInput", "WDataSetGP providing the Gaussian processes" );
     m_dendOC = WModuleOutputData< WDendrogram >::createAndAdd( shared_from_this(), "dendrogramOutput", "WDendrogram as a result of this clustering" );
+    m_matrixOC = WModuleOutputData< WDataSetMatrixSymFLT >::createAndAdd( shared_from_this(), "similaritiesOutput",
+        "WDataSetMatrixSym containing the similarities" );
 
     WModule::connectors();
 }
@@ -126,7 +128,7 @@ void WMDetTractClusteringGP::computeDistanceMatrix( boost::shared_ptr< const WDa
     boost::shared_ptr< WProgress > progress( new WProgress( "Similarity matrix computation", steps ) );
     m_progress->addSubProgress( progress );
 
-    m_similarities = WMatrixSymFLT( dataSet->size() );
+    m_similarities = WMatrixSymFLT::SPtr( new WMatrixSymFLT( dataSet->size() ) );
     for( size_t i = 0; i < dataSet->size() && !m_shutdownFlag(); ++i )
     {
         for( size_t j = i + 1; j < dataSet->size() && !m_shutdownFlag(); ++j )
@@ -135,15 +137,17 @@ void WMDetTractClusteringGP::computeDistanceMatrix( boost::shared_ptr< const WDa
             const WGaussProcess& p2 = ( *dataSet )[j];
             if( p1.getBB().minDistance( p2.getBB() ) < p1.getRadius() + p2.getRadius() )
             {
-                m_similarities( i, j ) = gauss::innerProduct( p1, p2 ); // As written in the paper, we don't use the normalized inner product
+                (*m_similarities)( i, j ) = gauss::innerProduct( p1, p2 ); // As written in the paper, we don't use the normalized inner product
             }
             else
             {
-                m_similarities( i, j ) = 0.0;
+                (*m_similarities)( i, j ) = 0.0;
             }
         }
         *progress = *progress + ( dataSet->size() - i - 1 );
     }
+
+    m_matrixOC->updateData( WDataSetMatrixSymFLT::SPtr( new WDataSetMatrixSymFLT( m_similarities ) ) );
     progress->finish();
     m_progress->removeSubProgress( progress );
 }
@@ -176,9 +180,9 @@ boost::shared_ptr< WDendrogram > WMDetTractClusteringGP::computeDendrogram( size
         {
             for( std::set< size_t >::const_iterator jt = boost::next( it ); jt != idx.end() && !m_shutdownFlag(); ++jt )
             {
-                if( m_similarities( *it, *jt ) > maxSim )
+                if( (*m_similarities)( *it, *jt ) > maxSim )
                 {
-                    maxSim = m_similarities( *it, *jt );
+                    maxSim = (*m_similarities)( *it, *jt );
                     p = *it;
                     q = *jt;
                 }
@@ -211,7 +215,7 @@ boost::shared_ptr< WDendrogram > WMDetTractClusteringGP::computeDendrogram( size
                 // < pq, k > = |p| / ( |p| + |q| ) < p, k > + |q| / (|p| + |q|) < q, k >
                 double firstFactor = static_cast< double >( clusterSize[ p ] ) / ( clusterSize[ p ] + clusterSize[ q ] );
                 double secondFactor = static_cast< double >( clusterSize[ q ] ) / ( clusterSize[ p ] + clusterSize[ q ] );
-                m_similarities( newCE, *it ) = firstFactor * m_similarities( p, *it ) + secondFactor * m_similarities( q, *it );
+                (*m_similarities)( newCE, *it ) = firstFactor * (*m_similarities)( p, *it ) + secondFactor * (*m_similarities)( q, *it );
             }
         }
         clusterSize[ newCE ] = clusterSize[ p ] + clusterSize[ q ];

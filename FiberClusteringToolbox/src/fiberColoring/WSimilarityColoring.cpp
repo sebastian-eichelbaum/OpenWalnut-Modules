@@ -22,8 +22,10 @@
 //
 //---------------------------------------------------------------------------
 
-#include <vector>
 #include <fstream>
+#include <vector>
+#include <string>
+#include <utility>
 
 #include <boost/lexical_cast.hpp>
 
@@ -34,7 +36,7 @@
 WSimilarityColoring::WSimilarityColoring()
     : WObjectNDIP< WColoring_I >( "Similarity Coloring", "Color codes the similarity based on 2D embedding" )
 {
-    m_filename = m_properties->addProperty( "Filename", "Filename where to write the NIfTI file to.",
+    m_filename = m_properties->addProperty( "Filename", "Filename where to read the positions from.",
                                              WPathHelper::getAppPath() );
     WPropertyHelper::PC_PATHEXISTS::addTo( m_filename );
     m_loadTrigger = m_properties->addProperty( "Read fiber Positions",  "Read!", WPVBaseTypes::PV_TRIGGER_READY );
@@ -53,29 +55,31 @@ WSimilarityColoring::~WSimilarityColoring()
 {
 }
 
-void WSimilarityColoring::loadPositions() {
-
+void WSimilarityColoring::loadPositions()
+{
     m_2dpos.clear();
 
     wlog::debug( "WSimilarity Coloring" ) << "Filename: " << m_filename->get().string();
     std::ifstream file( m_filename->get().string().c_str() );
     std::string str;
-    while (std::getline(file, str))
+    while( std::getline( file, str) )
     {
         std::vector< std::string > cols = string_utils::tokenize( str );
-        if( cols.size() < 2 ) {
+        if( cols.size() < 2 )
+        {
             wlog::error( "WSimilarityColoring" ) << "Invalid positions file, abort";
             std::cout << str << std::endl;        // Process str
             return;
         }
-        else {
+        else
+        {
             std::pair< double, double > pos = std::make_pair( 0.0, 0.0 );
             try
             {
-                pos.first = boost::lexical_cast<double>(cols[0]) / m_bb->get();
-                pos.second = boost::lexical_cast<double>(cols[1]) / m_bb->get();
+                pos.first = boost::lexical_cast< double >( cols[0] ) / m_bb->get();
+                pos.second = boost::lexical_cast< double >( cols[1] ) / m_bb->get();
             }
-            catch (boost::bad_lexical_cast const&)
+            catch( boost::bad_lexical_cast const& )
             {
                 wlog::error( "WSimilarityColoring" ) << "Error during reading ASCII pos file ( lexical cast )";
             }
@@ -84,8 +88,13 @@ void WSimilarityColoring::loadPositions() {
     }
 }
 
-namespace {
-    osg::Vec3f xyz2rgb( osg::Vec3f xyz ) {
+/**
+ * Annonymous namespace for some converting helper functions.
+ */
+namespace
+{
+    osg::Vec3f xyz2rgb( osg::Vec3f xyz )
+    {
         double var_X = xyz[0] / 100.0;
         double var_Y = xyz[1] / 100.0;
         double var_Z = xyz[2] / 100.0;
@@ -94,39 +103,64 @@ namespace {
         double var_G = var_X * -0.9689 + var_Y *  1.8758 + var_Z *  0.0415;
         double var_B = var_X *  0.0557 + var_Y * -0.2040 + var_Z *  1.0570;
 
-        if ( var_R > 0.0031308 )
+        if( var_R > 0.0031308 )
+        {
             var_R = 1.055 * std::pow( var_R, 1 / 2.4 ) - 0.055;
+        }
         else
+        {
             var_R = 12.92 * var_R;
-        if ( var_G > 0.0031308 )
+        }
+        if( var_G > 0.0031308 )
+        {
             var_G = 1.055 * ( std::pow( var_G, 1 / 2.4 ) ) - 0.055;
+        }
         else
+        {
             var_G = 12.92 * var_G;
-        if ( var_B > 0.0031308 )
+        }
+        if( var_B > 0.0031308 )
+        {
             var_B = 1.055 * ( std::pow( var_B, 1 / 2.4 ) ) - 0.055;
+        }
         else
+        {
             var_B = 12.92 * var_B;
+        }
 
         return osg::Vec3f( var_R, var_G, var_B );
     }
 
-    osg::Vec3f lab2xyz( osg::Vec3f lab ) {
+    osg::Vec3f lab2xyz( osg::Vec3f lab )
+    {
         double var_Y = ( lab[0] + 16 ) / 116.0;
         double var_X = lab[1] / 500.0 + var_Y;
         double var_Z = var_Y - lab[2] / 200.0;
 
-        if ( std::pow( var_Y, 3.0 ) > 0.008856 )
+        if( std::pow( var_Y, 3.0 ) > 0.008856 )
+        {
             var_Y = var_Y * var_Y * var_Y;
+        }
         else
+        {
             var_Y = ( var_Y - 16 / 116 ) / 7.787;
-        if ( std::pow( var_X, 3.0 ) > 0.008856 )
+        }
+        if( std::pow( var_X, 3.0 ) > 0.008856 )
+        {
             var_X = var_X * var_X * var_X;
+        }
         else
+        {
             var_X = ( var_X - 16 / 116 ) / 7.787;
-        if ( std::pow( var_Z, 3.0 ) > 0.008856 )
+        }
+        if( std::pow( var_Z, 3.0 ) > 0.008856 )
+        {
             var_Z = var_Z * var_Z * var_Z;
+        }
         else
+        {
             var_Z = ( var_Z - 16 / 116 ) / 7.787;
+        }
 
         return osg::Vec3f( 95.047 * var_X, 100.0 * var_Y, 108.883 * var_Z );
     }
@@ -140,7 +174,8 @@ WDataSetFibers::SPtr WSimilarityColoring::operator()( WProgress::SPtr progress, 
         wlog::debug( "WSimilarityColoring" ) << "No positions available or invalid fiber dataset";
         return fibers;
     }
-    if( fibers->getLineLengths()->size() != m_2dpos.size() ) {
+    if( fibers->getLineLengths()->size() != m_2dpos.size() )
+    {
         wlog::error( "WSimilarityColoring" ) << "#positions: " << m_2dpos.size() << " does not match #fibers: " << fibers->getLineLengths()->size();
     }
 

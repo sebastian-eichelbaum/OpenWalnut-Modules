@@ -22,41 +22,35 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMDETTRACTCLUSTERINGGP_H
-#define WMDETTRACTCLUSTERINGGP_H
+#ifndef WMMATRIXWRITER_H
+#define WMMATRIXWRITER_H
 
 #include <string>
-#include <map>
-#include <utility>
 
-#include <osg/Geode>
+#include <core/common/math/WMatrixSym.h>
+#include <core/kernel/WModule.h>
 
-#include "core/common/math/WMatrixSym.h"
-#include "core/kernel/WModule.h"
-#include "core/kernel/WModuleInputData.h"
-#include "core/kernel/WModuleOutputData.h"
-#include "../WDataSetGP.h"
-#include "../../WDataSetMatrixSym.h"
+#include "../WDataSetMatrixSym.h"
 
-class WDendrogram;
+template< class T > class WModuleInputData;
+template< class T > class WModuleOutputData;
 
 /**
- * Module for clustering Gaussian processes which representing deterministic tracts.
- *
+ * Writes a symmetrical Matrix down to file.
  * \ingroup modules
  */
-class WMDetTractClusteringGP: public WModule
+class WMMatrixWriter : public WModule
 {
 public:
     /**
-     * Constructs a new clustering instance.
+     * Default module ctor.
      */
-    WMDetTractClusteringGP();
+    WMMatrixWriter();
 
     /**
-     * Destructs this.
+     * Default module dtor.
      */
-    virtual ~WMDetTractClusteringGP();
+    virtual ~WMMatrixWriter();
 
     /**
      * Gives back the name of this module.
@@ -95,49 +89,35 @@ protected:
     virtual void properties();
 
     /**
-     * Computes the distant matrix for all pairs of Gaussian processes.
-     *
-     * \warning This function may leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param dataSet The dataset of Gaussian processes.
-     *
-     * \return The similarity or also called distant matrix.
+     * Initialize requirements for this module.
      */
-    void computeDistanceMatrix( boost::shared_ptr< const WDataSetGP > dataSet );
-
-    /**
-     * Constructs a dendrogram out of the m_similarity matrix. Please note that this member function needs a valid similarity
-     * matrix to operate correctly and it will leave an invalid matrix afterwards!
-     *
-     * \warning This function may return and leave an invalid matrix when the \c m_shutdownFlag becomes true!
-     *
-     * \param n How many tracts
-     *
-     * \return The dendrogram.
-     */
-    boost::shared_ptr< WDendrogram > computeDendrogram( size_t n );
-
-    /**
-     * Input Connector for the Gaussian processes which are about to be clustered.
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetGP > > m_gpIC;
-
-    /**
-     * Output Connector for the dendrogram which is about to be created with this module.
-     */
-    boost::shared_ptr< WModuleOutputData< WDendrogram > > m_dendOC;
-
-    /**
-     * Output Connector for the similarity matrix in float precision to save memory.
-     */
-    boost::shared_ptr< WModuleOutputData< WDataSetMatrixSymFLT > > m_matrixOC;
-
-    /**
-     * Distant matrix of all pairs of Gaussian processes. This is float to save more space!
-     */
-    WMatrixSymFLT::SPtr m_similarities;
+    virtual void requirements();
 
 private:
+    /**
+     * Input connector for the Symmetric Matrix.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetMatrixSymFLT > > m_fltMatrixIC;
+
+    /**
+     * Save data to file.
+     */
+    void save();
+
+    /**
+     * The filename property -> where to write the nifty file
+     */
+    WPropFilename m_filename;
+
+    /**
+     * This property triggers the actual writing
+     */
+    WPropTrigger  m_saveTrigger;
+
+    // /**
+    //  * Trigger binary or text mode.
+    //  */
+    // WPropBool m_binary;
 };
 
-#endif  // WMDETTRACTCLUSTERINGGP_H
+#endif  // WMMATRIXWRITER_H
