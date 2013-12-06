@@ -4,6 +4,9 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
 
+#ifndef PDSAMPLING_H
+#define PDSAMPLING_H
+
 #define kMaxPointsPerCell 9
 
 class RangeList;
@@ -85,3 +88,5 @@ public:
 
 	virtual void complete();
 };
+
+#endif  // PDSAMPLING_H
