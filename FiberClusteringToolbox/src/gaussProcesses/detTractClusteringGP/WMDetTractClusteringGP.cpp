@@ -27,6 +27,8 @@
 #include <utility>
 #include <vector>
 
+#include <omp.h>
+
 #include "core/common/datastructures/WDendrogram.h"
 #include "core/common/datastructures/WUnionFind.h"
 #include "core/common/WLimits.h"
@@ -129,22 +131,29 @@ void WMDetTractClusteringGP::computeDistanceMatrix( boost::shared_ptr< const WDa
     m_progress->addSubProgress( progress );
 
     m_similarities = WMatrixSymFLT::SPtr( new WMatrixSymFLT( dataSet->size() ) );
-    for( size_t i = 0; i < dataSet->size() && !m_shutdownFlag(); ++i )
+
+    #pragma omp parallel for
+    for( int i = 0; i < static_cast< int >( dataSet->size() ); ++i )
     {
         for( size_t j = i + 1; j < dataSet->size() && !m_shutdownFlag(); ++j )
         {
             const WGaussProcess& p1 = ( *dataSet )[i];
             const WGaussProcess& p2 = ( *dataSet )[j];
-            if( p1.getBB().minDistance( p2.getBB() ) < p1.getRadius() + p2.getRadius() )
+            bool computeInnerProduct = p1.getBB().minDistance( p2.getBB() ) < ( p1.getRadius() + p2.getRadius() );
+            float innerProduct = 0.0;
+            if( computeInnerProduct )
             {
-                (*m_similarities)( i, j ) = gauss::innerProduct( p1, p2 ); // As written in the paper, we don't use the normalized inner product
+                innerProduct = gauss::innerProduct( p1, p2 ); // As written in the paper, we don't use the normalized inner product
             }
-            else
+            #pragma omp critical
             {
-                (*m_similarities)( i, j ) = 0.0;
+                (*m_similarities)( i, j ) = innerProduct;
             }
         }
-        *progress = *progress + ( dataSet->size() - i - 1 );
+        #pragma omp critical
+        {
+            *progress = *progress + ( dataSet->size() - i - 1 );
+        }
     }
 
     m_matrixOC->updateData( WDataSetMatrixSymFLT::SPtr( new WDataSetMatrixSymFLT( m_similarities ) ) );
