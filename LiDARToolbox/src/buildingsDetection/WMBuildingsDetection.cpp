@@ -22,12 +22,11 @@
 //
 //---------------------------------------------------------------------------
 
-//Brings me at least very few forward: http://osgeo-org.1560.x6.nabble.com/Liblas-devel-c-liblas-problem-td4919064.html
-
 #include <string>
 
 #include <fstream>  // std::ifstream
 #include <iostream> // std::cout
+#include <vector>
 
 #include <osg/Geometry>
 #include "core/kernel/WModule.h"
@@ -42,6 +41,7 @@
 #include "core/kernel/WModuleInputData.h"
 #include "WMBuildingsDetection.xpm"
 #include "WMBuildingsDetection.h"
+#include "structure/WOTree.h"
 
 // This line is needed by the module loader to actually find your module.
 //W_LOADABLE_MODULE( WMBuildingsDetection )
@@ -51,6 +51,7 @@ WMBuildingsDetection::WMBuildingsDetection():
     WModule(),
     m_propCondition( new WCondition() )
 {
+    m_tree = new WOTree( 0 );
 }
 
 WMBuildingsDetection::~WMBuildingsDetection()
@@ -84,6 +85,7 @@ void WMBuildingsDetection::connectors()
                 new WModuleOutputData< WTriangleMesh >( shared_from_this(), "output", "The loaded mesh." ) );
 
     addConnector( m_output );
+//    addConnector( m_buildings );
     WModule::connectors();
 }
 
@@ -96,6 +98,19 @@ void WMBuildingsDetection::properties()
     m_stubSize->setMax( 3.0 );
     m_contrast = m_properties->addProperty( "Contrast: ",
                             "Color intensity multiplier.", 2.0, m_propCondition );
+    m_detailDepth = m_properties->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
+                            "depth for the octree search tree.", 0, m_propCondition );
+    m_detailDepth->setMin( -3 );
+    m_detailDepth->setMax( 4 );
+    m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
+                            "in meters for the octree search tree.", 1.0, m_propCondition  );
+    m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
+    m_showTrianglesInsteadOfOctreeCubes = m_properties->addProperty( "Triangles instead of cubes: ",
+                            "Depicting the input data set points showing the point outline "
+                            "instead of regions depicted as cubes that cover existing points. "
+                            "Enabling this option you must have 32GB RAM depicting a 400MB"
+                            "las file.", false, m_propCondition );
+
     WModule::properties();
 }
 
@@ -128,6 +143,7 @@ void WMBuildingsDetection::moduleMain()
         std::cout << "Execute cycle\r\n";
         if  ( points )
         {
+            m_tree = new WOTree( m_detailDepthLabel->get( true ) );
             WDataSetPoints::VertexArray verts = points->getVertices();
             WDataSetPoints::ColorArray colors = points->getColors();
             size_t count = verts->size()/3;
@@ -141,30 +157,37 @@ void WMBuildingsDetection::moduleMain()
                 float x = verts->at( vertex*3 );
                 float y = verts->at( vertex*3+1 );
                 float z = verts->at( vertex*3+2 );
-                float r = colors->at( vertex*3 );
-                float g = colors->at( vertex*3+1 );
-                float b = colors->at( vertex*3+2 );
-                osg::Vec4f* color = new osg::Vec4f(
-                        r/400.0f*contrast, g/400.0f*contrast, b/400.0f*contrast, 1.0f );
-//                std::cout << "Point at\t" << x << "\t" << y << "\t" << z << "\r\n";
-                tmpMesh->addVertex( 0+x, 0+y, 0+z );
-                tmpMesh->addVertex( a+x, 0+y, 0+z );
-                tmpMesh->addVertex( 0+x, a+y, 0+z );
-                tmpMesh->addVertex( 0+x, 0+y, a+z );
-                size_t body = vertex*4;
-                tmpMesh->addTriangle( 0+body, 2+body, 1+body );
-                tmpMesh->addTriangle( 0+body, 1+body, 3+body );
-                tmpMesh->addTriangle( 0+body, 3+body, 2+body );
-                tmpMesh->addTriangle( 1+body, 2+body, 3+body );
-                tmpMesh->setVertexColor( body, *color );
-                tmpMesh->setVertexColor( body+1, *color );
-                tmpMesh->setVertexColor( body+2, *color );
-                tmpMesh->setVertexColor( body+3, *color );
+                if  ( m_showTrianglesInsteadOfOctreeCubes->get( true ) )
+                {
+                    float r = colors->at( vertex*3 );
+                    float g = colors->at( vertex*3+1 );
+                    float b = colors->at( vertex*3+2 );
+                    osg::Vec4f* color = new osg::Vec4f(
+                            r/400.0f*contrast, g/400.0f*contrast, b/400.0f*contrast, 1.0f );
+                    tmpMesh->addVertex( 0+x, 0+y, 0+z );
+                    tmpMesh->addVertex( a+x, 0+y, 0+z );
+                    tmpMesh->addVertex( 0+x, a+y, 0+z );
+                    tmpMesh->addVertex( 0+x, 0+y, a+z );
+                    size_t body = vertex*4;
+                    tmpMesh->addTriangle( 0+body, 2+body, 1+body );
+                    tmpMesh->addTriangle( 0+body, 1+body, 3+body );
+                    tmpMesh->addTriangle( 0+body, 3+body, 2+body );
+                    tmpMesh->addTriangle( 1+body, 2+body, 3+body );
+                    tmpMesh->setVertexColor( body, *color );
+                    tmpMesh->setVertexColor( body+1, *color );
+                    tmpMesh->setVertexColor( body+2, *color );
+                    tmpMesh->setVertexColor( body+3, *color );
+                }
                 m_progressStatus->increment( 1 );
+                m_tree->registerPoint( x, y, z );
             }
-            m_output->updateData( tmpMesh );
+            m_output->updateData( m_showTrianglesInsteadOfOctreeCubes->get( true )
+                    ?tmpMesh :m_tree->getOutline( ) );
             m_progressStatus->finish();
         }
+
+        m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
+        std::cout << "this is WOTree " << std::endl;
 
         // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )

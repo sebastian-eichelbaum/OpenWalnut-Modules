@@ -41,11 +41,20 @@ namespace laslibb
         xMax = 0;
         yMin = 0;
         yMax = 0;
+        zMin = 0;
+        zMax = 0;
         filePath = 0;
     }
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
+        xMin = 0;
+        xMax = 0;
+        yMin = 0;
+        yMax = 0;
+        zMin = 0;
+        zMax = 0;
+        filePath = 0;
     }
     WLasReader::~WLasReader()
     {
@@ -84,7 +93,6 @@ namespace laslibb
 
         liblas::Point point;
         size_t count = header.GetPointRecordsCount();
-//        count = 100000;
         setProgressSettings( count );
         size_t addedPoints = 0;
         float xOffset = fromX + dataSetWidth / 2;

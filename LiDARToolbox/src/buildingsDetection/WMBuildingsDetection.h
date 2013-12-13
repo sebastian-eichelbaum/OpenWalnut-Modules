@@ -28,6 +28,7 @@
 
 #include <liblas/liblas.hpp>
 #include <string>
+#include <vector>
 
 #include <fstream>  // std::ifstream
 #include <iostream> // std::cout
@@ -41,6 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
+#include "structure/WOTree.h"
 
 
 
@@ -175,6 +177,19 @@ private:
      * Voxel count that is cut off and kept regarding the ISO value.
      */
     WPropDouble m_contrast;
+    /**
+     * Determines the resolution of the smallest octree nodes in 2^n meters
+     */
+    WPropInt m_detailDepth;
+    /**
+     * Determines the resolution of the smallest octree nodes in meters
+     */
+    WPropDouble m_detailDepthLabel;
+    /**
+     * Depicting the input data set points showing the point outline instead of regions
+     * depicted as cubes that cover existing points.
+     */
+    WPropBool m_showTrianglesInsteadOfOctreeCubes;
 
     /**
      * Instance for applying drawable geoms.
@@ -185,6 +200,10 @@ private:
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+    /**
+     * Octree node used for the data set points analysis.
+     */
+    WOTree* m_tree;
 };
 
 #endif  // WMBUILDINGSDETECTION_H
