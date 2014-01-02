@@ -41,17 +41,18 @@
 #include "core/kernel/WModuleInputData.h"
 #include "WMBuildingsDetection.xpm"
 #include "WMBuildingsDetection.h"
-#include "structure/WOTree.h"
+#include "structure/WOctree.h"
 
 // This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMBuildingsDetection )
+W_LOADABLE_MODULE( WMBuildingsDetection )
 //TODO(aschwarzkopf): Reenable above after solving the toolbox problem
 
 WMBuildingsDetection::WMBuildingsDetection():
     WModule(),
     m_propCondition( new WCondition() )
 {
-    m_tree = new WOTree( 0 );
+    m_tree = new WOctree( 0 );
+    m_elevationImage = new WQuadTree( 0 );
 }
 
 WMBuildingsDetection::~WMBuildingsDetection()
@@ -91,6 +92,15 @@ void WMBuildingsDetection::connectors()
 
 void WMBuildingsDetection::properties()
 {
+    m_nbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
+    m_xMin = m_infoProperties->addProperty( "X min.: ", "Minimal x coordinate of all input points.", 0.0 );
+    m_xMax = m_infoProperties->addProperty( "X max.: ", "Maximal x coordinate of all input points.", 0.0 );
+    m_yMin = m_infoProperties->addProperty( "Y min.: ", "Minimal y coordinate of all input points.", 0.0 );
+    m_yMax = m_infoProperties->addProperty( "Y max.: ", "Maximal y coordinate of all input points.", 0.0 );
+    m_zMin = m_infoProperties->addProperty( "Z min.: ", "Minimal z coordinate of all input points.", 0.0 );
+    m_zMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
+
+
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     m_stubSize = m_properties->addProperty( "Stub size: ",
                             "Size of tetraeders that are used to depict points.", 0.6, m_propCondition );
@@ -110,6 +120,20 @@ void WMBuildingsDetection::properties()
                             "instead of regions depicted as cubes that cover existing points. "
                             "Enabling this option you must have 32GB RAM depicting a 400MB"
                             "las file.", false, m_propCondition );
+
+    boost::shared_ptr< WItemSelection > imageModes( boost::shared_ptr< WItemSelection >( new WItemSelection() ) );
+    imageModes->addItem( "Minimals", "Minimal elevation values." );
+    imageModes->addItem( "Maximals", "Maximal elevation values." );
+    imageModes->addItem( "Point count", "Store point count to each pixel." );
+    m_elevImageMode = m_properties->addProperty( "Color mode", "Choose one of the available colorings.", imageModes->getSelectorFirst(),
+                                             m_propCondition );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_elevImageMode );
+    m_elevationImageExportablePath = m_properties->addProperty( "Elev. image:",
+                            "Target file path of the exportable elevation image *.bmp file",
+                            WPathHelper::getAppPath() );
+    m_exportTriggerProp = m_properties->addProperty( "Do read",  "Press!", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
+
+
 
     WModule::properties();
 }
@@ -141,9 +165,11 @@ void WMBuildingsDetection::moduleMain()
 
         boost::shared_ptr< WDataSetPoints > points = m_input->getData();
         std::cout << "Execute cycle\r\n";
+        WItemSelector elevImageModeSelector = m_elevImageMode->get( true );
         if  ( points )
         {
-            m_tree = new WOTree( m_detailDepthLabel->get( true ) );
+            m_tree = new WOctree( m_detailDepthLabel->get( true ) );
+            m_elevationImage = new WQuadTree( m_detailDepthLabel->get( true ) );
             WDataSetPoints::VertexArray verts = points->getVertices();
             WDataSetPoints::ColorArray colors = points->getColors();
             size_t count = verts->size()/3;
@@ -180,9 +206,21 @@ void WMBuildingsDetection::moduleMain()
                 }
                 m_progressStatus->increment( 1 );
                 m_tree->registerPoint( x, y, z );
+                m_elevationImage->registerPoint( x, y, z );
             }
             m_output->updateData( m_showTrianglesInsteadOfOctreeCubes->get( true )
                     ?tmpMesh :m_tree->getOutline( ) );
+            m_nbPoints->set( count );
+            m_xMin->set( m_elevationImage->getRootNode()->getXMin() );
+            m_xMax->set( m_elevationImage->getRootNode()->getXMax() );
+            m_yMin->set( m_elevationImage->getRootNode()->getYMin() );
+            m_yMax->set( m_elevationImage->getRootNode()->getYMax() );
+            m_zMin->set( m_elevationImage->getRootNode()->getElevationMin() );
+            m_zMax->set( m_elevationImage->getRootNode()->getElevationMax() );
+            if( m_exportTriggerProp->get( true ) )
+                m_elevationImage->exportElevationImage( m_elevationImageExportablePath->get().c_str(),
+                        elevImageModeSelector.getItemIndexOfSelected( 0 ) );
+            m_exportTriggerProp->set( WPVBaseTypes::PV_TRIGGER_READY, true );
             m_progressStatus->finish();
         }
 

@@ -37,23 +37,13 @@ namespace laslibb
 {
     WLasReader::WLasReader()
     {
-        xMin = 0;
-        xMax = 0;
-        yMin = 0;
-        yMax = 0;
-        zMin = 0;
-        zMax = 0;
+        xMin = xMax = yMin = yMax = zMin = zMax = 0;
         filePath = 0;
     }
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
-        xMin = 0;
-        xMax = 0;
-        yMin = 0;
-        yMax = 0;
-        zMin = 0;
-        zMax = 0;
+        xMin = xMax = yMin = yMax = zMin = zMax = 0;
         filePath = 0;
     }
     WLasReader::~WLasReader()
@@ -110,12 +100,9 @@ namespace laslibb
             z = point.GetZ();
             if  ( i == 0 )
             {
-                xMin = x;
-                xMax = x;
-                yMin = y;
-                yMax = y;
-                zMin = z;
-                zMax = z;
+                xMin = xMax = x;
+                yMin = yMax = y;
+                zMin = zMax = z;
             }
             if  ( x < xMin ) xMin = x;
             if  ( x > xMax ) xMax = x;

@@ -23,15 +23,15 @@
 //---------------------------------------------------------------------------
 
 #include "core/graphicsEngine/WTriangleMesh.h"
-#include "WONode.h"
+#include "WOctNode.h"
 
-#ifndef WOTREE_H
-#define WOTREE_H
+#ifndef WOCTREE_H
+#define WOCTREE_H
 
 /**
  * Octree structure for analyzing buildings point data
  */
-class WOTree
+class WOctree
 {
 public:
     /**
@@ -39,11 +39,11 @@ public:
      * \param detailDepth Supported octree node resolution resolution. Currently only
      *                    numbers covering 2^n results including negative n values.
      */
-    explicit WOTree( double detailDepth );
+    explicit WOctree( double detailDepth );
     /**
      * Octree destructor.
      */
-    virtual ~WOTree();
+    virtual ~WOctree();
     /**
      * Registers a new octree node corresponding to the entered resolution.
      * Sub octree nodes will be created until the level of the smallest set up 
@@ -65,11 +65,11 @@ private:
      * \param node Octree node to draw
      * \param outputMesh Output triangle mesh where the outline will be drawn.
      */
-    void drawNode( WONode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+    void drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
     /**
      * The root octree node of the whole tree.
      */
-    WONode* m_root;
+    WOctNode* m_root;
     /**
      * Detail level of the octree. Currently only numbers covering 2^n results 
      * including negative n values.
@@ -77,4 +77,4 @@ private:
     double m_detailLevel;
 };
 
-#endif  // WOTREE_H
+#endif  // WOCTREE_H
