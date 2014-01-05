@@ -23,14 +23,14 @@
 //---------------------------------------------------------------------------
 
 
-#ifndef WOCTNODE_H
-#define WOCTNODE_H
+#ifndef WOCTNODE2_H
+#define WOCTNODE2_H
 
 /**
  * Octree node class designed for points data. Each node represents an area where at least
  * one data set point exists.
  */
-class WOctNode
+class WOctNode2
 {
 public:
     /**
@@ -40,18 +40,18 @@ public:
      * \param centerZ Z coordinate of the octree node center.
      * \param radius Range from the center point that the node covers in each X/Y/Z direction.
      */
-    WOctNode( double centerX, double centerY, double centerZ, double radius );
+    WOctNode2( double centerX, double centerY, double centerZ, double radius );
     /**
      * Destructor of the octree node
      */
-    virtual ~WOctNode();
+    virtual ~WOctNode2();
     /**
      * Returns an octree child object of a particular case.
      * \param drawer Corresponding index of vX/vY/vZ which depict which octree node
      *               to return regarding the X/Y/Z coordinates.
      * \return Octree child node of that case.
      */
-    WOctNode* getChild( size_t drawer );
+    WOctNode2* getChild( size_t drawer );
     /**
      * Checks whether a coordinate fits into the existing root octree node. A false value
      * indicates that the node should be expanded. This method should be applied only
@@ -128,12 +128,12 @@ private:
      * \param drawer Determines where the node is nested into. The cases are determined by
      *               the constants vX, vY and vZ of the dwawer index lying between 0 and 7.
      */
-    void setChild( WOctNode* child, size_t drawer );
+    void setChild( WOctNode2* child, size_t drawer );
 
     /**
      * Children of the current octree node
      */
-    WOctNode* m_child[8];
+    WOctNode2* m_child[8];
     /**
      * Center of the current octree node
      */
@@ -149,4 +149,4 @@ private:
      */
     size_t m_groupNr;
 };
-#endif  // WOCTNODE_H
+#endif  // WOCTNODE2_H

@@ -22,17 +22,17 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WOCTREE_H
-#define WOCTREE_H
+#ifndef WOCTREE2_H
+#define WOCTREE2_H
 
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
-#include "WOctNode.h"
+#include "WOctNode2.h"
 
 /**
  * Octree structure for analyzing buildings point data
  */
-class WOctree
+class WOctree2
 {
 public:
     /**
@@ -40,11 +40,11 @@ public:
      * \param detailDepth Supported octree node resolution resolution. Currently only
      *                    numbers covering 2^n results including negative n values.
      */
-    explicit WOctree( double detailDepth );
+    explicit WOctree2( double detailDepth );
     /**
      * Octree destructor.
      */
-    virtual ~WOctree();
+    virtual ~WOctree2();
     /**
      * Registers a new octree node corresponding to the entered resolution.
      * Sub octree nodes will be created until the level of the smallest set up 
@@ -63,12 +63,7 @@ public:
      * \return Octree node that corresponds to the X/Y/Z coordinate. If no node is found, 
      *         then 0 will be returnd.
      */
-    WOctNode* getLeafNode( double x, double y, double z );
-    /**
-     * Returns the root node of the octree.
-     * \return The octree root noce.
-     */
-    WOctNode* getRootNode();
+    WOctNode2* getLeafNode( double x, double y, double z );
     /**
      * Adjusts group numbers of all leaf nodes so that nodes have the same ID that 
      * represent altogether a single block.
@@ -78,18 +73,17 @@ public:
      * Refreshs group IDs using the temporary id mapping vector m_groupEquivs.
      * \param node Node to refresh.
      */
-    void refreshNodeGroup( WOctNode* node );
-    /**
-     * Returns the voxel neighbor group count. Execute groupNeighbourLeafs() befor 
-     * acquiring that parameter.
-     * \return The voxel neighbor group count.
-     */
-    size_t getGroupCount();
+    void refreshNodeGroup( WOctNode2* node );
     /**
      * Returns a WTriangleMesh which outlines the octree.
      * \return Triangle mesh that represents the outline.
      */
     boost::shared_ptr< WTriangleMesh > getOutline();
+    /**
+     * Returns the root node of the octree.
+     * \return The octree root noce.
+     */
+    WOctNode2* getRootNode();
 
 private:
     /**
@@ -97,13 +91,13 @@ private:
      * \param node Octree node to draw
      * \param outputMesh Output triangle mesh where the outline will be drawn.
      */
-    void drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+    void drawNode( WOctNode2* node, boost::shared_ptr< WTriangleMesh > outputMesh );
     /**
      * method that traverses a node in order to group all neighbor cubes into mutual 
      * group numbers.
      * \param node Subnodes to traverse recursively.
      */
-    void groupNeighbourLeafs( WOctNode* node );
+    void groupNeighbourLeafs( WOctNode2* node );
     /**
      * Resizes the temporary voxel group id mapping array.
      * \param listLength Target list size to apply.
@@ -112,7 +106,7 @@ private:
     /**
      * The root octree node of the whole tree.
      */
-    WOctNode* m_root;
+    WOctNode2* m_root;
     /**
      * Detail level of the octree. Currently only numbers covering 2^n results 
      * including negative n values.
@@ -126,4 +120,4 @@ private:
     std::vector<size_t> m_groupEquivs;
 };
 
-#endif  // WOCTREE_H
+#endif  // WOCTREE2_H

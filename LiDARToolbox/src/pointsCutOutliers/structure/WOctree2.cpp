@@ -24,25 +24,25 @@
 
 #include <iostream>
 
-#include "WOctree.h"
+#include "WOctree2.h"
 
-WOctree::WOctree( double detailDepth )
+WOctree2::WOctree2( double detailDepth )
 {
-    m_root = new WOctNode( 0.0, 0.0, 0.0, detailDepth );
+    m_root = new WOctNode2( 0.0, 0.0, 0.0, 1.0 );
     m_detailLevel = detailDepth;
 }
 
-WOctree::~WOctree()
+WOctree2::~WOctree2()
 {
 }
 
-void WOctree::registerPoint( double x, double y, double z )
+void WOctree2::registerPoint( double x, double y, double z )
 {
 //    std::cout << "Inflating point: " << x << ", " << y << ", " << z << std::endl;
-    while  ( !m_root->fitsIn( x, y, z ) || m_root->getRadius() <= m_detailLevel )
+    while  ( !m_root->fitsIn( x, y, z ) )
         m_root->expand();
 
-    WOctNode* node = m_root;
+    WOctNode2* node = m_root;
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y, z );
@@ -50,12 +50,12 @@ void WOctree::registerPoint( double x, double y, double z )
         node = node->getChild( drawer );
     }
 }
-WOctNode* WOctree::getLeafNode( double x, double y, double z )
+WOctNode2* WOctree2::getLeafNode( double x, double y, double z )
 {
     if( !m_root->fitsIn( x, y, z ) )
         return 0;
 
-    WOctNode* node = m_root;
+    WOctNode2* node = m_root;
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y, z );
@@ -65,31 +65,16 @@ WOctNode* WOctree::getLeafNode( double x, double y, double z )
     }
     return node;
 }
-WOctNode* WOctree::getRootNode()
+void WOctree2::groupNeighbourLeafs()
 {
-    return m_root;
-}
-size_t WOctree::getGroupCount()
-{
-    return m_groupEquivs.size();
-}
-void WOctree::groupNeighbourLeafs()
-{
-    resizeGroupList( 0 );
     groupNeighbourLeafs( m_root );
     size_t currentFinalGroup = 0;
-    for( size_t groupID = 0; groupID < m_groupEquivs.size(); groupID++ )
+    for( size_t index =0; index < m_groupEquivs.size(); index++ )
     {
-        bool idUsed = false;
-        for( size_t index = 0; index < m_groupEquivs.size(); index++ )
-        {
-            if( m_groupEquivs[index] == groupID )
-            {
-                m_groupEquivs[index] = currentFinalGroup;
-                idUsed = true;
-            }
-        }
-        if( idUsed ) currentFinalGroup++;
+        bool isRootGroup = index == m_groupEquivs[index];
+        currentFinalGroup += isRootGroup ?1 :0;
+        size_t oldGroup = m_groupEquivs[index];
+        m_groupEquivs[index] = isRootGroup ?currentFinalGroup :m_groupEquivs[oldGroup];
     }
     refreshNodeGroup( m_root );
     resizeGroupList( currentFinalGroup );
@@ -97,7 +82,7 @@ void WOctree::groupNeighbourLeafs()
         m_groupEquivs[index] = index;
     std::cout << "Found " << currentFinalGroup << " groups." << std::endl;
 }
-void WOctree::refreshNodeGroup( WOctNode* node )
+void WOctree2::refreshNodeGroup( WOctNode2* node )
 {
     if  ( node->getRadius() <= m_detailLevel )
     {
@@ -111,7 +96,7 @@ void WOctree::refreshNodeGroup( WOctNode* node )
                 refreshNodeGroup( node->getChild( child ) );
     }
 }
-void WOctree::groupNeighbourLeafs( WOctNode* node )
+void WOctree2::groupNeighbourLeafs( WOctNode2* node )
 {
     if  ( node->getRadius() <= m_detailLevel )
     {
@@ -120,39 +105,32 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
         double y = node->getCenter( 1 );
         double z = node->getCenter( 2 );
         double d = node->getRadius() * 2.0;
-        WOctNode* neighbors[3] = {
-//            getLeafNode( x-d, y-d, z ),
+        WOctNode2* neighbors[3] = {
+        //    getLeafNode( x-d, y-d, z ),
             getLeafNode( x  , y-d, z ),
-//            getLeafNode( x+d, y-d, z ),
+        //    getLeafNode( x+d, y-d, z ),
             getLeafNode( x-d, y  , z ),
-//            getLeafNode( x-d, y-d, z-d ),
-//            getLeafNode( x  , y-d, z-d ),
-//            getLeafNode( x+d, y-d, z-d ),
-//            getLeafNode( x-d, y  , z-d ),
-            getLeafNode( x  , y  , z-d ),
-//            getLeafNode( x+d, y  , z-d ),
-//            getLeafNode( x-d, y+d, z-d ),
-//            getLeafNode( x  , y+d, z-d )
-//            getLeafNode( x+d, y+d, z-d )
+        //    getLeafNode( x-d, y-d, z-d ),
+        //    getLeafNode( x  , y-d, z-d ),
+        //    getLeafNode( x+d, y-d, z-d ),
+        //    getLeafNode( x-d, y  , z-d ),
+            getLeafNode( x  , y  , z-d )
+        //    getLeafNode( x+d, y  , z-d ),
+        //    getLeafNode( x-d, y+d, z-d ),
+        //    getLeafNode( x  , y+d, z-d ),
+        //    getLeafNode( x+d, y+d, z-d )
         };
         for( size_t index = 0; index < 3; index++ )
-        {
-            WOctNode* neighbor = neighbors[index];
-            size_t neighborID = neighbor == 0 ?group :m_groupEquivs[neighbor->getGroupNr()];
-            if( group > neighborID && m_detailLevel == neighbor->getRadius() )
-                group = neighborID;
-        }
+            if( neighbors[index] != 0 && group > neighbors[index]->getGroupNr() )
+                group = neighbors[index]->getGroupNr();
         for( size_t index = 0; index < 3; index++ )
-        {
-            WOctNode* neighbor = neighbors[index];
-            size_t neighborID = neighbor == 0 ?group :m_groupEquivs[neighbor->getGroupNr()];
-            if( group < neighborID && m_detailLevel == neighbor->getRadius() )
+            if( neighbors[index] != 0 && group < neighbors[index]->getGroupNr() )
             {
-                for( size_t newIdx = 0; newIdx < m_groupEquivs.size(); newIdx++ )
-                    if( m_groupEquivs[newIdx] == neighborID )
+                size_t oldGroupID = neighbors[index]->getGroupNr();
+                for(size_t newIdx = 0; newIdx < m_groupEquivs.size(); newIdx++ )
+                    if( m_groupEquivs[newIdx] == oldGroupID )
                         m_groupEquivs[newIdx] = group;
             }
-        }
         if( group >= m_groupEquivs.size() )
         {
             resizeGroupList( group + 1 );
@@ -167,21 +145,21 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
                 groupNeighbourLeafs( node->getChild( child ) );
     }
 }
-void WOctree::resizeGroupList( size_t listLength )
+void WOctree2::resizeGroupList( size_t listLength )
 {
     m_groupEquivs.resize( listLength );
     m_groupEquivs.reserve( listLength );
 }
 
 
-boost::shared_ptr< WTriangleMesh > WOctree::getOutline()
+boost::shared_ptr< WTriangleMesh > WOctree2::getOutline()
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
     drawNode( m_root, tmpMesh );
     return tmpMesh;
 }
 
-void WOctree::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
+void WOctree2::drawNode( WOctNode2* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
     if  ( node->getRadius() <= m_detailLevel )
     {
@@ -221,6 +199,10 @@ void WOctree::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outpu
             if  ( node->getChild( child ) != 0 )
                 drawNode( node->getChild( child ), outputMesh );
     }
+}
+WOctNode2* WOctree2::getRootNode()
+{
+    return m_root;
 }
 
 

@@ -45,7 +45,7 @@
 #include "WLasReader.h"
 
 // This line is needed by the module loader to actually find your module.
-W_LOADABLE_MODULE( WMReadLAS )
+//W_LOADABLE_MODULE( WMReadLAS )
 //TODO(aschwarzkopf): Reenable above after solving the toolbox problem
 
 WMReadLAS::WMReadLAS():
@@ -104,7 +104,7 @@ void WMReadLAS::properties()
                             "width'.", 0, m_propCondition );
 
     m_scrollBarY = m_properties->addProperty( "Scope selection Y: ",
-                            "Y range will be drawn between input and input+'Data set "
+                            "YY range will be drawn between input and input+'Data set "
                             "width'.", 0, m_propCondition );
 
     m_translateDataToCenter = m_properties->addProperty( "Translate to center: ",

@@ -44,7 +44,6 @@ WQuadNode::WQuadNode( double centerX, double centerY, double radius )
 WQuadNode::~WQuadNode()
 {
     m_pointCount = 0;
-    m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 0;
 }
 
 WQuadNode* WQuadNode::getChild( size_t drawer )

@@ -57,6 +57,23 @@ public:
      */
     void registerPoint( double x, double y, double elevation );
     /**
+     * Returns a leaf node of the maximum detail depth covering X/Y coordinates.
+     * \param x X coordinate of the quadtree node.
+     * \param y Y coordinate of the quadtree node.
+     * \return The leaf quadtree node that corresponds to a X/Y coordinate. the 
+     *         return is 0 if no node of the finest detail level is found.
+     */
+    WQuadNode* getLeafNode( double x, double y );
+    /**
+     * Returns a leaf node of a particular detail depth covering X/Y coordinates.
+     * \param x X coordinate of the quadtree node.
+     * \param y Y coordinate of the quadtree node.
+     * \param detailDepth The detail level that the returned node must have.
+     * \return The leaf quadtree node that corresponds to a X/Y coordinate. the 
+     *         return is 0 if no node of the finest detail level is found.
+     */
+    WQuadNode* getLeafNode( double x, double y, double detailDepth );
+    /**
      * Returns a WTriangleMesh which outlines the quadtree.
      * \return Triangle mesh that represents the outline.
      */
@@ -71,6 +88,12 @@ public:
      *                      2: Point count each X/Y bin coordinate.
      */
     void exportElevationImage( const char* path, size_t elevImageMode );
+    /**
+     * Sets the elevation image export settings.
+     * \param minElevImageZ The minimal elevation where the image intensity starts to rise.
+     * \param intensityIncreasesPerMeter Intensity increase count per meter.
+     */
+    void setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter );
 
 private:
     /**
@@ -101,6 +124,16 @@ private:
      * including negative n values.
      */
     double m_detailLevel;
+    /**
+     * Elevation image export setting.
+     * The minimal elevation where the image intensity starts to rise.
+     */
+    double m_minElevImageZ;
+    /**
+     * Elevation image export setting.
+     * Intensity increase count per meter
+     */
+    double m_intensityIncreasesPerMeter;
 };
 
 #endif  // WQUADTREE_H

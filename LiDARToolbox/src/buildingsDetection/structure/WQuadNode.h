@@ -104,6 +104,7 @@ public:
      * \param elevation Elevation to register.
      */
     void registerPoint( double x, double y, double elevation );
+
     /**
      * Returns the count of registered points.
      * \return Registered points count.

@@ -31,6 +31,7 @@
 #include <core/kernel/WModule.h>
 
 #include "buildingsDetection/WMBuildingsDetection.h"
+#include "pointsCutOutliers/WMPointsCutOutliers.h"
 #include "readLAS/WMReadLAS.h"
 
 // #include "WToolkit.h"
@@ -48,6 +49,7 @@
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
     m.push_back( boost::shared_ptr< WModule >( new WMBuildingsDetection ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMPointsCutOutliers ) );
     m.push_back( boost::shared_ptr< WModule >( new WMReadLAS ) );
 }
 

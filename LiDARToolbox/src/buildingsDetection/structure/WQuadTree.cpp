@@ -33,6 +33,8 @@ WQuadTree::WQuadTree( double detailDepth )
 {
     m_root = new WQuadNode( 0.0, 0.0, 1.0 );
     m_detailLevel = detailDepth;
+    m_minElevImageZ = -16;
+    m_intensityIncreasesPerMeter = 8;
 }
 
 WQuadTree::~WQuadTree()
@@ -54,7 +56,25 @@ void WQuadTree::registerPoint( double x, double y, double elevation )
         node->registerPoint( x, y, elevation );
     }
 }
+WQuadNode* WQuadTree::getLeafNode( double x, double y )
+{
+    return getLeafNode( x, y, m_detailLevel);
+}
+WQuadNode* WQuadTree::getLeafNode( double x, double y, double detailLevel )
+{
+    if( !m_root->fitsIn( x, y ) )
+        return 0;
 
+    WQuadNode* node = m_root;
+    while  ( node->getRadius() > detailLevel )
+    {
+        size_t drawer = node->getFittingCase( x, y );
+        if( node->getChild( drawer ) == 0 )
+            return 0;
+        node = node->getChild( drawer );
+    }
+    return node;
+}
 WQuadNode* WQuadTree::getRootNode()
 {
     return m_root;
@@ -78,9 +98,9 @@ void WQuadTree::drawNode( WQuadNode* node, WQuadNode* rootNode, WBmpImage* image
 {
     if( node->getRadius() <= m_detailLevel )
     {
-        int intensity = ( node->getElevationMax() + 16.0 ) * 8.0;
-        if(elevImageMode == 0)
-            intensity = ( node->getElevationMin() + 16.0 ) * 8.0;
+        int intensity = ( ( elevImageMode != 0
+                ?node->getElevationMax() :node->getElevationMin() )
+                - m_minElevImageZ ) * m_intensityIncreasesPerMeter;
         if(elevImageMode == 2)
             intensity = node->getPointCount();
         if( intensity < 0 )
@@ -97,6 +117,11 @@ void WQuadTree::drawNode( WQuadNode* node, WQuadNode* rootNode, WBmpImage* image
             if  ( node->getChild( child ) != 0 )
                 drawNode( node->getChild( child ), rootNode, image, elevImageMode );
     }
+}
+void WQuadTree::setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter )
+{
+    m_minElevImageZ = minElevImageZ;
+    m_intensityIncreasesPerMeter = intensityIncreasesPerMeter;
 }
 size_t WQuadTree::getBin( double x )
 {
