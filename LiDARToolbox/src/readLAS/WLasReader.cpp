@@ -132,7 +132,6 @@ namespace laslibb
             m_progressStatus->increment( 1 );
         }
         m_progressStatus->finish();
-        std::cout << "Added points: " << addedPoints << std::endl;
 
         if  ( addedPoints == 0 )
         {

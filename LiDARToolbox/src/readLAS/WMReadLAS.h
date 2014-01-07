@@ -153,6 +153,8 @@ private:
      */
     WPropBool m_translateDataToCenter;
 
+    WPropInt m_nbVertices; //!< Info-property showing the number of vertices in the mesh.
+
 
     /**
      * Instance that puts out a WDataSetPoints of a LiDAR file (see www.liblas.org).

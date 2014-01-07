@@ -112,6 +112,9 @@ void WMReadLAS::properties()
                             "possible coordinates are -/+'Data set width'/2."
                             ".", true, m_propCondition );
 
+    m_nbVertices = m_infoProperties->addProperty( "Points", "The number of vertices in the loaded scan.", 0 );
+    m_nbVertices->setMax( std::numeric_limits< int >::max() );
+
     WModule::properties();
 }
 
@@ -151,6 +154,8 @@ void WMReadLAS::moduleMain()
                     m_translateDataToCenter->get( true ) );
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
             WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
+            m_nbVertices->set( tmpPointSet->size() );
+
             m_output->updateData( tmpPointSet );
         } catch( ... )
         {
