@@ -68,9 +68,8 @@ void WMDetTractCulling::moduleMain()
 
         m_moduleState.wait();
 
-        if( !m_tractIC->getData().get() ) // only continue if there is a valid dataset
+        if( !m_tractIC->getData() ) // only continue if there is a valid dataset
         {
-            m_moduleState.wait();
             continue;
         }
 
