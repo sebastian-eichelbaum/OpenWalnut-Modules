@@ -26,7 +26,7 @@
 {
   icon="WMMatrixWriter.png";
   description = "Writes a symmetric matrix to file";
-  author = "Mathias Goldau"
+  author = "Mathias Goldau";
   "Mathias Goldau"
   {
     url="http://www.informatik.uni-leipzig.de/bsv/homepage/en/people/mathias-goldau";

@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#include <vector>
 #include <cmath>
+#include <vector>
 
 #include <osg/Vec3>
 
@@ -40,12 +40,12 @@ WBoyColoring::~WBoyColoring()
 {
 }
 
-namespace {
-
+namespace
+{
     // method used by Demiralp's algorithm
     inline double SS( double NA, double ND )
     {
-        return ( NA * std::sin( ND * piDouble / 180.0 ) ) ;
+        return ( NA * std::sin( ND * piDouble / 180.0 ) );
     }
 
     // method used by Demiralp's algorithm
@@ -68,7 +68,7 @@ namespace {
         double xz = x * z;
         double yz = y * z;
 
-        double hh1 = 0.5 * (3.0 * zz2 - 1.0 ) / 1.58;
+        double hh1 = 0.5 * ( 3.0 * zz2 - 1.0 ) / 1.58;
         double hh2 = 3.0 * xz / 2.745;
         double hh3 = 3.0 * yz / 2.745;
         double hh4 = 1.5 * ( xx2 - yy2 ) / 2.745;
@@ -77,37 +77,37 @@ namespace {
         double hh7 = 2.5 * x * ( 7.0 * zz3 - 3.0 * z ) / 3.737;
         double hh8 = 2.5 * y * ( 7.0 * zz3 - 3.0 * z ) / 3.737;
         double hh9 = ( ( xx2 - yy2 ) * 7.5 * ( 7.0 * zz2 - 1.0 ) ) / 15.85;
-        double hh10 = (( 2.0 * xy ) * ( 7.5 * ( 7.0 * zz2 - 1.0 ) ) ) / 15.85;
-        double hh11 = 105.0 * ( 4.0 * xx3 * z - 3.0 * xz * ( 1.0 - zz2 ) ) / 59.32;
-        double hh12 = 105.0 * (-4.0 * yy3 * z + 3.0 * yz * ( 1.0 - zz2 ) ) / 59.32;
+        double hh10 = ( ( 2.0 * xy ) * ( 7.5 * ( 7.0 * zz2 - 1.0 ) ) ) / 15.85;
+        double hh11 = 105.0 * (  4.0 * xx3 * z - 3.0 * xz * ( 1.0 - zz2 ) ) / 59.32;
+        double hh12 = 105.0 * ( -4.0 * yy3 * z + 3.0 * yz * ( 1.0 - zz2 ) ) / 59.32;
 
         double s0 = -23.0;
         double s1 = 227.9;
         double s2 = 251.0;
         double s3 = 125.0;
 
-        double ss23 = SS(2.71, s0);
-        double cc23 = CC(2.71, s0);
-        double ss45 = SS(2.12, s1);
-        double cc45 = CC(2.12, s1);
-        double ss67 = SS(0.972, s2);
-        double cc67 = CC(0.972, s2);
-        double ss89 = SS(0.868, s3);
-        double cc89 = CC(0.868, s3);
+        double ss23 = SS( 2.71, s0 );
+        double cc23 = CC( 2.71, s0 );
+        double ss45 = SS( 2.12, s1 );
+        double cc45 = CC( 2.12, s1 );
+        double ss67 = SS( 0.972, s2 );
+        double cc67 = CC( 0.972, s2 );
+        double ss89 = SS( 0.868, s3 );
+        double cc89 = CC( 0.868, s3 );
 
         s0 = -23.0;
         s1 = 227.9;
         s2 = 251.0;
         s3 = 125.0;
 
-        ss23 = SS(2.71, s0);
-        cc23 = CC(2.71, s0);
-        ss45 = SS(2.12, s1);
-        cc45 = CC(2.12, s1);
-        ss67 = SS(0.972, s2);
-        cc67 = CC(0.972, s2);
-        ss89 = SS(0.868, s3);
-        cc89 = CC(0.868, s3);
+        ss23 = SS( 2.71, s0 );
+        cc23 = CC( 2.71, s0 );
+        ss45 = SS( 2.12, s1 );
+        cc45 = CC( 2.12, s1 );
+        ss67 = SS( 0.972, s2 );
+        cc67 = CC( 0.972, s2 );
+        ss89 = SS( 0.868, s3 );
+        cc89 = CC( 0.868, s3 );
 
         double X = 0.0;
         X += hh2 * cc23;
@@ -140,8 +140,8 @@ namespace {
         double w_x = 4.1925;
         double trl_x = -2.0425;
 
-        double w_y = 4.0217 ;
-        double trl_y = -1.8541 ;
+        double w_y = 4.0217;
+        double trl_y = -1.8541;
 
         double w_z = 4.0694;
         double trl_z = -2.1899;
@@ -181,8 +181,8 @@ WDataSetFibers::SPtr WBoyColoring::operator()( WProgress::SPtr progress, WBoolFl
         ++*progress;
 
         size_t sidx = fibStart->at( fidx ) * 3;
-        double x1,y1,z1; // actual vertex
-        double x2,y2,z2; // next vertex
+        double x1, y1, z1; // actual vertex
+        double x2, y2, z2; // next vertex
         WVector3d vec;
         WVector3d col;
 

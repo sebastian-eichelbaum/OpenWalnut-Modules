@@ -132,7 +132,7 @@ void WMDetTractClusteringGP::computeDistanceMatrix( boost::shared_ptr< const WDa
 
     m_similarities = WMatrixSymFLT::SPtr( new WMatrixSymFLT( dataSet->size() ) );
 
-    #pragma omp parallel for
+    #pragma omp parallel for schedule(guided)
     for( int i = 0; i < static_cast< int >( dataSet->size() ); ++i )
     {
         for( size_t j = i + 1; j < dataSet->size() && !m_shutdownFlag(); ++j )
@@ -178,41 +178,37 @@ boost::shared_ptr< WDendrogram > WMDetTractClusteringGP::computeDendrogram( size
         idx.insert( i );
     }
 
+    SimSortArray sims;
+    IdxSimMap map;
+    for( int i = 0; i < n ; ++i ) {
+        for( size_t j = i + 1; j < n; ++j ) {
+            IdxSimSPtr current( new IndexSimilarity( (*m_similarities)( i, j ), i, j ) );
+            sims.push( current );
+            map[ ( i * n + j - ( i + 1 ) * ( i + 2 ) / 2 ) ] = current;
+        }
+    }
+
+
     for( size_t i = 0; i < n - 1 && !m_shutdownFlag(); ++i )
     {
-        // Nearest Neighbour find: update p, q, and sim, so iterate over all valid matrix entries
-        // NOTE, WARNING, ATTENTION: This is brute force NN finding strategy and requires O(n^2) time
-        float maxSim = -wlimits::MAX_FLOAT; // This is not 0.0, since the similarity maybe very near to 0.0, and thus no new pair would be found!
-        size_t p = 0;
-        size_t q = 0;
-        for( std::set< size_t >::const_iterator it = idx.begin(); it != idx.end() && !m_shutdownFlag(); ++it )
-        {
-            for( std::set< size_t >::const_iterator jt = boost::next( it ); jt != idx.end() && !m_shutdownFlag(); ++jt )
-            {
-                if( (*m_similarities)( *it, *jt ) > maxSim )
-                {
-                    maxSim = (*m_similarities)( *it, *jt );
-                    p = *it;
-                    q = *jt;
-                }
-            }
+        while( !sims.empty() && sims.top() && ( idx.find( sims.top()->_i ) == idx.end()  || idx.find( sims.top()->_j ) == idx.end() ) ) {
+            sims.pop();
         }
-        if( m_shutdownFlag() )
-        {
+
+        if( sims.empty() || m_shutdownFlag() ) {
             break;
         }
+
+        float maxSim = sims.top()->_sim;
+        size_t p = sims.top()->_i;
+        size_t q = sims.top()->_j;
+        sims.pop();
 
         uf.merge( p, q );
         size_t newCE = uf.find( p );
         innerNode[ newCE ] = dend->merge( innerNode[ p ], innerNode[ q ], maxSim );
 
-        // erase one of the columns
-        size_t col_to_delete = p;
-        if( newCE == p )
-        {
-            col_to_delete = q;
-        }
-        idx.erase( col_to_delete );
+        idx.erase( newCE == p ? q : p );
 
         // update the column where now the new cluster pq resides
         for( std::set< size_t >::const_iterator it = idx.begin(); it != idx.end(); ++it )
@@ -224,7 +220,16 @@ boost::shared_ptr< WDendrogram > WMDetTractClusteringGP::computeDendrogram( size
                 // < pq, k > = |p| / ( |p| + |q| ) < p, k > + |q| / (|p| + |q|) < q, k >
                 double firstFactor = static_cast< double >( clusterSize[ p ] ) / ( clusterSize[ p ] + clusterSize[ q ] );
                 double secondFactor = static_cast< double >( clusterSize[ q ] ) / ( clusterSize[ p ] + clusterSize[ q ] );
+                size_t r = newCE > *it ? *it : newCE;
+                size_t s = newCE > *it ? newCE : *it;
                 (*m_similarities)( newCE, *it ) = firstFactor * (*m_similarities)( p, *it ) + secondFactor * (*m_similarities)( q, *it );
+                IdxSimSPtr current( new IndexSimilarity( (*m_similarities)( r, s ), r, s ) );
+                IdxSimMap::iterator old = map.find( ( r * n + s - ( r + 1 ) * ( r + 2 ) / 2 ) );
+                if( old != map.end() && old->second ) {
+                    old->second->_i = std::numeric_limits< size_t >::max();
+                    old->second = current;
+                }
+                sims.push( current );
             }
         }
         clusterSize[ newCE ] = clusterSize[ p ] + clusterSize[ q ];

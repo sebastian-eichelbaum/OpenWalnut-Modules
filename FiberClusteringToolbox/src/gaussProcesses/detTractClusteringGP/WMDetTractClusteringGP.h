@@ -138,6 +138,23 @@ protected:
     WMatrixSymFLT::SPtr m_similarities;
 
 private:
+    struct IndexSimilarity {
+      IndexSimilarity( double sim, size_t i, size_t j ) {
+          _sim = sim; _i = i; _j = j;
+      }
+      double _sim;
+      size_t _i;
+      size_t _j;
+    };
+    typedef boost::shared_ptr< IndexSimilarity > IdxSimSPtr;
+    class IdxSimSPtrLess {
+        public:
+            bool operator()( const IdxSimSPtr& lhs, const IdxSimSPtr& rhs ) const {
+                return lhs->_sim < rhs->_sim;
+            }
+    };
+    typedef std::priority_queue< IdxSimSPtr, std::vector< IdxSimSPtr >, IdxSimSPtrLess > SimSortArray;
+    typedef std::map< size_t, IdxSimSPtr > IdxSimMap;
 };
 
 #endif  // WMDETTRACTCLUSTERINGGP_H
