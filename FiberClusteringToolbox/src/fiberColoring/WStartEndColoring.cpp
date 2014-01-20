@@ -62,6 +62,7 @@ WDataSetFibers::SPtr WStartEndColoring::operator()( WProgress::SPtr progress, WB
     WDataSetFibers::LengthArray  fibLen   = fibers->getLineLengths();
     WDataSetFibers::VertexArray  fibVerts = fibers->getVertices();
     WDataSetFibers::ColorArray   newColors( new std::vector< float > );
+    newColors->reserve( fibVerts->size() );
 
     for( size_t fidx = 0; fidx < fibStart->size(); ++fidx ) // iterate over fibers
     {
@@ -79,7 +80,6 @@ WDataSetFibers::SPtr WStartEndColoring::operator()( WProgress::SPtr progress, WB
             newColors->push_back( col[0] );
             newColors->push_back( col[1] );
             newColors->push_back( col[2] );
-            newColors->push_back( col[3] );
         }
     }
 
