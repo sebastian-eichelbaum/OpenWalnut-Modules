@@ -28,7 +28,6 @@
 #include <core/common/WProgress.h>
 #include <core/common/WFlag.h>
 #include <core/dataHandler/WDataSetFibers.h>
-#include <core/dataHandler/WDataSetScalar.h>
 
 /**
  * Interface for coloring fibs

@@ -31,9 +31,10 @@
 #include <core/kernel/WKernel.h>
 #include <core/kernel/WModuleInputData.h>
 
+#include "WBoyColoring.h"
 #include "WMFiberColoring.h"
 #include "WSimilarityColoring.h"
-#include "WBoyColoring.h"
+#include "WStartEndColoring.h"
 
 WMFiberColoring::WMFiberColoring():
     WModule(),
@@ -42,6 +43,7 @@ WMFiberColoring::WMFiberColoring():
 {
     m_strategy.addStrategy( WBoyColoring::SPtr( new WBoyColoring() ) );
     m_strategy.addStrategy( WSimilarityColoring::SPtr( new WSimilarityColoring() ) );
+    m_strategy.addStrategy( WStartEndColoring::SPtr( new WStartEndColoring() ) );
 }
 
 WMFiberColoring::~WMFiberColoring()
