@@ -104,13 +104,16 @@ void WMReadLAS::properties()
                             "width'.", 0, m_propCondition );
 
     m_scrollBarY = m_properties->addProperty( "Scope selection Y: ",
-                            "Y range will be drawn between input and input+'Data set "
+                            "YY range will be drawn between input and input+'Data set "
                             "width'.", 0, m_propCondition );
 
     m_translateDataToCenter = m_properties->addProperty( "Translate to center: ",
                             "Translates X and Y coordinates to center. Minimal and maximal "
                             "possible coordinates are -/+'Data set width'/2."
                             ".", true, m_propCondition );
+
+    m_nbVertices = m_infoProperties->addProperty( "Points", "The number of vertices in the loaded scan.", 0 );
+    m_nbVertices->setMax( std::numeric_limits< int >::max() );
 
     WModule::properties();
 }
@@ -151,6 +154,8 @@ void WMReadLAS::moduleMain()
                     m_translateDataToCenter->get( true ) );
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
             WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
+            m_nbVertices->set( tmpPointSet->size() );
+
             m_output->updateData( tmpPointSet );
         } catch( ... )
         {

@@ -42,7 +42,8 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOTree.h"
+#include "structure/WOctree.h"
+#include "structure/WQuadTree.h"
 
 
 
@@ -169,8 +170,37 @@ private:
     WGEShader::RefPtr m_shader;
 
     /**
+     * Info tab property: Input points count.
+     */
+    WPropInt m_nbPoints;
+    /**
+     * Info tab property: Minimal x value of input x coordunates.
+     */
+    WPropDouble m_xMin;
+    /**
+     * Info tab property: Maximal x value of input x coordunates.
+     */
+    WPropDouble m_xMax;
+    /**
+     * Info tab property: Minimal y value of input x coordunates.
+     */
+    WPropDouble m_yMin;
+    /**
+     * Info tab property: Maximal y value of input x coordunates.
+     */
+    WPropDouble m_yMax;
+    /**
+     * Info tab property: Minimal z value of input x coordunates.
+     */
+    WPropDouble m_zMin;
+    /**
+     * Info tab property: Maximal z value of input x coordunates.
+     */
+    WPropDouble m_zMax;
+    /**
      * Voxel count that is cut off and kept regarding the ISO value.
      */
+
     WPropDouble m_stubSize;
 
     /**
@@ -192,6 +222,56 @@ private:
     WPropBool m_showTrianglesInsteadOfOctreeCubes;
 
     /**
+     * Mode of the elevation image to display
+     * 0: Minimal Z value of each X/Y bin coordinate.
+     * 1: Maximal Z value of each X/Y bin coordinate.
+     * 2: Point count of each X/Y bin coordinate.
+     */
+    WPropSelection m_elevImageMode;
+
+    /**
+     * Elevation image export setting. 
+     * All areas below that elevation are depicted using the black color.
+     */
+    WPropDouble m_minElevImageZ;
+    /**
+     * Elevation image export setting. 
+     * Count of intensity increases per meter.
+     */
+    WPropDouble m_intensityIncreasesPerMeter;
+
+    /**
+     * Path of the exportable elevation image *.bmp file.
+     */
+    WPropFilename m_elevationImageExportablePath; //!< The mesh will be read from this file.
+    WPropTrigger  m_exportTriggerProp; //!< This property triggers the actual reading,
+
+    /**
+     * This trigger button reloads the data to output.
+     */
+    WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
+
+
+    /**
+     * Main building detection setting.
+     * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
+     * where n can also be 0 or below. The bigger the pixels the greater are the areas 
+     * searched from an examined X/Y area.
+     */
+    WPropInt m_minSearchDetailDepth;
+    /**
+     * Main building detection setting.
+     * Height that must exceed above an relative minimum to recognize it as a building pixel.
+     */
+    WPropDouble m_minSearchCutUntilAbove;
+
+    /**
+     * Property to choose an output building of a voxel group number. Currently 0 is 
+     * cutting nothing and 1 is is showing all buildings altogether.
+     */
+    WPropInt m_selectedShowableBuilding;
+
+    /**
      * Instance for applying drawable geoms.
      */
     osg::ref_ptr< osg::Geode > m_geode;
@@ -203,7 +283,12 @@ private:
     /**
      * Octree node used for the data set points analysis.
      */
-    WOTree* m_tree;
+    WOctree* m_tree;
+    /**
+     * This is the elevation image of the whole data set.
+     * It depicts some statistical Z coordinate information of each X/Y-coordinate.
+     */
+    WQuadTree* m_elevationImage;
 };
 
 #endif  // WMBUILDINGSDETECTION_H

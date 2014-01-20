@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
+// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,38 +22,38 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WLASTOOL_H
-#define WLASTOOL_H
 
-#include <fstream>  // std::ifstream
-#include <iostream> // std::cout
+#ifndef WBMPSAVER_H
+#define WBMPSAVER_H
 
-#include <string>
-#include <vector>
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
 
-#include "core/kernel/WModule.h"
-#include "core/kernel/WKernel.h"
-#include "core/graphicsEngine/WTriangleMesh.h"
-#include "core/dataHandler/WDataSetPoints.h"
+#include "WBmpImage.h"
 
-using osg::Vec3;
-
-namespace laslibb
+/**
+ * Class that saves an image to a bmp file
+ */
+class WBmpSaver
 {
-    class WLasTool
-    {
-    public:
-        WLasTool();
-        WLasTool( boost::shared_ptr< WProgressCombiner > progress );
-        virtual ~WLasTool();
-        boost::shared_ptr< WDataSetPoints > getPoints  ();
+public:
+    /**
+     * Bmp saver constructor
+     */
+    WBmpSaver();
+    /**
+     * Bmp saver destructor
+     */
+    virtual ~WBmpSaver();
+    /**
+     * Static method to save an image as a bmp file.
+     * \param image The image to store
+     * \param path Target image file path.
+     */
+    static void saveImage( WBmpImage* image, const char* path );
 
-    private:
-        void setProgressSettings( size_t steps );
+private:
+};
 
-        boost::shared_ptr< WDataSetPoints > m_outputPoints;
-        boost::shared_ptr< WProgressCombiner > m_associatedProgressCombiner;
-        boost::shared_ptr< WProgress > m_progressStatus;
-    };
-} /* namespace butterfly */
-#endif  // WLASTOOL_H
+#endif  // WBMPSAVER_H

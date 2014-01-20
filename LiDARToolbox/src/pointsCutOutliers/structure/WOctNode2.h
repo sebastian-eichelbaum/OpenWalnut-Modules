@@ -23,14 +23,14 @@
 //---------------------------------------------------------------------------
 
 
-#ifndef WONODE_H
-#define WONODE_H
+#ifndef WOCTNODE2_H
+#define WOCTNODE2_H
 
 /**
  * Octree node class designed for points data. Each node represents an area where at least
  * one data set point exists.
  */
-class WONode
+class WOctNode2
 {
 public:
     /**
@@ -40,18 +40,18 @@ public:
      * \param centerZ Z coordinate of the octree node center.
      * \param radius Range from the center point that the node covers in each X/Y/Z direction.
      */
-    WONode( double centerX, double centerY, double centerZ, double radius );
+    WOctNode2( double centerX, double centerY, double centerZ, double radius );
     /**
      * Destructor of the octree node
      */
-    virtual ~WONode();
+    virtual ~WOctNode2();
     /**
      * Returns an octree child object of a particular case.
      * \param drawer Corresponding index of vX/vY/vZ which depict which octree node
      *               to return regarding the X/Y/Z coordinates.
      * \return Octree child node of that case.
      */
-    WONode* getChild( size_t drawer );
+    WOctNode2* getChild( size_t drawer );
     /**
      * Checks whether a coordinate fits into the existing root octree node. A false value
      * indicates that the node should be expanded. This method should be applied only
@@ -97,6 +97,16 @@ public:
      * \return the center coordinate to the corresponding dimension parameter
      */
     double getCenter( size_t dimension );
+    /**
+     * Returns the Node group ID that is calculated regarding the node neighbors.
+     * \return The voxel group ID.
+     */
+    size_t getGroupNr();
+    /**
+     * Sets the octree node group ID. It's usually calculated regarding the voxel neighbors.
+     * \param groupNr The voxel group ID.
+     */
+    void setGroupNr( size_t groupNr );
 
     /**
      * Determines which X coordinate axis case a m_child has.
@@ -118,12 +128,12 @@ private:
      * \param drawer Determines where the node is nested into. The cases are determined by
      *               the constants vX, vY and vZ of the dwawer index lying between 0 and 7.
      */
-    void setChild( WONode* child, size_t drawer );
+    void setChild( WOctNode2* child, size_t drawer );
 
     /**
      * Children of the current octree node
      */
-    WONode* m_child[8];
+    WOctNode2* m_child[8];
     /**
      * Center of the current octree node
      */
@@ -134,5 +144,9 @@ private:
      * node standing next to the current.
      */
     double m_radius;
+    /**
+     * The node group ID. This number usually corresponds to its voxel neighborship
+     */
+    size_t m_groupNr;
 };
-#endif  // WONODE_H
+#endif  // WOCTNODE2_H

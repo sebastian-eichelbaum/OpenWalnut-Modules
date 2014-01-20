@@ -22,12 +22,13 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMREADLAS_H
-#define WMREADLAS_H
+#ifndef WMPOINTSCUTOUTLIERS_H
+#define WMPOINTSCUTOUTLIERS_H
 
 
 #include <liblas/liblas.hpp>
 #include <string>
+#include <vector>
 
 #include <fstream>  // std::ifstream
 #include <iostream> // std::cout
@@ -36,9 +37,12 @@
 
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/graphicsEngine/shaders/WGEShader.h"
+#include "core/graphicsEngine/WTriangleMesh.h"
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
+#include "core/dataHandler/WDataSetPoints.h"
+#include "structure/WOctree2.h"
 
 
 
@@ -64,102 +68,127 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
-#include "WLasReader.h"
-
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
-/**Draws cubes where a value is at least as big as the preset ISO value
- * \ingroup modules*/
-class WMReadLAS: public WModule
+/**
+ * Draws cubes where a value is at least as big as the preset ISO value
+ * \ingroup modules
+ */
+class WMPointsCutOutliers: public WModule
 {
 public:
-    /**Creates the module for drawing contour lines.*/
-    WMReadLAS();
+    /**
+     * Creates the module for drawing contour lines.
+     */
+    WMPointsCutOutliers();
 
-    /**Destroys this module.*/
-    virtual ~WMReadLAS();
+    /**
+     * Destroys this module.
+     */
+    virtual ~WMPointsCutOutliers();
 
-    /**Gives back the name of this module.
-     * \return the module's name.*/
+    /**
+     * Gives back the name of this module.
+     * \return the module's name.
+     */
     virtual const std::string getName() const;
 
-    /**Gives back a description of this module.
-     * \return description to module.*/
+    /**
+     * Gives back a description of this module.
+     * \return description to module.
+     */
     virtual const std::string getDescription() const;
 
-    /**Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
+    /**
+     * Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
      * should never be initialized or modified in some other way. A simple new instance is required.
-     * \return the prototype used to create every module in OpenWalnut.*/
+     * \return the prototype used to create every module in OpenWalnut.
+     */
     virtual boost::shared_ptr< WModule > factory() const;
 
-    /**Get the icon for this module in XPM format.
-     * \return The icon.*/
+    /**
+     * Get the icon for this module in XPM format.
+     * \return The icon.
+     */
     virtual const char** getXPMIcon() const;
 
 protected:
-    /**Entry point after loading the module. Runs in separate thread.*/
+    /**
+     * Entry point after loading the module. Runs in separate thread.
+     */
     virtual void moduleMain();
 
-    /**Initialize the connectors this module is using.*/
+    /**
+     *Initialize the connectors this module is using.
+     */
     virtual void connectors();
 
-    /**Initialize the properties for this module.*/
+    /**
+     * Initialize the properties for this module.
+     */
     virtual void properties();
 
-    /**Initialize requirements for this module.*/
+    /**
+     * Initialize requirements for this module.
+     */
     virtual void requirements();
 
 private:
     /**
-     * Refreshs the minimal and maximal values of the scrollbars
+     * Initializes progress bar settings.
+     * \param steps Points count as reference to the progress bar.
      */
-    void refreshScrollBars();
+    void setProgressSettings( size_t steps );
 
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;  //!< Output connector provided by this module.
+    /**
+     * WDataSetPoints data input (proposed for LiDAR data).
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+    /**
+     * Processed point data with cut off outliers.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;
 
-    /**The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.*/
+    /**
+     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
+     */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
 
-    /**Needed for recreating the geometry, incase when resolution changes.*/
+    /**
+     * Needed for recreating the geometry, incase when resolution changes.
+     */
     boost::shared_ptr< WCondition > m_propCondition;
 
-    /**Shader unit for drawing. */
+    /**
+     * Shader unit for drawing.
+     */
     WGEShader::RefPtr m_shader;
 
-    /**Instance for applying drawable geoms. */
+    /**
+     * Determines the resolution of the smallest octree nodes in 2^n meters
+     */
+    WPropInt m_detailDepth;
+    /**
+     * Determines the resolution of the smallest octree nodes in meters
+     */
+    WPropDouble m_detailDepthLabel;
+
+    /**
+     * Instance for applying drawable geoms.
+     */
     osg::ref_ptr< osg::Geode > m_geode;
 
     /**
-     * Path of the LiDAR input file (www.liblas.org)
+     * Plugin progress status that is shared with the reader.
      */
-    WPropFilename m_lasFile; //!< The mesh will be read from this file.
+    boost::shared_ptr< WProgress > m_progressStatus;
     /**
-     * The maximal width of the output data.
+     * Octree node used for the data set points analysis.
      */
-    WPropInt m_outputDataWidth;
-    /**
-     * Scrollbar that changes the minimal output X value
-     */
-    WPropInt m_scrollBarX;
-    /**
-     * Scrollbar that changes the minimal output Y value
-     */
-    WPropInt m_scrollBarY;
-    /**
-     * Enables to put the output data to the coordinate system center
-     */
-    WPropBool m_translateDataToCenter;
-
-    WPropInt m_nbVertices; //!< Info-property showing the number of vertices in the mesh.
-
-
-    /**
-     * Instance that puts out a WDataSetPoints of a LiDAR file (see www.liblas.org).
-     */
-    laslibb::WLasReader reader;
+    WOctree2* m_tree;
 };
 
-#endif  // WMREADLAS_H
+#endif  // WMPOINTSCUTOUTLIERS_H
