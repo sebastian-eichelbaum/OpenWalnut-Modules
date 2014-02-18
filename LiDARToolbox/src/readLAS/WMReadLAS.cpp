@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -22,12 +22,11 @@
 //
 //---------------------------------------------------------------------------
 
-//Brings me at least very few forward: http://osgeo-org.1560.x6.nabble.com/Liblas-devel-c-liblas-problem-td4919064.html
-
 #include <string>
 
-#include <fstream>  // std::ifstream
-#include <iostream> // std::cout
+#include <fstream>
+#include <iostream>
+#include <limits>
 
 #include <osg/Geometry>
 #include "core/kernel/WModule.h"

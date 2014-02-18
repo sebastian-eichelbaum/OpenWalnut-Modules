@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -28,10 +28,10 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOctNode.h"
-#include "structure/WQuadNode.h"
-#include "structure/WQuadTree.h"
-#include "structure/WOctree.h"
+#include "../datastructures/octree/WOctNode.h"
+#include "../datastructures/quadtree/WQuadNode.h"
+#include "../datastructures/quadtree/WQuadTree.h"
+#include "../datastructures/octree/WOctree.h"
 
 /**
  * Class that detects buildings using the WDataSetPoints

@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -26,12 +26,13 @@
 #include <vector>
 
 #include "WCutOutliersDeamon.h"
-#include "structure/WOctNode2.h"
-#include "structure/WOctree2.h"
+#include "../datastructures/octree/WOctNode.h"
+#include "../datastructures/octree/WOctree.h"
 
 WCutOutliersDeamon::WCutOutliersDeamon()
 {
     m_detailDepth = 1;
+    //TODO(schwarzkopf): Bug existing using the 79MB LiDAR file using the detail level 0.
 }
 
 WCutOutliersDeamon::~WCutOutliersDeamon()
@@ -43,7 +44,7 @@ boost::shared_ptr< WDataSetPoints > WCutOutliersDeamon::cutOutliers( boost::shar
     WDataSetPoints::VertexArray verts = points->getVertices();
     WDataSetPoints::ColorArray colors = points->getColors();
     size_t count = verts->size()/3;
-    WOctree2* octree = new WOctree2( m_detailDepth );
+    WOctree* octree = new WOctree( m_detailDepth );
 
     for  ( size_t vertex = 0; vertex < count; vertex++)
     {
@@ -75,7 +76,7 @@ boost::shared_ptr< WDataSetPoints > WCutOutliersDeamon::cutOutliers( boost::shar
         double x = verts->at( vertex*3 );
         double y = verts->at( vertex*3+1 );
         double z = verts->at( vertex*3+2 );
-        WOctNode2* node = octree->getLeafNode( x, y, z );
+        WOctNode* node = octree->getLeafNode( x, y, z );
         if(node != 0 && node->getGroupNr() == largestGroup )
         {
             float r = colors->at( vertex*3 );
@@ -95,7 +96,7 @@ boost::shared_ptr< WDataSetPoints > WCutOutliersDeamon::cutOutliers( boost::shar
     return outputPoints;
 }
 
-void WCutOutliersDeamon::countGroups( WOctNode2* node )
+void WCutOutliersDeamon::countGroups( WOctNode* node )
 {
     if  ( node->getRadius() <= m_detailDepth )
     {

@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -28,7 +28,7 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOctNode2.h"
+#include "../datastructures/octree/WOctNode.h"
 
 /**
  * This is an outliers cut algorithm it simply groups all the points in node groups. 
@@ -65,7 +65,7 @@ private:
      * Counts voxels of each group. The method traverses recursively.
      * \param node Octree node to count voxels of each physically connected node group.
      */
-    void countGroups( WOctNode2* node );
+    void countGroups( WOctNode* node );
     /**
      * Resizes the voxel group list representing corresponding voxel counts.
      * \param newSize Target list length to apply.

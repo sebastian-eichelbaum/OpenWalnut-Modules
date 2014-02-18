@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -24,8 +24,6 @@
 
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "WQuadNode.h"
-#include "../bitmapImage/WBmpImage.h"
-#include "../bitmapImage/WBmpSaver.h"
 
 #ifndef WQUADTREE_H
 #define WQUADTREE_H
@@ -78,43 +76,19 @@ public:
      * \return Triangle mesh that represents the outline.
      */
     WQuadNode* getRootNode();
-
-    /**
-     * Exports the quadtree to an elevation image of the bmp format.
-     * \param path Target image file path.
-     * \param elevImageMode Mode oft the elevation image.
-     *                      0: Minimal values each X/Y bin coordinate.
-     *                      1: Maximal values each X/Y bin coordinate.
-     *                      2: Point count each X/Y bin coordinate.
-     */
-    void exportElevationImage( const char* path, size_t elevImageMode );
-    /**
-     * Sets the elevation image export settings.
-     * \param minElevImageZ The minimal elevation where the image intensity starts to rise.
-     * \param intensityIncreasesPerMeter Intensity increase count per meter.
-     */
-    void setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter );
-
-private:
-    /**
-     * Draws an quadtree node to the bmp file. All subchildren will also be drawn.
-     * \param node Quadtree node to draw
-     * \param rootNode Root node that holds some important parameters for each calculation.
-     * \param image Image to set pixels into.
-     * \param elevImageMode Mode oft the elevation image.
-     *                      0: Minimal values each X/Y bin coordinate.
-     *                      1: Maximal values each X/Y bin coordinate.
-     *                      2: Point count each X/Y bin coordinate.
-     */
-    void drawNode( WQuadNode* node, WQuadNode* rootNode, WBmpImage* image, size_t elevImageMode );
-
     /**
      * Calculates relative coordinates which correspond to quadtree bin scheme.
      * \param x Coordinate of any dimension.
      * \return Linear bin coordinate index of a coordinate.
      */
     size_t getBin( double x );
+    /**
+     * Returns the minimal allowed radius for any Quadnode.
+     * \return The minimal radius of any quadnode.
+     */
+    double getDetailLevel();
 
+private:
     /**
      * The root quadtree node of the whole tree.
      */
@@ -124,16 +98,6 @@ private:
      * including negative n values.
      */
     double m_detailLevel;
-    /**
-     * Elevation image export setting.
-     * The minimal elevation where the image intensity starts to rise.
-     */
-    double m_minElevImageZ;
-    /**
-     * Elevation image export setting.
-     * Intensity increase count per meter
-     */
-    double m_intensityIncreasesPerMeter;
 };
 
 #endif  // WQUADTREE_H

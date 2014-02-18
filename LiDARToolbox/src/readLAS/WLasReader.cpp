@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -43,7 +43,7 @@ namespace laslibb
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
-        xMin = xMax = yMin = yMax = zMin = zMax = 0;
+        xMin = xMax = yMin = yMax = zMin = zMax = 1;
         filePath = 0;
     }
     WLasReader::~WLasReader()
@@ -88,6 +88,12 @@ namespace laslibb
         float xOffset = fromX + dataSetWidth / 2;
         float yOffset = fromY + dataSetWidth / 2;
         float zOffset = ( zMax - zMin ) / 2;
+
+//        double oldTime = 0.0; //TODO(schwarzkopf): remove that commented lines in final version
+//        size_t oldI = 0;
+//        size_t timeIdx = 0;
+//        size_t crashCount = 0;
+
         for  ( size_t i = 0; i < count; i++ )
         {
             double x, y, z;
@@ -98,6 +104,25 @@ namespace laslibb
             x = point.GetX();
             y = point.GetY();
             z = point.GetZ();
+//            { //TODO(schwarzkopf): remove that commented lines in final version
+//                double thisTime = point.GetTime();
+//                if(oldTime != thisTime)
+//                {
+//                    if(oldTime>thisTime)
+//                    {
+//                        crashCount++;
+//                        std::cout << "crash!! " << oldTime << "\t" << thisTime-oldTime << std::endl;
+//                    }
+//                    double diff = thisTime-oldTime;
+//                    std::cout << diff << "\t" << ( i - oldI ) << std::endl;
+//                    oldTime = thisTime;
+//                    oldI = i;
+//                    timeIdx++;
+//                }
+//                //std::cout << "Point stuff: " << point.GetFlightLineEdge() << "\t" <<
+//                //        point.GetPointSourceID() << "\t" << point.GetRawX() << "\t" <<
+//                //        timeIdx << std::endl;
+//            }
             if  ( i == 0 )
             {
                 xMin = xMax = x;
@@ -131,7 +156,10 @@ namespace laslibb
 //            std::cout << i << ": " << x << " " << " " << y << " " << z << " " << v << "\r\n";
             m_progressStatus->increment( 1 );
         }
+//        std::cout << "Time/point count: " << timeIdx << " / " << count <<
+//                "\tInvalid order occurances: " << crashCount<< std::endl;
         m_progressStatus->finish();
+//        std::cout << "Added points: " << addedPoints << std::endl;
 
         if  ( addedPoints == 0 )
         {

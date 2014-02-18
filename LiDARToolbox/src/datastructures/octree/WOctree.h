@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -86,10 +86,17 @@ public:
      */
     size_t getGroupCount();
     /**
-     * Returns a WTriangleMesh which outlines the octree.
-     * \return Triangle mesh that represents the outline.
+     * Returns the detail level. It's the minimal allowed radius of any quadnode.
+     * \return The minimal radius of any quadnode.
      */
-    boost::shared_ptr< WTriangleMesh > getOutline();
+    double getDetailLevel();
+    /**
+     * Returns a color channel value for a particular building or point group.
+     * \param groupNr Group number to assign a corresponding color
+     * \param colorChannel Channel of the whole color that is returned. 0=red, 1=green and 2=blue.
+     * \return Group color of values between 0.0 and 1.0 corresponding to a particular colorChannel.
+     */
+    static float calcColor( size_t groupNr, size_t colorChannel );
 
 private:
     /**
@@ -114,8 +121,8 @@ private:
      */
     WOctNode* m_root;
     /**
-     * Detail level of the octree. Currently only numbers covering 2^n results 
-     * including negative n values.
+     * Detail level of the octree. Currently 2^value is the smallest possible radius of 
+     * all octree nodes.
      */
     double m_detailLevel;
     /**
@@ -124,6 +131,20 @@ private:
      * After the process the size corresponds to the recognized building count.
      */
     std::vector<size_t> m_groupEquivs;
+    /**
+     * Colors that are used to highlight buildings using different colors.
+     */
+    static const size_t colors[];
+    /**
+     * Color count or size of the field colors[].
+     */
+    static const size_t colorCount;
+    /**
+     * Draws a Quadtree node and its subchildren to the triangle mesh.
+     * \param node Octree node to draw on the triangle mesh.
+     * \param outputMesh Target triangle mesh where the voxels will be drawn
+     * \param octree The octree that is drawn. Still requires that param to gather some parameters.
+     */
 };
 
 #endif  // WOCTREE_H

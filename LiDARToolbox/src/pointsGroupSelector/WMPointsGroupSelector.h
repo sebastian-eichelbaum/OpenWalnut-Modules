@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMBUILDINGSDETECTION_H
-#define WMBUILDINGSDETECTION_H
+#ifndef WMPOINTSGROUPSELECTOR_H
+#define WMPOINTSGROUPSELECTOR_H
 
 
 #include <liblas/liblas.hpp>
@@ -41,9 +41,7 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
-#include "core/dataHandler/WDataSetPoints.h"
 #include "../datastructures/octree/WOctree.h"
-#include "../datastructures/quadtree/WQuadTree.h"
 
 #include "../datastructures/WDataSetPointsGrouped.h"
 
@@ -78,18 +76,18 @@ class WGEManagedGroupNode;
  * Draws cubes where a value is at least as big as the preset ISO value
  * \ingroup modules
  */
-class WMBuildingsDetection: public WModule
+class WMPointsGroupSelector: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMBuildingsDetection();
+    WMPointsGroupSelector();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMBuildingsDetection();
+    virtual ~WMPointsGroupSelector();
 
     /**
      * Gives back the name of this module.
@@ -147,12 +145,12 @@ private:
     /**
      * WDataSetPoints data input (proposed for LiDAR data).
      */
-    boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_input;
 
     /**
-     * WDataSetPointsGrouped data output as point groups depicting each building
+     * WDataSetPoints data output as tetraeders.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputPointsGrouped;
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_output;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -197,7 +195,16 @@ private:
      * Info tab property: Maximal z value of input x coordunates.
      */
     WPropDouble m_zMax;
+    /**
+     * Voxel count that is cut off and kept regarding the ISO value.
+     */
 
+    WPropDouble m_stubSize;
+
+    /**
+     * Voxel count that is cut off and kept regarding the ISO value.
+     */
+    WPropDouble m_contrast;
     /**
      * Determines the resolution of the smallest octree nodes in 2^n meters
      */
@@ -206,22 +213,17 @@ private:
      * Determines the resolution of the smallest octree nodes in meters
      */
     WPropDouble m_detailDepthLabel;
-
-    WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
-
+    /**
+     * Depicting the input data set points showing the point outline instead of regions
+     * depicted as cubes that cover existing points.
+     */
+    WPropBool m_showTrianglesInsteadOfOctreeCubes;
 
     /**
-     * Main building detection setting.
-     * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
-     * where n can also be 0 or below. The bigger the pixels the greater are the areas 
-     * searched from an examined X/Y area.
+     * Property to choose an output building of a voxel group number. Currently 0 is 
+     * cutting nothing and 1 is is showing all buildings altogether.
      */
-    WPropInt m_minSearchDetailDepth;
-    /**
-     * Main building detection setting.
-     * Height that must exceed above an relative minimum to recognize it as a building pixel.
-     */
-    WPropDouble m_minSearchCutUntilAbove;
+    WPropInt m_selectedShowableBuilding;
 
     /**
      * Instance for applying drawable geoms.
@@ -234,4 +236,4 @@ private:
     boost::shared_ptr< WProgress > m_progressStatus;
 };
 
-#endif  // WMBUILDINGSDETECTION_H
+#endif  // WMPOINTSGROUPSELECTOR_H

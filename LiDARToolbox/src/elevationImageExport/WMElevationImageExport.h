@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMBUILDINGSDETECTION_H
-#define WMBUILDINGSDETECTION_H
+#ifndef WMELEVATIONIMAGEEXPORT_H
+#define WMELEVATIONIMAGEEXPORT_H
 
 
 #include <liblas/liblas.hpp>
@@ -42,10 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/octree/WOctree.h"
 #include "../datastructures/quadtree/WQuadTree.h"
-
-#include "../datastructures/WDataSetPointsGrouped.h"
 
 
 
@@ -69,27 +66,30 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
+#include "bitmapImage/WBmpImage.h"
+#include "bitmapImage/WBmpSaver.h"
+
+#include "WElevationImageOutliner.h"
+#include "../datastructures/WDataSetPointsGrouped.h"
+
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Draws cubes where a value is at least as big as the preset ISO value
+ * Module to export an elevation image bitmap
  * \ingroup modules
  */
-class WMBuildingsDetection: public WModule
+class WMElevationImageExport: public WModule
 {
 public:
-    /**
-     * Creates the module for drawing contour lines.
-     */
-    WMBuildingsDetection();
+    WMElevationImageExport();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMBuildingsDetection();
+    virtual ~WMElevationImageExport();
 
     /**
      * Gives back the name of this module.
@@ -148,11 +148,14 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
-
     /**
-     * WDataSetPointsGrouped data output as point groups depicting each building
+     * Grouped points input data to highlight detected groupes using a set of colors.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputPointsGrouped;
+    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_pointGroups;
+    /**
+     * The output connector containing the elevation image outlined to the triangle mesh.
+     */
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_elevationImageDisplay;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -207,21 +210,30 @@ private:
      */
     WPropDouble m_detailDepthLabel;
 
-    WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
-
+    /**
+     * Mode of the elevation image to display
+     * 0: Minimal Z value of each X/Y bin coordinate.
+     * 1: Maximal Z value of each X/Y bin coordinate.
+     * 2: Point count of each X/Y bin coordinate.
+     */
+    WPropSelection m_elevImageMode;
 
     /**
-     * Main building detection setting.
-     * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
-     * where n can also be 0 or below. The bigger the pixels the greater are the areas 
-     * searched from an examined X/Y area.
+     * Elevation image export setting. 
+     * All areas below that elevation are depicted using the black color.
      */
-    WPropInt m_minSearchDetailDepth;
+    WPropDouble m_minElevImageZ;
     /**
-     * Main building detection setting.
-     * Height that must exceed above an relative minimum to recognize it as a building pixel.
+     * Elevation image export setting. 
+     * Count of intensity increases per meter.
      */
-    WPropDouble m_minSearchCutUntilAbove;
+    WPropDouble m_intensityIncreasesPerMeter;
+
+    /**
+     * Path of the exportable elevation image *.bmp file.
+     */
+    WPropFilename m_elevationImageExportablePath; //!< The mesh will be read from this file.
+    WPropTrigger  m_exportTriggerProp; //!< This property triggers the actual reading,
 
     /**
      * Instance for applying drawable geoms.
@@ -232,6 +244,11 @@ private:
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+    /**
+     * This is the elevation image of the whole data set.
+     * It depicts some statistical Z coordinate information of each X/Y-coordinate.
+     */
+    WQuadTree* m_elevationImage;
 };
 
-#endif  // WMBUILDINGSDETECTION_H
+#endif  // WMELEVATIONIMAGEEXPORT_H

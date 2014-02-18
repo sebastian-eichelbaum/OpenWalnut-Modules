@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -23,14 +23,14 @@
 //---------------------------------------------------------------------------
 
 
-#ifndef WOCTNODE2_H
-#define WOCTNODE2_H
+#ifndef WOCTNODE_H
+#define WOCTNODE_H
 
 /**
  * Octree node class designed for points data. Each node represents an area where at least
  * one data set point exists.
  */
-class WOctNode2
+class WOctNode
 {
 public:
     /**
@@ -40,18 +40,18 @@ public:
      * \param centerZ Z coordinate of the octree node center.
      * \param radius Range from the center point that the node covers in each X/Y/Z direction.
      */
-    WOctNode2( double centerX, double centerY, double centerZ, double radius );
+    WOctNode( double centerX, double centerY, double centerZ, double radius );
     /**
      * Destructor of the octree node
      */
-    virtual ~WOctNode2();
+    virtual ~WOctNode();
     /**
      * Returns an octree child object of a particular case.
      * \param drawer Corresponding index of vX/vY/vZ which depict which octree node
      *               to return regarding the X/Y/Z coordinates.
      * \return Octree child node of that case.
      */
-    WOctNode2* getChild( size_t drawer );
+    WOctNode* getChild( size_t drawer );
     /**
      * Checks whether a coordinate fits into the existing root octree node. A false value
      * indicates that the node should be expanded. This method should be applied only
@@ -121,6 +121,51 @@ public:
      */
     static const size_t vZ[];
 
+    /**
+     * Registers a point to the node. During that minimum and maximum values of the 
+     * coordinates are refreshed. Each step the point count is incremented by 1. 
+     * The method doesn't traverse parents and children.
+     * \param x X coordinate to register.
+     * \param y Y coordinate to register.
+     * \param z Z coordinate to register.
+     */
+    void registerPoint( double x, double y, double z );
+    /**
+     * Returns the count of registered points.
+     * \return Registered points count.
+     */
+    size_t getPointCount();
+    /**
+     * Returns the minimal X value.
+     * \return The minimal X value.
+     */
+    double getXMin();
+    /**
+     * Returns the maximal X value.
+     * \return The maximal X value.
+     */
+    double getXMax();
+    /**
+     * Returns the minimal Y value.
+     * \return The minimal Y value.
+     */
+    double getYMin();
+    /**
+     * Returns the maximal Y value.
+     * \return The maximal Y value.
+     */
+    double getYMax();
+    /**
+     * Returns the minimal Z value.
+     * \return The minimal Z value.
+     */
+    double getZMin();
+    /**
+     * Returns the maximal Z value.
+     * \return The maximal Z value.
+     */
+    double getZMax();
+
 private:
     /**
      * Sets an octree node as a child of this node.
@@ -128,12 +173,12 @@ private:
      * \param drawer Determines where the node is nested into. The cases are determined by
      *               the constants vX, vY and vZ of the dwawer index lying between 0 and 7.
      */
-    void setChild( WOctNode2* child, size_t drawer );
+    void setChild( WOctNode* child, size_t drawer );
 
     /**
      * Children of the current octree node
      */
-    WOctNode2* m_child[8];
+    WOctNode* m_child[8];
     /**
      * Center of the current octree node
      */
@@ -148,5 +193,33 @@ private:
      * The node group ID. This number usually corresponds to its voxel neighborship
      */
     size_t m_groupNr;
+    /**
+     * Point count of the node.
+     */
+    size_t m_pointCount;
+    /**
+     * Minimal X coordinate.
+     */
+    double m_xMin;
+    /**
+     * Maximal X coordinate.
+     */
+    double m_xMax;
+    /**
+     * Minimal Y coordinate.
+     */
+    double m_yMin;
+    /**
+     * Maximal Y coordinate.
+     */
+    double m_yMax;
+    /**
+     * Minimal Z coordinate.
+     */
+    double m_zMin;
+    /**
+     * Maximal Z coordinate.
+     */
+    double m_zMax;
 };
-#endif  // WOCTNODE2_H
+#endif  // WOCTNODE_H

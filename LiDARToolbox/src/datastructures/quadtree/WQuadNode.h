@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -150,6 +150,17 @@ public:
      */
     static const size_t vY[];
 
+    /**
+     * Sets an assignable ID.
+     * \param id An assignable ID.
+     */
+    void setID( size_t id );
+    /**
+     * Returns an assignable ID.
+     * \return An assignable ID.
+     */
+    size_t getID();
+
 private:
     /**
      * Sets an quadtree node as a child of this node.
@@ -202,5 +213,11 @@ private:
      * Maximal elevation.
      */
     double m_zMax;
+
+    //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
+    /**
+     * An assignable ID parameter. It doesn't affect the quadtree function at all.
+     */
+    size_t m_id; //TODO(schwarzkopf): Function parameters that don't belong to the main function don't belong to it.
 };
 #endif  // WQUADNODE_H

@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -24,14 +24,14 @@
 
 #include <iostream>
 
-#include "WOctree2.h"
-#include "WOctNode2.h"
+#include "WOctree.h"
+#include "WOctNode.h"
 
-const size_t WOctNode2::vX[] = {0, 1, 0, 1, 0, 1, 0, 1};
-const size_t WOctNode2::vY[] = {0, 0, 1, 1, 0, 0, 1, 1};
-const size_t WOctNode2::vZ[] = {0, 0, 0, 0, 1, 1, 1, 1};
+const size_t WOctNode::vX[] = {0, 1, 0, 1, 0, 1, 0, 1};
+const size_t WOctNode::vY[] = {0, 0, 1, 1, 0, 0, 1, 1};
+const size_t WOctNode::vZ[] = {0, 0, 0, 0, 1, 1, 1, 1};
 
-WOctNode2::WOctNode2( double centerX, double centerY, double centerZ, double radius )
+WOctNode::WOctNode( double centerX, double centerY, double centerZ, double radius )
 {
     m_groupNr = 0;
     m_center[0] = centerX;
@@ -42,16 +42,16 @@ WOctNode2::WOctNode2( double centerX, double centerY, double centerZ, double rad
         m_child[index] = 0;
 }
 
-WOctNode2::~WOctNode2()
+WOctNode::~WOctNode()
 {
 }
 
-WOctNode2* WOctNode2::getChild( size_t drawer )
+WOctNode* WOctNode::getChild( size_t drawer )
 {
     return m_child[ drawer ];
 }
 
-bool WOctNode2::fitsIn( double x, double y, double z )
+bool WOctNode::fitsIn( double x, double y, double z )
 {
     if  ( z < m_center[2]-m_radius || z >= m_center[2]+m_radius )
         return false;
@@ -62,7 +62,7 @@ bool WOctNode2::fitsIn( double x, double y, double z )
     return true;
 }
 
-size_t WOctNode2::getFittingCase( double x, double y, double z )
+size_t WOctNode::getFittingCase( double x, double y, double z )
 {
     if  ( !fitsIn( x, y, z ) )
         return false;
@@ -75,7 +75,7 @@ size_t WOctNode2::getFittingCase( double x, double y, double z )
     return oct;
 }
 
-void WOctNode2::expand()
+void WOctNode::expand()
 {
     for  ( size_t oct = 0; oct < 8; oct++ )
     {
@@ -88,7 +88,7 @@ void WOctNode2::expand()
             double centerX = ( static_cast<double>( vX[oct] )*2.0 - 1.0 ) * m_radius + m_center[0];
             double centerY = ( static_cast<double>( vY[oct] )*2.0 - 1.0 ) * m_radius + m_center[1];
             double centerZ = ( static_cast<double>( vZ[oct] )*2.0 - 1.0 ) * m_radius + m_center[2];
-            WOctNode2* newChild = new WOctNode2( centerX, centerY, centerZ, m_radius );
+            WOctNode* newChild = new WOctNode( centerX, centerY, centerZ, m_radius );
             newChild->setChild( m_child[oct], newCase );
             setChild( newChild, oct );
         }
@@ -99,37 +99,81 @@ void WOctNode2::expand()
 /**
  * Creates a new octree node within a particular drawer if doesn't exist;
  */
-void WOctNode2::touchNode( size_t drawer )
+void WOctNode::touchNode( size_t drawer )
 {
     if  ( m_child[drawer] == 0 )
     {
         double centerX = m_center[0] - m_radius*0.5 + static_cast<double>( vX[drawer] )*m_radius;
         double centerY = m_center[1] - m_radius*0.5 + static_cast<double>( vY[drawer] )*m_radius;
         double centerZ = m_center[2] - m_radius*0.5 + static_cast<double>( vZ[drawer] )*m_radius;
-        m_child[drawer] = new WOctNode2( centerX, centerY, centerZ, m_radius * 0.5 );
+        m_child[drawer] = new WOctNode( centerX, centerY, centerZ, m_radius * 0.5 );
     }
 }
 
-double WOctNode2::getRadius()
+double WOctNode::getRadius()
 {
     return m_radius;
 }
-double WOctNode2::getCenter( size_t dimension )
+double WOctNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
 
-size_t WOctNode2::getGroupNr()
+size_t WOctNode::getGroupNr()
 {
     return m_groupNr;
 }
-void WOctNode2::setGroupNr( size_t groupNr )
+void WOctNode::setGroupNr( size_t groupNr )
 {
     m_groupNr = groupNr;
 }
 
 
-void WOctNode2::setChild( WOctNode2* child, size_t drawer )
+void WOctNode::registerPoint( double x, double y, double z )
+{
+    if( !m_pointCount > 0 )
+    {
+        m_xMin = m_xMax = x;
+        m_yMin = m_yMax = y;
+        m_zMin = m_zMax = z;
+    }
+    if( x < m_xMin ) m_xMin = x;
+    if( x > m_xMax ) m_xMax = x;
+    if( y < m_yMin ) m_yMin = y;
+    if( y > m_yMax ) m_yMax = y;
+    if( z < m_zMin ) m_zMin = z;
+    if( z > m_zMax ) m_zMax = z;
+    m_pointCount++;
+}
+void WOctNode::setChild( WOctNode* child, size_t drawer )
 {
     m_child[drawer] = child;
+}
+size_t WOctNode::getPointCount()
+{
+    return m_pointCount;
+}
+double WOctNode::getXMin()
+{
+    return m_xMin;
+}
+double WOctNode::getXMax()
+{
+    return m_xMax;
+}
+double WOctNode::getYMin()
+{
+    return m_yMin;
+}
+double WOctNode::getYMax()
+{
+    return m_yMax;
+}
+double WOctNode::getZMin()
+{
+    return m_zMin;
+}
+double WOctNode::getZMax()
+{
+    return m_zMax;
 }

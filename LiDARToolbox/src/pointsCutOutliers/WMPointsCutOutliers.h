@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -42,7 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOctree2.h"
+#include "../datastructures/octree/WOctree.h"
 
 
 
@@ -188,7 +188,7 @@ private:
     /**
      * Octree node used for the data set points analysis.
      */
-    WOctree2* m_tree;
+    WOctree* m_tree;
 };
 
 #endif  // WMPOINTSCUTOUTLIERS_H
