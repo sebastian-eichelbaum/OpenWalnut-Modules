@@ -38,7 +38,7 @@
  * Dataset to store a bunch of points without order or topology.
  */
 class WDataSetPointsGrouped : public WDataSet // NOLINT
-{ //TODO(schwarzkopf): Extend WDataSetPoints instead of writing lines again. Make Code cleaner that way.
+{ //TODO(schwarzkopf): Extension of WDataSetPoints can't be done because WDataSetPoints fields are private and not protected.
 public:
     // some type alias for the used arrays.
     /**
@@ -62,7 +62,7 @@ public:
     typedef boost::shared_ptr< std::vector< float > > ColorArray;
 
     /**
-     * Group IDs for each vertex in VertexArray
+     * Group IDs for each vertex in VertexArray.
      */
     typedef boost::shared_ptr< std::vector< size_t > > GroupArray;
 
@@ -236,7 +236,7 @@ private:
     ColorArray m_colors;
 
     /**
-     * Group index parameter for each vertex.
+     * Group ID array that is related to m_vertices and m_colors.
      */
     GroupArray m_groups;
 

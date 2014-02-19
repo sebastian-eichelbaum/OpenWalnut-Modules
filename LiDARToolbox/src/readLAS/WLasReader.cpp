@@ -37,13 +37,13 @@ namespace laslibb
 {
     WLasReader::WLasReader()
     {
-        xMin = xMax = yMin = yMax = zMin = zMax = 0;
+        m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 0;
         filePath = 0;
     }
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
-        xMin = xMax = yMin = yMax = zMin = zMax = 1;
+        m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 1;
         filePath = 0;
     }
     WLasReader::~WLasReader()
@@ -87,7 +87,7 @@ namespace laslibb
         size_t addedPoints = 0;
         float xOffset = fromX + dataSetWidth / 2;
         float yOffset = fromY + dataSetWidth / 2;
-        float zOffset = ( zMax - zMin ) / 2;
+        float zOffset = ( m_zMax - m_zMin ) / 2;
 
 //        double oldTime = 0.0; //TODO(schwarzkopf): remove that commented lines in final version
 //        size_t oldI = 0;
@@ -104,6 +104,7 @@ namespace laslibb
             x = point.GetX();
             y = point.GetY();
             z = point.GetZ();
+            v = point.GetIntensity(); //TODO(schwarzkopf): Still had no colored data set to check some liblas functions.
 //            { //TODO(schwarzkopf): remove that commented lines in final version
 //                double thisTime = point.GetTime();
 //                if(oldTime != thisTime)
@@ -125,16 +126,19 @@ namespace laslibb
 //            }
             if  ( i == 0 )
             {
-                xMin = xMax = x;
-                yMin = yMax = y;
-                zMin = zMax = z;
+                m_xMin = m_xMax = x;
+                m_yMin = m_yMax = y;
+                m_zMin = m_zMax = z;
+                m_intensityMin = m_intensityMax = v;
             }
-            if  ( x < xMin ) xMin = x;
-            if  ( x > xMax ) xMax = x;
-            if  ( y < yMin ) yMin = y;
-            if  ( y > yMax ) yMax = y;
-            if  ( z < zMin ) zMin = z;
-            if  ( z > zMax ) zMax = z;
+            if  ( x < m_xMin ) m_xMin = x;
+            if  ( x > m_xMax ) m_xMax = x;
+            if  ( y < m_yMin ) m_yMin = y;
+            if  ( y > m_yMax ) m_yMax = y;
+            if  ( z < m_zMin ) m_zMin = z;
+            if  ( z > m_zMax ) m_zMax = z;
+            if  ( v < m_intensityMin ) m_intensityMin = v;
+            if  ( v > m_intensityMax ) m_intensityMax = v;
 
             if  ( dataSetWidth == 0 || ( x >= fromX && x < fromX+dataSetWidth
                     && y >= fromY && y < fromY+dataSetWidth ) )
@@ -148,7 +152,6 @@ namespace laslibb
                 vertices->push_back( x );
                 vertices->push_back( y );
                 vertices->push_back( z );
-                v = point.GetIntensity();
                 for  ( int color = 0; color < 3; color++ )
                     colors->push_back( v );
                 addedPoints++;
@@ -178,18 +181,34 @@ namespace laslibb
     }
     float WLasReader::getXMin()
     {
-        return xMin;
+        return m_xMin;
     }
     float WLasReader::getXMax()
     {
-        return xMax;
+        return m_xMax;
     }
     float WLasReader::getYMin()
     {
-        return yMin;
+        return m_yMin;
     }
     float WLasReader::getYMax()
     {
-        return yMax;
+        return m_yMax;
+    }
+    float WLasReader::getZMin()
+    {
+        return m_zMin;
+    }
+    float WLasReader::getZMax()
+    {
+        return m_zMax;
+    }
+    float WLasReader::getIntensityMin()
+    {
+        return m_intensityMin;
+    }
+    float WLasReader::getIntensityMax()
+    {
+        return m_intensityMax;
     }
 } /* namespace std */

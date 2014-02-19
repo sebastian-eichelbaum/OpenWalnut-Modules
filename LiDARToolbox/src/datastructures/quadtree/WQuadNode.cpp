@@ -111,7 +111,7 @@ double WQuadNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
-void WQuadNode::registerPoint( double x, double y, double elevation )
+void WQuadNode::updateMinMax( double x, double y, double elevation )
 {
     if( !m_pointCount > 0 )
     {

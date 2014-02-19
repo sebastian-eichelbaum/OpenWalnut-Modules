@@ -111,10 +111,15 @@ void WMBuildingsDetection::properties()
                             "in meters for the octree search tree.", 1.0  );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
 
-    m_minSearchDetailDepth = m_properties->addProperty( "Detail Depth min. search: ", "//TODO", 3 );
+    m_minSearchDetailDepth = m_properties->addProperty( "Detail Depth min. search: ",
+            "Main building detection setting.\r\n"
+            "Resolution of the relative minimum search image. Use only numbers depictable by 2^n "
+            "where n can also be 0 or below. The bigger the pixels the greater are the areas "
+            "searched from an examined X/Y area", 3 );
     m_minSearchDetailDepth->setMin( 2 );
     m_minSearchDetailDepth->setMax( 6 );
-    m_minSearchCutUntilAbove = m_properties->addProperty( "Cut until above min: ", "//TODO", 4.0 );
+    m_minSearchCutUntilAbove = m_properties->addProperty( "Cut until above min: ", "Main building detection setting.\r\n"
+            "Height that must exceed above an relative minimum to recognize it as a building pixel.", 4.0 );
     m_minSearchCutUntilAbove->setMin( 2.0 );
     m_minSearchCutUntilAbove->setMax( 20.0 );
 
@@ -169,7 +174,7 @@ void WMBuildingsDetection::moduleMain()
             WOctree* buildingGroups = detector.getBuildingGroups();
 
             m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
-            WQuadTree* boundingBox = new WQuadTree( m_detailDepthLabel->get() ); //TODO(schwarzkopf): replace functions of this field by m_tree
+            WQuadTree* boundingBox = new WQuadTree( m_detailDepthLabel->get() );
 
             boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
             for  ( size_t vertex = 0; vertex < count; vertex++)
@@ -178,12 +183,11 @@ void WMBuildingsDetection::moduleMain()
                 float y = inputVerts->at( vertex*3+1 );
                 float z = inputVerts->at( vertex*3+2 );
 
+                boundingBox->registerPoint( x, y, z );
                 WOctNode* buildingVoxel = buildingGroups->getLeafNode( x, y, z );
                 if( buildingVoxel != 0 )
                 {
                     m_progressStatus->increment( 1 );
-                    boundingBox->registerPoint( x, y, z );
-
                     outputVerts->push_back( x );
                     outputVerts->push_back( y );
                     outputVerts->push_back( z );

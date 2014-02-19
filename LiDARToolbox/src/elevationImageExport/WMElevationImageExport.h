@@ -84,6 +84,9 @@ class WGEManagedGroupNode;
 class WMElevationImageExport: public WModule
 {
 public:
+    /**
+     * Constructs the module.
+     */
     WMElevationImageExport();
 
     /**
@@ -168,11 +171,6 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Shader unit for drawing.
-     */
-    WGEShader::RefPtr m_shader;
-
-    /**
      * Info tab property: Input points count.
      */
     WPropInt m_nbPoints;
@@ -220,7 +218,7 @@ private:
 
     /**
      * Elevation image export setting. 
-     * All areas below that elevation are depicted using the black color.
+     * Elevation height that will be displayed as the black color.
      */
     WPropDouble m_minElevImageZ;
     /**
@@ -232,13 +230,16 @@ private:
     /**
      * Path of the exportable elevation image *.bmp file.
      */
-    WPropFilename m_elevationImageExportablePath; //!< The mesh will be read from this file.
+    WPropFilename m_elevationImageExportablePath; //!< Path of the exportable elevation image *.bmp file.
     WPropTrigger  m_exportTriggerProp; //!< This property triggers the actual reading,
-
     /**
-     * Instance for applying drawable geoms.
+     * If trigger set then the elevation will be displayed in the triangle mesh color.
      */
-    osg::ref_ptr< osg::Geode > m_geode;
+    WPropBool m_showElevationInMeshColor;
+    /**
+     * If trigger set then the elevation will be displayed in the triangle mesh height offset.
+     */
+    WPropBool m_showElevationInMeshOffset;
 
     /**
      * Plugin progress status that is shared with the reader.

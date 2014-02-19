@@ -32,7 +32,6 @@
 WCutOutliersDeamon::WCutOutliersDeamon()
 {
     m_detailDepth = 1;
-    //TODO(schwarzkopf): Bug existing using the 79MB LiDAR file using the detail level 0.
 }
 
 WCutOutliersDeamon::~WCutOutliersDeamon()

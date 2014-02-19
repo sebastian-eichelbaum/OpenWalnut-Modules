@@ -71,45 +71,66 @@ template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
-/**Draws cubes where a value is at least as big as the preset ISO value
+/**
+ * Module to read LiDAR LAS files. It puts out data as WDataSetPoints.
  * \ingroup modules*/
 class WMReadLAS: public WModule
 {
 public:
-    /**Creates the module for drawing contour lines.*/
+    /**
+     * Creates the module for drawing contour lines.
+     */
     WMReadLAS();
 
-    /**Destroys this module.*/
+    /**
+     * Destroys this module.
+     */
     virtual ~WMReadLAS();
 
-    /**Gives back the name of this module.
-     * \return the module's name.*/
+    /**
+     * Gives back the name of this module.
+     * \return the module's name.
+     */
     virtual const std::string getName() const;
 
-    /**Gives back a description of this module.
-     * \return description to module.*/
+    /**
+     * Gives back a description of this module.
+     * \return description to module.
+     */
     virtual const std::string getDescription() const;
 
-    /**Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
+    /**
+     * Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
      * should never be initialized or modified in some other way. A simple new instance is required.
-     * \return the prototype used to create every module in OpenWalnut.*/
+     * \return the prototype used to create every module in OpenWalnut.
+     */
     virtual boost::shared_ptr< WModule > factory() const;
 
-    /**Get the icon for this module in XPM format.
-     * \return The icon.*/
+    /**
+     * Get the icon for this module in XPM format.
+     * \return The icon.
+     */
     virtual const char** getXPMIcon() const;
 
 protected:
-    /**Entry point after loading the module. Runs in separate thread.*/
+    /**
+     * Entry point after loading the module. Runs in separate thread.
+     */
     virtual void moduleMain();
 
-    /**Initialize the connectors this module is using.*/
+    /**
+     * Initialize the connectors this module is using.
+     */
     virtual void connectors();
 
-    /**Initialize the properties for this module.*/
+    /**
+     * Initialize the properties for this module.
+     */
     virtual void properties();
 
-    /**Initialize requirements for this module.*/
+    /**
+     * Initialize requirements for this module.
+     */
     virtual void requirements();
 
 private:
@@ -120,16 +141,19 @@ private:
 
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;  //!< Output connector provided by this module.
 
-    /**The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.*/
+    /**
+     * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
+     */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
 
-    /**Needed for recreating the geometry, incase when resolution changes.*/
+    /**
+     * Needed for recreating the geometry, incase when resolution changes.
+     */
     boost::shared_ptr< WCondition > m_propCondition;
 
-    /**Shader unit for drawing. */
-    WGEShader::RefPtr m_shader;
-
-    /**Instance for applying drawable geoms. */
+    /**
+     * Instance for applying drawable geoms.
+     */
     osg::ref_ptr< osg::Geode > m_geode;
 
     /**
@@ -154,6 +178,38 @@ private:
     WPropBool m_translateDataToCenter;
 
     WPropInt m_nbVertices; //!< Info-property showing the number of vertices in the mesh.
+    /**
+     * Info tab property: Minimal x value of input x coordunates.
+     */
+    WPropDouble m_xMin;
+    /**
+     * Info tab property: Maximal x value of input x coordunates.
+     */
+    WPropDouble m_xMax;
+    /**
+     * Info tab property: Minimal y value of input x coordunates.
+     */
+    WPropDouble m_yMin;
+    /**
+     * Info tab property: Maximal y value of input x coordunates.
+     */
+    WPropDouble m_yMax;
+    /**
+     * Info tab property: Minimal z value of input x coordunates.
+     */
+    WPropDouble m_zMin;
+    /**
+     * Info tab property: Maximal z value of input x coordunates.
+     */
+    WPropDouble m_zMax;
+    /**
+    * Info tab property: Minimal color intensity in LAS file.
+    */
+    WPropDouble m_intensityMin;
+    /**
+    * Info tab property: Maximal color intensity in LAS file.
+    */
+    WPropDouble m_intensityMax;
 
 
     /**

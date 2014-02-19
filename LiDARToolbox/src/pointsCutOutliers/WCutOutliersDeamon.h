@@ -31,8 +31,8 @@
 #include "../datastructures/octree/WOctNode.h"
 
 /**
- * This is an outliers cut algorithm it simply groups all the points in node groups. 
- * After all points of the lartest voxel group are returned.
+ * This is an outliers cut algorithm it simply groups all the points in cube groups. 
+ * After process all points of the largest voxel group are returned.
  */
 class WCutOutliersDeamon
 {
@@ -46,16 +46,16 @@ public:
      */
     virtual ~WCutOutliersDeamon();
     /**
-     * Cuts Outliers of a point data. At first all points are grouped. After that only 
+     * Cuts Outliers of a point data. At first all point cubes are grouped. After that only 
      * points of the group with the highest volume is returned
      * \param points Input WDataSetPoints to cut outliers off.
-     * \return WDataSetPoints after cutting ooff outliers.
+     * \return WDataSetPoints after cutting off outliers.
      */
     boost::shared_ptr< WDataSetPoints > cutOutliers(
             boost::shared_ptr< WDataSetPoints > points );
     /**
-     * Sets the cube size to determine cube neighborships. Not connected nodes are cut off.
-     * \param detailDepth Cube width in meters. Use only numbers that are in 2^n 
+     * Sets the cube radius to determine cube neighborships. Not connected nodes are cut off.
+     * \param detailDepth Cube radius in meters. Use only numbers that are in 2^n 
      * including negative n.
      */
     void setDetailDepth( double detailDepth );
@@ -76,7 +76,7 @@ private:
      */
     double m_detailDepth;
     /**
-     * Voxel count array of each group.
+     * Temporary voxel count array of each group.
      */
     std::vector<size_t> m_pointCounts;
 };

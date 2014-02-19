@@ -116,15 +116,15 @@ public:
      * the data voxels (currently only smallest possible leafs).
      * \param quadTree Elevation image that is imported to the bitmap image.
      * \param elevImageMode Mode oft the elevation image.
-     *                      0: Minimal values each X/Y bin coordinate.
-     *                      1: Maximal values each X/Y bin coordinate.
+     *                      0: Minimal Z values each X/Y bin coordinate.
+     *                      1: Maximal Z values each X/Y bin coordinate.
      *                      2: Point count each X/Y bin coordinate.
      */
     void importElevationImage( WQuadTree* quadTree, size_t elevImageMode );
     /**
      * Sets the elevation image export settings.
-     * \param minElevImageZ The minimal elevation where the image intensity starts to rise.
-     * \param intensityIncreasesPerMeter Intensity increase count per meter.
+     * \param minElevImageZ The elevation height that is mapped to the black color.
+     * \param intensityIncreasesPerMeter Intensity increases count per meter.
      */
     void setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter );
 
@@ -155,33 +155,33 @@ private:
      */
     size_t m_sizeY;
     /**
-     * Image red color intensity data. The order corresponds the following pixel traversing.
-     * It traverses linewise starting at Y=0 from first to last X value.
+     * Image red color intensity data. The order corresponds to the following pixel traversing.
+     * It traverses linewise each starting at Y=0 from first to last X value.
      */
     std::vector<size_t> m_dataR;
     /**
-     * Image green color intensity data. The order corresponds the following pixel traversing.
-     * It traverses linewise starting at Y=0 from first to last X value.
+     * Image green color intensity data. The order corresponds to the following pixel traversing.
+     * It traverses linewise each starting at Y=0 from first to last X value.
      */
     std::vector<size_t> m_dataG;
     /**
-     * Image blue color intensity data. The order corresponds the following pixel traversing.
-     * It traverses linewise starting at Y=0 from first to last X value.
+     * Image blue color intensity data. The order corresponds to the following pixel traversing.
+     * It traverses linewise each starting at Y=0 from first to last X value.
      */
     std::vector<size_t> m_dataB;
 
     /**
      * Elevation image export setting.
-     * The minimal elevation where the image intensity starts to rise.
+     * The elevation height that is mapped to the black color.
      */
     double m_minElevImageZ;
     /**
      * Elevation image export setting.
-     * Intensity increase count per meter
+     * Intensity increase count per meter.
      */
     double m_intensityIncreasesPerMeter;
     /**
-     * Draws an quadtree leaf node to the bmp file. All subchildren will also be drawn.
+     * Draws a quadtree leaf node to the bmp file. All subchildren will also be drawn.
      * \param node Quadtree node to draw
      * \param quadTree Quadtree that is drawn. Method knows where to draw points on the image 
      *                 using mandatory parameters (puxel size, x/y min/max etc.).

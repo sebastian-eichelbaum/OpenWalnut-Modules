@@ -123,11 +123,12 @@ size_t WElevationImageOutliner::getVertexID(
     existingNode = m_vertices->getLeafNode( x, y );
     size_t currentVertex = m_outputMesh->vertSize();
     existingNode->setID( currentVertex );
-    m_outputMesh->addVertex( x, y, elevation );
+    m_outputMesh->addVertex( x, y, m_showElevationInMeshOffset ?elevation :0 );
     elevation = ( elevation - m_minElevImageZ ) * m_intensityIncreasesPerMeter;
     if( elevation < 0.0 ) elevation = 0.0;
     if( elevation > 255.0 ) elevation = 255.0;
     elevation /= 255.0;
+    if( !m_showElevationInMeshColor ) elevation = 128;
     osg::Vec4 color = osg::Vec4( elevation, elevation, elevation, 1.0 );
     m_outputMesh->setVertexColor( currentVertex, color );
     return existingNode->getID();
@@ -136,6 +137,14 @@ void WElevationImageOutliner::setExportElevationImageSettings( double minElevIma
 {
     m_minElevImageZ = minElevImageZ;
     m_intensityIncreasesPerMeter = intensityIncreasesPerMeter;
+}
+void WElevationImageOutliner::setShowElevationInMeshColor( bool showElevationInMeshColor )
+{
+    m_showElevationInMeshColor = showElevationInMeshColor;
+}
+void WElevationImageOutliner::setShowElevationInMeshOffset( bool showElevationInMeshOffset )
+{
+    m_showElevationInMeshOffset = showElevationInMeshOffset;
 }
 boost::shared_ptr< WTriangleMesh > WElevationImageOutliner::getOutputMesh()
 {

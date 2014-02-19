@@ -92,7 +92,6 @@ void WMElevationImageExport::connectors()
 }
 
 
-//TODO(schwarzkopf): Feature - Elevation image preview as WTriangleMesh with option of Z schift in view.
 void WMElevationImageExport::properties()
 {
     m_nbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
@@ -131,7 +130,12 @@ void WMElevationImageExport::properties()
                             "Target file path of the exportable elevation image *.bmp file",
                             WPathHelper::getAppPath() );
     m_exportTriggerProp = m_properties->addProperty( "Write: ",  "Export elevation image", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
-
+    m_showElevationInMeshColor = m_properties->addProperty( "Show elevation in mesh color: ",
+                     "If trigger set then the elevation will be displayed in the triangle mesh "
+                     "color..", true, m_propCondition );
+    m_showElevationInMeshOffset = m_properties->addProperty( "Show elevation in mesh offset: ",
+                     "If trigger set then the elevation will be displayed in the triangle mesh "
+                     "height offset.", true, m_propCondition );
 
     WModule::properties();
 }
@@ -193,6 +197,8 @@ void WMElevationImageExport::moduleMain()
             m_zMax->set( m_elevationImage->getRootNode()->getElevationMax() );
             m_elevationImageOutliner->setExportElevationImageSettings(
                     m_minElevImageZ->get( true ), m_intensityIncreasesPerMeter->get() );
+            m_elevationImageOutliner->setShowElevationInMeshColor( m_showElevationInMeshColor->get() );
+            m_elevationImageOutliner->setShowElevationInMeshOffset( m_showElevationInMeshOffset->get() );
             m_elevationImageOutliner->importElevationImage( m_elevationImage,
                     elevImageModeSelector.getItemIndexOfSelected( 0 ) );
             m_elevationImageOutliner->highlightBuildingGroups( m_pointGroups->getData() );

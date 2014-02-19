@@ -45,13 +45,13 @@ void WQuadTree::registerPoint( double x, double y, double elevation )
         m_root->expand();
 
     WQuadNode* node = m_root;
-    node->registerPoint( x, y, elevation );
+    node->updateMinMax( x, y, elevation );
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y );
         node->touchNode( drawer );
         node = node->getChild( drawer );
-        node->registerPoint( x, y, elevation );
+        node->updateMinMax( x, y, elevation );
     }
 }
 WQuadNode* WQuadTree::getLeafNode( double x, double y )

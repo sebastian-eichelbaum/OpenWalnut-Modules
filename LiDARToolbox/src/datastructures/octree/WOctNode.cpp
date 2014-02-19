@@ -129,7 +129,7 @@ void WOctNode::setGroupNr( size_t groupNr )
 }
 
 
-void WOctNode::registerPoint( double x, double y, double z )
+void WOctNode::updateMinMax( double x, double y, double z )
 {
     if( !m_pointCount > 0 )
     {

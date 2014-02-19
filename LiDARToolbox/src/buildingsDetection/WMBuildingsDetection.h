@@ -75,14 +75,15 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Draws cubes where a value is at least as big as the preset ISO value
+ * Detects building structures within a WDataSetPoints. The recognition algorithm works by the 
+ * principle of relative height minimum height thresholding.
  * \ingroup modules
  */
 class WMBuildingsDetection: public WModule
 {
 public:
     /**
-     * Creates the module for drawing contour lines.
+     * Creates the module for the Building detection.
      */
     WMBuildingsDetection();
 
@@ -165,11 +166,6 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Shader unit for drawing.
-     */
-    WGEShader::RefPtr m_shader;
-
-    /**
      * Info tab property: Input points count.
      */
     WPropInt m_nbPoints;
@@ -199,11 +195,12 @@ private:
     WPropDouble m_zMax;
 
     /**
-     * Determines the resolution of the smallest octree nodes in 2^n meters
+     * Determines the resolution of the smallest octree nodes in 2^n meters. The smallest 
+     * radius equals to its result.
      */
     WPropInt m_detailDepth;
     /**
-     * Determines the resolution of the smallest octree nodes in meters
+     * Determines the resolution of smallest octree nodes. Their radius equal that value.
      */
     WPropDouble m_detailDepthLabel;
 
@@ -214,7 +211,9 @@ private:
      * Main building detection setting.
      * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
      * where n can also be 0 or below. The bigger the pixels the greater are the areas 
-     * searched from an examined X/Y area.
+     * searched from an examined X/Y area. In order to determine whether a point belongs to 
+     * at least four nodes of that detail level will be examined whether at least on of the 
+     * four is below of the height threshold of the examinable point.
      */
     WPropInt m_minSearchDetailDepth;
     /**
@@ -224,12 +223,7 @@ private:
     WPropDouble m_minSearchCutUntilAbove;
 
     /**
-     * Instance for applying drawable geoms.
-     */
-    osg::ref_ptr< osg::Geode > m_geode;
-
-    /**
-     * Plugin progress status that is shared with the reader.
+     * Plugin progress status.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
 };

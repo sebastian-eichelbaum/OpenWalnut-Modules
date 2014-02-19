@@ -90,16 +90,26 @@ public:
     virtual ~WElevationImageOutliner();
     /**
      * Sets the elevation image export settings.
-     * \param minElevImageZ The minimal elevation where the image intensity starts to rise.
+     * \param minElevImageZ The elevation height that is mapped to the black color.
      * \param intensityIncreasesPerMeter Intensity increase count per meter.
      */
     void setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter );
     /**
+     * Sets whether the elevation will be displayed in the triangle mesh color.
+     * \param showElevationInMeshColor Show elevation in triangle mesh color.
+     */
+    void setShowElevationInMeshColor( bool showElevationInMeshColor );
+    /**
+     * Sets whether the elevation will be displayed in the triangle mesh height offset.
+     * \param showElevationInMeshOffset Show elevation in triangle mesh offset.
+     */
+    void setShowElevationInMeshOffset( bool showElevationInMeshOffset );
+    /**
      * Draws an elevation image to the m_outputMesh triangle mesh.
      * \param quadTree Input quadtree depicting an elevation image.
      * \param elevImageMode Input quadtree depicting an elevation image.
-     *                      0: Minimal values each X/Y bin coordinate.
-     *                      1: Maximal values each X/Y bin coordinate.
+     *                      0: Minimal Z values each X/Y bin coordinate.
+     *                      1: Maximal Z values each X/Y bin coordinate.
      *                      2: Corresponding to the Point count each X/Y bin coordinate.
      */
     void importElevationImage( WQuadTree* quadTree, size_t elevImageMode );
@@ -116,16 +126,16 @@ public:
 
 private:
     /**
-     * Draws an elevation image to the m_outputMesh triangle mesh from a elevation image 
+     * Draws an elevation image to the m_outputMesh triangle mesh from an elevation image 
      * data node. All subnodes will be traversed.
      * \param node If it's a leaf node then physical neighbor nodes will be analyzed to 
-     *             draw triangles to the m_outputMesh. If it's a parent node then it'll 
+     *             draw triangles to m_outputMesh. If it's a parent node then it'll 
      *             used to traverse children.
-     * \param quadTree The quadtree object of the node. It's mainly used to be able to get 
+     * \param quadTree The quadtree object of the node. It's mainly used to be able to poll 
      *                 node's physical neighbors.
      * \param elevImageMode Elevation image kind to draw.
-     *                      0: Depicts minimal values
-     *                      1: Depicts maximal values
+     *                      0: Depicts minimal Z values
+     *                      1: Depicts maximal Z values
      *                      2: Depicts point counts within elevation image areas
      */
     void drawNode( WQuadNode* node, WQuadTree* quadTree, size_t elevImageMode );
@@ -138,38 +148,42 @@ private:
      *             m_outputMesh vertex ID.
      * \param elevImageMode Elevation image type for initializing the vertex if doesn't 
      *                      exist before:
-     *                      0: Minimal values each X/Y bin coordinate.
-     *                      1: Maximal values each X/Y bin coordinate.
+     *                      0: Minimal Z values each X/Y bin coordinate.
+     *                      1: Maximal Z values each X/Y bin coordinate.
      *                      2: Corresponding to the Point count each X/Y bin coordinate.
      * \return The m_outputMesh vertex ID to the corresponding elevation image value node.
      */
     size_t getVertexID( WQuadNode* node, size_t elevImageMode );
     /**
-     * Triangle mesh where the elevation image can be exported using importElevationImage().
+     * Triangle mesh where the elevation image can be generated using importElevationImage().
      */
     boost::shared_ptr< WTriangleMesh > m_outputMesh;
     /**
-     * This field is a map to real m_outputMesh vertex indices leaf node m_id params map to.
+     * This field is a map to real m_outputMesh vertex indices. Leaf node m_id params map to them.
      */
     WQuadTree* m_vertices;
     /**
-     * The elevation image is a crid of vertices which are organized quadratically.
+     * The elevation image is a grid of vertices which are organized by quadrats.
      * during drawing triangles importElevationImage() needs to know on which quadrat 
-     * areas triangle pairs have already been drawn in order to avoid duplicates.
+     * areas triangle pairs have already been drawn in order to avoid duplicate triangles.
      */
     WQuadTree* m_printedQuadrats;
     /**
-     * Vertex count of m_outputMesh. It's used to figure out what is the next vertex ID to add.
-     */
-    size_t m_currentVertex; //TODO(schwarzkopf): Consiider removing that field very soon. It's really not necessary.
-    /**
-     * Elevation reference height which will taken as the black color;
+     * Elevation reference height which will be taken as the black color;
      */
     double m_minElevImageZ;
     /**
      * Intensity increases (of 8 bit) that are calculated each meter of the elevation image.
      */
     double m_intensityIncreasesPerMeter;
+    /**
+     * The elevation will be displayed in the triangle mesh color if the value is true.
+     */
+    bool m_showElevationInMeshColor;
+    /**
+     * The elevation will be displayed in the triangle mesh height offset if the value is true.
+     */
+    bool m_showElevationInMeshOffset;
 };
 
 #endif  // WELEVATIONIMAGEOUTLINER_H

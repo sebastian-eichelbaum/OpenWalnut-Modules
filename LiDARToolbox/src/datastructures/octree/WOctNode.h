@@ -35,7 +35,7 @@ class WOctNode
 public:
     /**
      * Octree node constructor.
-     * \param centerX Xcoordinate of the octree node center.
+     * \param centerX X coordinate of the octree node center.
      * \param centerY Y coordinate of the octree node center.
      * \param centerZ Z coordinate of the octree node center.
      * \param radius Range from the center point that the node covers in each X/Y/Z direction.
@@ -47,15 +47,14 @@ public:
     virtual ~WOctNode();
     /**
      * Returns an octree child object of a particular case.
-     * \param drawer Corresponding index of vX/vY/vZ which depict which octree node
+     * \param drawer Corresponding index (0-7) of vX/vY/vZ which depict which octree node
      *               to return regarding the X/Y/Z coordinates.
      * \return Octree child node of that case.
      */
     WOctNode* getChild( size_t drawer );
     /**
-     * Checks whether a coordinate fits into the existing root octree node. A false value
-     * indicates that the node should be expanded. This method should be applied only
-     * using the root noce.
+     * Checks whether a coordinate fits into the octree node. If it's a root noe then 
+     * it will indicate whether it should be expanded to fit in a point..
      * \param x X coordinate to determine whether the node covers it.
      * \param y Y coordinate to determine whether the node covers it.
      * \param z Z coordinate to determine whether the node covers it.
@@ -63,12 +62,11 @@ public:
      */
     bool fitsIn( double x, double y, double z );
     /**
-     * Returns which child case index is covered by particular coordinates. An invalid
-     * index is returned if ther's no possible child for that coordinate.
+     * Returns which child case index (0-7) is covered by a particular coordinate.
      * \param x X coordinate to analyze.
      * \param y Y coordinate to analyze.
      * \param z Z coordinate to analyze.
-     * \return Case index regarding the x/Y/Z coordinates described by the vX/vY/vZ 
+     * \return Case index regarding the X/Y/Z coordinate described by the vX/vY/vZ 
      *         constants.
      */
     size_t getFittingCase( double x, double y, double z );
@@ -85,9 +83,7 @@ public:
      */
     void touchNode( size_t drawer );
     /**
-     * Range that the octree node covers in each dimension. Smallest possible dimension
-     * value is included but the largest should be excluded in order to put in the octree
-     * node standing next to the current.
+     * Returns the radius of the octree node.
      * \return Node range from its center.
      */
     double getRadius();
@@ -98,12 +94,12 @@ public:
      */
     double getCenter( size_t dimension );
     /**
-     * Returns the Node group ID that is calculated regarding the node neighbors.
-     * \return The voxel group ID.
+     * Returns the Node group ID that is calculated regarding the lear node neighbors.
+     * \return The voxel group ID. Applyable only on leaf nodes.
      */
     size_t getGroupNr();
     /**
-     * Sets the octree node group ID. It's usually calculated regarding the voxel neighbors.
+     * Sets the octree node group ID. It's usually calculated regarding the leaf voxel neighbors.
      * \param groupNr The voxel group ID.
      */
     void setGroupNr( size_t groupNr );
@@ -122,14 +118,12 @@ public:
     static const size_t vZ[];
 
     /**
-     * Registers a point to the node. During that minimum and maximum values of the 
-     * coordinates are refreshed. Each step the point count is incremented by 1. 
-     * The method doesn't traverse parents and children.
-     * \param x X coordinate to register.
-     * \param y Y coordinate to register.
-     * \param z Z coordinate to register.
+     * Updates minimal and maximal X/Y/Z value parameters. The point count is incremented by 1.
+     * \param x X coordinate to update.
+     * \param y Y coordinate to update.
+     * \param z Z coordinate to update.
      */
-    void registerPoint( double x, double y, double z );
+    void updateMinMax( double x, double y, double z );
     /**
      * Returns the count of registered points.
      * \return Registered points count.
@@ -176,23 +170,23 @@ private:
     void setChild( WOctNode* child, size_t drawer );
 
     /**
-     * Children of the current octree node
+     * Children of the current octree node.
      */
     WOctNode* m_child[8];
     /**
-     * Center of the current octree node
+     * Absolute center coordinate of the current octree node.
      */
     double m_center[3];
     /**
-     * Range that the octree node covers in each dimension. Smallest possible dimension
-     * value is included but the largest should be excluded in order to put in the octree
-     * node standing next to the current.
+     * Radius from the center that is covered by the octree node area.
      */
     double m_radius;
+
+    //TODO(schwarzkopf): Function parameters that don't belong to the main function don't belong to it.
     /**
-     * The node group ID. This number usually corresponds to its voxel neighborship
+     * The node group ID. This number usually corresponds to its voxel neighborship.
      */
-    size_t m_groupNr;
+    size_t m_groupNr; //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
     /**
      * Point count of the node.
      */

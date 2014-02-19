@@ -44,6 +44,7 @@
 #include "../datastructures/octree/WOctree.h"
 
 #include "../datastructures/WDataSetPointsGrouped.h"
+#include "core/dataHandler/WDataSetPoints.h"
 
 
 
@@ -73,7 +74,8 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Draws cubes where a value is at least as big as the preset ISO value
+ * Select a point group in order to display it as a triangle mesh outline or data set points. Each 
+ * group can be displayed in a single color depicting all groups..
  * \ingroup modules
  */
 class WMPointsGroupSelector: public WModule
@@ -143,14 +145,18 @@ private:
     void setProgressSettings( size_t steps );
 
     /**
-     * WDataSetPoints data input (proposed for LiDAR data).
+     * WDataSetPointsGrouped data input (Grouped point data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_input;
 
     /**
-     * WDataSetPoints data output as tetraeders.
+     * Data output connector for triangle mesh output.
      */
-    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_output;
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
+    /**
+     * Data output connector for data set points output.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -163,36 +169,31 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Shader unit for drawing.
-     */
-    WGEShader::RefPtr m_shader;
-
-    /**
      * Info tab property: Input points count.
      */
     WPropInt m_nbPoints;
     /**
-     * Info tab property: Minimal x value of input x coordunates.
+     * Info tab property: Minimal x value of output x coordunates.
      */
     WPropDouble m_xMin;
     /**
-     * Info tab property: Maximal x value of input x coordunates.
+     * Info tab property: Maximal x value of output x coordunates.
      */
     WPropDouble m_xMax;
     /**
-     * Info tab property: Minimal y value of input x coordunates.
+     * Info tab property: Minimal y value of output x coordunates.
      */
     WPropDouble m_yMin;
     /**
-     * Info tab property: Maximal y value of input x coordunates.
+     * Info tab property: Maximal y value of output x coordunates.
      */
     WPropDouble m_yMax;
     /**
-     * Info tab property: Minimal z value of input x coordunates.
+     * Info tab property: Minimal z value of output x coordunates.
      */
     WPropDouble m_zMin;
     /**
-     * Info tab property: Maximal z value of input x coordunates.
+     * Info tab property: Maximal z value of output x coordunates.
      */
     WPropDouble m_zMax;
     /**
@@ -217,18 +218,18 @@ private:
      * Depicting the input data set points showing the point outline instead of regions
      * depicted as cubes that cover existing points.
      */
-    WPropBool m_showTrianglesInsteadOfOctreeCubes;
+    WPropBool m_showTetraedersInsteadOfOctreeCubes;
+    /**
+     * Depicting the input data set points showing the point outline instead of regions
+     * depicted as cubes that cover existing points.
+     */
+    WPropBool m_highlightUsingColors;
 
     /**
      * Property to choose an output building of a voxel group number. Currently 0 is 
      * cutting nothing and 1 is is showing all buildings altogether.
      */
     WPropInt m_selectedShowableBuilding;
-
-    /**
-     * Instance for applying drawable geoms.
-     */
-    osg::ref_ptr< osg::Geode > m_geode;
 
     /**
      * Plugin progress status that is shared with the reader.

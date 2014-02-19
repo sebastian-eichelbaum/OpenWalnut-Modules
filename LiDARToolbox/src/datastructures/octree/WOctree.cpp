@@ -43,13 +43,13 @@ void WOctree::registerPoint( double x, double y, double z )
         m_root->expand();
 
     WOctNode* node = m_root;
-    node->registerPoint( x, y, z );
+    node->updateMinMax( x, y, z );
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y, z );
         node->touchNode( drawer );
         node = node->getChild( drawer );
-        node->registerPoint( x, y, z );
+        node->updateMinMax( x, y, z );
     }
 }
 WOctNode* WOctree::getLeafNode( double x, double y, double z )

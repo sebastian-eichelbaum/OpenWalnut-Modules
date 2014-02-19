@@ -113,6 +113,14 @@ void WMReadLAS::properties()
 
     m_nbVertices = m_infoProperties->addProperty( "Points", "The number of vertices in the loaded scan.", 0 );
     m_nbVertices->setMax( std::numeric_limits< int >::max() );
+    m_xMin = m_infoProperties->addProperty( "X min.: ", "Minimal x coordinate of all input points.", 0.0 );
+    m_xMax = m_infoProperties->addProperty( "X max.: ", "Maximal x coordinate of all input points.", 0.0 );
+    m_yMin = m_infoProperties->addProperty( "Y min.: ", "Minimal y coordinate of all input points.", 0.0 );
+    m_yMax = m_infoProperties->addProperty( "Y max.: ", "Maximal y coordinate of all input points.", 0.0 );
+    m_zMin = m_infoProperties->addProperty( "Z min.: ", "Minimal z coordinate of all input points.", 0.0 );
+    m_zMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
+    m_intensityMin = m_infoProperties->addProperty( "Intensity min.: ", "Minimal intensity of all input points.", 0.0 );
+    m_intensityMax = m_infoProperties->addProperty( "Intensity max.: ", "Maximal intensity of all input points.", 0.0 );
 
     WModule::properties();
 }
@@ -154,6 +162,14 @@ void WMReadLAS::moduleMain()
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
             WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
             m_nbVertices->set( tmpPointSet->size() );
+            m_xMin->set( reader.getXMin() );
+            m_xMax->set( reader.getXMax() );
+            m_yMin->set( reader.getYMin() );
+            m_yMax->set( reader.getYMax() );
+            m_zMin->set( reader.getZMin() );
+            m_zMax->set( reader.getZMax() );
+            m_intensityMin->set( reader.getIntensityMin() );
+            m_intensityMax->set( reader.getIntensityMax() );
 
             m_output->updateData( tmpPointSet );
         } catch( ... )

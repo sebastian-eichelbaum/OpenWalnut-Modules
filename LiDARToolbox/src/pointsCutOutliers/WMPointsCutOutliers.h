@@ -74,7 +74,8 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Draws cubes where a value is at least as big as the preset ISO value
+ * Cuts data set points outliers. It works by put points in rasterized cube set. Neighbor cubes will 
+ * will be grouped. Points of the largest one remain.
  * \ingroup modules
  */
 class WMPointsCutOutliers: public WModule
@@ -163,23 +164,13 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Shader unit for drawing.
-     */
-    WGEShader::RefPtr m_shader;
-
-    /**
-     * Determines the resolution of the smallest octree nodes in 2^n meters
+     * Determines the resolution of the smallest octree node radius in 2^n meters.
      */
     WPropInt m_detailDepth;
     /**
-     * Determines the resolution of the smallest octree nodes in meters
+     * Determines the resolution of the smallest octree node radius in meters.
      */
     WPropDouble m_detailDepthLabel;
-
-    /**
-     * Instance for applying drawable geoms.
-     */
-    osg::ref_ptr< osg::Geode > m_geode;
 
     /**
      * Plugin progress status that is shared with the reader.

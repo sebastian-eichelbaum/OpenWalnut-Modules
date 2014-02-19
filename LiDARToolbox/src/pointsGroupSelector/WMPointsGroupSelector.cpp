@@ -79,12 +79,19 @@ const std::string WMPointsGroupSelector::getDescription() const
 
 void WMPointsGroupSelector::connectors()
 {
-    m_input = WModuleInputData< WDataSetPointsGrouped >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
+    m_input = WModuleInputData< WDataSetPointsGrouped >::createAndAdd( shared_from_this(),
+            "Grouped data set points input.", "Brouped points that can be observed separately." );
 
-    m_output = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
-                new WModuleOutputData< WTriangleMesh >( shared_from_this(), "output", "The loaded mesh." ) );
+    m_outputTrimesh = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
+                new WModuleOutputData< WTriangleMesh >( shared_from_this(),
+                "Triangle mesh output.", "Either cubes or tetraeders that depict buildings." ) );
 
-    addConnector( m_output );
+    m_outputPoints = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
+                new WModuleOutputData< WDataSetPoints >( shared_from_this(),
+                "Data set points output.", "Data set points of groups." ) );
+
+    addConnector( m_outputTrimesh );
+    addConnector( m_outputPoints );
     WModule::connectors();
 }
 
@@ -106,7 +113,9 @@ void WMPointsGroupSelector::properties()
     m_stubSize->setMin( 0.0 );
     m_stubSize->setMax( 3.0 );
     m_contrast = m_properties->addProperty( "Contrast: ",
-                            "Color intensity multiplier.", 2.0, m_propCondition );
+                            "This is the value that multiplies the input colors before assigning to the output. "
+                            "Note that the output has the range between 0.0 and 1.0.\r\nHint: Look ath the intensity "
+                            "maximum param in the information tab of the ReadLAS plugin.", 0.005, m_propCondition );
     m_detailDepth = m_properties->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
                             "depth for the octree search tree.", 0, m_propCondition );
     m_detailDepth->setMin( -3 );
@@ -114,16 +123,18 @@ void WMPointsGroupSelector::properties()
     m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
                             "in meters for the octree search tree.", 1.0  );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
-    m_showTrianglesInsteadOfOctreeCubes = m_properties->addProperty( "Triangles instead of cubes: ",
+    m_showTetraedersInsteadOfOctreeCubes = m_properties->addProperty( "Tetraeders instead of cubes: ",
                             "Depicting the input data set points showing the point outline "
                             "instead of regions depicted as cubes that cover existing points. "
                             "Enabling this option you must have 32GB RAM depicting a 400MB"
                             "las file.", false, m_propCondition );
+    m_highlightUsingColors = m_properties->addProperty( "Hilight using colors: ",
+                            "Hilights output ddata groups using colors.", true, m_propCondition );
 
     m_selectedShowableBuilding = m_properties->addProperty( "Showable building idx: ",
             "Index of the showable building. 0 means all "
             "buildings without the ground. Other numbers are all each other buildings in "
-            "one single piece", 1, m_propCondition );
+            "one single piece", 0, m_propCondition );
     m_selectedShowableBuilding->setMin( 0 );
     m_selectedShowableBuilding->setMax( 1 );
 
@@ -163,6 +174,8 @@ void WMPointsGroupSelector::moduleMain()
             WDataSetPointsGrouped::VertexArray verts = points->getVertices();
             WDataSetPointsGrouped::ColorArray colors = points->getColors();
             WDataSetPointsGrouped::GroupArray groups = points->getGroups();
+            WDataSetPoints::VertexArray outputVertices( new WDataSetPoints::VertexArray::element_type() );
+            WDataSetPoints::ColorArray outputColors( new WDataSetPoints::ColorArray::element_type() );
             size_t count = verts->size()/3;
             setProgressSettings( count );
 
@@ -188,15 +201,25 @@ void WMPointsGroupSelector::moduleMain()
                 size_t group = groups->at( vertex );
                 if( selectedGroup == 0 || selectedGroup == group + 1 )
                 {
-                    if( m_showTrianglesInsteadOfOctreeCubes->get() ) //TODO(schwarzkopf): plugin crashes using that option
+                    float r = colors->at( vertex*3 );
+                    float g = colors->at( vertex*3+1 );
+                    float b = colors->at( vertex*3+2 );
+                    if( m_highlightUsingColors->get() )
                     {
-                        float r = colors->at( vertex*3 );
-                        float g = colors->at( vertex*3+1 );
-                        float b = colors->at( vertex*3+2 );
-                        osg::Vec4f* color = new osg::Vec4f(
-                                r/400.0f*contrast*WOctree::calcColor( group, 0 ),
-                                g/400.0f*contrast*WOctree::calcColor( group, 1 ),
-                                b/400.0f*contrast*WOctree::calcColor( group, 2 ), 1.0f );
+                        r *= WOctree::calcColor( group, 0 );
+                        g *= WOctree::calcColor( group, 1 );
+                        b *= WOctree::calcColor( group, 2 );
+                    }
+                    outputVertices->push_back( x );
+                    outputVertices->push_back( y );
+                    outputVertices->push_back( z );
+                    outputColors->push_back( r*contrast );
+                    outputColors->push_back( g*contrast );
+                    outputColors->push_back( b*contrast );
+                    if( m_showTetraedersInsteadOfOctreeCubes->get() )
+                    {
+                        osg::Vec4f* color = new osg::Vec4f( r*contrast,
+                                g*contrast, b*contrast, 1.0f );
                         tmpMesh->addVertex( 0+x, 0+y, 0+z );
                         tmpMesh->addVertex( a+x, 0+y, 0+z );
                         tmpMesh->addVertex( 0+x, a+y, 0+z );
@@ -218,8 +241,16 @@ void WMPointsGroupSelector::moduleMain()
                 }
             }
             m_tree->groupNeighbourLeafs();
-            m_output->updateData( m_showTrianglesInsteadOfOctreeCubes->get( true )
-                    ?tmpMesh :WVoxelOutliner::getOutline( m_tree ) );
+            if  ( outputVertices->size() == 0 ) //TODO(aschwarzkopf): Handle the problem in other way. When no points exist then the program crashes.
+                for  ( size_t lfd = 0; lfd < 3; lfd++)
+                {
+                    outputVertices->push_back( 0 );
+                    outputColors->push_back( 0 );
+                }
+            boost::shared_ptr< WDataSetPoints > outputPoints( new WDataSetPoints( outputVertices, outputColors ) );
+            m_outputPoints->updateData( outputPoints );
+            m_outputTrimesh->updateData( m_showTetraedersInsteadOfOctreeCubes->get( true )
+                    ?tmpMesh :WVoxelOutliner::getOutline( m_tree, m_highlightUsingColors->get() ) );
             m_nbPoints->set( count );
             m_xMin->set( m_tree->getRootNode()->getXMin() );
             m_xMax->set( m_tree->getRootNode()->getXMax() );

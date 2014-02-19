@@ -51,19 +51,23 @@ public:
     /**
      * Converts an octree to a triangle mesh. Only smallest possible octree nodes will be drawn.
      * \param octree Octree to draw.
+     * \param highlightUsingColors Add color to voxels corresponding to their group IDs.
      * \return The drawn output triangle mesh.
      */
-    static boost::shared_ptr< WTriangleMesh > getOutline( WOctree* octree );
+    static boost::shared_ptr< WTriangleMesh > getOutline( WOctree* octree, bool highlightUsingColors );
 
 private:
     /**
-     * Outlines an octree node in the triangle mesh.
+     * Outlines an octree node in the triangle mesh if it's a leaf noce. Parents are just traversed 
+     * recursively.
      * \param node Octree node to outline. It doesn't outline itself but children if it has some. All 
      *             subnodes will be traversed.
      * \param outputMesh The target triangle mesh to draw octree leaf nodes.
      * \param octree The octree object of the node. It's required to poll some dimension propertiies.
+     * \param highlightUsingColors Add color to voxels corresponding to their group ID.
      */
-    static void drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh, WOctree* octree );
+    static void drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh, WOctree* octree,
+                          bool highlightUsingColors );
 };
 
 #endif  // WVOXELOUTLINER_H

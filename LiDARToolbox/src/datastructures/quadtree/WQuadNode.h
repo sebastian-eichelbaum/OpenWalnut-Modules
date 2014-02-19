@@ -27,17 +27,17 @@
 #define WQUADNODE_H
 
 /**
- * Octree node class designed for points data. Each node represents an area where at least
+ * Quadtree node class designed for points data. Each node represents an area where at least
  * one data set point exists.
  */
 class WQuadNode
 {
 public:
     /**
-     * Octree node constructor.
-     * \param centerX Xcoordinate of the quadtree node center.
+     * Quadtree node constructor.
+     * \param centerX X coordinate of the quadtree node center.
      * \param centerY Y coordinate of the quadtree node center.
-     * \param radius Range from the center point that the node covers in each X/Y/Z direction.
+     * \param radius Range from the center point that the node covers in each X/Y direction.
      */
     WQuadNode( double centerX, double centerY, double radius );
     /**
@@ -45,24 +45,22 @@ public:
      */
     virtual ~WQuadNode();
     /**
-     * Returns an quadtree child object of a particular case.
-     * \param drawer Corresponding index of vX/vY/vZ which depict which quadtree node
-     *               to return regarding the X/Y/Z coordinates.
-     * \return Octree child node of that case.
+     * Returns a quadtree child object of a particular case.
+     * \param drawer Corresponding index of vX/vY which depicts which quadtree node
+     *               to return regarding the X/Y coordinates.
+     * \return Quadtree child node of that case.
      */
     WQuadNode* getChild( size_t drawer );
     /**
-     * Checks whether a coordinate fits into the existing root quadtree node. A false value
-     * indicates that the node should be expanded. This method should be applied only
-     * using the root noce.
+     * Checks whether a coordinate fits into the quadtree node. If it's a rot node then 
+     * it indicates whether it should be expanded in order to access the coordinate.
      * \param x X coordinate to determine whether the node covers it.
      * \param y Y coordinate to determine whether the node covers it.
-     * \return Shows whether the quadtree node covers the X/Y/Z coordinate.
+     * \return Shows whether the quadtree node covers the X/Y coordinate.
      */
     bool fitsIn( double x, double y );
     /**
-     * Returns which child case index is covered by particular coordinates. An invalid
-     * index is returned if ther's no possible child for that coordinate.
+     * Returns which child case index is covered by particular coordinates.
      * \param x X coordinate to analyze.
      * \param y Y coordinate to analyze.
      * \return Case index regarding the x/Y/Z coordinates described by the vX/vY/vZ 
@@ -82,31 +80,28 @@ public:
      */
     void touchNode( size_t drawer );
     /**
-     * Range that the quadtree node covers in each dimension. Smallest possible dimension
-     * value is included but the largest should be excluded in order to put in the quadtree
-     * node standing next to the current.
+     * Returns the quadnode's radiius from the center.
      * \return Node range from its center.
      */
     double getRadius();
     /**
      * Returns center coordinates of an quadtree node.
-     * \param dimension center dimension to return (0/1/2 = X/Y/Z)
-     * \return the center coordinate to the corresponding dimension parameter
+     * \param dimension Center dimension to return (0/1 = X/Y)
+     * \return The center coordinate to the corresponding dimension parameter.
      */
     double getCenter( size_t dimension );
 
     /**
-     * Registers a point to the node. During that minimum and maximum values of the 
-     * coordinates and the elevation is refreshed. Each step the point count is 
-     * incremented by 1. The method doesn't traverse parents and children.
-     * \param x X coordinate to register.
-     * \param y Y coordinate to register.
-     * \param elevation Elevation to register.
+     * Updates minimal and maximal X/Y/elevation value parameters. The point count is incremented by 1.
+     * It doesn't alter or add any node.
+     * \param x X coordinate to update.
+     * \param y Y coordinate to update.
+     * \param elevation Elevation to update.
      */
-    void registerPoint( double x, double y, double elevation );
+    void updateMinMax( double x, double y, double elevation );
 
     /**
-     * Returns the count of registered points.
+     * Returns the count of registered points using updateMinMax().
      * \return Registered points count.
      */
     size_t getPointCount();
@@ -131,22 +126,22 @@ public:
      */
     double getYMax();
     /**
-     * Returns the minimal Elevation.
-     * \return The minimal Elevation.
+     * Returns the minimal elevation.
+     * \return The minimal elevation.
      */
     double getElevationMin();
     /**
-     * Returns the maximal Elevation.
-     * \return The maximal Elevation.
+     * Returns the maximal elevation.
+     * \return The maximal elevation.
      */
     double getElevationMax();
 
     /**
-     * Determines which X coordinate axis case a m_child has.
+     * Determines which X coordinate axis case an m_child has.
      */
     static const size_t vX[];
     /**
-     * Determines which Y coordinate axis case a m_child has.
+     * Determines which Y coordinate axis case an m_child has.
      */
     static const size_t vY[];
 
@@ -164,9 +159,9 @@ public:
 private:
     /**
      * Sets an quadtree node as a child of this node.
-     * \param child Octree node to nest into
+     * \param child Quadtree node to nest into.
      * \param drawer Determines where the node is nested into. The cases are determined by
-     *               the constants vX, vY and vZ of the dwawer index lying between 0 and 7.
+     *               the constants vX and vY of the dwawer index lying between 0 and 3.
      */
     void setChild( WQuadNode* child, size_t drawer );
 
@@ -175,18 +170,16 @@ private:
      */
     WQuadNode* m_child[4];
     /**
-     * Center of the current quadtree node
+     * Center coordinate of the current quadtree node
      */
     double m_center[2];
     /**
-     * Range that the quadtree node covers in each dimension. Smallest possible dimension
-     * value is included but the largest should be excluded in order to put in the quadtree
-     * node standing next to the current.
+     * The radius of the quadnode which is covered of its area.
      */
     double m_radius;
 
     /**
-     * Point count of the node.
+     * Point count of the node registered by updateMinMax().
      */
     size_t m_pointCount;
     /**

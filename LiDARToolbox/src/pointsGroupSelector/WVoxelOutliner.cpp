@@ -34,18 +34,19 @@ WVoxelOutliner::~WVoxelOutliner()
 {
 }
 
-boost::shared_ptr< WTriangleMesh > WVoxelOutliner::getOutline( WOctree* octree )
+boost::shared_ptr< WTriangleMesh > WVoxelOutliner::getOutline( WOctree* octree, bool highlightUsingColors )
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
-    drawNode( octree->getRootNode(), tmpMesh, octree );
+    drawNode( octree->getRootNode(), tmpMesh, octree, highlightUsingColors );
     return tmpMesh;
 }
 
-void WVoxelOutliner::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh, WOctree* octree )
+void WVoxelOutliner::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh,
+                               WOctree* octree, bool highlightUsingColors )
 {
     if  ( node->getRadius() <= octree->getDetailLevel() )
     {
-        osg::Vec4 color = osg::Vec4( //TODO(schwarzkopf): Can't display colors when built from a toolbox
+        osg::Vec4 color = osg::Vec4(
                 WOctree::calcColor( node->getGroupNr(), 0 ),
                 WOctree::calcColor( node->getGroupNr(), 1 ),
                 WOctree::calcColor( node->getGroupNr(), 2 ), 1.0 );
@@ -59,7 +60,7 @@ void WVoxelOutliner::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh 
             double y = node->getCenter( 1 ) + node->getRadius() * ( iY * 2.0 - 1.0 );
             double z = node->getCenter( 2 ) + node->getRadius() * ( iZ * 2.0 - 1.0 );
             outputMesh->addVertex( x, y, z );
-            outputMesh->setVertexColor( index+vertex, color );
+            outputMesh->setVertexColor( index+vertex, highlightUsingColors ?color :osg::Vec4( 0.9, 0.9, 0.9, 1.0 ) );
         }
         // Z = 0
         outputMesh->addTriangle( index + 0, index + 2, index + 1 );
@@ -84,6 +85,6 @@ void WVoxelOutliner::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh 
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                drawNode( node->getChild( child ), outputMesh, octree );
+                drawNode( node->getChild( child ), outputMesh, octree, highlightUsingColors );
     }
 }

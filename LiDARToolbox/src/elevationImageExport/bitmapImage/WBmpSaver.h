@@ -39,11 +39,11 @@ class WBmpSaver
 {
 public:
     /**
-     * Bmp saver constructor
+     * Bmp image saver constructor
      */
     WBmpSaver();
     /**
-     * Bmp saver destructor
+     * Bmp image saver destructor
      */
     virtual ~WBmpSaver();
     /**
