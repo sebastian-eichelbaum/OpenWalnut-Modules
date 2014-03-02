@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -28,10 +28,10 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOctNode.h"
-#include "structure/WQuadNode.h"
-#include "structure/WQuadTree.h"
-#include "structure/WOctree.h"
+#include "../datastructures/octree/WOctNode.h"
+#include "../datastructures/quadtree/WQuadNode.h"
+#include "../datastructures/quadtree/WQuadTree.h"
+#include "../datastructures/octree/WOctree.h"
 
 /**
  * Class that detects buildings using the WDataSetPoints
@@ -49,7 +49,6 @@ public:
     virtual ~WBuildingDetector();
     /**
      * Starts the routine detecting buildings using the point data.
-     * Don't forget to execute initMinimalMaxima() before using that method.
      * After executing you can extract the building number from each node 
      * using the method getBuildingGroups().
      * \param points Point data to extract buildings from
@@ -57,8 +56,9 @@ public:
     void detectBuildings( boost::shared_ptr< WDataSetPoints > points );
     /**
      * Sets setting params for building recognition
-     * \param m_detailDepth data grid resolution of cube group data. The number must
-     *                      be an element of 2^n. n can be smaller than 0.
+     * \param m_detailDepth Data grid resolution of cube group data. The number must
+     *                      be an element of 2^n. n can be smaller than 0 It means the 
+     *                      area's radius by 2^n for recognition as building.
      * \param minSearchDetailDepth The area width to search a corresponding minimum.
      *                             This number must be an element of 2^n. n can be 
      *                             smaller than 0. Finally this parameter determines the 
@@ -69,10 +69,10 @@ public:
     void setDetectionParams( int m_detailDepth, int minSearchDetailDepth,
             double minSearchCutUntilAbove );
     /**
-     * Returns the 3D node tree. Each node has a group ID number. Many nodes can pe 
+     * Returns the 3D node tree. Each leaf node has a group ID number. Many nodes can pe 
      * pointed by an equal parameter to a single building area.
      * \return The octree of existing buildings. Buildings are grouped by an equal
-     *         group number parameter of WOctNode.
+     *         group number parameter of WOctNode leafs.
      */
     WOctree* getBuildingGroups();
 
@@ -80,28 +80,29 @@ private:
     /**
      * Inits the image of minimals which is used to determine a relative minimum of 
      * a X/Y coordinate.
-     * \param sourceNode Input image with fine-grain maximal geights to calculate a 
-     *                   better image of relative minimums. It removes outliers below 
-     *                   the ground.
-     * \param targetTree The grifty image to calculate relative minimums.
+     * \param sourceNode Input image with fine-grain maximal heights to calculate a 
+     *                   better image of relative minimums. It removes most outliers 
+     *                   below the ground.
+     * \param targetTree The grifty image where minimums are takin in order to 
+     *                   compare whether points are above threshold.
      */
     void initMinimalMaxima( WQuadNode* sourceNode, WQuadTree* targetTree );
     /**
-     * Calculates 2D-areas which cover buildings.
-     * \param sourceImage Input image, maximal points.
+     * Calculates 2D-areas which cover buildings. Building areas will be outlined in targetTree.
+     * \param sourceImage Input image. Maximal point values are taken.
      * \param minimalMaxima Image of relative minimums calculated by initMinimalMaxima();
      * \param targetTree Output image containing elevation data. Areas covering no 
-     *                   buildings should contain no data.
+     *                   buildings won*t contain data.
      */
     void projectDrawableAreas( WQuadNode* sourceImage, WQuadTree* minimalMaxima,
             WQuadTree* targetTree );
     /**
-     * This is one of the last steps. It sorts out voxels that belong to buildings.
-     * \param sourceNode Source octree contatining data that represent to contain any 
+     * It generates a voxel structure. Leaf nodes should appear where building points exist.
+     * \param sourceNode Source octree contatining data that represents any 
      *                   point data altogether.
      * \param buildingPixels Image that depicts areas covered by buildings in order to map 
      *                       the source 3D cubes on them.
-     * \param targetTree Not grouped voxels that represent building point areas.
+     * \param targetTree Not grouped output voxels that represent building point areas.
      */
     void fetchBuildingVoxels( WOctNode* sourceNode, WQuadTree* buildingPixels,
         WOctree* targetTree );
@@ -114,7 +115,7 @@ private:
     /**
      * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
      * where n can also be 0 or below. The bigger the pixels the greater are the areas 
-     * searched from an examined X/Y area.
+     * searched from an examined X/Y area. Their radius equals that parameter.
      */
     double m_minSearchDetailDepth;
     /**
@@ -123,16 +124,16 @@ private:
     double m_minSearchCutUntilAbove;
     /**
      * The same as m_minSearchDetailDepth. But it's used to still be able tu use smaller
-     * areas not having big proglems with larger buildings.
+     * m_minSearchDetailDepth values not having big proglems with larger buildings.
      */
     double m_detailDepthBigHeights;
     /**
-     * The corresponding height setting for m_detailDepthBigHeights.
+     * The corresponding threshold height setting for m_detailDepthBigHeights.
      */
     double m_minSearchCutUntilAboveBigHeights;
 
     /**
-     * The Octree that depicts the set of all buildings. Each node represents a cube 
+     * The Octree that depicts the set of all buildings. Each leaf node represents a cube 
      * within X/Y/Z. Every cube has a group id which corresponds to a building number. 
      * This field is calculated by detectBuildings().
      */

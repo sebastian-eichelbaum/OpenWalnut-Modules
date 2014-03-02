@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -43,11 +43,13 @@ void WOctree::registerPoint( double x, double y, double z )
         m_root->expand();
 
     WOctNode* node = m_root;
+    node->updateMinMax( x, y, z );
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y, z );
         node->touchNode( drawer );
         node = node->getChild( drawer );
+        node->updateMinMax( x, y, z );
     }
 }
 WOctNode* WOctree::getLeafNode( double x, double y, double z )
@@ -95,7 +97,7 @@ void WOctree::groupNeighbourLeafs()
     resizeGroupList( currentFinalGroup );
     for( size_t index = 0; index < currentFinalGroup; index++ )
         m_groupEquivs[index] = index;
-    std::cout << "Found " << currentFinalGroup << " groups." << std::endl;
+//    std::cout << "Found " << currentFinalGroup << " groups." << std::endl;
 }
 void WOctree::refreshNodeGroup( WOctNode* node )
 {
@@ -129,10 +131,10 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
 //            getLeafNode( x  , y-d, z-d ),
 //            getLeafNode( x+d, y-d, z-d ),
 //            getLeafNode( x-d, y  , z-d ),
-            getLeafNode( x  , y  , z-d ),
+            getLeafNode( x  , y  , z-d )
 //            getLeafNode( x+d, y  , z-d ),
 //            getLeafNode( x-d, y+d, z-d ),
-//            getLeafNode( x  , y+d, z-d )
+//            getLeafNode( x  , y+d, z-d ),
 //            getLeafNode( x+d, y+d, z-d )
         };
         for( size_t index = 0; index < 3; index++ )
@@ -172,55 +174,23 @@ void WOctree::resizeGroupList( size_t listLength )
     m_groupEquivs.resize( listLength );
     m_groupEquivs.reserve( listLength );
 }
-
-
-boost::shared_ptr< WTriangleMesh > WOctree::getOutline()
+double WOctree::getDetailLevel()
 {
-    boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
-    drawNode( m_root, tmpMesh );
-    return tmpMesh;
+    return m_detailLevel;
 }
-
-void WOctree::drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
+const size_t WOctree::colors[] = {
+        0xff0000, 0xff8080,    //red
+        0xff8000,            //orange
+        0xffff00, 0xa0a000,    //yellow
+        0x00ff00, 0x00b000,    //green
+        0x00ffff,           //cyan
+        0x8080ff,            //blue
+        0xff00a0            //pink
+};
+const size_t WOctree::colorCount = sizeof( colors ) / sizeof( colors[0] );
+float WOctree::calcColor( size_t groupNr, size_t colorChannel )
 {
-    if  ( node->getRadius() <= m_detailLevel )
-    {
-        size_t index = outputMesh->vertSize();
-        for( size_t vertex = 0; vertex <= 8; vertex++ )
-        {
-            double iX = vertex % 2;
-            double iY = ( vertex / 2 ) % 2;
-            double iZ = ( vertex / 4 ) % 2;
-            double x = node->getCenter( 0 ) + node->getRadius() * ( iX * 2.0 - 1.0 );
-            double y = node->getCenter( 1 ) + node->getRadius() * ( iY * 2.0 - 1.0 );
-            double z = node->getCenter( 2 ) + node->getRadius() * ( iZ * 2.0 - 1.0 );
-            outputMesh->addVertex( x, y, z );
-        }
-        // Z = 0
-        outputMesh->addTriangle( index + 0, index + 2, index + 1 );
-        outputMesh->addTriangle( index + 3, index + 1, index + 2 );
-        // X = 0
-        outputMesh->addTriangle( index + 0, index + 4, index + 2 );
-        outputMesh->addTriangle( index + 4, index + 6, index + 2 );
-        // Y = 0
-        outputMesh->addTriangle( index + 0, index + 1, index + 4 );
-        outputMesh->addTriangle( index + 1, index + 5, index + 4 );
-        // Z = 1
-        outputMesh->addTriangle( index + 4, index + 5, index + 6 );
-        outputMesh->addTriangle( index + 5, index + 7, index + 6 );
-        // X = 1
-        outputMesh->addTriangle( index + 1, index + 3, index + 5 );
-        outputMesh->addTriangle( index + 3, index + 7, index + 5 );
-        // Y = 1
-        outputMesh->addTriangle( index + 2, index + 6, index + 3 );
-        outputMesh->addTriangle( index + 6, index + 7, index + 3 );
-    }
-    else
-    {
-        for  ( int child = 0; child < 8; child++ )
-            if  ( node->getChild( child ) != 0 )
-                drawNode( node->getChild( child ), outputMesh );
-    }
+    groupNr = colors[groupNr%colorCount];
+    groupNr = ( groupNr >> ( 16-8*colorChannel ) ) & 0xff;
+    return static_cast<float>(groupNr)/255.0f;
 }
-
-

@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -27,6 +27,11 @@
 #define WBMPIMAGE_H
 
 #include <vector>
+
+#include "../../datastructures/quadtree/WQuadNode.h"
+#include "../../datastructures/quadtree/WQuadTree.h"
+#include "../../datastructures/octree/WOctree.h"
+#include "../../datastructures/WDataSetPointsGrouped.h"
 
 /**
  * Image object. Currently it's used for saving bmp files.
@@ -106,6 +111,32 @@ public:
     void setPixel( size_t x, size_t y, size_t r, size_t g, size_t b );
 
 
+    /**
+     * Imports Quadtree data to the bitmap image. The Quadtree is aligned automatically by 
+     * the data voxels (currently only smallest possible leafs).
+     * \param quadTree Elevation image that is imported to the bitmap image.
+     * \param elevImageMode Mode oft the elevation image.
+     *                      0: Minimal Z values each X/Y bin coordinate.
+     *                      1: Maximal Z values each X/Y bin coordinate.
+     *                      2: Point count each X/Y bin coordinate.
+     */
+    void importElevationImage( WQuadTree* quadTree, size_t elevImageMode );
+    /**
+     * Sets the elevation image export settings.
+     * \param minElevImageZ The elevation height that is mapped to the black color.
+     * \param intensityIncreasesPerMeter Intensity increases count per meter.
+     */
+    void setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter );
+
+    /**
+     * Highlights point groups in the image using the grouped data set points. Colors vary 
+     * by the group ID.
+     * \param groupedPoints The data set points with the 3D cooordinate and point group parameter.
+     * \param quadTree The quadtree which was used to import elevation image from. The method knows 
+     *                 where to place points using this param's coordinate min/max values.
+     */
+    void highlightBuildingGroups( boost::shared_ptr< WDataSetPointsGrouped >  groupedPoints, WQuadTree* quadTree );
+
 private:
     /**
      * Returns the color data vector index using X and Y coordinates.
@@ -124,20 +155,42 @@ private:
      */
     size_t m_sizeY;
     /**
-     * Image red color intensity data. The order corresponds the following pixel traversing.
-     * It traverses linewise starting at Y=0 from first to last X value.
+     * Image red color intensity data. The order corresponds to the following pixel traversing.
+     * It traverses linewise each starting at Y=0 from first to last X value.
      */
     std::vector<size_t> m_dataR;
     /**
-     * Image green color intensity data. The order corresponds the following pixel traversing.
-     * It traverses linewise starting at Y=0 from first to last X value.
+     * Image green color intensity data. The order corresponds to the following pixel traversing.
+     * It traverses linewise each starting at Y=0 from first to last X value.
      */
     std::vector<size_t> m_dataG;
     /**
-     * Image blue color intensity data. The order corresponds the following pixel traversing.
-     * It traverses linewise starting at Y=0 from first to last X value.
+     * Image blue color intensity data. The order corresponds to the following pixel traversing.
+     * It traverses linewise each starting at Y=0 from first to last X value.
      */
     std::vector<size_t> m_dataB;
+
+    /**
+     * Elevation image export setting.
+     * The elevation height that is mapped to the black color.
+     */
+    double m_minElevImageZ;
+    /**
+     * Elevation image export setting.
+     * Intensity increase count per meter.
+     */
+    double m_intensityIncreasesPerMeter;
+    /**
+     * Draws a quadtree leaf node to the bmp file. All subchildren will also be drawn.
+     * \param node Quadtree node to draw
+     * \param quadTree Quadtree that is drawn. Method knows where to draw points on the image 
+     *                 using mandatory parameters (puxel size, x/y min/max etc.).
+     * \param elevImageMode Mode of the elevation image.
+     *                      0: Minimal Z value each X/Y bin coordinate.
+     *                      1: Maximal Z value each X/Y bin coordinate.
+     *                      2: Point count each X/Y bin coordinate.
+     */
+    void importElevationImageDrawNode( WQuadNode* node, WQuadTree* quadTree, size_t elevImageMode );
 };
 
 #endif  // WBMPIMAGE_H

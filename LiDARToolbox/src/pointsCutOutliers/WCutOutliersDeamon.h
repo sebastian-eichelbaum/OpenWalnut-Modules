@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -28,11 +28,11 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOctNode2.h"
+#include "../datastructures/octree/WOctNode.h"
 
 /**
- * This is an outliers cut algorithm it simply groups all the points in node groups. 
- * After all points of the lartest voxel group are returned.
+ * This is an outliers cut algorithm it simply groups all the points in cube groups. 
+ * After process all points of the largest voxel group are returned.
  */
 class WCutOutliersDeamon
 {
@@ -46,16 +46,16 @@ public:
      */
     virtual ~WCutOutliersDeamon();
     /**
-     * Cuts Outliers of a point data. At first all points are grouped. After that only 
+     * Cuts Outliers of a point data. At first all point cubes are grouped. After that only 
      * points of the group with the highest volume is returned
      * \param points Input WDataSetPoints to cut outliers off.
-     * \return WDataSetPoints after cutting ooff outliers.
+     * \return WDataSetPoints after cutting off outliers.
      */
     boost::shared_ptr< WDataSetPoints > cutOutliers(
             boost::shared_ptr< WDataSetPoints > points );
     /**
-     * Sets the cube size to determine cube neighborships. Not connected nodes are cut off.
-     * \param detailDepth Cube width in meters. Use only numbers that are in 2^n 
+     * Sets the cube radius to determine cube neighborships. Not connected nodes are cut off.
+     * \param detailDepth Cube radius in meters. Use only numbers that are in 2^n 
      * including negative n.
      */
     void setDetailDepth( double detailDepth );
@@ -65,7 +65,7 @@ private:
      * Counts voxels of each group. The method traverses recursively.
      * \param node Octree node to count voxels of each physically connected node group.
      */
-    void countGroups( WOctNode2* node );
+    void countGroups( WOctNode* node );
     /**
      * Resizes the voxel group list representing corresponding voxel counts.
      * \param newSize Target list length to apply.
@@ -76,7 +76,7 @@ private:
      */
     double m_detailDepth;
     /**
-     * Voxel count array of each group.
+     * Temporary voxel count array of each group.
      */
     std::vector<size_t> m_pointCounts;
 };

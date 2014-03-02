@@ -25,13 +25,15 @@
 // This file's purpose is to provide a list of modules and additional extensions as entry point for OpenWalnut's module loader.
 // Both functAdd your modules here. If you miss this step, OpenWalnut will not be able to load your modules/extensions.
 
-
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 #include <core/kernel/WModule.h>
 
 #include "buildingsDetection/WMBuildingsDetection.h"
+#include "elevationImageExport/WMElevationImageExport.h"
 #include "pointsCutOutliers/WMPointsCutOutliers.h"
+#include "pointsGroupSelector/WMPointsGroupSelector.h"
 #include "readLAS/WMReadLAS.h"
 
 // #include "WToolkit.h"
@@ -49,7 +51,9 @@
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
     m.push_back( boost::shared_ptr< WModule >( new WMBuildingsDetection ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMElevationImageExport ) );
     m.push_back( boost::shared_ptr< WModule >( new WMPointsCutOutliers ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMPointsGroupSelector ) );
     m.push_back( boost::shared_ptr< WModule >( new WMReadLAS ) );
 }
 

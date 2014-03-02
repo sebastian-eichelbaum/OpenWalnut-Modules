@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSCUTOUTLIERS_H
-#define WMPOINTSCUTOUTLIERS_H
+#ifndef WMELEVATIONIMAGEEXPORT_H
+#define WMELEVATIONIMAGEEXPORT_H
 
 
 #include <liblas/liblas.hpp>
@@ -42,9 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/octree/WOctree.h"
-
-
+#include "../datastructures/quadtree/WQuadTree.h"
 
 
 
@@ -68,28 +66,33 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
+#include "bitmapImage/WBmpImage.h"
+#include "bitmapImage/WBmpSaver.h"
+
+#include "WElevationImageOutliner.h"
+#include "../datastructures/WDataSetPointsGrouped.h"
+
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Cuts data set points outliers. It works by put points in rasterized cube set. Neighbor cubes will 
- * will be grouped. Points of the largest one remain.
+ * Module to export an elevation image bitmap
  * \ingroup modules
  */
-class WMPointsCutOutliers: public WModule
+class WMElevationImageExport: public WModule
 {
 public:
     /**
-     * Creates the module for drawing contour lines.
+     * Constructs the module.
      */
-    WMPointsCutOutliers();
+    WMElevationImageExport();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsCutOutliers();
+    virtual ~WMElevationImageExport();
 
     /**
      * Gives back the name of this module.
@@ -149,9 +152,13 @@ private:
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
     /**
-     * Processed point data with cut off outliers.
+     * Grouped points input data to highlight detected groupes using a set of colors.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;
+    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_pointGroups;
+    /**
+     * The output connector containing the elevation image outlined to the triangle mesh.
+     */
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_elevationImageDisplay;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -164,22 +171,85 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Determines the resolution of the smallest octree node radius in 2^n meters.
+     * Info tab property: Input points count.
+     */
+    WPropInt m_nbPoints;
+    /**
+     * Info tab property: Minimal x value of input x coordunates.
+     */
+    WPropDouble m_xMin;
+    /**
+     * Info tab property: Maximal x value of input x coordunates.
+     */
+    WPropDouble m_xMax;
+    /**
+     * Info tab property: Minimal y value of input x coordunates.
+     */
+    WPropDouble m_yMin;
+    /**
+     * Info tab property: Maximal y value of input x coordunates.
+     */
+    WPropDouble m_yMax;
+    /**
+     * Info tab property: Minimal z value of input x coordunates.
+     */
+    WPropDouble m_zMin;
+    /**
+     * Info tab property: Maximal z value of input x coordunates.
+     */
+    WPropDouble m_zMax;
+
+    /**
+     * Determines the resolution of the smallest octree nodes in 2^n meters
      */
     WPropInt m_detailDepth;
     /**
-     * Determines the resolution of the smallest octree node radius in meters.
+     * Determines the resolution of the smallest octree nodes in meters
      */
     WPropDouble m_detailDepthLabel;
+
+    /**
+     * Mode of the elevation image to display
+     * 0: Minimal Z value of each X/Y bin coordinate.
+     * 1: Maximal Z value of each X/Y bin coordinate.
+     * 2: Point count of each X/Y bin coordinate.
+     */
+    WPropSelection m_elevImageMode;
+
+    /**
+     * Elevation image export setting. 
+     * Elevation height that will be displayed as the black color.
+     */
+    WPropDouble m_minElevImageZ;
+    /**
+     * Elevation image export setting. 
+     * Count of intensity increases per meter.
+     */
+    WPropDouble m_intensityIncreasesPerMeter;
+
+    /**
+     * Path of the exportable elevation image *.bmp file.
+     */
+    WPropFilename m_elevationImageExportablePath; //!< Path of the exportable elevation image *.bmp file.
+    WPropTrigger  m_exportTriggerProp; //!< This property triggers the actual reading,
+    /**
+     * If trigger set then the elevation will be displayed in the triangle mesh color.
+     */
+    WPropBool m_showElevationInMeshColor;
+    /**
+     * If trigger set then the elevation will be displayed in the triangle mesh height offset.
+     */
+    WPropBool m_showElevationInMeshOffset;
 
     /**
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
     /**
-     * Octree node used for the data set points analysis.
+     * This is the elevation image of the whole data set.
+     * It depicts some statistical Z coordinate information of each X/Y-coordinate.
      */
-    WOctree* m_tree;
+    WQuadTree* m_elevationImage;
 };
 
-#endif  // WMPOINTSCUTOUTLIERS_H
+#endif  // WMELEVATIONIMAGEEXPORT_H

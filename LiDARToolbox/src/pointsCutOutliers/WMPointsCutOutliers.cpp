@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -41,7 +41,7 @@
 #include "core/kernel/WModuleInputData.h"
 #include "WMPointsCutOutliers.xpm"
 #include "WMPointsCutOutliers.h"
-#include "structure/WOctree2.h"
+#include "../datastructures/octree/WOctree.h"
 #include "WCutOutliersDeamon.h"
 
 // This line is needed by the module loader to actually find your module.
@@ -52,7 +52,7 @@ WMPointsCutOutliers::WMPointsCutOutliers():
     WModule(),
     m_propCondition( new WCondition() )
 {
-    m_tree = new WOctree2( 0 );
+    m_tree = new WOctree( 0 );
 }
 
 WMPointsCutOutliers::~WMPointsCutOutliers()
@@ -131,7 +131,7 @@ void WMPointsCutOutliers::moduleMain()
         m_moduleState.wait();
 
         boost::shared_ptr< WDataSetPoints > points = m_input->getData();
-        std::cout << "Execute cycle\r\n";
+//        std::cout << "Execute cycle\r\n";
         m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
         if  ( points )
         {
@@ -145,7 +145,7 @@ void WMPointsCutOutliers::moduleMain()
             m_progressStatus->finish();
         }
 
-        std::cout << "this is WOTree " << std::endl;
+//        std::cout << "this is WOTree " << std::endl;
 
         // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )

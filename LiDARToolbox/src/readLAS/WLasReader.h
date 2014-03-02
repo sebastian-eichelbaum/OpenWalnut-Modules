@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -44,7 +44,7 @@ namespace laslibb
     /** 
      * Compound that reads a LiDAR file (see www.liblas.org).
      * These *.las files consist of a point set of X/Y/Z coordinates 
-     * paired with the intensity/color.
+     * paired with the intensity or color.
      */
     class WLasReader
     {
@@ -75,10 +75,10 @@ namespace laslibb
          * Returns the read LiDAR data set points.
          * \param fromX The minimal read X coordinate.
          * \param fromY The minimal read Y coordinate.
-         * \param dataSetWidth The width of the read daat set.
+         * \param dataSetWidth The width of the read data set.
          *         No cropping is applied using the value 0.
          * \param moveToCenter Move the data to the center of the coordinate system.
-         * \return LiDAR data set points containing intensities/colors.
+         * \return LiDAR data set points containing intensities or colors.
          */
         boost::shared_ptr< WDataSetPoints > getPoints(
                 size_t fromX, size_t fromY, size_t dataSetWidth, bool moveToCenter );
@@ -103,6 +103,27 @@ namespace laslibb
          * \return The maximal Y coordinate.
          */
         float getYMax();
+        /**
+         * Returns the minimal Z coordinate.
+         * \return The minimal Z coordinate.
+         */
+        float getZMin();
+        /**
+         * Returns the maximal Z coordinate.
+         * \return The maximal Z coordinate.
+         */
+        float getZMax();
+        /**
+         * Returns the minimal color intensity in LAS file.
+         * \return Minimal color intensity in LAS file.
+         */
+        float getIntensityMin();
+        /**
+         * Returns the maximal color intensity in LAS file.
+         * \return Maximal color intensity in LAS file.
+         */
+        float getIntensityMax();
+
 
     private:
         /**
@@ -131,27 +152,35 @@ namespace laslibb
         /**
          * Minimal X coordinate in LAS file.
          */
-        float xMin;
+        float m_xMin;
         /**
          * Maximal X coordinate in LAS file.
          */
-        float xMax;
+        float m_xMax;
         /**
          * Minimal Y coordinate in LAS file.
          */
-        float yMin;
+        float m_yMin;
         /**
          * Maximal Y coordinate in LAS file.
          */
-        float yMax;
+        float m_yMax;
         /**
          * Minimal Z coordinate in LAS file.
          */
-        float zMin;
+        float m_zMin;
         /**
          * Maximal Z coordinate in LAS file.
          */
-        float zMax;
+        float m_zMax;
+        /**
+         * Minimal color intensity in LAS file.
+         */
+        float m_intensityMin;
+        /**
+         * Maximal color intensity in LAS file.
+         */
+        float m_intensityMax;
     };
 } /* namespace butterfly */
 #endif  // WLASREADER_H

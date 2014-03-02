@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -42,10 +42,10 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WOctree.h"
-#include "structure/WQuadTree.h"
+#include "../datastructures/octree/WOctree.h"
+#include "../datastructures/quadtree/WQuadTree.h"
 
-
+#include "../datastructures/WDataSetPointsGrouped.h"
 
 
 
@@ -75,14 +75,15 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Draws cubes where a value is at least as big as the preset ISO value
+ * Detects building structures within a WDataSetPoints. The recognition algorithm works by the 
+ * principle of relative height minimum height thresholding.
  * \ingroup modules
  */
 class WMBuildingsDetection: public WModule
 {
 public:
     /**
-     * Creates the module for drawing contour lines.
+     * Creates the module for the Building detection.
      */
     WMBuildingsDetection();
 
@@ -150,9 +151,9 @@ private:
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
 
     /**
-     * WDataSetPoints data output as tetraeders.
+     * WDataSetPointsGrouped data output as point groups depicting each building
      */
-    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_output;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputPointsGrouped;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -163,11 +164,6 @@ private:
      * Needed for recreating the geometry, incase when resolution changes.
      */
     boost::shared_ptr< WCondition > m_propCondition;
-
-    /**
-     * Shader unit for drawing.
-     */
-    WGEShader::RefPtr m_shader;
 
     /**
      * Info tab property: Input points count.
@@ -197,58 +193,17 @@ private:
      * Info tab property: Maximal z value of input x coordunates.
      */
     WPropDouble m_zMax;
-    /**
-     * Voxel count that is cut off and kept regarding the ISO value.
-     */
-
-    WPropDouble m_stubSize;
 
     /**
-     * Voxel count that is cut off and kept regarding the ISO value.
-     */
-    WPropDouble m_contrast;
-    /**
-     * Determines the resolution of the smallest octree nodes in 2^n meters
+     * Determines the resolution of the smallest octree nodes in 2^n meters. The smallest 
+     * radius equals to its result.
      */
     WPropInt m_detailDepth;
     /**
-     * Determines the resolution of the smallest octree nodes in meters
+     * Determines the resolution of smallest octree nodes. Their radius equal that value.
      */
     WPropDouble m_detailDepthLabel;
-    /**
-     * Depicting the input data set points showing the point outline instead of regions
-     * depicted as cubes that cover existing points.
-     */
-    WPropBool m_showTrianglesInsteadOfOctreeCubes;
 
-    /**
-     * Mode of the elevation image to display
-     * 0: Minimal Z value of each X/Y bin coordinate.
-     * 1: Maximal Z value of each X/Y bin coordinate.
-     * 2: Point count of each X/Y bin coordinate.
-     */
-    WPropSelection m_elevImageMode;
-
-    /**
-     * Elevation image export setting. 
-     * All areas below that elevation are depicted using the black color.
-     */
-    WPropDouble m_minElevImageZ;
-    /**
-     * Elevation image export setting. 
-     * Count of intensity increases per meter.
-     */
-    WPropDouble m_intensityIncreasesPerMeter;
-
-    /**
-     * Path of the exportable elevation image *.bmp file.
-     */
-    WPropFilename m_elevationImageExportablePath; //!< The mesh will be read from this file.
-    WPropTrigger  m_exportTriggerProp; //!< This property triggers the actual reading,
-
-    /**
-     * This trigger button reloads the data to output.
-     */
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
 
 
@@ -256,7 +211,9 @@ private:
      * Main building detection setting.
      * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
      * where n can also be 0 or below. The bigger the pixels the greater are the areas 
-     * searched from an examined X/Y area.
+     * searched from an examined X/Y area. In order to determine whether a point belongs to 
+     * at least four nodes of that detail level will be examined whether at least on of the 
+     * four is below of the height threshold of the examinable point.
      */
     WPropInt m_minSearchDetailDepth;
     /**
@@ -266,29 +223,9 @@ private:
     WPropDouble m_minSearchCutUntilAbove;
 
     /**
-     * Property to choose an output building of a voxel group number. Currently 0 is 
-     * cutting nothing and 1 is is showing all buildings altogether.
-     */
-    WPropInt m_selectedShowableBuilding;
-
-    /**
-     * Instance for applying drawable geoms.
-     */
-    osg::ref_ptr< osg::Geode > m_geode;
-
-    /**
-     * Plugin progress status that is shared with the reader.
+     * Plugin progress status.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
-    /**
-     * Octree node used for the data set points analysis.
-     */
-    WOctree* m_tree;
-    /**
-     * This is the elevation image of the whole data set.
-     * It depicts some statistical Z coordinate information of each X/Y-coordinate.
-     */
-    WQuadTree* m_elevationImage;
 };
 
 #endif  // WMBUILDINGSDETECTION_H

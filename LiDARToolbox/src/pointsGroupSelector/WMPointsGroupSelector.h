@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSCUTOUTLIERS_H
-#define WMPOINTSCUTOUTLIERS_H
+#ifndef WMPOINTSGROUPSELECTOR_H
+#define WMPOINTSGROUPSELECTOR_H
 
 
 #include <liblas/liblas.hpp>
@@ -41,10 +41,10 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
-#include "core/dataHandler/WDataSetPoints.h"
 #include "../datastructures/octree/WOctree.h"
 
-
+#include "../datastructures/WDataSetPointsGrouped.h"
+#include "core/dataHandler/WDataSetPoints.h"
 
 
 
@@ -74,22 +74,22 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Cuts data set points outliers. It works by put points in rasterized cube set. Neighbor cubes will 
- * will be grouped. Points of the largest one remain.
+ * Select a point group in order to display it as a triangle mesh outline or data set points. Each 
+ * group can be displayed in a single color depicting all groups..
  * \ingroup modules
  */
-class WMPointsCutOutliers: public WModule
+class WMPointsGroupSelector: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMPointsCutOutliers();
+    WMPointsGroupSelector();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsCutOutliers();
+    virtual ~WMPointsGroupSelector();
 
     /**
      * Gives back the name of this module.
@@ -145,13 +145,18 @@ private:
     void setProgressSettings( size_t steps );
 
     /**
-     * WDataSetPoints data input (proposed for LiDAR data).
+     * WDataSetPointsGrouped data input (Grouped point data).
      */
-    boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_input;
+
     /**
-     * Processed point data with cut off outliers.
+     * Data output connector for triangle mesh output.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
+    /**
+     * Data output connector for data set points output.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -164,22 +169,72 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Determines the resolution of the smallest octree node radius in 2^n meters.
+     * Info tab property: Input points count.
+     */
+    WPropInt m_nbPoints;
+    /**
+     * Info tab property: Minimal x value of output x coordunates.
+     */
+    WPropDouble m_xMin;
+    /**
+     * Info tab property: Maximal x value of output x coordunates.
+     */
+    WPropDouble m_xMax;
+    /**
+     * Info tab property: Minimal y value of output x coordunates.
+     */
+    WPropDouble m_yMin;
+    /**
+     * Info tab property: Maximal y value of output x coordunates.
+     */
+    WPropDouble m_yMax;
+    /**
+     * Info tab property: Minimal z value of output x coordunates.
+     */
+    WPropDouble m_zMin;
+    /**
+     * Info tab property: Maximal z value of output x coordunates.
+     */
+    WPropDouble m_zMax;
+    /**
+     * Voxel count that is cut off and kept regarding the ISO value.
+     */
+
+    WPropDouble m_stubSize;
+
+    /**
+     * Voxel count that is cut off and kept regarding the ISO value.
+     */
+    WPropDouble m_contrast;
+    /**
+     * Determines the resolution of the smallest octree nodes in 2^n meters
      */
     WPropInt m_detailDepth;
     /**
-     * Determines the resolution of the smallest octree node radius in meters.
+     * Determines the resolution of the smallest octree nodes in meters
      */
     WPropDouble m_detailDepthLabel;
+    /**
+     * Depicting the input data set points showing the point outline instead of regions
+     * depicted as cubes that cover existing points.
+     */
+    WPropBool m_showTetraedersInsteadOfOctreeCubes;
+    /**
+     * Depicting the input data set points showing the point outline instead of regions
+     * depicted as cubes that cover existing points.
+     */
+    WPropBool m_highlightUsingColors;
+
+    /**
+     * Property to choose an output building of a voxel group number. Currently 0 is 
+     * cutting nothing and 1 is is showing all buildings altogether.
+     */
+    WPropInt m_selectedShowableBuilding;
 
     /**
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
-    /**
-     * Octree node used for the data set points analysis.
-     */
-    WOctree* m_tree;
 };
 
-#endif  // WMPOINTSCUTOUTLIERS_H
+#endif  // WMPOINTSGROUPSELECTOR_H

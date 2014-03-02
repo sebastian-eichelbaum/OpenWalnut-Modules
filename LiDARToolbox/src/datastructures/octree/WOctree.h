@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -30,15 +30,16 @@
 #include "WOctNode.h"
 
 /**
- * Octree structure for analyzing buildings point data
+ * Octree structure for analyzing the point data
  */
 class WOctree
 {
 public:
     /**
-     * Octree constructor
-     * \param detailDepth Supported octree node resolution resolution. Currently only
-     *                    numbers covering 2^n results including negative n values.
+     * Octree constructor.
+     * \param detailDepth Supported octree node resolution resolution. It equals the 
+     *                    node's radius. Currently only numbers covering 2^n results 
+     *                    including negative n values.
      */
     explicit WOctree( double detailDepth );
     /**
@@ -80,26 +81,28 @@ public:
      */
     void refreshNodeGroup( WOctNode* node );
     /**
-     * Returns the voxel neighbor group count. Execute groupNeighbourLeafs() befor 
+     * Returns the voxel neighbor group count. Execute groupNeighbourLeafs() before 
      * acquiring that parameter.
      * \return The voxel neighbor group count.
      */
     size_t getGroupCount();
     /**
-     * Returns a WTriangleMesh which outlines the octree.
-     * \return Triangle mesh that represents the outline.
+     * Returns the detail level. It's the minimal allowed radius of any octnode.
+     * \return The minimal radius of any octnode.
      */
-    boost::shared_ptr< WTriangleMesh > getOutline();
+    double getDetailLevel();
+    //TODO(schwarzkopf): Function parameters that don't belong to the main function don't belong to it.
+    /**
+     * Returns a color channel value for a particular point group.
+     * \param groupNr Group number to assign a corresponding color
+     * \param colorChannel Channel of the whole color that is returned. 0=red, 1=green and 2=blue.
+     * \return Group color of values between 0.0 and 1.0 corresponding to a particular colorChannel.
+     */
+    static float calcColor( size_t groupNr, size_t colorChannel ); //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
 
 private:
     /**
-     * Draws an octree node. All subchildren will also be drawn.
-     * \param node Octree node to draw
-     * \param outputMesh Output triangle mesh where the outline will be drawn.
-     */
-    void drawNode( WOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
-    /**
-     * method that traverses a node in order to group all neighbor cubes into mutual 
+     * Method that traverses a node in order to group all neighbor cubes into mutual 
      * group numbers.
      * \param node Subnodes to traverse recursively.
      */
@@ -114,16 +117,24 @@ private:
      */
     WOctNode* m_root;
     /**
-     * Detail level of the octree. Currently only numbers covering 2^n results 
-     * including negative n values.
+     * The radius of smallest octree nodes. Currently only numbers covering 2^n (included negative n). 
+     * are supported.
      */
     double m_detailLevel;
     /**
-     * Variable used during voxel grouping.
+     * Variable used during voxel grouping for correcting group IDs.
      * It contains Voxel group number to building ID mapping.
      * After the process the size corresponds to the recognized building count.
      */
     std::vector<size_t> m_groupEquivs;
+    /**
+     * Colors that are used to highlight buildings using different colors.
+     */
+    static const size_t colors[];
+    /**
+     * Color count or size of the field colors[].
+     */
+    static const size_t colorCount;
 };
 
 #endif  // WOCTREE_H

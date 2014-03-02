@@ -75,7 +75,7 @@ INCLUDE( OpenWalnut )
 SETUP_MODULE( 
     ${PROJECT_NAME}   # use project name as module(-toolbox) name
     "."               # where to find the sources
-    "liblas.so"                # no additonal dependencies
+    "liblas.so"       # no additonal dependencies
     ""                # no sources to exclude
 )
 

@@ -2,7 +2,7 @@
 //
 // Project: OpenWalnut ( http://www.openwalnut.org )
 //
-// Copyright 2013 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
+// Copyright 2009 OpenWalnut Community, BSV-Leipzig and CNCF-CBS
 // For more information see http://www.openwalnut.org/copying
 //
 // This file is part of OpenWalnut.
@@ -33,6 +33,7 @@ const size_t WQuadNode::vY[] = {0, 0, 1, 1};
 WQuadNode::WQuadNode( double centerX, double centerY, double radius )
 {
     m_pointCount = 0;
+    m_id = 0;
     m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 0;
     m_center[0] = centerX;
     m_center[1] = centerY;
@@ -110,7 +111,7 @@ double WQuadNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
-void WQuadNode::registerPoint( double x, double y, double elevation )
+void WQuadNode::updateMinMax( double x, double y, double elevation )
 {
     if( !m_pointCount > 0 )
     {
@@ -162,4 +163,13 @@ double WQuadNode::getElevationMin()
 double WQuadNode::getElevationMax()
 {
     return m_zMax;
+}
+
+size_t WQuadNode::getID()
+{
+    return m_id;
+}
+void WQuadNode::setID( size_t id )
+{
+    m_id = id;
 }
