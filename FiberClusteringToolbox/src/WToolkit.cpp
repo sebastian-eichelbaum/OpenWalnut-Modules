@@ -26,6 +26,7 @@
 
 #include <core/kernel/WModule.h>
 
+#include "centerLine/WMCenterLine.h"
 #include "clusterParamDisplay/WMClusterParamDisplay.h"
 #include "clusterSlicer/WMClusterSlicer.h"
 #include "detTractClustering/WMDetTractClustering.h"
@@ -37,14 +38,16 @@
 #include "gaussProcesses/detTractClusteringGP/WMDetTractClusteringGP.h"
 #include "gaussProcesses/gpView/WMGpView.h"
 #include "loadClusters/WMLoadClusters.h"
-#include "writeClusters/WMWriteClusters.h"
+#include "lineGuidedSlice/WMLineGuidedSlice.h"
 #include "matrixWriter/WMMatrixWriter.h"
+#include "writeClusters/WMWriteClusters.h"
 #include "WToolkit.h"
 
 // This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
 // Add your modules here. If you miss this step, OpenWalnut will not be able to load your modules.
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
+    m.push_back( WModule::SPtr( new WMCenterLine ) );
     m.push_back( WModule::SPtr( new WMClusterParamDisplay ) );
     m.push_back( WModule::SPtr( new WMClusterSlicer ) );
     m.push_back( WModule::SPtr( new WMDetTract2GPConvert ) );
@@ -55,8 +58,9 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
     m.push_back( WModule::SPtr( new WMEdgeBundling ) );
     m.push_back( WModule::SPtr( new WMFiberColoring ) );
     m.push_back( WModule::SPtr( new WMGpView ) );
+    m.push_back( WModule::SPtr( new WMLineGuidedSlice ) );
     m.push_back( WModule::SPtr( new WMLoadClusters ) );
-    m.push_back( WModule::SPtr( new WMWriteClusters ) );
     m.push_back( WModule::SPtr( new WMMatrixWriter ) );
+    m.push_back( WModule::SPtr( new WMWriteClusters ) );
 }
 

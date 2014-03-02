@@ -1,0 +1,771 @@
+2014-Mar-02 11:20:26 INFO    Walnut: Using the file "/local/home/math/repos/ow-modules/FiberClusteringToolbox/src/lineGuidedSlice/openwalnut.log" for logging.
+2014-Mar-02 11:20:26 INFO    Walnut: Version: 1.3.1+hg843adb464c8e
+2014-Mar-02 11:20:27 DEBUG   OpenWalnut: OpenWalnut binary path: "/local/home/math/repos/ow/build/release/bin"
+2014-Mar-02 11:20:27 INFO    GUI: Bringing up GUI
+2014-Mar-02 11:20:27 INFO    GE: Initializing Graphics Engine
+2014-Mar-02 11:20:27 INFO    GE: Initializing OpenSceneGraph Root Node
+2014-Mar-02 11:20:27 INFO    Kernel: Initializing Kernel
+2014-Mar-02 11:20:27 DEBUG   Kernel: Version: 1.3.1+hg843adb464c8e
+2014-Mar-02 11:20:27 INFO    Data Handler: Initializing Data Handler
+2014-Mar-02 11:20:27 DEBUG   Data Handler: Adding subject with ID "0" and Name "UNKNOWN,  ".
+2014-Mar-02 11:20:27 DEBUG   ModuleContainer (KernelRootContainer): Constructing module container.
+2014-Mar-02 11:20:27 INFO    ModuleFactory: Loading Modules
+2014-Mar-02 11:20:27 INFO    Module Loader: Searching modules in "/local/home/math/repos/ow/build/release/bin/../lib/openwalnut".
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libeigenSystem.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 3 modules from libdata.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwriteTransferFunction.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libvectorAlign.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libreadVIM.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libsplineSurface.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libvectorPlot.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libtransferFunction1D.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libreadAmiraMesh.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberResampling.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwriteMesh.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libvectorScale.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libanisotropicFiltering.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdirectVolumeRendering.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   ModuleContainer (Unnamed Module Container): Constructing module container.
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libprobTractDisplay.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberTranslator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libclusterDisplayVoxels.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libimageExtractor.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libscalarOperator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libvectorNormalize.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libcalculateTensors.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libtemplate.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwebglSupport.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libcoordinateHUD.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdatasetManipulator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libtransferFunctionColorBar.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdeterministicFTMori.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdatasetProfile.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libHARDIToSphericalHarmonics.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 3 modules from libdataCreator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdistanceMap.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libarbitraryPlane.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libcolormapper.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libsurfaceIllustrator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libsurfaceParameterAnimator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libclusterDisplay.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libarbitraryROIs.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libspatialDerivative.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libreadDipoles.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   ModuleContainer (Effective Connectivity Cluster): Constructing module container.
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libeffectiveConnectivityCluster.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libvoxelizer.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   ModuleContainer (Distance Map Isosurface): Constructing module container.
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdistanceMapIsosurface.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libcoordinateSystem.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libeegView.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libsampleOnFibers.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberFilterROI.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libimageSpaceLIC.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libisosurfaceRaytracer.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberSelection.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libgridRenderer.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libtriangleMeshRenderer.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfunctionalMRIViewer.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwriteDendrogram.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libisosurface.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libgaussFiltering.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libreadMesh.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libnavigationSlices.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libpointRenderer.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libmergePoints.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libsuperquadricGlyphs.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfibersToPoints.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libapplyMask.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libpaintTexture.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwriteRawData.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libreadRawData.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libvectorOperator.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberDisplay.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwriteTracts.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberTransform.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libfiberParameterColoring.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libhistogramEqualization.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libwriteAmiraMesh.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libhistogramView.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libmeshToPoints.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libdataTypeConversion.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libmergeComponentsToVector.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libscalarSegmentation.so.1.3.1
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 1 modules from libcalculateGFA.so.1.3.1
+2014-Mar-02 11:20:27 INFO    Module Loader: Searching modules in "/home/math/.OpenWalnut/modules".
+2014-Mar-02 11:20:27 WARNING Module Loader: Searching modules in "/home/math/.OpenWalnut/modules" failed. It is not a directory or does not exist. Ignoring.
+2014-Mar-02 11:20:27 INFO    Module Loader: Searching modules in "/home/math/repos/ow-modules/FiberClusteringToolbox/build/release/lib".
+2014-Mar-02 11:20:27 DEBUG   ModuleContainer (Cluster Param Display): Constructing module container.
+2014-Mar-02 11:20:27 DEBUG   Module Loader: Loaded 15 modules from libClusteringToolbox.so.0.1.0
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Eigen System"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Data Module"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Read Spherical Harmonics"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write NIfTI"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write Transfer Function"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Vector Align"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Read VIM"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Spline Surface"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Vector Plot"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Transfer Function 1D"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Read Amira Mesh"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Re-Sampling"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write Mesh"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Vector Scaling"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Anisotropic Filter"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Direct Volume Rendering"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Probabilistic Tract Rendering with multi transparent iso surfaces."
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber translator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "ClusterDisplayVoxels"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Image Extractor"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Scalar Operator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Vector Normalize"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Calculate Tensors"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Template"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "WebGL Support"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Coordinate HUD"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Dataset Manipulator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Transfer Function Color Bar"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Mori Det. Tracking"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Dataset Profile"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Spherical Harmonic Calculator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Scalar Data Creator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Vector Data Creator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Data Creator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Distance Map"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Arbitrary Plane"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Colormapper"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Surface Illustrator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Surface Parameter Animator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Cluster Display"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Arbitrary ROIs"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Spatial Derivative"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Read Dipoles"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Effective Connectivity Cluster"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Voxelizer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Distance Map Isosurface"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Coordinate System"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "EEG View"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Sample On Fibers"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Filter ROI"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Image Space LIC"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Isosurface Raytracer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Selection"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Grid Renderer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Triangle Mesh Renderer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Functional MRI Viewer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write Dendrogram"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Isosurface"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Gauss Filtering"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Read Mesh"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Navigation Slices"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Point Renderer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Merge Points"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Superquadric Glyphs"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fibers To Points"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Apply Mask"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Paint Texture"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write Raw Data"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Read Raw Data"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Vector Operator"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Display"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write Tracts"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Transform"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Parameter Coloring"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Histogram Equalization"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write Amira Mesh"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "HistogramView"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Mesh To Points"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Data Type Conversion"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Merge Components To Vector"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Scalar Segmentation"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Calculate GFA"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Center Line"
+2014-Mar-02 11:20:27 ERROR   Module (Center Line): Meta file loaded but no entry for module "Center Line" found. Ignoring.
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Cluster Param Display"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Cluster Slicer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Deterministic Tract to Gaussian Process Converter"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Deterministic Tract Clustering"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Deterministic Tract Clustering using Gaussian Proccesses"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Deterministic Tract Culling"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Direction Histogram"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Edge Bundling"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Fiber Coloring"
+2014-Mar-02 11:20:27 ERROR   Module (Fiber Coloring): Meta file loaded but no entry for module "Fiber Coloring" found. Ignoring.
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Gaussian Process Viewer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Line Guided Slice"
+2014-Mar-02 11:20:27 ERROR   Module (Line Guided Slice): Meta file loaded but no entry for module "Line Guided Slice" found. Ignoring.
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Load clusters"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Matrix Writer"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Initializing module prototype: "Write clusters"
+2014-Mar-02 11:20:27 INFO    ModuleFactory: Loading Modules Done
+2014-Mar-02 11:20:27 INFO    Kernel: Starting Kernel
+2014-Mar-02 11:20:27 INFO    WMainWindow: Setting up GUI
+2014-Mar-02 11:20:27 DEBUG   WQtGLScreenCapture: Deactivating animation mode.
+2014-Mar-02 11:20:27 DEBUG   WQtGLScreenCapture: Deactivating animation mode.
+2014-Mar-02 11:20:27 INFO    GE: Initializing OpenSceneGraph Root Node
+2014-Mar-02 11:20:27 DEBUG   WQtGLWidget(Axial View): Switched to OSG manipulator "WGENoOp".
+2014-Mar-02 11:20:27 DEBUG   WQtGLScreenCapture: Deactivating animation mode.
+2014-Mar-02 11:20:27 INFO    GE: Initializing OpenSceneGraph Root Node
+2014-Mar-02 11:20:27 DEBUG   WQtGLWidget(Coronal View): Switched to OSG manipulator "WGENoOp".
+2014-Mar-02 11:20:27 DEBUG   WQtGLScreenCapture: Deactivating animation mode.
+2014-Mar-02 11:20:27 INFO    GE: Initializing OpenSceneGraph Root Node
+2014-Mar-02 11:20:27 DEBUG   WQtGLWidget(Sagittal View): Switched to OSG manipulator "WGENoOp".
+2014-Mar-02 11:20:27 INFO    MainWindow: Restoring window state.
+2014-Mar-02 11:20:27 INFO    GE: Starting Graphics Engine
+2014-Mar-02 11:20:27 INFO    Kernel: Initializing extensions.
+2014-Mar-02 11:20:27 INFO    Kernel: Initialization completed.
+2014-Mar-02 11:20:27 DEBUG   OpenWalnut: Deferred loading of data and project files.
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraVignette-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Creating new instance of prototype "Data Module".
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraVignette-fragment.glsl"
+2014-Mar-02 11:20:27 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container.
+2014-Mar-02 11:20:27 INFO    ModuleContainer (KernelRootContainer): Associated module "Data Module" with container.
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraVignette-geometry.glsl"
+2014-Mar-02 11:20:27 INFO    Module (Data Module): Starting module main method.
+2014-Mar-02 11:20:27 DEBUG   Data Module: Loading data from "/home/math/MPI-CBS/mr188/Tractography/DeterministicTracts/CNG.fib".
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraOverlayTexture-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraOverlayTexture-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   Data Module: Loading data done.
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraOverlayTexture-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   ModuleFactory: Creating new instance of prototype "Data Module".
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraHorizon-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraHorizon-fragment.glsl"
+2014-Mar-02 11:20:27 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container.
+2014-Mar-02 11:20:27 INFO    ModuleContainer (KernelRootContainer): Associated module "Data Module" with container.
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraHorizon-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraVignette-vertex.glsl"
+2014-Mar-02 11:20:27 INFO    Module (Data Module): Starting module main method.
+2014-Mar-02 11:20:27 DEBUG   Data Module: Loading data from "/home/math/MPI-CBS/mr188/mr188_fa.nii.gz".
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraVignette-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraVignette-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraOverlayTexture-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraOverlayTexture-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraOverlayTexture-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraHorizon-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraHorizon-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraHorizon-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraVignette-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraVignette-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraVignette-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   NetworkEditor: Inserting "Data Module".
+2014-Mar-02 11:20:27 DEBUG   ControlPanel: Inserting module Data Module to control panel.
+2014-Mar-02 11:20:27 DEBUG   NetworkEditor: Activating "Data Module".
+2014-Mar-02 11:20:27 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraOverlayTexture-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraOverlayTexture-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraOverlayTexture-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraHorizon-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraHorizon-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraHorizon-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraVignette-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraVignette-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraVignette-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraOverlayTexture-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraOverlayTexture-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraOverlayTexture-geometry.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading vertex shader "WGECameraHorizon-vertex.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading fragment shader "WGECameraHorizon-fragment.glsl"
+2014-Mar-02 11:20:27 DEBUG   WGEShader: Reloading geometry shader "WGECameraHorizon-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WReaderNIfTI: Load as WDataSetScalar
+2014-Mar-02 11:20:28 DEBUG   Data Module: Loading data done.
+2014-Mar-02 11:20:28 DEBUG   WGEColormapping: Registering texture "mr188_fa.nii.gz".
+2014-Mar-02 11:20:28 DEBUG   GUI: Auto Display active and Data module added. The proper module will be added.
+2014-Mar-02 11:20:28 DEBUG   ModuleFactory: Creating new instance of prototype "Fiber Display".
+2014-Mar-02 11:20:28 INFO    ModuleContainer (KernelRootContainer): Adding module "Fiber Display" to container.
+2014-Mar-02 11:20:28 INFO    ModuleContainer (KernelRootContainer): Associated module "Fiber Display" with container.
+2014-Mar-02 11:20:28 INFO    Module (Fiber Display): Starting module main method.
+2014-Mar-02 11:20:28 INFO    ModuleContainer (KernelRootContainer): Connecting Data Module:out with Fiber Display:fibers
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Waiting ...
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Fibers updated.
+2014-Mar-02 11:20:28 DEBUG   KdTree:  Start building KdTree
+2014-Mar-02 11:20:28 DEBUG   KdTree: Start threads
+2014-Mar-02 11:20:28 DEBUG   KdTree: All threads started
+2014-Mar-02 11:20:28 DEBUG   KdTree: thread finished
+2014-Mar-02 11:20:28 DEBUG   KdTree: thread finished
+2014-Mar-02 11:20:28 DEBUG   KdTree: thread finished
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   KdTree: thread finished
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   KdTree: All threads finished
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   NetworkEditor: Inserting "Data Module".
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Color mode is 3.
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Iterating over 402 fibers.
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Number of vertices: 89358
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   ControlPanel: Inserting module Data Module to control panel.
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Iterating over all fibers: done!
+2014-Mar-02 11:20:28 DEBUG   Fiber Display: Waiting ...
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WMFiberDisplay-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WMFiberDisplay-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WMFiberDisplay-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WMFiberDisplay-EndCap-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WMFiberDisplay-EndCap-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WMFiberDisplay-EndCap-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WDataTexture3D: Creating Texture of type W_DT_FLOAT
+2014-Mar-02 11:20:28 DEBUG   WDataTexture3D: Resolution: 160x200x160
+2014-Mar-02 11:20:28 DEBUG   WDataTexture3D: Channels: 1
+2014-Mar-02 11:20:28 DEBUG   WDataTexture3D: Value Range: [0,1] - Scaler: 1
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:20:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:20:30 DEBUG   NetworkEditor: Activating "Data Module".
+2014-Mar-02 11:20:30 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:20:30 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:20:30 DEBUG   GUI: Auto Display active and Data module added. The proper module will be added.
+2014-Mar-02 11:20:30 DEBUG   ModuleFactory: Creating new instance of prototype "Navigation Slices".
+2014-Mar-02 11:20:30 INFO    ModuleContainer (KernelRootContainer): Adding module "Navigation Slices" to container.
+2014-Mar-02 11:20:30 INFO    ModuleContainer (KernelRootContainer): Associated module "Navigation Slices" with container.
+2014-Mar-02 11:20:30 INFO    Module (Navigation Slices): Starting module main method.
+2014-Mar-02 11:20:30 DEBUG   Navigation Slices: Waiting ...
+2014-Mar-02 11:20:30 DEBUG   WGEShader: Reloading vertex shader "WMNavigationSlices-vertex.glsl"
+2014-Mar-02 11:20:30 DEBUG   WGEShader: Reloading fragment shader "WMNavigationSlices-fragment.glsl"
+2014-Mar-02 11:20:30 DEBUG   WGEShader: Reloading geometry shader "WMNavigationSlices-geometry.glsl"
+2014-Mar-02 11:20:30 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:20:30 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:20:30 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:20:30 DEBUG   NetworkEditor: Inserting "Fiber Display".
+2014-Mar-02 11:20:30 DEBUG   ControlPanel: Inserting module Fiber Display to control panel.
+2014-Mar-02 11:20:30 DEBUG   NetworkEditor: Activating "Fiber Display".
+2014-Mar-02 11:20:30 DEBUG   ControlPanel: Activating module "Fiber Display".
+2014-Mar-02 11:20:31 DEBUG   NetworkEditor: Connecting "Fiber Display" and "Data Module".
+2014-Mar-02 11:20:31 DEBUG   NetworkEditor: Inserting "Navigation Slices".
+2014-Mar-02 11:20:31 DEBUG   ControlPanel: Inserting module Navigation Slices to control panel.
+2014-Mar-02 11:20:31 DEBUG   NetworkEditor: Activating "Navigation Slices".
+2014-Mar-02 11:20:31 DEBUG   ControlPanel: Activating module "Navigation Slices".
+2014-Mar-02 11:20:32 DEBUG   ControlPanel: Activating module "Navigation Slices".
+2014-Mar-02 11:20:33 DEBUG   ModuleContainer (KernelRootContainer): Removing module "Navigation Slices" from container.
+2014-Mar-02 11:20:33 DEBUG   ControlPanel: Removing module "Navigation Slices" from Tree.
+2014-Mar-02 11:20:33 DEBUG   ControlPanel: Waiting for module "Navigation Slices" to finish before deleting.
+2014-Mar-02 11:20:33 DEBUG   NetworkEditor: Removing "Navigation Slices".
+2014-Mar-02 11:20:34 DEBUG   NetworkEditor: Deleting "Navigation Slices".
+2014-Mar-02 11:20:34 DEBUG   ControlPanel: Deleting module "Navigation Slices" from Tree.
+2014-Mar-02 11:20:35 DEBUG   ControlPanel: Activating module "Fiber Display".
+2014-Mar-02 11:20:36 DEBUG   ModuleContainer (KernelRootContainer): Removing module "Fiber Display" from container.
+2014-Mar-02 11:20:36 INFO    ModuleContainer (KernelRootContainer): Disconnecting Data Module:out from Fiber Display:fibers
+2014-Mar-02 11:20:36 DEBUG   Fiber Display: Resetting.
+2014-Mar-02 11:20:36 DEBUG   Fiber Display: Nothing to do.
+2014-Mar-02 11:20:36 DEBUG   Fiber Display: Waiting ...
+2014-Mar-02 11:20:36 DEBUG   NetworkEditor: Disconnecting "Fiber Display:fibers" and "Data Module:out".
+2014-Mar-02 11:20:36 DEBUG   ControlPanel: Removing module "Fiber Display" from Tree.
+2014-Mar-02 11:20:36 DEBUG   ControlPanel: Waiting for module "Fiber Display" to finish before deleting.
+2014-Mar-02 11:20:36 DEBUG   NetworkEditor: Removing "Fiber Display".
+2014-Mar-02 11:20:36 DEBUG   NetworkEditor: Deleting "Fiber Display".
+2014-Mar-02 11:20:36 DEBUG   ControlPanel: Deleting module "Fiber Display" from Tree.
+2014-Mar-02 11:20:36 DEBUG   NetworkEditor: Deleting "Fiber Display".
+2014-Mar-02 11:20:36 DEBUG   ControlPanel: Deleting module "Fiber Display" from Tree.
+2014-Mar-02 11:20:36 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:20:39 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:20:44 DEBUG   ModuleFactory: Creating new instance of prototype "Deterministic Tract Clustering".
+2014-Mar-02 11:20:44 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container.
+2014-Mar-02 11:20:44 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container not needed. Its already inside.
+2014-Mar-02 11:20:44 INFO    ModuleContainer (KernelRootContainer): Adding module "Deterministic Tract Clustering" to container.
+2014-Mar-02 11:20:44 INFO    ModuleContainer (KernelRootContainer): Associated module "Deterministic Tract Clustering" with container.
+2014-Mar-02 11:20:44 INFO    Module (Deterministic Tract Clustering): Starting module main method.
+2014-Mar-02 11:20:44 INFO    ModuleContainer (KernelRootContainer): Connecting Data Module:out with Deterministic Tract Clustering:tractInput
+2014-Mar-02 11:20:44 WARNING Deterministic Tract Clustering: There are no clusters for the output, leave output connecter untouched
+2014-Mar-02 11:20:44 DEBUG   NetworkEditor: Inserting "Deterministic Tract Clustering".
+2014-Mar-02 11:20:44 DEBUG   ControlPanel: Inserting module Deterministic Tract Clustering to control panel.
+2014-Mar-02 11:20:44 DEBUG   NetworkEditor: Connecting "Deterministic Tract Clustering" and "Data Module".
+2014-Mar-02 11:20:44 DEBUG   NetworkEditor: Activating "Deterministic Tract Clustering".
+2014-Mar-02 11:20:44 DEBUG   ControlPanel: Activating module "Deterministic Tract Clustering".
+2014-Mar-02 11:20:47 INFO    Deterministic Tract Clustering: Start processing tracts
+2014-Mar-02 11:20:47 DEBUG   Deterministic Tract Clustering: trying to read table from: /home/math/MPI-CBS/mr188/Tractography/DeterministicTracts/CNG.pt-1.00.dlt
+2014-Mar-02 11:20:47 INFO    Deterministic Tract Clustering: Start clustering with 402 tracts.
+2014-Mar-02 11:20:48 INFO    Deterministic Tract Clustering: Processing finished
+2014-Mar-02 11:20:48 DEBUG   ControlPanel: Activating module "Deterministic Tract Clustering".
+2014-Mar-02 11:20:57 DEBUG   ModuleFactory: Creating new instance of prototype "Line Guided Slice".
+2014-Mar-02 11:20:57 ERROR   Module (Line Guided Slice): Meta file loaded but no entry for module "Line Guided Slice" found. Ignoring.
+2014-Mar-02 11:20:57 INFO    ModuleContainer (KernelRootContainer): Adding module "Deterministic Tract Clustering" to container.
+2014-Mar-02 11:20:57 INFO    ModuleContainer (KernelRootContainer): Adding module "Deterministic Tract Clustering" to container not needed. Its already inside.
+2014-Mar-02 11:20:57 INFO    ModuleContainer (KernelRootContainer): Adding module "Line Guided Slice" to container.
+2014-Mar-02 11:20:57 INFO    ModuleContainer (KernelRootContainer): Associated module "Line Guided Slice" with container.
+2014-Mar-02 11:20:57 INFO    Module (Line Guided Slice): Starting module main method.
+2014-Mar-02 11:20:57 INFO    ModuleContainer (KernelRootContainer): Connecting Deterministic Tract Clustering:clusterOutput with Line Guided Slice:cluster
+2014-Mar-02 11:20:57 DEBUG   Line Guided Slice: Draw center line.
+2014-Mar-02 11:20:57 DEBUG   Line Guided Slice: Draw center line representation.121.778
+2014-Mar-02 11:20:57 DEBUG   NetworkEditor: Inserting "Line Guided Slice".
+2014-Mar-02 11:20:57 DEBUG   ControlPanel: Inserting module Line Guided Slice to control panel.
+2014-Mar-02 11:20:57 DEBUG   WGEShader: Reloading vertex shader "WMLineGuidedSlice-vertex.glsl"
+2014-Mar-02 11:20:57 DEBUG   WGEShader: Reloading fragment shader "WMLineGuidedSlice-fragment.glsl"
+2014-Mar-02 11:20:57 DEBUG   WGEShader: Reloading geometry shader "WMLineGuidedSlice-geometry.glsl"
+2014-Mar-02 11:20:57 DEBUG   NetworkEditor: Activating "Line Guided Slice".
+2014-Mar-02 11:20:57 DEBUG   ControlPanel: Activating module "Line Guided Slice".
+2014-Mar-02 11:20:58 DEBUG   NetworkEditor: Connecting "Line Guided Slice" and "Deterministic Tract Clustering".
+2014-Mar-02 11:21:07 DEBUG   ControlPanel: Activating module "Deterministic Tract Clustering".
+2014-Mar-02 11:23:50 DEBUG   WGEShader: Reloading vertex shader "WMLineGuidedSlice-vertex.glsl"
+2014-Mar-02 11:23:50 DEBUG   WGEShader: Reloading fragment shader "WMLineGuidedSlice-fragment.glsl"
+2014-Mar-02 11:23:50 DEBUG   WGEShader: Reloading geometry shader "WMLineGuidedSlice-geometry.glsl"
+2014-Mar-02 11:25:17 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:25:21 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:25:24 DEBUG   ControlPanel: Activating module "Data Module".
+2014-Mar-02 11:25:28 DEBUG   ModuleFactory: Creating new instance of prototype "Voxelizer".
+2014-Mar-02 11:25:28 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container.
+2014-Mar-02 11:25:28 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container not needed. Its already inside.
+2014-Mar-02 11:25:28 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container.
+2014-Mar-02 11:25:28 INFO    ModuleContainer (KernelRootContainer): Associated module "Voxelizer" with container.
+2014-Mar-02 11:25:28 INFO    Module (Voxelizer): Starting module main method.
+2014-Mar-02 11:25:28 INFO    ModuleContainer (KernelRootContainer): Connecting Data Module:out with Voxelizer:tractInput
+2014-Mar-02 11:25:28 INFO    Voxelizer: Start voxelization with: 402 tracts
+2014-Mar-02 11:25:28 DEBUG   Voxelizer: Created grid of size: 211680
+2014-Mar-02 11:25:28 DEBUG   Voxelizer: WRasterAlogrithm created 211680 values.
+2014-Mar-02 11:25:28 DEBUG   Voxelizer: No Parameterization as parameterization method selected.
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WMVoxelizer-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   NetworkEditor: Inserting "Voxelizer".
+2014-Mar-02 11:25:28 DEBUG   ControlPanel: Inserting module Voxelizer to control panel.
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WMVoxelizer-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WMVoxelizer-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:25:28 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:25:28 INFO    Voxelizer: Finished.
+2014-Mar-02 11:25:28 INFO    Voxelizer: Start voxelization with: 402 tracts
+2014-Mar-02 11:25:28 DEBUG   Voxelizer: Created grid of size: 211680
+2014-Mar-02 11:25:28 DEBUG   Voxelizer: WRasterAlogrithm created 211680 values.
+2014-Mar-02 11:25:28 DEBUG   Voxelizer: No Parameterization as parameterization method selected.
+2014-Mar-02 11:25:28 DEBUG   NetworkEditor: Activating "Voxelizer".
+2014-Mar-02 11:25:28 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:25:28 INFO    Voxelizer: Finished.
+2014-Mar-02 11:25:28 DEBUG   NetworkEditor: Connecting "Voxelizer" and "Data Module".
+2014-Mar-02 11:25:31 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:25:31 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:25:50 DEBUG   ModuleFactory: Creating new instance of prototype "Scalar Segmentation".
+2014-Mar-02 11:25:50 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container.
+2014-Mar-02 11:25:50 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container not needed. Its already inside.
+2014-Mar-02 11:25:50 INFO    ModuleContainer (KernelRootContainer): Adding module "Scalar Segmentation" to container.
+2014-Mar-02 11:25:50 INFO    ModuleContainer (KernelRootContainer): Associated module "Scalar Segmentation" with container.
+2014-Mar-02 11:25:50 INFO    Module (Scalar Segmentation): Starting module main method.
+2014-Mar-02 11:25:50 INFO    ModuleContainer (KernelRootContainer): Connecting Voxelizer:voxelOutput with Scalar Segmentation:inputSet
+2014-Mar-02 11:25:50 DEBUG   Scalar Segmentation: Starting segmentation.
+2014-Mar-02 11:25:50 DEBUG   Scalar Segmentation: Segmentation finished.
+2014-Mar-02 11:25:50 DEBUG   NetworkEditor: Inserting "Scalar Segmentation".
+2014-Mar-02 11:25:50 DEBUG   ControlPanel: Inserting module Scalar Segmentation to control panel.
+2014-Mar-02 11:25:50 DEBUG   NetworkEditor: Activating "Scalar Segmentation".
+2014-Mar-02 11:25:50 DEBUG   ControlPanel: Activating module "Scalar Segmentation".
+2014-Mar-02 11:25:50 DEBUG   NetworkEditor: Connecting "Scalar Segmentation" and "Voxelizer".
+2014-Mar-02 11:25:52 DEBUG   ControlPanel: Activating module "Scalar Segmentation".
+2014-Mar-02 11:25:54 DEBUG   ModuleContainer (KernelRootContainer): Removing module "Scalar Segmentation" from container.
+2014-Mar-02 11:25:54 INFO    ModuleContainer (KernelRootContainer): Disconnecting Voxelizer:voxelOutput from Scalar Segmentation:inputSet
+2014-Mar-02 11:25:54 DEBUG   Scalar Segmentation: Starting segmentation.
+2014-Mar-02 11:25:54 DEBUG   Scalar Segmentation: Segmentation finished.
+2014-Mar-02 11:25:54 DEBUG   NetworkEditor: Disconnecting "Scalar Segmentation:inputSet" and "Voxelizer:voxelOutput".
+2014-Mar-02 11:25:54 DEBUG   ControlPanel: Removing module "Scalar Segmentation" from Tree.
+2014-Mar-02 11:25:54 DEBUG   ControlPanel: Waiting for module "Scalar Segmentation" to finish before deleting.
+2014-Mar-02 11:25:54 DEBUG   NetworkEditor: Removing "Scalar Segmentation".
+2014-Mar-02 11:25:54 DEBUG   NetworkEditor: Deleting "Scalar Segmentation".
+2014-Mar-02 11:25:54 DEBUG   ControlPanel: Deleting module "Scalar Segmentation" from Tree.
+2014-Mar-02 11:25:55 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:25:59 DEBUG   ModuleFactory: Creating new instance of prototype "Scalar Operator".
+2014-Mar-02 11:25:59 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container.
+2014-Mar-02 11:25:59 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container not needed. Its already inside.
+2014-Mar-02 11:25:59 INFO    ModuleContainer (KernelRootContainer): Adding module "Scalar Operator" to container.
+2014-Mar-02 11:25:59 INFO    ModuleContainer (KernelRootContainer): Associated module "Scalar Operator" with container.
+2014-Mar-02 11:25:59 INFO    Module (Scalar Operator): Starting module main method.
+2014-Mar-02 11:25:59 DEBUG   Scalar Operator: Waiting ...
+2014-Mar-02 11:25:59 INFO    ModuleContainer (KernelRootContainer): Connecting Voxelizer:voxelOutput with Scalar Operator:operandA
+2014-Mar-02 11:25:59 DEBUG   Scalar Operator: Processing ...
+2014-Mar-02 11:25:59 DEBUG   Scalar Operator: Resetting output.
+2014-Mar-02 11:25:59 DEBUG   Scalar Operator: Waiting ...
+2014-Mar-02 11:25:59 DEBUG   NetworkEditor: Inserting "Scalar Operator".
+2014-Mar-02 11:25:59 DEBUG   ControlPanel: Inserting module Scalar Operator to control panel.
+2014-Mar-02 11:25:59 DEBUG   NetworkEditor: Activating "Scalar Operator".
+2014-Mar-02 11:25:59 DEBUG   ControlPanel: Activating module "Scalar Operator".
+2014-Mar-02 11:25:59 DEBUG   NetworkEditor: Connecting "Scalar Operator" and "Voxelizer".
+2014-Mar-02 11:26:00 DEBUG   ControlPanel: Activating module "Scalar Operator".
+2014-Mar-02 11:26:02 DEBUG   ControlPanel: Activating module "Scalar Operator".
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container.
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Adding module "Data Module" to container not needed. Its already inside.
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Adding module "Scalar Operator" to container.
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Adding module "Scalar Operator" to container not needed. Its already inside.
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Connecting Data Module:out with Scalar Operator:operandB
+2014-Mar-02 11:26:07 DEBUG   Scalar Operator: Processing ...
+2014-Mar-02 11:26:07 ERROR   KernelRootContainer: Error in module "Scalar Operator". Forwarding to nesting container.
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Disconnecting Voxelizer:voxelOutput from Scalar Operator:operandA
+2014-Mar-02 11:26:07 INFO    ModuleContainer (KernelRootContainer): Disconnecting Data Module:out from Scalar Operator:operandB
+2014-Mar-02 11:26:07 ERROR   Module (Scalar Operator): WException. Notifying. Message: The both value sets are not of equal size, dimension and order.
+2014-Mar-02 11:26:07 DEBUG   NetworkEditor: Connecting "Scalar Operator" and "Data Module".
+2014-Mar-02 11:26:07 DEBUG   NetworkEditor: Marking "Scalar Operator" as crashed.
+2014-Mar-02 11:26:07 DEBUG   NetworkEditor: Disconnecting "Scalar Operator:operandA" and "Voxelizer:voxelOutput".
+2014-Mar-02 11:26:07 DEBUG   NetworkEditor: Disconnecting "Scalar Operator:operandB" and "Data Module:out".
+2014-Mar-02 11:26:36 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:26:42 DEBUG   ModuleFactory: Creating new instance of prototype "Colormapper".
+2014-Mar-02 11:26:42 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container.
+2014-Mar-02 11:26:42 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container not needed. Its already inside.
+2014-Mar-02 11:26:42 INFO    ModuleContainer (KernelRootContainer): Adding module "Colormapper" to container.
+2014-Mar-02 11:26:42 INFO    ModuleContainer (KernelRootContainer): Associated module "Colormapper" with container.
+2014-Mar-02 11:26:42 INFO    Module (Colormapper): Starting module main method.
+2014-Mar-02 11:26:42 DEBUG   Colormapper: Waiting ...
+2014-Mar-02 11:26:42 INFO    ModuleContainer (KernelRootContainer): Connecting Voxelizer:voxelOutput with Colormapper:input
+2014-Mar-02 11:26:42 DEBUG   Colormapper: Registering new texture "Unnamed".
+2014-Mar-02 11:26:42 DEBUG   WGEColormapping: Registering texture "".
+2014-Mar-02 11:26:42 DEBUG   Colormapper: Waiting ...
+2014-Mar-02 11:26:42 DEBUG   WDataTexture3D: Creating Texture of type W_DT_DOUBLE
+2014-Mar-02 11:26:42 DEBUG   WDataTexture3D: Resolution: 20x147x72
+2014-Mar-02 11:26:42 DEBUG   WDataTexture3D: Channels: 1
+2014-Mar-02 11:26:42 DEBUG   WDataTexture3D: Value Range: [0,1] - Scaler: 1
+2014-Mar-02 11:26:42 DEBUG   WGEShader: Reloading vertex shader "WMColormapper-vertex.glsl"
+2014-Mar-02 11:26:42 DEBUG   NetworkEditor: Inserting "Colormapper".
+2014-Mar-02 11:26:42 DEBUG   ControlPanel: Inserting module Colormapper to control panel.
+2014-Mar-02 11:26:42 DEBUG   WGEShader: Reloading fragment shader "WMColormapper-fragment.glsl"
+2014-Mar-02 11:26:42 DEBUG   WGEShader: Reloading geometry shader "WMColormapper-geometry.glsl"
+2014-Mar-02 11:26:42 DEBUG   NetworkEditor: Activating "Colormapper".
+2014-Mar-02 11:26:42 DEBUG   ControlPanel: Activating module "Colormapper".
+2014-Mar-02 11:26:43 DEBUG   NetworkEditor: Connecting "Colormapper" and "Voxelizer".
+2014-Mar-02 11:26:51 DEBUG   ControlPanel: Activating module "Deterministic Tract Clustering".
+2014-Mar-02 11:26:53 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:27:04 DEBUG   ControlPanel: Activating module "Voxelizer".
+2014-Mar-02 11:27:08 DEBUG   ModuleFactory: Creating new instance of prototype "Gauss Filtering".
+2014-Mar-02 11:27:08 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container.
+2014-Mar-02 11:27:08 INFO    ModuleContainer (KernelRootContainer): Adding module "Voxelizer" to container not needed. Its already inside.
+2014-Mar-02 11:27:08 INFO    ModuleContainer (KernelRootContainer): Adding module "Gauss Filtering" to container.
+2014-Mar-02 11:27:08 INFO    ModuleContainer (KernelRootContainer): Associated module "Gauss Filtering" with container.
+2014-Mar-02 11:27:08 INFO    Module (Gauss Filtering): Starting module main method.
+2014-Mar-02 11:27:08 INFO    ModuleContainer (KernelRootContainer): Connecting Voxelizer:voxelOutput with Gauss Filtering:in
+2014-Mar-02 11:27:08 DEBUG   Gauss Filtering: Waiting ...
+2014-Mar-02 11:27:08 DEBUG   Gauss Filtering: Received Data.
+2014-Mar-02 11:27:08 DEBUG   Gauss Filtering: Waiting ...
+2014-Mar-02 11:27:08 DEBUG   NetworkEditor: Inserting "Gauss Filtering".
+2014-Mar-02 11:27:08 DEBUG   ControlPanel: Inserting module Gauss Filtering to control panel.
+2014-Mar-02 11:27:08 DEBUG   NetworkEditor: Connecting "Gauss Filtering" and "Voxelizer".
+2014-Mar-02 11:27:08 DEBUG   NetworkEditor: Activating "Gauss Filtering".
+2014-Mar-02 11:27:08 DEBUG   ControlPanel: Activating module "Gauss Filtering".
+2014-Mar-02 11:27:10 INFO    ModuleContainer (KernelRootContainer): Adding module "Gauss Filtering" to container.
+2014-Mar-02 11:27:10 INFO    ModuleContainer (KernelRootContainer): Adding module "Gauss Filtering" to container not needed. Its already inside.
+2014-Mar-02 11:27:10 INFO    ModuleContainer (KernelRootContainer): Adding module "Colormapper" to container.
+2014-Mar-02 11:27:10 INFO    ModuleContainer (KernelRootContainer): Adding module "Colormapper" to container not needed. Its already inside.
+2014-Mar-02 11:27:10 INFO    ModuleContainer (KernelRootContainer): Disconnecting Voxelizer:voxelOutput from Colormapper:input
+2014-Mar-02 11:27:10 DEBUG   Colormapper: Removing previous texture "Unnamed".
+2014-Mar-02 11:27:10 DEBUG   WGEColormapping: De-registering texture "Unnamed".
+2014-Mar-02 11:27:10 INFO    ModuleContainer (KernelRootContainer): Connecting Gauss Filtering:out with Colormapper:input
+2014-Mar-02 11:27:10 DEBUG   Colormapper: Waiting ...
+2014-Mar-02 11:27:10 DEBUG   Colormapper: Registering new texture "Unnamed".
+2014-Mar-02 11:27:10 DEBUG   WGEColormapping: Registering texture "".
+2014-Mar-02 11:27:10 DEBUG   Colormapper: Waiting ...
+2014-Mar-02 11:27:10 DEBUG   WGEShader: Reloading vertex shader "WMColormapper-vertex.glsl"
+2014-Mar-02 11:27:10 DEBUG   WGEShader: Reloading fragment shader "WMColormapper-fragment.glsl"
+2014-Mar-02 11:27:10 DEBUG   WGEShader: Reloading geometry shader "WMColormapper-geometry.glsl"
+2014-Mar-02 11:27:10 DEBUG   NetworkEditor: Disconnecting "Colormapper:input" and "Voxelizer:voxelOutput".
+2014-Mar-02 11:27:10 DEBUG   NetworkEditor: Connecting "Colormapper" and "Gauss Filtering".
+2014-Mar-02 11:27:11 DEBUG   WDataTexture3D: Creating Texture of type W_DT_DOUBLE
+2014-Mar-02 11:27:11 DEBUG   WDataTexture3D: Resolution: 20x147x72
+2014-Mar-02 11:27:11 DEBUG   WDataTexture3D: Channels: 1
+2014-Mar-02 11:27:11 DEBUG   WDataTexture3D: Value Range: [0,0.960938] - Scaler: 0.960938
+2014-Mar-02 11:27:11 DEBUG   ControlPanel: Activating module "Gauss Filtering".
+2014-Mar-02 11:27:14 DEBUG   Gauss Filtering: Waiting ...
+2014-Mar-02 11:27:14 DEBUG   Colormapper: Replacing texture "Unnamed" with "Unnamed".
+2014-Mar-02 11:27:14 DEBUG   WGEColormapping: Replacing texture.
+2014-Mar-02 11:27:14 DEBUG   Colormapper: Waiting ...
+2014-Mar-02 11:27:14 DEBUG   WGEShader: Reloading vertex shader "WMColormapper-vertex.glsl"
+2014-Mar-02 11:27:14 DEBUG   WGEShader: Reloading fragment shader "WMColormapper-fragment.glsl"
+2014-Mar-02 11:27:14 DEBUG   WGEShader: Reloading geometry shader "WMColormapper-geometry.glsl"
+2014-Mar-02 11:27:14 DEBUG   WDataTexture3D: Creating Texture of type W_DT_DOUBLE
+2014-Mar-02 11:27:14 DEBUG   WDataTexture3D: Resolution: 20x147x72
+2014-Mar-02 11:27:14 DEBUG   WDataTexture3D: Channels: 1
+2014-Mar-02 11:27:14 DEBUG   WDataTexture3D: Value Range: [0,0.90346] - Scaler: 0.90346
+2014-Mar-02 11:27:53 DEBUG   ControlPanel: Activating module "Gauss Filtering".
+2014-Mar-02 11:27:56 DEBUG   ModuleFactory: Creating new instance of prototype "Isosurface".
+2014-Mar-02 11:27:56 INFO    ModuleContainer (KernelRootContainer): Adding module "Gauss Filtering" to container.
+2014-Mar-02 11:27:56 INFO    ModuleContainer (KernelRootContainer): Adding module "Gauss Filtering" to container not needed. Its already inside.
+2014-Mar-02 11:27:56 INFO    ModuleContainer (KernelRootContainer): Adding module "Isosurface" to container.
+2014-Mar-02 11:27:56 INFO    ModuleContainer (KernelRootContainer): Associated module "Isosurface" with container.
+2014-Mar-02 11:27:56 INFO    Module (Isosurface): Starting module main method.
+2014-Mar-02 11:27:56 INFO    ModuleContainer (KernelRootContainer): Connecting Gauss Filtering:out with Isosurface:values
+2014-Mar-02 11:27:56 DEBUG   Isosurface: Waiting ...
+2014-Mar-02 11:27:56 DEBUG   Isosurface: Computing surface ...
+2014-Mar-02 11:27:56 DEBUG   Isosurface: Isovalue: 0.45173
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   Isosurface: Rendering surface ...
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   NetworkEditor: Inserting "Isosurface".
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   ControlPanel: Inserting module Isosurface to control panel.
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   Isosurface: Done!
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   Isosurface: Waiting ...
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WMIsosurface-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WMIsosurface-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WMIsosurface-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGECullProxyShader-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGECullProxyShader-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGECullProxyShader-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessor-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessor-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessor-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading vertex shader "WGEPostprocessorCombiner-vertex.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading fragment shader "WGEPostprocessorCombiner-fragment.glsl"
+2014-Mar-02 11:27:56 DEBUG   WGEShader: Reloading geometry shader "WGEPostprocessorCombiner-geometry.glsl"
+2014-Mar-02 11:27:56 DEBUG   NetworkEditor: Activating "Isosurface".
+2014-Mar-02 11:27:56 DEBUG   ControlPanel: Activating module "Isosurface".
+2014-Mar-02 11:27:56 DEBUG   NetworkEditor: Connecting "Isosurface" and "Gauss Filtering".
+2014-Mar-02 11:28:01 DEBUG   ControlPanel: Activating module "Isosurface".
+2014-Mar-02 11:28:04 DEBUG   Isosurface: Computing surface ...
+2014-Mar-02 11:28:04 DEBUG   Isosurface: Isovalue: 0.2
+2014-Mar-02 11:28:04 DEBUG   Isosurface: Rendering surface ...
+2014-Mar-02 11:28:04 DEBUG   Isosurface: Done!
+2014-Mar-02 11:28:04 DEBUG   Isosurface: Waiting ...
+2014-Mar-02 11:28:04 DEBUG   WGEShader: Reloading vertex shader "WMIsosurface-vertex.glsl"
+2014-Mar-02 11:28:04 DEBUG   WGEShader: Reloading fragment shader "WMIsosurface-fragment.glsl"
+2014-Mar-02 11:28:04 DEBUG   WGEShader: Reloading geometry shader "WMIsosurface-geometry.glsl"
+2014-Mar-02 11:28:23 DEBUG   WGEShader: Reloading vertex shader "WMIsosurface-vertex.glsl"
+2014-Mar-02 11:28:23 DEBUG   WGEShader: Reloading fragment shader "WMIsosurface-fragment.glsl"
+2014-Mar-02 11:28:23 DEBUG   WGEShader: Reloading geometry shader "WMIsosurface-geometry.glsl"
+2014-Mar-02 11:28:26 DEBUG   WGEShader: Reloading vertex shader "WMIsosurface-vertex.glsl"
+2014-Mar-02 11:28:26 DEBUG   WGEShader: Reloading fragment shader "WMIsosurface-fragment.glsl"
+2014-Mar-02 11:28:26 DEBUG   WGEShader: Reloading geometry shader "WMIsosurface-geometry.glsl"
+2014-Mar-02 11:28:32 DEBUG   WGEShader: Reloading vertex shader "WMIsosurface-vertex.glsl"
+2014-Mar-02 11:28:32 DEBUG   WGEShader: Reloading fragment shader "WMIsosurface-fragment.glsl"
+2014-Mar-02 11:28:32 DEBUG   WGEShader: Reloading geometry shader "WMIsosurface-geometry.glsl"
+2014-Mar-02 11:28:49 DEBUG   ControlPanel: Activating module "Isosurface".
+2014-Mar-02 11:29:18 INFO    MainWindow: Saving window state.
+2014-Mar-02 11:29:18 INFO    Kernel: Stopping Kernel
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Stopping pending threads.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Stopping modules.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Scalar Operator" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Data Module" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Disconnecting Deterministic Tract Clustering:tractInput from Data Module:out
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Disconnecting Voxelizer:tractInput from Data Module:out
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Data Module" to finish.
+2014-Mar-02 11:29:18 DEBUG   WGEColormapping: De-registering texture "mr188_fa.nii.gz".
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Deterministic Tract Clustering" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Disconnecting Line Guided Slice:cluster from Deterministic Tract Clustering:clusterOutput
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Line Guided Slice" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Voxelizer" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Disconnecting Gauss Filtering:in from Voxelizer:voxelOutput
+2014-Mar-02 11:29:18 DEBUG   Gauss Filtering: Received Data.
+2014-Mar-02 11:29:18 DEBUG   Gauss Filtering: Resetting output.
+2014-Mar-02 11:29:18 DEBUG   Colormapper: Removing previous texture "Unnamed".
+2014-Mar-02 11:29:18 DEBUG   Isosurface: Waiting for data ...
+2014-Mar-02 11:29:18 DEBUG   Gauss Filtering: Waiting ...
+2014-Mar-02 11:29:18 DEBUG   Isosurface: Waiting ...
+2014-Mar-02 11:29:18 DEBUG   WGEColormapping: De-registering texture "Unnamed".
+2014-Mar-02 11:29:18 DEBUG   Colormapper: Waiting ...
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Colormapper" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Disconnecting Gauss Filtering:out from Colormapper:input
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Gauss Filtering" to finish.
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Disconnecting Isosurface:values from Gauss Filtering:out
+2014-Mar-02 11:29:18 DEBUG   Isosurface: Waiting for data ...
+2014-Mar-02 11:29:18 INFO    ModuleContainer (KernelRootContainer): Waiting for module "Isosurface" to finish.
+2014-Mar-02 11:29:18 DEBUG   Isosurface: Waiting ...
+2014-Mar-02 11:29:18 INFO    Kernel: Stopping Data Handler
+2014-Mar-02 11:29:18 INFO    Data Handler: Removing all subjects.
+2014-Mar-02 11:29:18 DEBUG   Data Handler: Removing subject "0".
+2014-Mar-02 11:29:18 DEBUG   NetworkEditor: Disconnecting "Deterministic Tract Clustering:tractInput" and "Data Module:out".
+2014-Mar-02 11:29:18 DEBUG   NetworkEditor: Disconnecting "Voxelizer:tractInput" and "Data Module:out".
+2014-Mar-02 11:29:19 DEBUG   NetworkEditor: Disconnecting "Line Guided Slice:cluster" and "Deterministic Tract Clustering:clusterOutput".
+2014-Mar-02 11:29:19 DEBUG   NetworkEditor: Disconnecting "Gauss Filtering:in" and "Voxelizer:voxelOutput".
+2014-Mar-02 11:29:19 DEBUG   NetworkEditor: Disconnecting "Colormapper:input" and "Gauss Filtering:out".
+2014-Mar-02 11:29:19 DEBUG   NetworkEditor: Disconnecting "Isosurface:values" and "Gauss Filtering:out".
+2014-Mar-02 11:29:19 INFO    Kernel: Shutting down Kernel
+2014-Mar-02 11:29:19 INFO    GE: Stopping Graphics Engine
