@@ -49,12 +49,10 @@
 #include "core/kernel/WKernel.h"
 #include "WMClusterSlicer.h"
 
-// This line is needed by the module loader to actually find your module.
-
 WMClusterSlicer::WMClusterSlicer()
     : WModule(),
-      m_rootNode( osg::ref_ptr< WGEGroupNode >( new WGEGroupNode() ) ),
-      m_fullUpdate( new WCondition ),
+      m_rootNode( osg::ref_ptr< WGEManagedGroupNode > ( new WGEManagedGroupNode( m_active ) ) ),
+      m_fullUpdate( new WCondition() ),
       m_maxMean( 0.0 ),
       m_minMean( 0.0 )
 {
@@ -128,8 +126,6 @@ void WMClusterSlicer::properties()
 
 void WMClusterSlicer::moduleMain()
 {
-    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
-
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_paramIC->getDataChangedCondition() );
     m_moduleState.add( m_triangleMeshIC->getDataChangedCondition() );
@@ -139,6 +135,8 @@ void WMClusterSlicer::moduleMain()
     m_moduleState.add( m_selectBiggestComponentOnly->getCondition() );
 
     ready();
+
+    WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
 
     while( !m_shutdownFlag() )
     {
@@ -160,21 +158,21 @@ void WMClusterSlicer::moduleMain()
         bool clusterDSChanged = ( m_clusterDS != newClusterDS );
         bool dataChanged = clusterDSChanged || clusterChanged || paramDSChanged || meshChanged;
 
-        m_clusterDS = newClusterDS;
-        m_cluster = newCluster;
-        m_paramDS = newParamDS;
-        m_mesh = newMesh;
-
-        if( !( m_clusterDS.get() && m_cluster.get() && m_paramDS.get() && m_mesh.get() ) )
+        if( !( newClusterDS && newCluster && newParamDS && newMesh ) )
         {
             debugLog() << "Invalid data. Waiting for data change again.";
             continue;
         }
 
+        m_clusterDS = newClusterDS;
+        m_cluster = newCluster;
+        m_paramDS = newParamDS;
+        m_mesh = newMesh;
+
         if( dataChanged )
         {
             infoLog() << "Coverage for isovalue: " << m_isoValue->get() << " is: " << countTractPointsInsideVolume( m_isoValue->get() );
-            infoLog() << "Recommended isovalue for specified coverage: " << computeOptimalIsoValue();
+            // infoLog() << "Recommended isovalue for specified coverage: " << computeOptimalIsoValue();
         }
 
         if( dataChanged )
@@ -302,7 +300,7 @@ void WMClusterSlicer::generateSlices()
     const double stepWidth = m_planeStepWidth->get( true );
     const int meanType = m_meanSelector->get( true );
     m_rootNode->remove( m_samplePointsGeode );
-    m_samplePointsGeode = osg::ref_ptr< WGEGroupNode >( new WGEGroupNode ); // discard old geode
+    m_samplePointsGeode = osg::ref_ptr< WGEManagedGroupNode >( new WGEManagedGroupNode( m_active ) ); // discard old geode
 
     WVector3d generator = ( centerLine.front() - midPoint( centerLine ) );
     generator = cross( generator, centerLine.back() - midPoint( centerLine ) );
@@ -550,7 +548,7 @@ void WMClusterSlicer::updateDisplay( bool force )
 
         generateSlices(); // for recomputation of sample point geode
 
-        m_sliceGeode = osg::ref_ptr< WGEGroupNode >( new WGEGroupNode ); // discard old geode
+        m_sliceGeode = osg::ref_ptr< WGEManagedGroupNode >( new WGEManagedGroupNode( m_active ) ); // discard old geode
         if( m_drawSlices->get( true ) ) // regenerate
         {
             const double width = m_planeNumX->get() * m_planeStepWidth->get();
@@ -632,21 +630,4 @@ double WMClusterSlicer::computeOptimalIsoValue( double coverage ) const
         valuesSoFar += h[index--];
     }
     return  m_clusterDS->getMin() + std::abs( m_clusterDS->getMin() - m_clusterDS->getMax() ) * index / static_cast< double >( h.size() );
-}
-
-void WMClusterSlicer::activate()
-{
-    if( m_rootNode )
-    {
-        if( m_active->get() )
-        {
-            m_rootNode->setNodeMask( 0xFFFFFFFF );
-        }
-        else
-        {
-            m_rootNode->setNodeMask( 0x0 );
-        }
-    }
-
-    WModule::activate();
 }

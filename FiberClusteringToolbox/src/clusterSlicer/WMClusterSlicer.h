@@ -39,7 +39,7 @@
 #include "core/dataHandler/datastructures/WFiberCluster.h"
 #include "core/dataHandler/datastructures/WJoinContourTree.h"
 #include "core/dataHandler/WDataSetScalar.h"
-#include "core/graphicsEngine/WGEGroupNode.h"
+#include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/graphicsEngine/WGEGeometryUtils.h"
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/kernel/WModule.h"
@@ -102,11 +102,6 @@ protected:
     virtual void properties();
 
     /**
-     * Callback for m_active. Overwrite this in your modules to handle m_active changes separately.
-     */
-    virtual void activate();
-
-    /**
      * Updates either the planes representing the slices or the isovoxels of the volume
      *
      * \param force If true the scene is updated even if no property changed
@@ -163,7 +158,7 @@ protected:
     /**
      * The root node used for this modules graphics.
      */
-    osg::ref_ptr< WGEGroupNode > m_rootNode;
+    osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
 
     /**
      * Separate geode for voxels of the cluster volume
@@ -173,12 +168,12 @@ protected:
     /**
      * Separate geode for slices
      */
-    osg::ref_ptr< WGEGroupNode > m_sliceGeode;
+    osg::ref_ptr< WGEManagedGroupNode > m_sliceGeode;
 
     /**
      * Separate geode for the sample Points
      */
-    osg::ref_ptr< WGEGroupNode > m_samplePointsGeode;
+    osg::ref_ptr< WGEManagedGroupNode > m_samplePointsGeode;
 
     /**
      * InputConnector for a fiber cluster with its CenterLine
@@ -210,140 +205,140 @@ protected:
      */
     boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_triangleMeshOC;
 
-    /**
-     * A cluster with its CenterLine
-     */
-    boost::shared_ptr< WFiberCluster >  m_cluster;
+     /**
+      * A cluster with its CenterLine
+      */
+     boost::shared_ptr< WFiberCluster >  m_cluster;
 
-    /**
-     * Dataset derived from a voxelized cluster
-     */
-    boost::shared_ptr< WDataSetScalar > m_clusterDS;
+     /**
+      * Dataset derived from a voxelized cluster
+      */
+     boost::shared_ptr< WDataSetScalar > m_clusterDS;
 
-    /**
-     * Dataset derived from a voxelized cluster
-     */
-    boost::shared_ptr< WDataSetScalar > m_paramDS;
+     /**
+      * Dataset derived from a voxelized cluster
+      */
+     boost::shared_ptr< WDataSetScalar > m_paramDS;
 
-    /**
-     * stores all planes and their average parameters along centerLine
-     */
-    boost::shared_ptr< std::vector< std::pair< double, WPlane > > > m_slices;
+     /**
+      * stores all planes and their average parameters along centerLine
+      */
+     boost::shared_ptr< std::vector< std::pair< double, WPlane > > > m_slices;
 
-    /**
-     * Reference to the TriangleMesh to make intersections
-     */
-    boost::shared_ptr< WTriangleMesh > m_mesh;
+     /**
+      * Reference to the TriangleMesh to make intersections
+      */
+     boost::shared_ptr< WTriangleMesh > m_mesh;
 
-    /**
-     * Stores the color for vertices belonging to the intersection with the mesh and the planes
-     */
-    boost::shared_ptr< WColoredVertices > m_colorMap;
+     /**
+      * Stores the color for vertices belonging to the intersection with the mesh and the planes
+      */
+     boost::shared_ptr< WColoredVertices > m_colorMap;
 
-    /**
-     * Stores the JoinTree
-     */
-    boost::shared_ptr< WJoinContourTree >   m_joinTree;
+     /**
+      * Stores the JoinTree
+      */
+     boost::shared_ptr< WJoinContourTree >   m_joinTree;
 
-    /**
-     * Stores the voxels belonging to the cluster volume of a certain iso value
-     */
-    boost::shared_ptr< std::set< size_t > > m_isoVoxels;
+     /**
+      * Stores the voxels belonging to the cluster volume of a certain iso value
+      */
+     boost::shared_ptr< std::set< size_t > > m_isoVoxels;
 
-    /**
-     * Mesh decomposed into connected components
-     */
-    boost::shared_ptr< std::list< boost::shared_ptr< WTriangleMesh > > > m_components;
+     /**
+      * Mesh decomposed into connected components
+      */
+     boost::shared_ptr< std::list< boost::shared_ptr< WTriangleMesh > > > m_components;
 
-    /**
-     * Indicates a complete update of display and computed data (time consuming)
-     */
-    boost::shared_ptr< WCondition > m_fullUpdate;
+     /**
+      * Indicates a complete update of display and computed data (time consuming)
+      */
+     boost::shared_ptr< WCondition > m_fullUpdate;
 
-    /**
-     * En/Disable the display of cluster volume voxels
-     */
-    WPropBool   m_drawIsoVoxels;
+     /**
+      * En/Disable the display of cluster volume voxels
+      */
+     WPropBool   m_drawIsoVoxels;
 
-    /**
-     * En/Disable the display of slices along center line
-     */
-    WPropBool   m_drawSlices;
+     /**
+      * En/Disable the display of slices along center line
+      */
+     WPropBool   m_drawSlices;
 
-    /**
-     * The isovalue selecting the size of the cluster volume
-     */
-    WPropDouble m_isoValue;
+     /**
+      * The isovalue selecting the size of the cluster volume
+      */
+     WPropDouble m_isoValue;
 
-    /**
-     * Selects the mean: 0 == arithmeticMean, 1 == geometricMean, 2 == median (default)
-     */
-    WPropInt    m_meanSelector;
+     /**
+      * Selects the mean: 0 == arithmeticMean, 1 == geometricMean, 2 == median (default)
+      */
+     WPropInt    m_meanSelector;
 
-    /**
-     * how many sample points in first direction of the slice
-     */
-    WPropInt    m_planeNumX;
+     /**
+      * how many sample points in first direction of the slice
+      */
+     WPropInt    m_planeNumX;
 
-    /**
-     * how many sample points in the second direction of the slice
-     */
-    WPropInt    m_planeNumY;
+     /**
+      * how many sample points in the second direction of the slice
+      */
+     WPropInt    m_planeNumY;
 
-    /**
-     * distance of the sample points on the slices
-     */
-    WPropDouble m_planeStepWidth;
+     /**
+      * distance of the sample points on the slices
+      */
+     WPropDouble m_planeStepWidth;
 
-    /**
-     * rescales the centerline for using more or less slices.
-     */
-    WPropDouble m_centerLineScale;
+     /**
+      * rescales the centerline for using more or less slices.
+      */
+     WPropDouble m_centerLineScale;
 
-    /**
-     * If true, first the mesh is decomposed into its components (expensive!) & the biggest will be drawn
-     */
-    WPropBool   m_selectBiggestComponentOnly;
+     /**
+      * If true, first the mesh is decomposed into its components (expensive!) & the biggest will be drawn
+      */
+     WPropBool   m_selectBiggestComponentOnly;
 
-    /**
-     * En/Disables alternative mesh coloring strategy
-     */
-    WPropBool   m_alternateColoring;
+     /**
+      * En/Disables alternative mesh coloring strategy
+      */
+     WPropBool   m_alternateColoring;
 
-    /**
-     * En/Disables custom color scaling
-     */
-    WPropBool   m_customScale;
+     /**
+      * En/Disables custom color scaling
+      */
+     WPropBool   m_customScale;
 
-    /**
-     * A synthetic minMean value. All mean values below are mapped to 0
-     */
-    WPropDouble m_minScale;
+     /**
+      * A synthetic minMean value. All mean values below are mapped to 0
+      */
+     WPropDouble m_minScale;
 
-    /**
-     * color used for minMean
-     */
-    WPropColor  m_minScaleColor;
+     /**
+      * color used for minMean
+      */
+     WPropColor  m_minScaleColor;
 
-    /**
-     * A synthetic maxMean value. All mean value above are mapped to 1
-     */
-    WPropDouble m_maxScale;
+     /**
+      * A synthetic maxMean value. All mean value above are mapped to 1
+      */
+     WPropDouble m_maxScale;
 
-    /**
-     * color used for maxMean
-     */
-    WPropColor  m_maxScaleColor;
+     /**
+      * color used for maxMean
+      */
+     WPropColor  m_maxScaleColor;
 
-    /**
-     * maximum average (of sample points of a plane) parameter value over all planes
-     */
-    double m_maxMean;
+     /**
+      * maximum average (of sample points of a plane) parameter value over all planes
+      */
+     double m_maxMean;
 
-    /**
-     * minimum average (of sample points of a plane) parameter value over all planes
-     */
-    double m_minMean;
+     /**
+      * minimum average (of sample points of a plane) parameter value over all planes
+      */
+     double m_minMean;
 
 private:
     /**

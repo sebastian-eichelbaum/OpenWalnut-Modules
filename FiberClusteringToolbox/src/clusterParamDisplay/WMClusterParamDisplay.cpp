@@ -148,29 +148,13 @@ void WMClusterParamDisplay::initSubModules()
     m_meshRenderer->getInputConnector( "mesh" )->connect( m_clusterSlicer->getOutputConnector( "meshOutput" ) );
     m_meshRenderer->getInputConnector( "colorMap" )->connect( m_clusterSlicer->getOutputConnector( "colorMapOutput" ) );
 
-    m_voxelizer->getInputConnector( "tractInput" )->connect( m_detTractClustering->getOutputConnector( "clusterOutput" ) );
     m_fiberIC->forward( m_detTractClustering->getInputConnector( "tractInput" ) ); // init rippling
+    m_fiberIC->forward( m_voxelizer->getInputConnector( "tractInput" ) ); // init rippling
     debugLog() << "Wiring done";
 
-    // forward properties
-    m_properties->addProperty( m_detTractClustering->getProperties()->getProperty( "Output cluster ID" ) );
-    m_properties->addProperty( m_detTractClustering->getProperties()->getProperty( "Max cluster distance" ) );
-    m_properties->addProperty( m_detTractClustering->getProperties()->getProperty( "Min point distance" ) );
-    m_properties->addProperty( m_gaussFiltering->getProperties()->getProperty( "Iterations" ) );
-    m_properties->addProperty( m_meshRenderer->getProperties()->getProperty( "Coloring" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Show|Hide Iso Voxels" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Mean Type" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Show|Hide Slices" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Planes #X-SamplePoints" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Planes #Y-SamplePoints" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Planes Step Width" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "#Planes" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Biggest Component Only" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "Custom Scale" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "MinScale" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "MaxScale" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "MinScaleColor" ) );
-    m_properties->addProperty( m_clusterSlicer->getProperties()->getProperty( "MaxScaleColor" ) );
-    m_properties->addProperty( m_voxelizer->getProperties()->getProperty( "Voxels per Unit" ) );
-    m_properties->addProperty( m_detTractClustering->getProperties()->getProperty( "Start clustering" ) );
+    m_properties->addPropertyGroup( "MeshRender", "Props" )->addProperty( m_meshRenderer->getProperties() );
+    m_properties->addPropertyGroup( "Slicer", "Props" )->addProperty( m_clusterSlicer->getProperties() );
+    m_properties->addPropertyGroup( "Clustering", "Props" )->addProperty( m_detTractClustering->getProperties() );
+    m_properties->addPropertyGroup( "Voxelizer", "Props" )->addProperty( m_voxelizer->getProperties() );
+    m_properties->addPropertyGroup( "Gauss", "Props" )->addProperty( m_gaussFiltering->getProperties() );
 }
