@@ -73,6 +73,9 @@ private:
      * Array containing the colors per vertex.
      */
     WDataSetFibers::ColorArray m_StartEndColors;
+
+    WPropColor m_start;
+    WPropColor m_end;
 };
 
 #endif  // WSTARTENDCOLORING_H

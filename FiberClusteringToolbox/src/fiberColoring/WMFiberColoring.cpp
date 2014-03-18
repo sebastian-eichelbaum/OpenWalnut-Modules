@@ -32,6 +32,7 @@
 #include <core/kernel/WModuleInputData.h>
 
 #include "WBoyColoring.h"
+#include "WBoyGlobalColoring.h"
 #include "WMFiberColoring.h"
 #include "WSimilarityColoring.h"
 #include "WStartEndColoring.h"
@@ -42,6 +43,7 @@ WMFiberColoring::WMFiberColoring():
                 "FiberColor", "A list of all known bundling strategies" )
 {
     m_strategy.addStrategy( WBoyColoring::SPtr( new WBoyColoring() ) );
+    m_strategy.addStrategy( WBoyGlobalColoring::SPtr( new WBoyGlobalColoring() ) );
     m_strategy.addStrategy( WSimilarityColoring::SPtr( new WSimilarityColoring() ) );
     m_strategy.addStrategy( WStartEndColoring::SPtr( new WStartEndColoring() ) );
 }

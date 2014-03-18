@@ -38,6 +38,8 @@
 WStartEndColoring::WStartEndColoring()
     : WObjectNDIP< WColoring_I >( "StartEnd Coloring", "Colorcoding segmentwise from start to end with color scale" )
 {
+  m_start = m_properties->addProperty( "Start Color", "From this color we start", WColor( 1.0, 0, 0, 1.0 ) );
+  m_end = m_properties->addProperty( "Stop Color", "To this color we proceed", WColor( 1.0, 1.0, 1.0, 1.0 ) );
 }
 
 WStartEndColoring::~WStartEndColoring()
@@ -46,7 +48,7 @@ WStartEndColoring::~WStartEndColoring()
 
 osg::Vec4 WStartEndColoring::segmentColor( double param ) const
 {
-    return osg::Vec4( 1.0, param, param, 1.0 );
+    return m_start->get() * param + m_end->get() * ( 1 - param );
 }
 
 WDataSetFibers::SPtr WStartEndColoring::operator()( WProgress::SPtr progress, WBoolFlag const & shutdown, WDataSetFibers::SPtr fibers )
