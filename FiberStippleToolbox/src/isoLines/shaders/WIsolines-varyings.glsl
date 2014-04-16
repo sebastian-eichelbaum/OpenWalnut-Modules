@@ -78,3 +78,5 @@ varying float edge3Hit_f;
  */
 varying float v_quadScale;
 
+varying vec4 v_col;
+

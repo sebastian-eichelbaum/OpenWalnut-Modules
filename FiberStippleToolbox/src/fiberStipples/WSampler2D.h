@@ -65,10 +65,32 @@ enum RandomInit
     DONT_CALL_SRAND
 };
 
+class WSampler2DBase : public WSampler2D
+{
+public:
+    /**
+     * Shortcut for boost shared pointers on that objects.
+     */
+    typedef boost::shared_ptr< WSampler2DBase > SPtr;
+
+    WSampler2DBase( size_t numSamples, double width, double height, RandomInit init = DONT_CALL_SRAND );
+
+protected:
+    /**
+     * X dimension.
+     */
+    double m_width;
+
+    /**
+     * Y dimension.
+     */
+    double m_height;
+};
+
 /**
  * Generates uniform distributed random positions within the given a rectangular domain.
  */
-class WSampler2DUniform : public WSampler2D
+class WSampler2DUniform : public WSampler2DBase
 {
 public:
     /**
@@ -85,18 +107,46 @@ public:
      * \param init Flag for calling srand or not
      */
     explicit WSampler2DUniform( size_t numSamples, double width = 1.0, double height = 1.0, RandomInit init = CALL_SRAND );
-
-protected:
-    /**
-     * X dimension.
-     */
-    double m_width;
-
-    /**
-     * Y dimension.
-     */
-    double m_height;
 };
+
+class WSampler2DRegular : public WSampler2DBase
+{
+public:
+    /**
+     * Shortcut for boost shared pointers on that objects.
+     */
+    typedef boost::shared_ptr< WSampler2DRegular > SPtr;
+
+    /**
+     * Generates stratified sampled points distributed uniformly within each cell.
+     *
+     * \param numSamples How many samples.
+     * \param width X dimension
+     * \param height Y dimension
+     * \param init Flag for calling srand or not
+     */
+    explicit WSampler2DRegular( size_t numSamples, double width = 1.0, double height = 1.0 );
+};
+
+class WSampler2DStratified : public WSampler2DBase
+{
+public:
+    /**
+     * Shortcut for boost shared pointers on that objects.
+     */
+    typedef boost::shared_ptr< WSampler2DStratified > SPtr;
+
+    /**
+     * Generates stratified sampled points distributed uniformly within each cell.
+     *
+     * \param numSamples How many samples.
+     * \param width X dimension
+     * \param height Y dimension
+     * \param init Flag for calling srand or not
+     */
+    explicit WSampler2DStratified( size_t numSamples, double width = 1.0, double height = 1.0, RandomInit init = CALL_SRAND );
+};
+
 
 /**
  * Creates a Poisson Disk sampling in the [0,1]^2 domain.

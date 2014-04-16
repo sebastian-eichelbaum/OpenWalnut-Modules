@@ -100,9 +100,9 @@ namespace
         size_t maxA = a.length() / resolution;
         size_t maxB = b.length() / resolution;
         // the stuff needed by the OSG to create a geometry instance
-        osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array( maxA * maxB * 4 );
-        osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array( maxA * maxB * 4 );
-        osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array( maxA * maxB * 4 );
+        osg::ref_ptr< osg::Vec3Array > vertices = new osg::Vec3Array;
+        osg::ref_ptr< osg::Vec3Array > texcoords0 = new osg::Vec3Array;
+        osg::ref_ptr< osg::Vec3Array > texcoords1 = new osg::Vec3Array;
         osg::ref_ptr< osg::Vec3Array > normals = new osg::Vec3Array;
         osg::ref_ptr< osg::Vec4Array > colors = new osg::Vec4Array;
 

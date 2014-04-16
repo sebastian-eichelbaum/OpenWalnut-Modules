@@ -40,18 +40,53 @@ namespace
     const double rndMax = RAND_MAX;
 }
 
-WSampler2DUniform::WSampler2DUniform(  size_t numSamples, double width, double height, RandomInit init )
+WSampler2DBase::WSampler2DBase( size_t numSamples, double width, double height, RandomInit init )
     : WSampler2D(),
       m_width( width ),
       m_height( height )
 {
     reserve( numSamples );
-
     if( init == CALL_SRAND )
     {
         srand( time( NULL ) );
     }
 
+}
+
+
+WSampler2DRegular::WSampler2DRegular( size_t numSamples, double width, double height )
+    : WSampler2DBase( numSamples, width, height )
+{
+    double maxX = std::sqrt( static_cast< double >( numSamples ) );
+    double maxY = maxX;
+    for( double col = 0.0; col < width; col += width / maxX )
+    {
+        for( double row = 0.0; row < height; row += height / maxY )
+        {
+            push_back( WVector2d( row, col ) );
+        }
+    }
+}
+
+WSampler2DStratified::WSampler2DStratified( size_t numSamples, double width, double height, RandomInit init )
+    : WSampler2DBase( numSamples, width, height, init )
+{
+    double maxX = std::sqrt( static_cast< double >( numSamples ) );
+    double maxY = maxX;
+    for( double col = 0.0; col < width; col += width / maxX )
+    {
+        for( double row = 0.0; row < height; row += height / maxY )
+        {
+            double rnd1 = std::rand() / rndMax;
+            double rnd2 = std::rand() / rndMax;
+            push_back( WVector2d( row, col ) + WVector2d( rnd1 * height / maxY, rnd2 * width / maxX ) );
+        }
+    }
+}
+
+WSampler2DUniform::WSampler2DUniform(  size_t numSamples, double width, double height, RandomInit init )
+    : WSampler2DBase( numSamples, width, height, init )
+{
     for( size_t i = 0; i < numSamples; ++i )
     {
         push_back( WVector2d( std::rand() / rndMax * m_width, std::rand() / rndMax * m_height ) );
@@ -62,7 +97,7 @@ WSampler2DPoisson::WSampler2DPoisson( float radius )
     : WSampler2D(),
       m_radius( radius )
 {
-    boost::shared_ptr< PDSampler > sampler( new BoundarySampler( 0.002, true ) );
+    boost::shared_ptr< PDSampler > sampler( new BoundarySampler( radius, true ) );
     sampler->complete(); // generates PDSampling in [-1,1]^2 domain.
 
     double x,y;

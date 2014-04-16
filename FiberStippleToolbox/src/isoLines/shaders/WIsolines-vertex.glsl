@@ -91,6 +91,10 @@ vec3 textPos( vec3 p )
     return texturePosition;
 }
 
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(13.9898,78.233))) * 43758.5453);
+}
+
 /**
  * Vertex Main.
  */
@@ -115,6 +119,7 @@ void main()
     edge3Hit_f = float( d3 >= u_isovalue != d0 >= u_isovalue );
 
     float overlap = 1.6;
+    // float overlap = 0.0;
     v_quadScale = 1.000 + overlap;
 
     // determine the position where the corresponding edge was hitten (in 0,1 clamped relative coordinates)
@@ -143,4 +148,5 @@ void main()
     {
         gl_Position = ftransform();
     }
+    v_col = vec4( rand( gl_Vertex.xy ), rand( gl_Vertex.yz ), rand( gl_Vertex.xz ), 1.0 );
 }

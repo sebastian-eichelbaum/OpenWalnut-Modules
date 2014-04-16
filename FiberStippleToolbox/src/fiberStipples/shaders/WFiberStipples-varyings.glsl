@@ -25,28 +25,10 @@
 #version 120
 
 /**
- * First focal point, which is one of the endings of the projected diffusion direction.
- */
-varying vec3 focalPoint1;
-
-/**
- * Second focal point, which is one of the endings of the projected diffusion direction.
- */
-varying vec3 focalPoint2;
-
-/**
- * First focal point, scaled.
- */
-varying vec3 scaledFocalPoint1;
-
-/**
- * Second focal poin, scaled.
- */
-varying vec3 scaledFocalPoint2;
-
-/**
  * Scaled connectivity score; now between 0.0...1.0.
  */
-varying float probability;
+varying float v_probability;
 
-varying float col;
+// varying vec3 diff;
+
+varying vec3 v_textPos;

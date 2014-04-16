@@ -157,6 +157,25 @@ private:
      */
     WPropDouble m_glyphThickness;
 
+    WPropDouble m_regSamplesFactor;
+
+    WPropDouble m_numSamples;
+
+    WPropSelection m_samplingSelection;
+
+    WPropBool m_outline;
+
+    WPropDouble m_outlineWidth;
+    WPropInt m_outlineSteps;
+    WPropBool m_outlineDark;
+    WPropBool m_outlineInOut;
+
+    WPropDouble m_sampleRes;
+
+    boost::shared_ptr< WItemSelection > m_samplingMethods;
+
+    typedef WItemSelectionItemTyped< size_t > SamplingMethod;
+
     /**
      * For initial slice positioning we need to control if the module is in intial state or not.
      */
@@ -164,7 +183,6 @@ private:
 
     // TODO(math): Remove this ugly hack as soon as possible
     std::vector< WSampler2D > m_samplers;
-    WPropBool m_oldNew;
 };
 
 #endif  // WMFIBERSTIPPLES_H

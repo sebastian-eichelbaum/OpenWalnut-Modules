@@ -125,7 +125,39 @@ void WMFiberStipples::properties()
     m_glyphSize->setMin( 0.01 );
     m_glyphSize->setMax( 10.0 );
 
-    m_oldNew = m_properties->addProperty( "Old|New", "Old|New", true, m_propCondition );
+    m_regSamplesFactor = m_properties->addProperty( "Regular*#Samples", "Multiples of #Samples for regular sampling", 2.0, m_propCondition );
+    m_regSamplesFactor->setMin( 1.0 );
+    m_regSamplesFactor->setMax( 100 );
+
+    m_numSamples = m_properties->addProperty( "#Samples", "Number of Samples for uniform, stratified and regular sampling methods", 10000.0, m_propCondition );
+    m_numSamples->setMin( 100 );
+    m_numSamples->setMax( 100000 );
+
+    m_samplingMethods = boost::shared_ptr< WItemSelection >( new WItemSelection() );
+    m_samplingMethods->addItem( SamplingMethod::create( 0, "Poission", "Poission-Disk Sampling" ) );
+    m_samplingMethods->addItem( SamplingMethod::create( 1, "Stratified", "Stratified (Uniform-Cell) Sampling" ) );
+    m_samplingMethods->addItem( SamplingMethod::create( 2, "Uniform", "Uniform (Slice) Sampling" ) );
+    m_samplingMethods->addItem( SamplingMethod::create( 3, "Regular", "Regular Sampling" ) );
+    m_samplingSelection = m_properties->addProperty( "Sampling Method", "Which placement strategy. We suggest Poission-Disk!", m_samplingMethods->getSelector( 0 ), m_propCondition );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_samplingSelection );
+
+    m_outline = m_properties->addProperty( "Outline", "Stipple Outline Y|N", true );
+
+    m_outlineWidth = m_properties->addProperty( "Outline Width", "Stipple Outline Width", 0.02 );
+    m_outlineWidth->setMin( 0.0 );
+    m_outlineWidth->setMax( 0.2 );
+
+    m_outlineSteps = m_properties->addProperty( "Outline Steps", "Stipple Outline Steps", 10 );
+    m_outlineSteps->setMin( 0 );
+    m_outlineSteps->setMax( 50 );
+
+    m_outlineDark = m_properties->addProperty( "Dark Outline", "Dark Stipple Outline or Bright", true );
+
+    m_outlineInOut = m_properties->addProperty( "In-Out Outline", "In/out-side of Stipple", true );
+
+    m_sampleRes = m_properties->addProperty( "PoissionRes", "Poission Sampling Resolution", 0.02, m_propCondition );
+    m_sampleRes->setMin( 0.0001 );
+    m_sampleRes->setMax( 0.2 );
 
     // call WModule's initialization
     WMAbstractSliceModule::properties();
@@ -153,8 +185,8 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     // TODO(math): remove this ugly hack
     double width = a.length();
     double height = b.length();
-    double maxX = ( width >= height ? 1.0 : width / height );
-    double maxY = ( width >= height ? height / width : 1.0 );
+    double maxX = ( width <= height ? 1.0 : width / height );
+    double maxY = ( width <= height ? height / width : 1.0 );
 
     double lambda0, lambda1;
     for( size_t i = 0; i < glyphPositions.size(); ++i )
@@ -261,12 +293,17 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, m_color, "u_color" );
     wge::bindAsUniform( m_output, m_minRange, "u_minRange" );
     wge::bindAsUniform( m_output, m_maxRange, "u_maxRange" );
+    wge::bindAsUniform( m_output, m_outline, "u_outline" );
     wge::bindAsUniform( m_output, m_threshold, "u_threshold" );
     wge::bindAsUniform( m_output, probTract->getMax(), "u_maxConnectivityScore" );
     wge::bindAsUniform( m_output, numDensitySlices, "u_numDensitySlices" );
     wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
     wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
     wge::bindAsUniform( m_output, m_colorThreshold, "u_colorThreshold" );
+    wge::bindAsUniform( m_output, m_outlineWidth, "u_outlineWidth" );
+    wge::bindAsUniform( m_output, m_outlineSteps, "u_outlineSteps" );
+    wge::bindAsUniform( m_output, m_outlineDark, "u_outlineDark" );
+    wge::bindAsUniform( m_output, m_outlineInOut, "u_outlineInOut" );
 
 
     // each slice (containing scattered quads) is child of an transformation node
@@ -277,14 +314,22 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     for( size_t i = 0; i < numDensitySlices; ++i )
     {
         osg::ref_ptr< osg::Geode > slice;
-        if( !m_oldNew->get() )
+        // select sampling strategy
+
+        debugLog() <<  m_samplingSelection->get( true ).at( 0 );
+        switch(  m_samplingSelection->get( true ).at( 0 )->getAs< SamplingMethod >()->getValue() )
         {
-            slice = genScatteredDegeneratedQuads( WSampler2DUniform( 10000, 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
+          case 0 : slice = genScatteredDegeneratedQuads( m_samplers[i], minV, aVec, bVec, i );
+                   break;
+          case 1 : slice = genScatteredDegeneratedQuads( WSampler2DStratified( m_numSamples->get( true ), 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
+                   break;
+          case 2 : slice = genScatteredDegeneratedQuads( WSampler2DUniform( m_numSamples->get( true ), 1.0, 1.0, DONT_CALL_SRAND ), minV, aVec, bVec, i );
+                   break;
+          case 3 : slice = genScatteredDegeneratedQuads( WSampler2DRegular( m_numSamples->get( true ) * m_regSamplesFactor->get( true ), 1.0, 1.0 ), minV, aVec, bVec, i );
+                   break;
+          default : throw WException( "Invalid Sampling strategy selected" );
         }
-        else
-        {
-            slice = genScatteredDegeneratedQuads( m_samplers[i], minV, aVec, bVec, i );
-        }
+
         debugLog() << "Density slice " << i << ": " << slice->getDrawable(0)->asGeometry()->getVertexArray()->getNumElements() / 4 << " points";
         slice->setCullingActive( false );
         mT->addChild( slice );
@@ -347,6 +392,7 @@ void WMFiberStipples::moduleMain()
 
     // TODO(math): Remove this ugly hack as soon as possible
     const size_t numDensitySlices = 20;
+    m_sampleRes->get( true ); // eat changes
     WSampler2DPoisson sampler( 0.02 );
     boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
     m_progress->addSubProgress( splitProgress );
@@ -386,6 +432,14 @@ void WMFiberStipples::moduleMain()
             m_moduleState.remove( m_externPropSlider->getCondition() );
             m_externPropSlider.reset();
             infoLog() << "Removed external slice position control.";
+        }
+        if( m_sampleRes->changed() )
+        {
+            debugLog() << "New poission sampling resolution";
+            boost::filesystem::remove( "/tmp/klaus" );
+            boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
+            m_progress->addSubProgress( splitProgress );
+            m_samplers = splitSamplingPoisson( WSampler2DPoisson( m_sampleRes->get( true ) ), numDensitySlices, splitProgress );
         }
 
         if( m_externPropSlider && m_externPropSlider->changed() )
