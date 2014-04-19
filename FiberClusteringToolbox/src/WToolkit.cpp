@@ -41,7 +41,7 @@
 #include "lineGuidedSlice/WMLineGuidedSlice.h"
 #include "matrixWriter/WMMatrixWriter.h"
 #include "writeClusters/WMWriteClusters.h"
-#include "bundleParamView/WMBundleParamView.h"
+//#include "bundleParamView/WMBundleParamView.h"
 #include "WToolkit.h"
 
 // This file's purpose is to provide a list of modules as entry point for OpenWalnut's module loader.
@@ -63,6 +63,6 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
     m.push_back( WModule::SPtr( new WMLoadClusters ) );
     m.push_back( WModule::SPtr( new WMMatrixWriter ) );
     m.push_back( WModule::SPtr( new WMWriteClusters ) );
-    m.push_back( WModule::SPtr( new WMBundleParamView ) );
+  //  m.push_back( WModule::SPtr( new WMBundleParamView ) );
 }
 
