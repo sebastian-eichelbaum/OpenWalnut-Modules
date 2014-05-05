@@ -240,7 +240,7 @@ void WMPointsGroupSelector::moduleMain()
                     voxel->setGroupNr( group );
                 }
             }
-            m_tree->groupNeighbourLeafs();
+            m_tree->groupNeighbourLeafsFromRoot();
             if  ( outputVertices->size() == 0 ) //TODO(aschwarzkopf): Handle the problem in other way. When no points exist then the program crashes.
                 for  ( size_t lfd = 0; lfd < 3; lfd++)
                 {

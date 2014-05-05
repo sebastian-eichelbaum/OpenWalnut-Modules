@@ -52,7 +52,7 @@ boost::shared_ptr< WDataSetPoints > WCutOutliersDeamon::cutOutliers( boost::shar
         double z = verts->at( vertex*3+2 );
         octree->registerPoint( x, y, z );
     }
-    octree->groupNeighbourLeafs();
+    octree->groupNeighbourLeafsFromRoot();
 
     resizeItemCountGroupList( 0 );
     countGroups( octree->getRootNode() );

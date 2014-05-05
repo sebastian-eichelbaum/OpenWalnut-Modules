@@ -23,12 +23,17 @@
 //---------------------------------------------------------------------------
 
 #include <iostream>
-
+#include <vector>
 #include "WOctree.h"
 
 WOctree::WOctree( double detailDepth )
 {
     m_root = new WOctNode( 0.0, 0.0, 0.0, detailDepth );
+    m_detailLevel = detailDepth;
+}
+WOctree::WOctree( double detailDepth, WOctNode* nodeType )
+{
+    m_root = nodeType->newInstance( 0.0, 0.0, 0.0, detailDepth );
     m_detailLevel = detailDepth;
 }
 
@@ -43,13 +48,13 @@ void WOctree::registerPoint( double x, double y, double z )
         m_root->expand();
 
     WOctNode* node = m_root;
-    node->updateMinMax( x, y, z );
+    node->touchPosition( x, y, z );
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y, z );
         node->touchNode( drawer );
         node = node->getChild( drawer );
-        node->updateMinMax( x, y, z );
+        node->touchPosition( x, y, z );
     }
 }
 WOctNode* WOctree::getLeafNode( double x, double y, double z )
@@ -75,7 +80,7 @@ size_t WOctree::getGroupCount()
 {
     return m_groupEquivs.size();
 }
-void WOctree::groupNeighbourLeafs()
+void WOctree::groupNeighbourLeafsFromRoot()
 {
     resizeGroupList( 0 );
     groupNeighbourLeafs( m_root );
@@ -118,37 +123,21 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
     if  ( node->getRadius() <= m_detailLevel )
     {
         size_t group = m_groupEquivs.size();
-        double x = node->getCenter( 0 );
-        double y = node->getCenter( 1 );
-        double z = node->getCenter( 2 );
-        double d = node->getRadius() * 2.0;
-        WOctNode* neighbors[3] = {
-//            getLeafNode( x-d, y-d, z ),
-            getLeafNode( x  , y-d, z ),
-//            getLeafNode( x+d, y-d, z ),
-            getLeafNode( x-d, y  , z ),
-//            getLeafNode( x-d, y-d, z-d ),
-//            getLeafNode( x  , y-d, z-d ),
-//            getLeafNode( x+d, y-d, z-d ),
-//            getLeafNode( x-d, y  , z-d ),
-            getLeafNode( x  , y  , z-d )
-//            getLeafNode( x+d, y  , z-d ),
-//            getLeafNode( x-d, y+d, z-d ),
-//            getLeafNode( x  , y+d, z-d ),
-//            getLeafNode( x+d, y+d, z-d )
-        };
-        for( size_t index = 0; index < 3; index++ )
+        vector<WOctNode*> neighbors = getNeighborsOfNode( node );
+        for( size_t index = 0; index < neighbors.size(); index++ )
         {
             WOctNode* neighbor = neighbors[index];
             size_t neighborID = neighbor == 0 ?group :m_groupEquivs[neighbor->getGroupNr()];
             if( group > neighborID && m_detailLevel == neighbor->getRadius() )
-                group = neighborID;
+                if( neighbor->hasGroup() )
+                    if( canGroupNodes( node, neighbor ) )
+                        group = neighborID;
         }
-        for( size_t index = 0; index < 3; index++ )
+        for( size_t index = 0; index < neighbors.size(); index++ )
         {
             WOctNode* neighbor = neighbors[index];
             size_t neighborID = neighbor == 0 ?group :m_groupEquivs[neighbor->getGroupNr()];
-            if( group < neighborID && m_detailLevel == neighbor->getRadius() )
+            if( group < neighborID && neighbor->hasGroup() && m_detailLevel == neighbor->getRadius() )
             {
                 for( size_t newIdx = 0; newIdx < m_groupEquivs.size(); newIdx++ )
                     if( m_groupEquivs[newIdx] == neighborID )
@@ -169,6 +158,24 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
                 groupNeighbourLeafs( node->getChild( child ) );
     }
 }
+vector<WOctNode*> WOctree::getNeighborsOfNode( WOctNode* node )
+{
+    double x = node->getCenter( 0 );
+    double y = node->getCenter( 1 );
+    double z = node->getCenter( 2 );
+    double d = node->getRadius() * 2.0;
+    vector<WOctNode*> neighbors;
+    neighbors.push_back( getLeafNode( x  , y-d, z ) );
+    neighbors.push_back( getLeafNode( x-d, y  , z ) ),
+    neighbors.push_back( getLeafNode( x  , y  , z-d ) );
+    return neighbors;
+}
+bool WOctree::canGroupNodes( WOctNode* node1, WOctNode* node2 )
+{
+    node1 = node1;
+    node2 = node2;
+    return true;
+}
 void WOctree::resizeGroupList( size_t listLength )
 {
     m_groupEquivs.resize( listLength );
@@ -179,13 +186,13 @@ double WOctree::getDetailLevel()
     return m_detailLevel;
 }
 const size_t WOctree::colors[] = {
-        0xff0000, 0xff8080,    //red
-        0xff8000,            //orange
-        0xffff00, 0xa0a000,    //yellow
-        0x00ff00, 0x00b000,    //green
-        0x00ffff,           //cyan
-        0x8080ff,            //blue
-        0xff00a0            //pink
+        0xff8080, 0xff0000, 0xa00000,   //red
+        0xffb080, 0xff8000, 0xb25900,   //orange
+        0xffff70, 0xffff00, 0xa0a000,   //yellow
+        0x60ff60, 0x00ff00, 0x00b000,   //green
+        0x70ffff, 0x00ffff, 0x00b2b2,   //cyan
+        0x8080ff, 0x0000ff,             //blue
+        0xff80cf, 0xff00a0, 0xb20070    //pink
 };
 const size_t WOctree::colorCount = sizeof( colors ) / sizeof( colors[0] );
 float WOctree::calcColor( size_t groupNr, size_t colorChannel )

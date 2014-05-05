@@ -31,8 +31,15 @@ const size_t WOctNode::vX[] = {0, 1, 0, 1, 0, 1, 0, 1};
 const size_t WOctNode::vY[] = {0, 0, 1, 1, 0, 0, 1, 1};
 const size_t WOctNode::vZ[] = {0, 0, 0, 0, 1, 1, 1, 1};
 
+WOctNode::WOctNode()
+{
+    m_pointCount = 0;
+    m_hasGroup = false;
+}
 WOctNode::WOctNode( double centerX, double centerY, double centerZ, double radius )
 {
+    m_pointCount = 0;
+    m_hasGroup = false;
     m_groupNr = 0;
     m_center[0] = centerX;
     m_center[1] = centerY;
@@ -44,6 +51,11 @@ WOctNode::WOctNode( double centerX, double centerY, double centerZ, double radiu
 
 WOctNode::~WOctNode()
 {
+}
+
+WOctNode* WOctNode::newInstance( double centerX, double centerY, double centerZ, double radius )
+{
+    return new WOctNode( centerX, centerY, centerZ, radius );
 }
 
 WOctNode* WOctNode::getChild( size_t drawer )
@@ -88,7 +100,7 @@ void WOctNode::expand()
             double centerX = ( static_cast<double>( vX[oct] )*2.0 - 1.0 ) * m_radius + m_center[0];
             double centerY = ( static_cast<double>( vY[oct] )*2.0 - 1.0 ) * m_radius + m_center[1];
             double centerZ = ( static_cast<double>( vZ[oct] )*2.0 - 1.0 ) * m_radius + m_center[2];
-            WOctNode* newChild = new WOctNode( centerX, centerY, centerZ, m_radius );
+            WOctNode* newChild = newInstance( centerX, centerY, centerZ, m_radius );
             newChild->setChild( m_child[oct], newCase );
             setChild( newChild, oct );
         }
@@ -106,10 +118,9 @@ void WOctNode::touchNode( size_t drawer )
         double centerX = m_center[0] - m_radius*0.5 + static_cast<double>( vX[drawer] )*m_radius;
         double centerY = m_center[1] - m_radius*0.5 + static_cast<double>( vY[drawer] )*m_radius;
         double centerZ = m_center[2] - m_radius*0.5 + static_cast<double>( vZ[drawer] )*m_radius;
-        m_child[drawer] = new WOctNode( centerX, centerY, centerZ, m_radius * 0.5 );
+        m_child[drawer] = newInstance( centerX, centerY, centerZ, m_radius * 0.5 );
     }
 }
-
 double WOctNode::getRadius()
 {
     return m_radius;
@@ -118,18 +129,35 @@ double WOctNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
-
 size_t WOctNode::getGroupNr()
 {
     return m_groupNr;
 }
+bool WOctNode::hasGroup()
+{
+    if( m_hasGroup )    //TODO(aschwarzkopf): Shorten this temporary debugging purpused stuff
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 void WOctNode::setGroupNr( size_t groupNr )
 {
     m_groupNr = groupNr;
+    m_hasGroup = true;
 }
-
-
-void WOctNode::updateMinMax( double x, double y, double z )
+size_t WOctNode::getTotalNodeCount()
+{
+    size_t totalNodeCount = 1;
+    for(size_t index = 0; index < 8; index++)
+        if( m_child[index] != 0 )
+            totalNodeCount += m_child[index]->getTotalNodeCount();
+    return totalNodeCount;
+}
+void WOctNode::touchPosition( double x, double y, double z )
 {
     if( !m_pointCount > 0 )
     {
@@ -144,6 +172,14 @@ void WOctNode::updateMinMax( double x, double y, double z )
     if( z < m_zMin ) m_zMin = z;
     if( z > m_zMax ) m_zMax = z;
     m_pointCount++;
+
+    onTouchPosition( x, y, z );
+}
+void WOctNode::onTouchPosition( double x, double y, double z )
+{
+    x = x;  //TODO(aschwarzkopf): How to come around warnings by another way?
+    y = y;
+    z = z;
 }
 void WOctNode::setChild( WOctNode* child, size_t drawer )
 {
