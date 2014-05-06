@@ -34,6 +34,8 @@ WPCAWallDetector::WPCAWallDetector( WWallDetectOctree* analyzableOctree, boost::
 
 WPCAWallDetector::~WPCAWallDetector()
 {
+    m_minimalGroupSize = 1;
+    m_minimalPointsPerVoxel = 1;
 }
 void WPCAWallDetector::analyze()
 {
@@ -71,42 +73,15 @@ boost::shared_ptr< WTriangleMesh > WPCAWallDetector::getOutline()
 
 void WPCAWallDetector::drawNode( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
-    if  ( node->getRadius() <= m_analyzableOctree->getDetailLevel() )
+    if( node->getRadius() <= m_analyzableOctree->getDetailLevel() )
     {
-        size_t index = outputMesh->vertSize();
-        osg::Vec4 color = osg::Vec4(
-                WOctree::calcColor( node->getGroupNr(), 0 ),
-                WOctree::calcColor( node->getGroupNr(), 1 ),
-                WOctree::calcColor( node->getGroupNr(), 2 ), 1.0 );
-        for( size_t vertex = 0; vertex <= 8; vertex++ )
-        {
-            double iX = vertex % 2;
-            double iY = ( vertex / 2 ) % 2;
-            double iZ = ( vertex / 4 ) % 2;
-            double x = node->getCenter( 0 ) + node->getRadius() * ( iX * 2.0 - 1.0 );
-            double y = node->getCenter( 1 ) + node->getRadius() * ( iY * 2.0 - 1.0 );
-            double z = node->getCenter( 2 ) + node->getRadius() * ( iZ * 2.0 - 1.0 );
-            outputMesh->addVertex( x, y, z );
-            outputMesh->setVertexColor( index+vertex, color );
-        }
-        // Z = 0
-        outputMesh->addTriangle( index + 0, index + 2, index + 1 );
-        outputMesh->addTriangle( index + 3, index + 1, index + 2 );
-        // X = 0
-        outputMesh->addTriangle( index + 0, index + 4, index + 2 );
-        outputMesh->addTriangle( index + 4, index + 6, index + 2 );
-        // Y = 0
-        outputMesh->addTriangle( index + 0, index + 1, index + 4 );
-        outputMesh->addTriangle( index + 1, index + 5, index + 4 );
-        // Z = 1
-        outputMesh->addTriangle( index + 4, index + 5, index + 6 );
-        outputMesh->addTriangle( index + 5, index + 7, index + 6 );
-        // X = 1
-        outputMesh->addTriangle( index + 1, index + 3, index + 5 );
-        outputMesh->addTriangle( index + 3, index + 7, index + 5 );
-        // Y = 1
-        outputMesh->addTriangle( index + 2, index + 6, index + 3 );
-        outputMesh->addTriangle( index + 6, index + 7, index + 3 );
+        size_t groupSize = m_analyzableOctree->getNodeCountOfGroup( node->getGroupNr() );
+        if( groupSize < m_minimalGroupSize )
+            return;
+        if( node->getPointCount() < m_minimalPointsPerVoxel )
+            return;
+
+        drawLeavNode( node, outputMesh );
     }
     else
     {
@@ -114,4 +89,49 @@ void WPCAWallDetector::drawNode( WWallDetectOctNode* node, boost::shared_ptr< WT
             if  ( node->getChild( child ) != 0 )
                 drawNode( ( WWallDetectOctNode* )(node->getChild( child ) ), outputMesh );
     }
+}
+void WPCAWallDetector::drawLeavNode( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
+{
+    size_t index = outputMesh->vertSize();
+    osg::Vec4 color = osg::Vec4(
+            WOctree::calcColor( node->getGroupNr(), 0 ),
+            WOctree::calcColor( node->getGroupNr(), 1 ),
+            WOctree::calcColor( node->getGroupNr(), 2 ), 1.0 );
+    for( size_t vertex = 0; vertex <= 8; vertex++ )
+    {
+        double iX = vertex % 2;
+        double iY = ( vertex / 2 ) % 2;
+        double iZ = ( vertex / 4 ) % 2;
+        double x = node->getCenter( 0 ) + node->getRadius() * ( iX * 2.0 - 1.0 );
+        double y = node->getCenter( 1 ) + node->getRadius() * ( iY * 2.0 - 1.0 );
+        double z = node->getCenter( 2 ) + node->getRadius() * ( iZ * 2.0 - 1.0 );
+        outputMesh->addVertex( x, y, z );
+        outputMesh->setVertexColor( index+vertex, color );
+    }
+    // Z = 0
+    outputMesh->addTriangle( index + 0, index + 2, index + 1 );
+    outputMesh->addTriangle( index + 3, index + 1, index + 2 );
+    // X = 0
+    outputMesh->addTriangle( index + 0, index + 4, index + 2 );
+    outputMesh->addTriangle( index + 4, index + 6, index + 2 );
+    // Y = 0
+    outputMesh->addTriangle( index + 0, index + 1, index + 4 );
+    outputMesh->addTriangle( index + 1, index + 5, index + 4 );
+    // Z = 1
+    outputMesh->addTriangle( index + 4, index + 5, index + 6 );
+    outputMesh->addTriangle( index + 5, index + 7, index + 6 );
+    // X = 1
+    outputMesh->addTriangle( index + 1, index + 3, index + 5 );
+    outputMesh->addTriangle( index + 3, index + 7, index + 5 );
+    // Y = 1
+    outputMesh->addTriangle( index + 2, index + 6, index + 3 );
+    outputMesh->addTriangle( index + 6, index + 7, index + 3 );
+}
+void WPCAWallDetector::setMinimalGroupSize( double minimalGroupSize )
+{
+    m_minimalGroupSize = minimalGroupSize;
+}
+void WPCAWallDetector::setMinimalPointsPerVoxel( double minimalPointsPerVoxel )
+{
+    m_minimalPointsPerVoxel = minimalPointsPerVoxel;
 }

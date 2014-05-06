@@ -184,6 +184,16 @@ private:
      * strength divided by the strongest. Nodes above that quotient aren't grouped.
      */
     WPropDouble m_showedVarianceQuotientMax;
+    /**
+     * The minimal group size of nodes or its surface parts that makes voxels be drawn.
+     * Especially parts of buildings have bigger connected parts than e. g. trees.
+     */
+    WPropInt m_minimalGroupSize;
+    /**
+     * Minimal allowed point count per voxel. Very small pixel counts don't make sense
+     * for the Principal Component Analysis.
+     */
+    WPropInt m_minimalPointsPerVoxel;
 
     /**
      * Plugin progress status.

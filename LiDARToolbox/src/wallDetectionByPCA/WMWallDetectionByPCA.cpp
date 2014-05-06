@@ -111,6 +111,14 @@ void WMWallDetectionByPCA::properties()
     m_showedVarianceQuotientMax->setMin( 0.0 );
     m_showedVarianceQuotientMax->setMax( 1.0 );
 
+    m_minimalGroupSize = m_properties->addProperty( "Min. group size to draw: ",
+                            "Groups below that node count aren't drawn.", 1 );
+    m_showedVarianceQuotientMax->setMin( 1 );
+
+    m_minimalPointsPerVoxel = m_properties->addProperty( "Min. points per voxel to draw: ",
+                            "The minimal points per voxel that enables an area to draw.", 1 );
+    m_showedVarianceQuotientMax->setMin( 1 );
+
     WModule::properties();
 }
 
@@ -165,8 +173,11 @@ void WMWallDetectionByPCA::moduleMain()
             pcaAnalysis->setMaxIsotropicThresholdForVoxelMerge( m_showedVarianceQuotientMax->get() );
 
             WPCAWallDetector detector( pcaAnalysis, m_progressStatus );
+            detector.setMinimalGroupSize( m_minimalGroupSize->get() );
+            detector.setMinimalPointsPerVoxel( m_minimalPointsPerVoxel->get() );
             detector.analyze();
             pcaAnalysis->groupNeighbourLeafsFromRoot();
+            pcaAnalysis->generateNodeCountsOfGroups();
             m_outputTrimesh->updateData( detector.getOutline() );
 
             m_progressStatus->finish();

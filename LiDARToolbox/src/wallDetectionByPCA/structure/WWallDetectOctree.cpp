@@ -94,3 +94,34 @@ double WWallDetectOctree::getAngleOfTwoVectors( WVector3d vector1, WVector3d vec
     return acos( sum ) * 90.0 / ANGLE_90_DEGREES;
 }
 const double WWallDetectOctree::ANGLE_90_DEGREES = asin( 1.0 );
+
+size_t WWallDetectOctree::getNodeCountOfGroup( size_t groupNr )
+{
+    if(groupNr >= m_nodeCountsOfGroups.size() )
+        return 0;
+    return m_nodeCountsOfGroups[groupNr];
+}
+void WWallDetectOctree::generateNodeCountsOfGroups()
+{
+    m_nodeCountsOfGroups.reserve( 0 );
+    m_nodeCountsOfGroups.resize( 0 );
+    addGroupCountsFromNode( ( WWallDetectOctNode* )getRootNode() );
+}
+void WWallDetectOctree::addGroupCountsFromNode( WWallDetectOctNode* node )
+{
+    if  ( node->getRadius() <= getDetailLevel() )
+    {
+        if( node->hasGroup() == false )
+            return;
+        size_t groupNr = node->getGroupNr();
+        while( m_nodeCountsOfGroups.size() <= groupNr )
+            m_nodeCountsOfGroups.push_back( 0 );
+        m_nodeCountsOfGroups[groupNr]++;
+    }
+    else
+    {
+        for  ( int child = 0; child < 8; child++ )
+            if  ( node->getChild( child ) != 0 )
+                addGroupCountsFromNode( ( WWallDetectOctNode* )( node->getChild( child ) ) );
+    }
+}

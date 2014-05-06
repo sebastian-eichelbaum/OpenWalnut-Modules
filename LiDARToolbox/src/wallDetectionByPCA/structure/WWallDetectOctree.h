@@ -77,6 +77,16 @@ public:
      */
     static double getAngleOfTwoVectors( WVector3d vector1, WVector3d vector2 );
     /**
+     * Returns how many nodes a group ID has.
+     * \param groupNr The group ID.
+     * \return Leaf node count of that croup.
+     */
+    size_t getNodeCountOfGroup( size_t groupNr );
+    /**
+     * Counts The number of leaf nodes for each group.
+     */
+    void generateNodeCountsOfGroups();
+    /**
      * Radial amount of 90 degrees.
      */
     static const double ANGLE_90_DEGREES;
@@ -92,6 +102,12 @@ protected:
 
 private:
     /**
+     * Adds a node and its children to the node counts for groups.
+     * \param node Node to analyze.
+     */
+    void addGroupCountsFromNode( WWallDetectOctNode* node );
+
+    /**
      * The maximal allowed angle between two node surface normal vectors. Nodes above 
      * that angle difference aren't grouped.
      */
@@ -101,6 +117,10 @@ private:
      * strength divided by the strongest. Nodes above that quotient aren't grouped.
      */
     double m_maxIsotropicThresholdForVoxelMerge;
+    /**
+     * Node counts for each connected group.
+     */
+    vector<size_t> m_nodeCountsOfGroups;
 };
 
 #endif  // WWALLDETECTOCTREE_H

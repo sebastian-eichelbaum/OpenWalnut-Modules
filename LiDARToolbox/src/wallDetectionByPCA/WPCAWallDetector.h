@@ -74,8 +74,26 @@ public:
      * \param outputMesh Target triangle mesh.
      */
     void drawNode( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+    /**
+     * Sets the minimal group size of nodes or its surface parts that makes voxels be 
+     * drawn.Especially parts of buildings have bigger connected parts than e. g. trees.
+     * \param minimalGroupSize The minimal connected node count to put out.
+     */
+    void setMinimalGroupSize( double minimalGroupSize );
+    /**
+     * Sets the minimal allowed point count per voxel. Very small pixel counts don't
+     * make sense for the Principal Component Analysis.
+     * \param minimalPointsPerVoxel The minimal point count per voxel to put them out.
+     */
+    void setMinimalPointsPerVoxel( double minimalPointsPerVoxel );
 
 private:
+    /**
+     * Draws a leaf node as a voxel on the output triangle mesh.
+     * \param node Leaf node to draw.
+     * \param outputMesh The output triangle mesh to draw a voxel.
+     */
+    void drawLeavNode( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
     /**
      * Input point data to be analyzed organized by voxels.
      */
@@ -84,6 +102,16 @@ private:
      * The assigned progress status.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+    /**
+     * The minimal group size of nodes or its surface parts that makes voxels be drawn.
+     * Especially parts of buildings have bigger connected parts than e. g. trees.
+     */
+    double m_minimalGroupSize;
+    /**
+     * Minimal allowed point count per voxel. Very small pixel counts don't make sense
+     * for the Principal Component Analysis.
+     */
+    double m_minimalPointsPerVoxel;
 };
 
 #endif  // WPCAWALLDETECTOR_H
