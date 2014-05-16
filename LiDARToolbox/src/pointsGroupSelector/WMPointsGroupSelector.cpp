@@ -108,10 +108,7 @@ void WMPointsGroupSelector::properties()
 
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
-    m_stubSize = m_properties->addProperty( "Stub size: ",
-                            "Size of tetraeders that are used to depict points.", 0.6 );
-    m_stubSize->setMin( 0.0 );
-    m_stubSize->setMax( 3.0 );
+
     m_contrast = m_properties->addProperty( "Contrast: ",
                             "This is the value that multiplies the input colors before assigning to the output. "
                             "Note that the output has the range between 0.0 and 1.0.\r\nHint: Look ath the intensity "
@@ -120,14 +117,9 @@ void WMPointsGroupSelector::properties()
                             "depth for the octree search tree.", 0, m_propCondition );
     m_detailDepth->setMin( -3 );
     m_detailDepth->setMax( 4 );
-    m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
-                            "in meters for the octree search tree.", 1.0  );
+    m_detailDepthLabel = m_properties->addProperty( "Voxel width meters: ", "Resulting detail depth "
+                            "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
-    m_showTetraedersInsteadOfOctreeCubes = m_properties->addProperty( "Tetraeders instead of cubes: ",
-                            "Depicting the input data set points showing the point outline "
-                            "instead of regions depicted as cubes that cover existing points. "
-                            "Enabling this option you must have 32GB RAM depicting a 400MB"
-                            "las file.", false, m_propCondition );
     m_highlightUsingColors = m_properties->addProperty( "Hilight using colors: ",
                             "Hilights output ddata groups using colors.", true, m_propCondition );
 
@@ -186,11 +178,9 @@ void WMPointsGroupSelector::moduleMain()
             m_selectedShowableBuilding->setMax( groupCount + 0 );
             size_t selectedGroup = m_selectedShowableBuilding->get();
 
-            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
-            WOctree* m_tree = new WOctree( m_detailDepthLabel->get() );
+            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
+            WOctree* m_tree = new WOctree( pow( 2.0, m_detailDepth->get() ) );
 
-            boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
-            float a = m_stubSize->get();
             float contrast = m_contrast->get();
             for  ( size_t vertex = 0; vertex < count; vertex++)
             {
@@ -216,24 +206,7 @@ void WMPointsGroupSelector::moduleMain()
                     outputColors->push_back( r*contrast );
                     outputColors->push_back( g*contrast );
                     outputColors->push_back( b*contrast );
-                    if( m_showTetraedersInsteadOfOctreeCubes->get() )
-                    {
-                        osg::Vec4f* color = new osg::Vec4f( r*contrast,
-                                g*contrast, b*contrast, 1.0f );
-                        tmpMesh->addVertex( 0+x, 0+y, 0+z );
-                        tmpMesh->addVertex( a+x, 0+y, 0+z );
-                        tmpMesh->addVertex( 0+x, a+y, 0+z );
-                        tmpMesh->addVertex( 0+x, 0+y, a+z );
-                        size_t body = vertex*4;
-                        tmpMesh->addTriangle( 0+body, 2+body, 1+body );
-                        tmpMesh->addTriangle( 0+body, 1+body, 3+body );
-                        tmpMesh->addTriangle( 0+body, 3+body, 2+body );
-                        tmpMesh->addTriangle( 1+body, 2+body, 3+body );
-                        tmpMesh->setVertexColor( body, *color );
-                        tmpMesh->setVertexColor( body+1, *color );
-                        tmpMesh->setVertexColor( body+2, *color );
-                        tmpMesh->setVertexColor( body+3, *color );
-                    }
+
                     m_progressStatus->increment( 1 );
                     m_tree->registerPoint( x, y, z );
                     WOctNode* voxel = m_tree->getLeafNode( x, y, z );
@@ -249,8 +222,7 @@ void WMPointsGroupSelector::moduleMain()
                 }
             boost::shared_ptr< WDataSetPoints > outputPoints( new WDataSetPoints( outputVertices, outputColors ) );
             m_outputPoints->updateData( outputPoints );
-            m_outputTrimesh->updateData( m_showTetraedersInsteadOfOctreeCubes->get( true )
-                    ?tmpMesh :WVoxelOutliner::getOutline( m_tree, m_highlightUsingColors->get() ) );
+            m_outputTrimesh->updateData( WVoxelOutliner::getOutline( m_tree, m_highlightUsingColors->get() ) );
             m_nbPoints->set( count );
             m_xMin->set( m_tree->getRootNode()->getXMin() );
             m_xMax->set( m_tree->getRootNode()->getXMax() );

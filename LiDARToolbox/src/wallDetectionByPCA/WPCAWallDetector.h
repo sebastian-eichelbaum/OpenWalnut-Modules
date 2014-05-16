@@ -63,8 +63,16 @@ public:
      */
     void analyzeNode( WWallDetectOctNode* node );
     /**
-     * Draws the nodes into a triangle mesh. Groups of each surface are displayed using 
-     * colors.
+     * Returns the voxel outline in a triangle mesh. Depending on m_voxelOutlineMode
+     * it's either depicted as voxels of its group color (=0) or rhombs displaying
+     * the node group, Eigen Vectors, Eigen Values and the input point's mean (=1).
+     * \param inputVertices Points to be added a group color.
+     * \return Input points with an added group color.
+     */
+    boost::shared_ptr< WDataSetPoints > getOutlinePoints( WDataSetPoints::VertexArray inputVertices );
+    /**
+     * Draws the nodes into a triangle mesh. Groups of each surface are displayed 
+     * using colors.
      * \return The voxels grouped by surfaces.
      */
     boost::shared_ptr< WTriangleMesh > getOutline();
@@ -75,17 +83,33 @@ public:
      */
     void drawNode( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
     /**
-     * Sets the minimal group size of nodes or its surface parts that makes voxels be 
-     * drawn.Especially parts of buildings have bigger connected parts than e. g. trees.
+     * Sets the minimal group size of nodes or its surface parts that makes voxels
+     * be drawn.Especially parts of buildings have bigger connected parts than e. g. 
+     * trees.
      * \param minimalGroupSize The minimal connected node count to put out.
      */
     void setMinimalGroupSize( double minimalGroupSize );
     /**
+     * Sets the maximal node count of groups. Groups above that voxel count aren't
+     * displayed
+     * \param maximalGroupSize Maximal node count for groups to set.
+     */
+    void setMaximalGroupSize( double maximalGroupSize );
+    /**
      * Sets the minimal allowed point count per voxel. Very small pixel counts don't
      * make sense for the Principal Component Analysis.
-     * \param minimalPointsPerVoxel The minimal point count per voxel to put them out.
+     * \param minimalPointsPerVoxel The minimal point count per voxel to put them 
+     *                              out.
      */
     void setMinimalPointsPerVoxel( double minimalPointsPerVoxel );
+    /**
+     * Sets the mode how the output triangle mesh is organized.
+     * 0: Voxels with a group color
+     * 1: Rhombs displaying the node group, the three Eigen Vectors, relative Eigen
+     *    Values and the mean coordinate of input points.
+     * \param voxelOutlineMode The kind of the voxel outline.
+     */
+    void setVoxelOutlineMode( size_t voxelOutlineMode );
 
 private:
     /**
@@ -93,7 +117,14 @@ private:
      * \param node Leaf node to draw.
      * \param outputMesh The output triangle mesh to draw a voxel.
      */
-    void drawLeavNode( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+    void drawLeafNodeCube( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+    /**
+     * Draws a voxel using a rhomb. It Displays the node group, Eigen Vectors, Eigen
+     * Values and the mean of input coordinates.
+     * \param node Leaf node to draw.
+     * \param outputMesh The output triangle mesh to draw a voxel.
+     */
+    void drawLeafNodeNormalVector( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
     /**
      * Input point data to be analyzed organized by voxels.
      */
@@ -103,15 +134,28 @@ private:
      */
     boost::shared_ptr< WProgress > m_progressStatus;
     /**
-     * The minimal group size of nodes or its surface parts that makes voxels be drawn.
-     * Especially parts of buildings have bigger connected parts than e. g. trees.
+     * The minimal group size of nodes or its surface parts that makes voxels be 
+     * drawn. Especially parts of buildings have bigger connected parts than e. g. 
+     * trees.
      */
     double m_minimalGroupSize;
     /**
-     * Minimal allowed point count per voxel. Very small pixel counts don't make sense
-     * for the Principal Component Analysis.
+     * Maximal node count of groups to display. Groups above that voxel count aren't 
+     * put out.
+     */
+    double m_maximalGroupSize;
+    /**
+     * Minimal allowed point count per voxel. Very small pixel counts don't make 
+     * sense for the Principal Component Analysis.
      */
     double m_minimalPointsPerVoxel;
+    /**
+     * The mode how the output triangle mesh is organized.
+     * 0: Voxels with a group color
+     * 1: Rhombs displaying the node group, the three Eigen Vectors, relative Eigen
+     *    Values and the mean coordinate of input points.
+     */
+    size_t m_voxelOutlineMode;
 };
 
 #endif  // WPCAWALLDETECTOR_H

@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSGROUPSELECTOR_H
-#define WMPOINTSGROUPSELECTOR_H
+#ifndef WMPOINTSCROP_H
+#define WMPOINTSCROP_H
 
 
 #include <liblas/liblas.hpp>
@@ -41,10 +41,10 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
+#include "core/dataHandler/WDataSetPoints.h"
 #include "../datastructures/octree/WOctree.h"
 
-#include "../datastructures/WDataSetPointsGrouped.h"
-#include "core/dataHandler/WDataSetPoints.h"
+
 
 
 
@@ -74,22 +74,21 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Select a point group in order to display it as a triangle mesh outline or data set points. Each 
- * group can be displayed in a single color depicting all groups..
+ * Crops a point data set to a selection or cuts away a cube area.
  * \ingroup modules
  */
-class WMPointsGroupSelector: public WModule
+class WMPointsCrop: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMPointsGroupSelector();
+    WMPointsCrop();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsGroupSelector();
+    virtual ~WMPointsCrop();
 
     /**
      * Gives back the name of this module.
@@ -145,23 +144,30 @@ private:
     void setProgressSettings( size_t steps );
 
     /**
-     * WDataSetPointsGrouped data input (Grouped point data).
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_input;
-
-    /**
-     * Data output connector for triangle mesh output.
-     */
-    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
-    /**
-     * Data output connector for data set points output.
-     */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
-
-    /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+    /**
+     * Calculates the bounding box of the input point data set. Minimals and
+     * maximals of X/Y/Z are set.
+     */
+    void initBoundingBox();
+    /**
+     * Returns a cropped data set corresponding to the selection. The selection is
+     * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
+     * a selection or to cut away a cube area.
+     * \return The cropped or cut point data set.
+     */
+    boost::shared_ptr< WDataSetPoints > getCroppedPointSet();
+
+    /**
+     * WDataSetPoints data input (proposed for LiDAR data).
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+    /**
+     * Processed point data with cut off outliers.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;
 
     /**
      * Needed for recreating the geometry, incase when resolution changes.
@@ -169,62 +175,73 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Info tab property: Input points count.
-     */
-    WPropInt m_nbPoints;
-    /**
-     * Info tab property: Minimal x value of output x coordunates.
-     */
-    WPropDouble m_xMin;
-    /**
-     * Info tab property: Maximal x value of output x coordunates.
-     */
-    WPropDouble m_xMax;
-    /**
-     * Info tab property: Minimal y value of output x coordunates.
-     */
-    WPropDouble m_yMin;
-    /**
-     * Info tab property: Maximal y value of output x coordunates.
-     */
-    WPropDouble m_yMax;
-    /**
-     * Info tab property: Minimal z value of output x coordunates.
-     */
-    WPropDouble m_zMin;
-    /**
-     * Info tab property: Maximal z value of output x coordunates.
-     */
-    WPropDouble m_zMax;
-
-    /**
-     * Multiplier that is applied on the input data set color intensity.
-     */
-    WPropDouble m_contrast;
-    /**
-     * Determines the resolution of the smallest octree node's radius in 2^n meters
-     */
-    WPropInt m_detailDepth;
-    /**
-     * Determines the resolution of the smallest octree nodes in meters
-     */
-    WPropDouble m_detailDepthLabel;
-    /**
-     * Depicting the input data set points showing the point outline instead of regions
-     * depicted as cubes that cover existing points.
-     */
-    WPropBool m_highlightUsingColors;
-
-    /**
-     * Property to choose an output building of a voxel group number. Currently 0 is 
-     * cutting nothing and 1 is is showing all buildings altogether.
-     */
-    WPropInt m_selectedShowableBuilding;
-
-    /**
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+
+    /**
+     * Input point coordinates to crop.
+     */
+    WDataSetPoints::VertexArray m_verts;
+    /**
+     * Colors of the input point data set that are also passed through.
+     */
+    WDataSetPoints::ColorArray m_colors;
+
+    /**
+     * Minimal X value of the selection.
+     */
+    WPropDouble m_fromX;
+    /**
+     * Maximal X value of the selection.
+     */
+    WPropDouble m_toX;
+    /**
+     * Maximal Y value of the selection.
+     */
+    WPropDouble m_fromY;
+    /**
+     * Minimal Y value of the selection.
+     */
+    WPropDouble m_toY;
+    /**
+     * Minimal Z value of the selection.
+     */
+    WPropDouble m_fromZ;
+    /**
+     * Maximal Z value of the selection.
+     */
+    WPropDouble m_toZ;
+
+    /**
+     * Switch to cut away the selection instead of to crop the area.
+     */
+    WPropBool m_cutInsteadOfCrop;
+
+    /**
+     * Minimal X coordinate of input points.
+     */
+    double m_minX;
+    /**
+     * Maximal X coordinate of input points.
+     */
+    double m_maxX;
+    /**
+     * Minimal Y coordinate of input points.
+     */
+    double m_minY;
+    /**
+     * Maximal Y coordinate of input points.
+     */
+    double m_maxY;
+    /**
+     * Minimal Z coordinate of input points.
+     */
+    double m_minZ;
+    /**
+     * Maximal Z coordinate of input points.
+     */
+    double m_maxZ;
 };
 
-#endif  // WMPOINTSGROUPSELECTOR_H
+#endif  // WMPOINTSCROP_H

@@ -99,7 +99,7 @@ void WMBuildingsDetectionByPCA::properties()
     m_detailDepth->setMin( -3 );
     m_detailDepth->setMax( 4 );
     m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
-                            "in meters for the octree search tree.", 1.0  );
+                            "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
 
     m_showedIsotropicThresholdMin = m_properties->addProperty( "Eigen Value Quot. min.: ", "The minimal "
@@ -158,8 +158,8 @@ void WMBuildingsDetectionByPCA::moduleMain()
             size_t count = inputVerts->size()/3;
             setProgressSettings( count );
 
-            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
-            WOctree* pcaAnalysis = new WOctree( m_detailDepthLabel->get(), new WPcaDetectOctNode() );
+            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
+            WOctree* pcaAnalysis = new WOctree( pow( 2.0, m_detailDepth->get() ), new WPcaDetectOctNode() );
 
             boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
             for  ( size_t vertex = 0; vertex < count; vertex++)

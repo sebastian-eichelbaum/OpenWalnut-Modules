@@ -47,39 +47,57 @@ vector<WOctNode*> WWallDetectOctree::getNeighborsOfNode( WOctNode* node )
     neighbors.push_back( getLeafNode( x  , y-d, z ) );
     neighbors.push_back( getLeafNode( x+d, y-d, z ) );
     neighbors.push_back( getLeafNode( x-d, y  , z ) );
-//     neighbors.push_back( getLeafNode( x-d, y-d, z-d ) );
+    neighbors.push_back( getLeafNode( x-d, y-d, z-d ) );
     neighbors.push_back( getLeafNode( x  , y-d, z-d ) );
-//     neighbors.push_back( getLeafNode( x+d, y-d, z-d ) );
+    neighbors.push_back( getLeafNode( x+d, y-d, z-d ) );
     neighbors.push_back( getLeafNode( x-d, y  , z-d ) );
     neighbors.push_back( getLeafNode( x  , y  , z-d ) );
     neighbors.push_back( getLeafNode( x+d, y  , z-d ) );
-//     neighbors.push_back( getLeafNode( x-d, y+d, z-d ) );
+    neighbors.push_back( getLeafNode( x-d, y+d, z-d ) );
     neighbors.push_back( getLeafNode( x  , y+d, z-d ) );
-//     neighbors.push_back( getLeafNode( x+d, y+d, z-d ) );
+    neighbors.push_back( getLeafNode( x+d, y+d, z-d ) );
     return neighbors;
 }
-bool WWallDetectOctree::canGroupNodes( WOctNode* node1, WOctNode* node2 )
+bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
 {
-    WWallDetectOctNode* node1typed = ( WWallDetectOctNode* ) node1;
-    WWallDetectOctNode* node2typed = ( WWallDetectOctNode* ) node2;
-    if( node1typed->getIsotropicThreshold() > m_maxIsotropicThresholdForVoxelMerge
-            || node2typed->getIsotropicThreshold() > m_maxIsotropicThresholdForVoxelMerge )
+    WWallDetectOctNode* node1 = ( WWallDetectOctNode* ) octNode1;
+    WWallDetectOctNode* node2 = ( WWallDetectOctNode* ) octNode2;
+    if( !( node1->hasEigenValuesAndVectors() ) || !( node2->hasEigenValuesAndVectors() )
+            || node1->getPointCount() < m_minimalPointsPerVoxel
+            || node2->getPointCount() < m_minimalPointsPerVoxel
+            || isIsotropicNode( node1 ) || isIsotropicNode( node2 ) )
         return false;
-    double angleDegrees = getAngleOfTwoVectors(
-            node1typed->getNormalVector(), node2typed->getNormalVector() );
-    if( angleDegrees > 90.0 ) angleDegrees = 180 - angleDegrees;
-//     cout << angleDegrees << " <= " << m_wallMaxAngleToNeighborVoxel << endl;
-    return angleDegrees <= m_wallMaxAngleToNeighborVoxel;
+
+    if( isLinearNode( node1 ) && isLinearNode( node2 ) )
+        return getAngleOfNormals( node1->getStrongestEigenVector(), node2->getStrongestEigenVector() )
+                <= m_wallMaxAngleToNeighborVoxel;
+    if( isLinearNode( node1 ) && !isLinearNode( node2 ) )
+        return getAngleOfNormals( node1->getStrongestEigenVector(), node2->getNormalVector() )
+                > 90.0 - m_wallMaxAngleToNeighborVoxel;
+    if( !isLinearNode( node1 ) && isLinearNode( node2 ) )
+        return getAngleOfNormals( node1->getNormalVector(), node2->getStrongestEigenVector() )
+                > 90.0 - m_wallMaxAngleToNeighborVoxel;
+
+    return getAngleOfNormals( node1->getNormalVector(), node2->getNormalVector() )
+            <= m_wallMaxAngleToNeighborVoxel;
 }
 void WWallDetectOctree::setWallMaxAngleToNeighborVoxel( double angleDegrees )
 {
     m_wallMaxAngleToNeighborVoxel = angleDegrees;
 }
+void WWallDetectOctree::setMinimalPointsPerVoxel( size_t minimalPointsPerVoxel )
+{
+    m_minimalPointsPerVoxel = minimalPointsPerVoxel;
+}
+void WWallDetectOctree::setEigenValueQuotientLinear( double linearThreshold )
+{
+    m_eigenValueQuotientLinear = linearThreshold;
+}
 void WWallDetectOctree::setMaxIsotropicThresholdForVoxelMerge( double isotropicThreshold )
 {
     m_maxIsotropicThresholdForVoxelMerge = isotropicThreshold;
 }
-double WWallDetectOctree::getAngleOfTwoVectors( WVector3d vector1, WVector3d vector2 )
+double WWallDetectOctree::getAngleOfVectors( WVector3d vector1, WVector3d vector2 )
 {
     double sum = 0;
     double range1 = 0;
@@ -92,6 +110,21 @@ double WWallDetectOctree::getAngleOfTwoVectors( WVector3d vector1, WVector3d vec
     }
     sum = sum / pow( range1, 0.5 ) / pow( range2, 0.5 );
     return acos( sum ) * 90.0 / ANGLE_90_DEGREES;
+}
+double WWallDetectOctree::getAngleOfNormals( WVector3d vector1, WVector3d vector2 )
+{
+    double angle = getAngleOfVectors( vector1, vector2 );
+    return angle > 90.0 ?180.0 - angle :angle;
+}
+bool WWallDetectOctree::isLinearNode( WWallDetectOctNode* node )
+{
+    if( isIsotropicNode( node ) )
+        return false;
+    return node->getLinearLevel() <= m_eigenValueQuotientLinear;
+}
+bool WWallDetectOctree::isIsotropicNode( WWallDetectOctNode* node )
+{
+    return node->getIsotropicLevel() > m_maxIsotropicThresholdForVoxelMerge;
 }
 const double WWallDetectOctree::ANGLE_90_DEGREES = asin( 1.0 );
 
