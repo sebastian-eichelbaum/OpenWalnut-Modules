@@ -33,7 +33,7 @@
 #include "../datastructures/quadtree/WQuadTree.h"
 #include "../datastructures/octree/WOctree.h"
 #include "structure/WPcaDetectOctNode.h"
-#include "core/common/math/PrincipalComponentAnalsis/WPrincipalComponentAnalysis.h"
+#include "core/common/math/principalComponentAnalysis/WPrincipalComponentAnalysis.h"
 #include "core/common/WProgress.h"
 
 /**
