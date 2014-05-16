@@ -127,21 +127,22 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
         for( size_t index = 0; index < neighbors.size(); index++ )
         {
             WOctNode* neighbor = neighbors[index];
-            size_t neighborID = neighbor == 0 ?group :m_groupEquivs[neighbor->getGroupNr()];
+            size_t neighborID = neighbor != 0 && neighbor->hasGroup()
+                    ?m_groupEquivs[neighbor->getGroupNr()] :group;
             if( group > neighborID && m_detailLevel == neighbor->getRadius() )
-                if( neighbor->hasGroup() )
-                    if( canGroupNodes( node, neighbor ) )
+                if( neighbor->hasGroup() && canGroupNodes( node, neighbor ) )
                         group = neighborID;
         }
         for( size_t index = 0; index < neighbors.size(); index++ )
         {
             WOctNode* neighbor = neighbors[index];
-            size_t neighborID = neighbor == 0 ?group :m_groupEquivs[neighbor->getGroupNr()];
+            size_t neighborID = neighbor != 0 && neighbor->hasGroup()
+                    ?m_groupEquivs[neighbor->getGroupNr()] :group;
             if( group < neighborID && neighbor->hasGroup() && m_detailLevel == neighbor->getRadius() )
             {
                 for( size_t newIdx = 0; newIdx < m_groupEquivs.size(); newIdx++ )
-                    if( m_groupEquivs[newIdx] == neighborID )
-                        m_groupEquivs[newIdx] = group;
+                    if( m_groupEquivs[newIdx] == neighborID &&  canGroupNodes( node, neighbor ) )
+                            m_groupEquivs[newIdx] = group;
             }
         }
         if( group >= m_groupEquivs.size() )

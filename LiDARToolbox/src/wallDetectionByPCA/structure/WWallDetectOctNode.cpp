@@ -28,11 +28,13 @@
 
 WWallDetectOctNode::WWallDetectOctNode()
 {
+    m_eigenValues[3];
 }
 
 WWallDetectOctNode::WWallDetectOctNode( double centerX, double centerY, double centerZ, double radius ) :
         WOctNode( centerX, centerY, centerZ, radius )
 {
+    m_eigenValues[3];
 }
 
 WWallDetectOctNode::~WWallDetectOctNode()
@@ -51,19 +53,49 @@ vector<WPosition> WWallDetectOctNode::getInputPoints()
 {
     return m_inputPoints;
 }
-double WWallDetectOctNode::getIsotropicThreshold()
+WPosition WWallDetectOctNode::getMean()
 {
-    return m_isotropicThreshold;
+    return m_mean;
 }
-void WWallDetectOctNode::setIsotropicThreshold( double isotropicThreshold )
+void WWallDetectOctNode::setMean( WPosition mean )
 {
-    m_isotropicThreshold = isotropicThreshold;
+    m_mean = mean;
+}
+double WWallDetectOctNode::getLinearLevel()
+{
+    return m_eigenValues.size() < 2 || m_eigenValues[0] == 0.0
+            ?1.0 :m_eigenValues[1] / m_eigenValues[0];
+}
+double WWallDetectOctNode::getIsotropicLevel()
+{
+    return m_eigenValues.size() < 3 || m_eigenValues[0] == 0.0
+            ?1.0 :m_eigenValues[2] / m_eigenValues[0];
+}
+vector<double> WWallDetectOctNode::getEigenValues()
+{
+    return m_eigenValues;
+}
+void WWallDetectOctNode::setEigenValues( vector<double> eigenValues )
+{
+    m_eigenValues = eigenValues;
 }
 WVector3d WWallDetectOctNode::getNormalVector()
 {
-    return m_normalVector;
+    return m_eigenVectors[2];
 }
-void WWallDetectOctNode::setNormalVector( WVector3d normalVector )
+WVector3d WWallDetectOctNode::getStrongestEigenVector()
 {
-    m_normalVector = normalVector;
+    return m_eigenVectors[0];
+}
+void WWallDetectOctNode::setEigenVectors( vector<WVector3d> eigenVectors )
+{
+    m_eigenVectors = eigenVectors;
+}
+bool WWallDetectOctNode::hasEigenValuesAndVectors()
+{
+    return m_eigenValues.size() >= 3 && m_eigenVectors.size() >= 3;
+}
+WVector3d WWallDetectOctNode::getEigenVector( size_t index )
+{
+    return m_eigenVectors[index];
 }

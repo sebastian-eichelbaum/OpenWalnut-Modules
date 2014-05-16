@@ -50,7 +50,6 @@ void WPCADetector::setMinPointsPerVoxelToDraw( size_t minPointsPerVoxelToDraw )
 }
 void WPCADetector::analyze()
 {
-    cout << "Total nodes in set: " << m_analyzableOctree->getRootNode()->getTotalNodeCount();
     analyzeNode( ( WPcaDetectOctNode* )( m_analyzableOctree->getRootNode() ) );
 }
 void WPCADetector::analyzeNode( WPcaDetectOctNode* node )
@@ -62,9 +61,9 @@ void WPCADetector::analyzeNode( WPcaDetectOctNode* node )
         {
             WPrincipalComponentAnalysis pca;
             pca.analyzeData( node->getInputPoints() );
-            vector<double> variance = pca.getEigenValues();
-            if( variance[0] > 0.0 )
-                node->setEigenValueQuotient( variance[2] / variance[0] );
+            vector<double> eigenValues = pca.getEigenValues();
+            if( eigenValues[0] > 0.0 )
+                node->setEigenValueQuotient( eigenValues[2] / eigenValues[0] );
         }
     }
     else

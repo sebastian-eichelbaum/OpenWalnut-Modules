@@ -155,7 +155,10 @@ private:
      * The output triangle mesh that is proposed to show surface node groups.
      */
     boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
-
+    /**
+     * The input point data that is given the information of colored data according to a wall voxel group
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached 
      * on this single node.
@@ -180,20 +183,38 @@ private:
      */
     WPropDouble m_wallMaxAngleToNeighborVoxel;
     /**
+     * The quotient of the second Eigen Value over the biggest. Nodes with a value
+     * below that are treated as linear.
+     */
+    WPropDouble m_eigenValueQuotientLinear;
+    /**
      * The biggest allowed value consisting of that: Weakest point distribution vector 
      * strength divided by the strongest. Nodes above that quotient aren't grouped.
      */
-    WPropDouble m_showedVarianceQuotientMax;
+    WPropDouble m_eigenValueQuotientIsotropic;
     /**
-     * The minimal group size of nodes or its surface parts that makes voxels be drawn.
-     * Especially parts of buildings have bigger connected parts than e. g. trees.
+     * The minimal group size of nodes or its surface parts that makes voxels be
+     * drawn. Especially parts of buildings have bigger connected parts than e. g. 
+     * trees.
      */
     WPropInt m_minimalGroupSize;
+    /**
+     * Maximal node count of groups to display. Groups above that voxel count aren't 
+     * put out.
+     */
+    WPropInt m_maximalGroupSize;
     /**
      * Minimal allowed point count per voxel. Very small pixel counts don't make sense
      * for the Principal Component Analysis.
      */
     WPropInt m_minimalPointsPerVoxel;
+    /**
+     * The mode how the output triangle mesh is organized.
+     * 0: Voxels with a group color
+     * 1: Rhombs displaying the node group, the three Eigen Vectors, relative Eigen
+     *    Values and the mean coordinate of input points.
+     */
+    WPropSelection m_voxelOutlineMode;
 
     /**
      * Plugin progress status.

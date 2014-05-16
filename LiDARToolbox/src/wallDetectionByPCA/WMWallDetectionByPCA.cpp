@@ -43,6 +43,7 @@
 #include "WMWallDetectionByPCA.h"
 #include "WPCAWallDetector.h"
 
+
 // This line is needed by the module loader to actually find your module.
 //W_LOADABLE_MODULE( WMWallDetectionByPCA )
 //TODO(aschwarzkopf): Reenable above after solving the toolbox problem
@@ -82,8 +83,11 @@ void WMWallDetectionByPCA::connectors()
 
     m_outputTrimesh = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
                 new WModuleOutputData< WTriangleMesh >( shared_from_this(), "Variance intensity", "The loaded mesh." ) );
+    m_outputPoints = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
+                new WModuleOutputData< WDataSetPoints >( shared_from_this(), "Grouped points", "The loaded mesh." ) );
 
     addConnector( m_outputTrimesh );
+    addConnector( m_outputPoints );
 //    addConnector( m_buildings );
     WModule::connectors();
 }
@@ -97,27 +101,44 @@ void WMWallDetectionByPCA::properties()
                             "depth for the octree search tree.", 0 );
     m_detailDepth->setMin( -3 );
     m_detailDepth->setMax( 4 );
-    m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
-                            "in meters for the octree search tree.", 1.0  );
+    m_detailDepthLabel = m_properties->addProperty( "Voxel width meters: ", "Resulting detail depth "
+                            "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
 
     m_wallMaxAngleToNeighborVoxel = m_properties->addProperty( "Wall - max angle to voxel: ", "The maximal "
-                            "angle between two connected voxels to detect as a single wall.", 5.0  );
+                            "angle between two connected voxels to detect as a single wall.", 10.0  );
     m_wallMaxAngleToNeighborVoxel->setMin( 0.0 );
     m_wallMaxAngleToNeighborVoxel->setMax( 45.0 );
 
-    m_showedVarianceQuotientMax = m_properties->addProperty( "Variance - Quotient max.: ", "The maximal "
-                            "that is displayed in the output triangle mesh using colors.", 0.5  );
-    m_showedVarianceQuotientMax->setMin( 0.0 );
-    m_showedVarianceQuotientMax->setMax( 1.0 );
+    m_eigenValueQuotientLinear = m_properties->addProperty( "Variance quot. linear.: ", "Second biggest "
+                            "Eigen Value divided by the first one stands for the linearity here. Quotients "
+                            "below that value are treated as linear ones.", 0.0  );
+    m_eigenValueQuotientLinear->setMin( 0.0 );
+    m_eigenValueQuotientLinear->setMax( 1.0 );
+
+    m_eigenValueQuotientIsotropic = m_properties->addProperty( "Variance quot. isotropic.: ", "The maximal "
+                            "that is displayed in the output triangle mesh using colors.", 1.0  );
+    m_eigenValueQuotientIsotropic->setMin( 0.0 );
+    m_eigenValueQuotientIsotropic->setMax( 1.0 );
 
     m_minimalGroupSize = m_properties->addProperty( "Min. group size to draw: ",
                             "Groups below that node count aren't drawn.", 1 );
-    m_showedVarianceQuotientMax->setMin( 1 );
+    m_minimalGroupSize->setMin( 1 );
+
+    m_maximalGroupSize = m_properties->addProperty( "Max. group size to draw: ",
+                            "Groups above that node count aren't drawn.", 1000000 );
+    m_maximalGroupSize->setMin( 1 );
 
     m_minimalPointsPerVoxel = m_properties->addProperty( "Min. points per voxel to draw: ",
                             "The minimal points per voxel that enables an area to draw.", 1 );
-    m_showedVarianceQuotientMax->setMin( 1 );
+    m_minimalPointsPerVoxel->setMin( 1 );
+
+    boost::shared_ptr< WItemSelection > outlineModes( boost::shared_ptr< WItemSelection >( new WItemSelection() ) );
+    outlineModes->addItem( "Cubes", "Only displaying cubes with their group colors." );
+    outlineModes->addItem( "Normal vectors", "Normal vectors of voxels including group colors." );
+    m_voxelOutlineMode = m_properties->addProperty( "Outline mode", "Choose one of the available colorings.",
+                                                 outlineModes->getSelectorFirst() );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_voxelOutlineMode );
 
     WModule::properties();
 }
@@ -155,8 +176,9 @@ void WMWallDetectionByPCA::moduleMain()
             size_t count = inputVerts->size()/3;
             setProgressSettings( count );
 
-            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
-            WWallDetectOctree* pcaAnalysis = new WWallDetectOctree( m_detailDepthLabel->get() );
+            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
+            WWallDetectOctree* pcaAnalysis = new WWallDetectOctree( pow( 2.0, m_detailDepth->get() ) );
+            pcaAnalysis->setEigenValueQuotientLinear( m_eigenValueQuotientLinear->get() );
             pcaAnalysis->setWallMaxAngleToNeighborVoxel( m_wallMaxAngleToNeighborVoxel->get() );
 
             boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
@@ -170,15 +192,20 @@ void WMWallDetectionByPCA::moduleMain()
                 pcaAnalysis->registerPoint( x, y, z );
             }
             setProgressSettings( pcaAnalysis->getRootNode()->getTotalNodeCount() );
-            pcaAnalysis->setMaxIsotropicThresholdForVoxelMerge( m_showedVarianceQuotientMax->get() );
+            pcaAnalysis->setMaxIsotropicThresholdForVoxelMerge( m_eigenValueQuotientIsotropic->get() );
 
             WPCAWallDetector detector( pcaAnalysis, m_progressStatus );
+            WItemSelector voxelOutlineModeSelector = m_voxelOutlineMode->get();
             detector.setMinimalGroupSize( m_minimalGroupSize->get() );
+            detector.setMaximalGroupSize( m_maximalGroupSize->get() );
             detector.setMinimalPointsPerVoxel( m_minimalPointsPerVoxel->get() );
+            detector.setVoxelOutlineMode( voxelOutlineModeSelector.getItemIndexOfSelected( 0 ) );
             detector.analyze();
+            pcaAnalysis->setMinimalPointsPerVoxel( m_minimalPointsPerVoxel->get() );
             pcaAnalysis->groupNeighbourLeafsFromRoot();
             pcaAnalysis->generateNodeCountsOfGroups();
             m_outputTrimesh->updateData( detector.getOutline() );
+            m_outputPoints->updateData( detector.getOutlinePoints( inputVerts ) );
 
             m_progressStatus->finish();
         }
