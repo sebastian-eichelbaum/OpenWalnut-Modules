@@ -93,7 +93,7 @@ public:
      * Returns the input points covered by the node.
      * \return Input point data covered by the node.
      */
-    vector<WPosition> getInputPoints();
+    vector<WPosition>* getInputPoints();
     /**
      * Returns the normal vector of the node. It points to the least point 
      * distributed direction.
@@ -153,12 +153,17 @@ public:
      * \return The node has Eigen Values and Eigen Vectors or not.
      */
     bool hasEigenValuesAndVectors();
+    /**
+     * Clears the input point data. It mainly frees space after the Principal
+     * Component Analysis.
+     */
+    void clearInputData();
 
 private:
     /**
      * Input points covered by the space of the node.
      */
-    vector<WPosition> m_inputPoints;
+    vector<WPosition>* m_inputPoints;
     /**
      * The mean coordinate of all input points.
      */

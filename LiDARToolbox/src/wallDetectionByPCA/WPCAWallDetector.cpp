@@ -51,6 +51,7 @@ void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
         {
             WPrincipalComponentAnalysis pca;
             pca.analyzeData( node->getInputPoints() );
+            node->clearInputData();
             node->setMean( pca.getMean() );
             node->setEigenVectors( pca.getDirections() );
             node->setEigenValues( pca.getEigenValues() );

@@ -77,7 +77,7 @@ public:
      * Returns input data points. covered by the node's area.
      * \return Input point data set.
      */
-    vector<WPosition> getInputPoints();
+    vector<WPosition>* getInputPoints();
     /**
      * Sets the node color.
      * \param color Node color to assign.
@@ -103,23 +103,29 @@ public:
      */
     double getEigenValueQuotient();
     /**
-     * Says whether the node has got the information about the point's isotropic level.
+     * Says whether the node has got the information about the point's isotropic
+     * level.
      * \return Point has got information about the istropic level or not.
      */
     bool hasEigenValueQuotient();
+    /**
+     * Clears the input point data. It mainly frees space after the Principal
+     * Component Analysis.
+     */
+    void clearInputData();
 
 private:
     /**
      * Input data set points covered by that node.
      */
-    vector<WPosition> inputPoints;
+    vector<WPosition>* m_inputPoints;
     /**
      * Quotient of the smallest Eigen Value over the biggest.
      */
     double m_eigenValueQuotient;
     /**
-     * Marker that says whether the node has the information about its point's isotropic
-     * level.
+     * Marker that says whether the node has the information about its point's
+     * isotropic level.
      */
     bool m_hasEigenValueQuotient;
 };

@@ -28,12 +28,14 @@
 
 WWallDetectOctNode::WWallDetectOctNode()
 {
+    m_inputPoints = new vector<WPosition>();
     m_eigenValues[3];
 }
 
 WWallDetectOctNode::WWallDetectOctNode( double centerX, double centerY, double centerZ, double radius ) :
         WOctNode( centerX, centerY, centerZ, radius )
 {
+    m_inputPoints = new vector<WPosition>();
     m_eigenValues[3];
 }
 
@@ -47,9 +49,9 @@ WOctNode* WWallDetectOctNode::newInstance( double centerX, double centerY, doubl
 }
 void WWallDetectOctNode::onTouchPosition( double x, double y, double z )
 {
-    m_inputPoints.push_back( WPosition( x, y, z ) );
+    m_inputPoints->push_back( WPosition( x, y, z ) );
 }
-vector<WPosition> WWallDetectOctNode::getInputPoints()
+vector<WPosition>* WWallDetectOctNode::getInputPoints()
 {
     return m_inputPoints;
 }
@@ -98,4 +100,9 @@ bool WWallDetectOctNode::hasEigenValuesAndVectors()
 WVector3d WWallDetectOctNode::getEigenVector( size_t index )
 {
     return m_eigenVectors[index];
+}
+void WWallDetectOctNode::clearInputData()
+{
+    m_inputPoints->resize( 0 );
+    m_inputPoints->reserve( 0 );
 }

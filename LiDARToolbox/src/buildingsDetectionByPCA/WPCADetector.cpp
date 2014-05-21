@@ -61,6 +61,7 @@ void WPCADetector::analyzeNode( WPcaDetectOctNode* node )
         {
             WPrincipalComponentAnalysis pca;
             pca.analyzeData( node->getInputPoints() );
+            node->clearInputData();
             vector<double> eigenValues = pca.getEigenValues();
             if( eigenValues[0] > 0.0 )
                 node->setEigenValueQuotient( eigenValues[2] / eigenValues[0] );
