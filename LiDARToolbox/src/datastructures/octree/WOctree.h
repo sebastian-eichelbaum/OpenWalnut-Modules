@@ -118,6 +118,22 @@ public:
      *         colorChannel.
      */
     static float calcColor( size_t groupNr, size_t colorChannel ); //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
+    /**
+     * An octree node is a leaf or not.
+     * \param node Node to examine whether it is a leaf or not:
+     * \return The node is a leaf or not.
+     */
+    bool isLeafNode( WOctNode* node );
+    /**
+     * Neighborship detection mode. It's simply the allowed count of dimensions where 
+     * planes stand next to instead overlap. Having a regular grid these settings mean 
+     * following neighborship kinds:
+     *  1: Neighborship of 6
+     *  2: Neighborship of 18
+     *  3: Neighborship of 27
+     * \param cornerNeighborClass The node neighborship class.
+     */
+    void setCornerNeighborClass( size_t cornerNeighborClass );
 
 protected:
     /**
@@ -133,6 +149,22 @@ protected:
      * \return Neighbors of the node.
      */
     virtual vector<WOctNode*> getNeighborsOfNode( WOctNode* node );
+    /**
+     * Puts leaf nodes of examinedNode into targetNeighborList if they are neighbors of 
+     * nodeOfArea.
+     * \param nodeOfArea Node to look neighbors of for.
+     * \param examinedNode Node of which children and subchildren are examined in order
+     *                     to find neighbors of an octree node.
+     * \param targetNeighborList List where the neighbors are put.
+     */
+    void fetchNeighborsTooNode( WOctNode* nodeOfArea, WOctNode* examinedNode, vector<WOctNode*>* targetNeighborList );
+    /**
+     * Says whether two nodes are neighbors or not.
+     * \param node1 First node to check.
+     * \param node2 Second node to check.
+     * \return Node 1 and 2 are neighbors or not.
+     */
+    virtual bool isConnectedTo( WOctNode* node1, WOctNode* node2 );
     /**
      * Resizes the temporary voxel group id mapping array.
      * \param listLength Target list size to apply.
@@ -161,6 +193,15 @@ protected:
      * Color count or size of the field colors[].
      */
     static const size_t colorCount;
+    /**
+     * Neighborship detection mode. It's simply the allowed count of dimensions where 
+     * planes stand next to instead overlap. Having a regular grid these settings mean 
+     * following neighborship kinds:
+     *  1: Neighborship of 6
+     *  2: Neighborship of 18
+     *  3: Neighborship of 27
+     */
+    size_t m_cornerNeighborClass;
 };
 
 #endif  // WOCTREE_H

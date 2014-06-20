@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMWALLDETECTIONBYPCA_H
-#define WMWALLDETECTIONBYPCA_H
+#ifndef WMSURFACEDETECTIONBYPCL_H
+#define WMSURFACEDETECTIONBYPCL_H
 
 
 #include <liblas/liblas.hpp>
@@ -42,7 +42,6 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WWallDetectOctree.h"
 #include "../datastructures/quadtree/WQuadTree.h"
 
 #include "../datastructures/WDataSetPointsGrouped.h"
@@ -68,6 +67,7 @@
 #include "core/common/WItemSelectionItemTyped.h"
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
+#include "core/common/WRealtimeTimer.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -75,17 +75,22 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * OpenWalnut plugin for detecting plain surfaces, mainly walls and roofs.
+ * Detects surfaces using the Region Growing Segmentation of the Point Cloud Library 
+ * http://pointclouds.org/
+ * \ingroup modules
  */
-class WMWallDetectionByPCA: public WModule
+class WMSurfaceDetectionByPCL: public WModule
 {
 public:
-    WMWallDetectionByPCA();
+    /**
+     * Creates the module for the Building detection.
+     */
+    WMSurfaceDetectionByPCL();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMWallDetectionByPCA();
+    virtual ~WMSurfaceDetectionByPCL();
 
     /**
      * Gives back the name of this module.
@@ -100,9 +105,8 @@ public:
     virtual const std::string getDescription() const;
 
     /**
-     * Due to the prototype design pattern used to build modules, this method returns a 
-     * new instance of this method. NOTE: it should never be initialized or modified in 
-     * some other way. A simple new instance is required.
+     * Due to the prototype design pattern used to build modules, this method returns a new instance of this method. NOTE: it
+     * should never be initialized or modified in some other way. A simple new instance is required.
      * \return the prototype used to create every module in OpenWalnut.
      */
     virtual boost::shared_ptr< WModule > factory() const;
@@ -142,23 +146,15 @@ private:
     void setProgressSettings( size_t steps );
 
     /**
-     * Determines the resolution of the smallest octree nodes in 2^n meters. The smallest 
-     * radius equals to its result.
-     */
-    WPropInt m_detailDepth;
-
-    /**
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+
     /**
-     * The output triangle mesh that is proposed to show surface node groups.
+     * WDataSetPointsGrouped data output as point groups depicting each building
      */
-    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
-    /**
-     * The input point data that is given the information of colored data according to a wall voxel group
-     */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputPointsGrouped;
+
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached 
      * on this single node.
@@ -171,59 +167,68 @@ private:
     boost::shared_ptr< WCondition > m_propCondition;
 
     /**
-     * Determines the resolution of smallest octree nodes. Their radius equal that value.
+     * Info tab property: Input points count.
      */
-    WPropDouble m_detailDepthLabel;
+    WPropInt m_infoNbPoints;
+    /**
+     * Info field - Wall time for the whole surface detection process.
+     */
+    WPropDouble m_infoRenderTimeSeconds;
+    /**
+     * Info field - The points per second detection rate of the segmentation process.
+     */
+    WPropDouble m_infoPointsPerSecond;
+
+    /**
+     * Info tab property: Minimal x value of input x coordunates.
+     */
+    WPropDouble m_infoXMin;
+    /**
+     * Info tab property: Maximal x value of input x coordunates.
+     */
+    WPropDouble m_infoXMax;
+    /**
+     * Info tab property: Minimal y value of input x coordunates.
+     */
+    WPropDouble m_infoYMin;
+    /**
+     * Info tab property: Maximal y value of input x coordunates.
+     */
+    WPropDouble m_infoYMax;
+    /**
+     * Info tab property: Minimal z value of input x coordunates.
+     */
+    WPropDouble m_infoZMin;
+    /**
+     * Info tab property: Maximal z value of input x coordunates.
+     */
+    WPropDouble m_infoZMax;
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
 
     /**
-     * The maximal allowed angle between two node surface normal vectors. Nodes above 
-     * that angle difference aren't grouped.
+     * Minimal cluster point count of detected surfaces.
      */
-    WPropDouble m_wallMaxAngleToNeighborVoxel;
+    WPropInt m_clusterSizeMin;
     /**
-     * The quotient of the second Eigen Value over the biggest. Nodes with a value
-     * below that are treated as linear.
+     * Maximal cluster point count of detected surfaces.
      */
-    WPropDouble m_eigenValueQuotientLinear;
+    WPropInt m_clusterSizeMax;
     /**
-     * The biggest allowed value consisting of that: Weakest point distribution vector 
-     * strength divided by the strongest. Nodes above that quotient aren't grouped.
+     * The count of considered neighbors during considering the analysis point wise.
      */
-    WPropDouble m_eigenValueQuotientIsotropic;
+    WPropInt m_numberOfNeighbours;
     /**
-     * Neighborship detection mode. It's simply the allowed count of dimensions where 
-     * planes stand next to instead overlap. Having a regular grid these settings mean 
-     * following neighborship kinds:
-     *  1: Neighborship of 6
-     *  2: Neighborship of 18
-     *  3: Neighborship of 27
+     * Allows to set smoothness threshold used for testing the points. The angle is 
+     * scaled by degrees and it is a new threshold value for the angle between normals.
      */
-    WPropInt m_cornerNeighborClass;
+    WPropDouble m_smoothnessThresholdDegrees;
     /**
-     * The minimal group size of nodes or its surface parts that makes voxels be
-     * drawn. Especially parts of buildings have bigger connected parts than e. g. 
-     * trees.
+     * Curvature threshold used for testing the points. It is a threshold value for 
+     * curvature testing.
      */
-    WPropInt m_minimalGroupSize;
-    /**
-     * Maximal node count of groups to display. Groups above that voxel count aren't 
-     * put out.
-     */
-    WPropInt m_maximalGroupSize;
-    /**
-     * Minimal allowed point count per voxel. Very small pixel counts don't make sense
-     * for the Principal Component Analysis.
-     */
-    WPropInt m_minimalPointsPerVoxel;
-    /**
-     * The mode how the output triangle mesh is organized.
-     * 0: Voxels with a group color
-     * 1: Rhombs displaying the node group, the three Eigen Vectors, relative Eigen
-     *    Values and the mean coordinate of input points.
-     */
-    WPropSelection m_voxelOutlineMode;
+    WPropDouble m_curvatureThreshold;
+
 
     /**
      * Plugin progress status.
@@ -231,4 +236,4 @@ private:
     boost::shared_ptr< WProgress > m_progressStatus;
 };
 
-#endif  // WMWALLDETECTIONBYPCA_H
+#endif  // WMSURFACEDETECTIONBYPCL_H

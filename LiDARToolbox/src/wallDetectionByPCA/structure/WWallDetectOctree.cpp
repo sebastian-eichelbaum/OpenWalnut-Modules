@@ -35,7 +35,7 @@ WWallDetectOctree::~WWallDetectOctree()
 {
     m_wallMaxAngleToNeighborVoxel = 20.0;
 }
-vector<WOctNode*> WWallDetectOctree::getNeighborsOfNode( WOctNode* node )
+/*vector<WOctNode*> WWallDetectOctree::getNeighborsOfNode( WOctNode* node )
 {
     double x = node->getCenter( 0 );
     double y = node->getCenter( 1 );
@@ -57,7 +57,7 @@ vector<WOctNode*> WWallDetectOctree::getNeighborsOfNode( WOctNode* node )
     neighbors.push_back( getLeafNode( x  , y+d, z-d ) );
     neighbors.push_back( getLeafNode( x+d, y+d, z-d ) );
     return neighbors;
-}
+}*/
 bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
 {
     WWallDetectOctNode* node1 = ( WWallDetectOctNode* ) octNode1;

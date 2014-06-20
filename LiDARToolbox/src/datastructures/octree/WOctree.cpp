@@ -30,11 +30,13 @@ WOctree::WOctree( double detailDepth )
 {
     m_root = new WOctNode( 0.0, 0.0, 0.0, detailDepth );
     m_detailLevel = detailDepth;
+    m_cornerNeighborClass = 1;
 }
 WOctree::WOctree( double detailDepth, WOctNode* nodeType )
 {
     m_root = nodeType->newInstance( 0.0, 0.0, 0.0, detailDepth );
     m_detailLevel = detailDepth;
+    m_cornerNeighborClass = 1;
 }
 
 WOctree::~WOctree()
@@ -106,7 +108,7 @@ void WOctree::groupNeighbourLeafsFromRoot()
 }
 void WOctree::refreshNodeGroup( WOctNode* node )
 {
-    if  ( node->getRadius() <= m_detailLevel )
+    if  ( isLeafNode(node) )
     {
         size_t oldGroupNr = node->getGroupNr();
         node->setGroupNr( m_groupEquivs[oldGroupNr] );
@@ -120,7 +122,7 @@ void WOctree::refreshNodeGroup( WOctNode* node )
 }
 void WOctree::groupNeighbourLeafs( WOctNode* node )
 {
-    if  ( node->getRadius() <= m_detailLevel )
+    if  ( isLeafNode(node) )
     {
         size_t group = m_groupEquivs.size();
         vector<WOctNode*> neighbors = getNeighborsOfNode( node );
@@ -129,7 +131,7 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
             WOctNode* neighbor = neighbors[index];
             size_t neighborID = neighbor != 0 && neighbor->hasGroup()
                     ?m_groupEquivs[neighbor->getGroupNr()] :group;
-            if( group > neighborID && m_detailLevel == neighbor->getRadius() )
+            if( group > neighborID && m_detailLevel == neighbor->getRadius()/*TODO(aschwarzkopf): Consider removing this query*/ )
                 if( neighbor->hasGroup() && canGroupNodes( node, neighbor ) )
                         group = neighborID;
         }
@@ -138,7 +140,8 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
             WOctNode* neighbor = neighbors[index];
             size_t neighborID = neighbor != 0 && neighbor->hasGroup()
                     ?m_groupEquivs[neighbor->getGroupNr()] :group;
-            if( group < neighborID && neighbor->hasGroup() && m_detailLevel == neighbor->getRadius() )
+            if( group < neighborID && neighbor->hasGroup() &&
+                    m_detailLevel == neighbor->getRadius() /*TODO( aschwarzkopf ): Consider removing this query*/ )
             {
                 for( size_t newIdx = 0; newIdx < m_groupEquivs.size(); newIdx++ )
                     if( m_groupEquivs[newIdx] == neighborID &&  canGroupNodes( node, neighbor ) )
@@ -161,21 +164,46 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
 }
 vector<WOctNode*> WOctree::getNeighborsOfNode( WOctNode* node )
 {
-    double x = node->getCenter( 0 );
-    double y = node->getCenter( 1 );
-    double z = node->getCenter( 2 );
-    double d = node->getRadius() * 2.0;
+    vector<WOctNode*>* foundNeighbors = new vector<WOctNode*>();
+    fetchNeighborsTooNode( node, getRootNode(), foundNeighbors );
     vector<WOctNode*> neighbors;
-    neighbors.push_back( getLeafNode( x  , y-d, z ) );
-    neighbors.push_back( getLeafNode( x-d, y  , z ) ),
-    neighbors.push_back( getLeafNode( x  , y  , z-d ) );
+    for(size_t index = 0; index < foundNeighbors->size(); index++ )
+        neighbors.push_back( foundNeighbors->at( index ) );
     return neighbors;
+}
+void WOctree::fetchNeighborsTooNode( WOctNode* nodeOfArea, WOctNode* examinedNode, vector<WOctNode*>* targetNeighborList )
+{
+    if( !isConnectedTo( nodeOfArea, examinedNode ) )
+        return;
+    if( isLeafNode(examinedNode ) )
+    {
+        if( examinedNode != nodeOfArea )
+            targetNeighborList->push_back( examinedNode );
+    }
+    else
+    {
+        for( size_t child = 0; child < 8; child++ )
+            if( examinedNode->getChild(child) != 0 )
+                fetchNeighborsTooNode( nodeOfArea, examinedNode->getChild( child ), targetNeighborList );
+    }
+}
+bool WOctree::isConnectedTo( WOctNode* node1, WOctNode* node2 )
+{
+    size_t cornerNeighborClass = 0;
+    for( size_t dimension = 0; dimension < 3; dimension++ )
+    {
+        double centerDistance = abs( node1->getCenter( dimension ) - node2->getCenter( dimension ) );
+        double radiusSum = node1->getRadius() + node2->getRadius();
+        if( centerDistance > radiusSum + 0.000001 )
+            return false;
+        if( centerDistance > radiusSum - 0.000001 )
+            cornerNeighborClass++;
+    }
+    return cornerNeighborClass <= m_cornerNeighborClass;
 }
 bool WOctree::canGroupNodes( WOctNode* node1, WOctNode* node2 )
 {
-    node1 = node1;
-    node2 = node2;
-    return true;
+    return isConnectedTo(node1, node2);
 }
 void WOctree::resizeGroupList( size_t listLength )
 {
@@ -200,5 +228,18 @@ float WOctree::calcColor( size_t groupNr, size_t colorChannel )
 {
     groupNr = colors[groupNr%colorCount];
     groupNr = ( groupNr >> ( 16-8*colorChannel ) ) & 0xff;
-    return static_cast<float>(groupNr)/255.0f;
+    return static_cast<float>( groupNr )/255.0f;
+}
+bool WOctree::isLeafNode( WOctNode* node )
+{
+    if( node->getRadius() > m_detailLevel )
+        return false;
+    for( size_t childIdx = 0; childIdx < 8; childIdx++ )
+        if( node->getChild(childIdx) != 0 )
+            return false;
+    return true;
+}
+void WOctree::setCornerNeighborClass( size_t cornerNeighborClass )
+{
+    m_cornerNeighborClass = cornerNeighborClass;
 }

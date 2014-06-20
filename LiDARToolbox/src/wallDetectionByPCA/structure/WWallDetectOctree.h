@@ -131,7 +131,7 @@ protected:
      * \param node Node to get neighbors of.
      * \return Neighbors of the node that are probably traversed.
      */
-    virtual vector<WOctNode*> getNeighborsOfNode( WOctNode* node );
+    /*virtual vector<WOctNode*> getNeighborsOfNode( WOctNode* node );*/
 
 private:
     /**

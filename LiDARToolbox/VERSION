@@ -15,4 +15,4 @@
 #VERSION=1.2.0
 #VERSION=1.2.0+hgX  -> replaces the X with the current revision number
 #VERSUIB=1.2.0+hg1234 -> here, revision number was set by the build scripts for example.
-VERSION=0.0.2+hgX
+VERSION=0.0.3+hgX
