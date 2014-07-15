@@ -235,8 +235,8 @@ void main()
     vec3 bVecNorm = normalize( u_bVec );
     vec3 projectedDirectionTextCoords = 0.5 * vec3( dot( aVecNorm, diffusionDirection ), dot( bVecNorm, diffusionDirection ), 0.0 );
 
-    vec3 scaledFocalPoint1 = middlePoint_tex + scale * projectedDirectionTextCoords;
-    vec3 scaledFocalPoint2 = middlePoint_tex - scale * projectedDirectionTextCoords;
+    vec3 scaledFocalPoint1 = middlePoint_tex + u_scale * projectedDirectionTextCoords;
+    vec3 scaledFocalPoint2 = middlePoint_tex - u_scale * projectedDirectionTextCoords;
     vec3 focalPoint1 = middlePoint_tex + projectedDirectionTextCoords;
     vec3 focalPoint2 = middlePoint_tex - projectedDirectionTextCoords;
 
@@ -295,15 +295,26 @@ void main()
     vec4 white = vec4( 1, 1, 1, 1 );
     vec4 black = vec4( 0, 0, 0, 1 );
 
+    vec4 color = u_color;
+    // Enable this for textured stipples
+    // ///////////// if( u_color.r == 1.0 ) { // this if, realises one FS to be colored with texture while the other set is colored with fixed color
+    // /////////////   if( col < 0.5 ) {
+    // /////////////     discard;
+    // /////////////   }
+    // /////////////   else {
+    //     color = hotIron( ( col - 0.5 ) * 2 );
+    // /////////////  }
+    // /////////////} 
+
     // opacity filtered color (default)
-    vec4 c = u_color * pow( v_probability, 1.0 / (10.0 * u_colorThreshold) );
+    vec4 c = color * pow( v_probability, 1.0 / (10.0 * u_colorThreshold) );
 
     if( u_colorThreshold >= 1.0 ) { // pure color
-      c = u_color;
+      c = color;
     }
 
     // mod: dark stipples in bright regions, bright stipples in dark regions
-    // c.r = c.r - 0.1 + 0.1 * ( 1 - 2.0 * col );
+    // c.r = c.r - 0.2 + 0.2 * ( 1 - 2.0 * col );
 
     // // Debug: hotIron colormapping of the probability.
     // vec4 c = hotIron( 1.0 - v_probability );

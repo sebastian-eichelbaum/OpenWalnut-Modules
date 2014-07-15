@@ -31,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-#include <osg/Geometry>
+#include <osg/ShapeDrawable>
 
 #include "core/common/datastructures/WColoredVertices.h"
 #include "core/common/math/WPlane.h"
@@ -415,42 +415,16 @@ template< class Container > inline osg::ref_ptr< osg::Geode > WMClusterSlicer::g
                                                                              double size,
                                                                              const WColor& color ) const
 {
-    osg::ref_ptr< osg::Vec3Array > vertices = osg::ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
-    osg::ref_ptr< osg::Vec4Array > colors   = osg::ref_ptr< osg::Vec4Array >( new osg::Vec4Array );
-    osg::ref_ptr< osg::Geometry >  geometry = osg::ref_ptr< osg::Geometry >( new osg::Geometry );
-    osg::ref_ptr< osg::Vec3Array > normals  = osg::ref_ptr< osg::Vec3Array >( new osg::Vec3Array );
+    osg::ref_ptr< osg::Geode > geode = osg::ref_ptr< osg::Geode >( new osg::Geode );
 
     for( typename Container::const_iterator point = points->begin(); point != points->end(); ++point )
     {
-        const WPosition& pos = *point;
-        std::vector< WPosition > corners;
-        corners.reserve( 8 );
-        double halfSize = size / 2.0;
-        corners.push_back( WPosition( pos[0] - halfSize, pos[1] - halfSize, pos[2] - halfSize ) );
-        corners.push_back( WPosition( pos[0] + halfSize, pos[1] - halfSize, pos[2] - halfSize ) );
-        corners.push_back( WPosition( pos[0] + halfSize, pos[1] - halfSize, pos[2] + halfSize ) );
-        corners.push_back( WPosition( pos[0] - halfSize, pos[1] - halfSize, pos[2] + halfSize ) );
-        corners.push_back( WPosition( pos[0] - halfSize, pos[1] + halfSize, pos[2] - halfSize ) );
-        corners.push_back( WPosition( pos[0] + halfSize, pos[1] + halfSize, pos[2] - halfSize ) );
-        corners.push_back( WPosition( pos[0] + halfSize, pos[1] + halfSize, pos[2] + halfSize ) );
-        corners.push_back( WPosition( pos[0] - halfSize, pos[1] + halfSize, pos[2] + halfSize ) );
-
-        osg::ref_ptr< osg::Vec3Array > ver = wge::generateCuboidQuads( corners ); // do not use. use osg::Shape for boxes
-        vertices->insert( vertices->end(), ver->begin(), ver->end() );
-        osg::ref_ptr< osg::Vec3Array > nor = wge::generateCuboidQuadNormals( corners );
-        normals->insert( normals->end(), nor->begin(), nor->end() );
-        geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, vertices->size() - ver->size(), ver->size() ) );
+        osg::Box* box = new osg::Box( *point, size / 2.0 );
+        osg::ShapeDrawable* boxDrawable = new osg::ShapeDrawable(box);
+        boxDrawable->setColor( color );
+        geode->addDrawable( boxDrawable );
     }
 
-    geometry->setVertexArray( vertices );
-    colors->push_back( color );
-    geometry->setColorArray( colors );
-    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
-    geometry->setNormalArray( normals );
-    geometry->setNormalBinding( osg::Geometry::BIND_PER_PRIMITIVE );    // this will not compile on OSG 3.2. Please use osg::Shape for creating
-                                                                        // boxes
-    osg::ref_ptr< osg::Geode > geode = osg::ref_ptr< osg::Geode >( new osg::Geode );
-    geode->addDrawable( geometry );
     return geode;
 }
 

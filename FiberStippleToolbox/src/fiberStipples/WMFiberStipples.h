@@ -169,6 +169,7 @@ private:
     WPropInt m_outlineSteps;
     WPropBool m_outlineDark;
     WPropBool m_outlineInOut;
+    WPropDouble m_directionScale;
 
     WPropDouble m_sampleRes;
 

@@ -82,7 +82,7 @@ uniform float u_pixelSizeZ;
 /**
  * Used for scaling the focal points, as otherwise the the stipple endings may not fit inside quad.
  */
-uniform float scale = 0.8;
+uniform float u_scale;
 
 /**
  * Probabilities below this threshold are ignored and discarded.

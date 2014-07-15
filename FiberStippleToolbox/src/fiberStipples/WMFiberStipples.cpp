@@ -159,6 +159,10 @@ void WMFiberStipples::properties()
     m_sampleRes->setMin( 0.0001 );
     m_sampleRes->setMax( 0.2 );
 
+    m_directionScale = m_properties->addProperty( "Direction Scale", "Scale the direction within the quad", 0.8 );
+    m_directionScale->setMin( 0.0 );
+    m_directionScale->setMax( 1.0 );
+
     // call WModule's initialization
     WMAbstractSliceModule::properties();
 }
@@ -304,6 +308,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, m_outlineSteps, "u_outlineSteps" );
     wge::bindAsUniform( m_output, m_outlineDark, "u_outlineDark" );
     wge::bindAsUniform( m_output, m_outlineInOut, "u_outlineInOut" );
+    wge::bindAsUniform( m_output, m_directionScale, "u_scale" );
 
 
     // each slice (containing scattered quads) is child of an transformation node

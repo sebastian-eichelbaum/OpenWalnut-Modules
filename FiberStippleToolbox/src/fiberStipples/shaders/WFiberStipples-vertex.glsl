@@ -27,7 +27,6 @@
 #include "WGETextureTools.glsl"
 #include "WFiberStipples-varyings.glsl"
 #include "WFiberStipples-uniforms.glsl"
-// #include "WGETransformationTools.glsl"
 
 /**
  * Vertex Main. Simply transforms the geometry and computes the projected diffusion direction.
