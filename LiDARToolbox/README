@@ -6,3 +6,7 @@ This toolbox is a collection of modules for dealing with LiDAR data. More inform
 This toolbox is currently under development by
 - Andreas Schwarzkopf
 - Alexander Wiebel
+
+Requirements:
+- libLAS (http://www.liblas.org/ or packages liblas-dev and liblas-c-dev)
+- Point Cloud Library (http://pointclouds.org/)

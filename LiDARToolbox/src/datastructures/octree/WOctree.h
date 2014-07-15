@@ -29,6 +29,8 @@
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "WOctNode.h"
 
+using std::vector;
+
 /**
  * Octree structure for analyzing the point data
  */
@@ -42,6 +44,14 @@ public:
      *                    including negative n values.
      */
     explicit WOctree( double detailDepth );
+    /**
+     * Creates an octree node using a particular node type.
+     * \param detailDepth Supported octree node resolution resolution. It equals the 
+     *                    node's radius. Currently only numbers covering 2^n results 
+     *                    including negative n values.
+     * \param nodeType nodeType Type of this node will be used for all children of the root.
+     */
+    WOctree( double detailDepth, WOctNode* nodeType );
     /**
      * Octree destructor.
      */
@@ -74,7 +84,7 @@ public:
      * Adjusts group numbers of all leaf nodes so that nodes have the same ID that 
      * represent altogether a single block.
      */
-    void groupNeighbourLeafs();
+    virtual void groupNeighbourLeafsFromRoot(); //TODO(aschwarzkopf): Rename to groupNeighbourLeafs() after extracting neighbors fetch method
     /**
      * Refreshs group IDs using the temporary id mapping vector m_groupEquivs.
      * \param node Node to refresh.
@@ -87,6 +97,13 @@ public:
      */
     size_t getGroupCount();
     /**
+     * Describes the condition when neighbor nodes can be grouped.
+     * \param node1 First node to verify.
+     * \param node2 Second node to verify.
+     * \return Nodes can be grouped or not.
+     */
+    virtual bool canGroupNodes( WOctNode* node1, WOctNode* node2 );
+    /**
      * Returns the detail level. It's the minimal allowed radius of any octnode.
      * \return The minimal radius of any octnode.
      */
@@ -95,18 +112,59 @@ public:
     /**
      * Returns a color channel value for a particular point group.
      * \param groupNr Group number to assign a corresponding color
-     * \param colorChannel Channel of the whole color that is returned. 0=red, 1=green and 2=blue.
-     * \return Group color of values between 0.0 and 1.0 corresponding to a particular colorChannel.
+     * \param colorChannel Channel of the whole color that is returned. 0=red, 1=green 
+     *                     and 2=blue.
+     * \return Group color of values between 0.0 and 1.0 corresponding to a particular 
+     *         colorChannel.
      */
     static float calcColor( size_t groupNr, size_t colorChannel ); //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
+    /**
+     * An octree node is a leaf or not.
+     * \param node Node to examine whether it is a leaf or not:
+     * \return The node is a leaf or not.
+     */
+    bool isLeafNode( WOctNode* node );
+    /**
+     * Neighborship detection mode. It's simply the allowed count of dimensions where 
+     * planes stand next to instead overlap. Having a regular grid these settings mean 
+     * following neighborship kinds:
+     *  1: Neighborship of 6
+     *  2: Neighborship of 18
+     *  3: Neighborship of 27
+     * \param cornerNeighborClass The node neighborship class.
+     */
+    void setCornerNeighborClass( size_t cornerNeighborClass );
 
-private:
+protected:
     /**
      * Method that traverses a node in order to group all neighbor cubes into mutual 
      * group numbers.
      * \param node Subnodes to traverse recursively.
      */
     void groupNeighbourLeafs( WOctNode* node );
+    /**
+     * Returns possible neighbors of a node. Nodes that are in no case traversed before 
+     * for a comparison aren't added.
+     * \param node Node to return neighbors of.
+     * \return Neighbors of the node.
+     */
+    virtual vector<WOctNode*> getNeighborsOfNode( WOctNode* node );
+    /**
+     * Puts leaf nodes of examinedNode into targetNeighborList if they are neighbors of 
+     * nodeOfArea.
+     * \param nodeOfArea Node to look neighbors of for.
+     * \param examinedNode Node of which children and subchildren are examined in order
+     *                     to find neighbors of an octree node.
+     * \param targetNeighborList List where the neighbors are put.
+     */
+    void fetchNeighborsTooNode( WOctNode* nodeOfArea, WOctNode* examinedNode, vector<WOctNode*>* targetNeighborList );
+    /**
+     * Says whether two nodes are neighbors or not.
+     * \param node1 First node to check.
+     * \param node2 Second node to check.
+     * \return Node 1 and 2 are neighbors or not.
+     */
+    virtual bool isConnectedTo( WOctNode* node1, WOctNode* node2 );
     /**
      * Resizes the temporary voxel group id mapping array.
      * \param listLength Target list size to apply.
@@ -117,8 +175,8 @@ private:
      */
     WOctNode* m_root;
     /**
-     * The radius of smallest octree nodes. Currently only numbers covering 2^n (included negative n). 
-     * are supported.
+     * The radius of smallest octree nodes. Currently only numbers covering 2^n (included 
+     * negative n) are supported.
      */
     double m_detailLevel;
     /**
@@ -135,6 +193,15 @@ private:
      * Color count or size of the field colors[].
      */
     static const size_t colorCount;
+    /**
+     * Neighborship detection mode. It's simply the allowed count of dimensions where 
+     * planes stand next to instead overlap. Having a regular grid these settings mean 
+     * following neighborship kinds:
+     *  1: Neighborship of 6
+     *  2: Neighborship of 18
+     *  3: Neighborship of 27
+     */
+    size_t m_cornerNeighborClass;
 };
 
 #endif  // WOCTREE_H

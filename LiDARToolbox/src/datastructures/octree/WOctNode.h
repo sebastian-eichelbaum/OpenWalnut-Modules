@@ -27,24 +27,39 @@
 #define WOCTNODE_H
 
 /**
- * Octree node class designed for points data. Each node represents an area where at least
- * one data set point exists.
+ * Octree node class designed for points data. Each node represents an area where at 
+ * least one data set point exists.
  */
 class WOctNode
 {
 public:
     /**
+     * Creates an octree node.
+     */
+    WOctNode(); //TODO(aschwarzkopf): Consider removing that unnecessary constructor.
+    /**
      * Octree node constructor.
      * \param centerX X coordinate of the octree node center.
      * \param centerY Y coordinate of the octree node center.
      * \param centerZ Z coordinate of the octree node center.
-     * \param radius Range from the center point that the node covers in each X/Y/Z direction.
+     * \param radius Range from the center point that the node covers in each X/Y/Z 
+     *               direction.
      */
     WOctNode( double centerX, double centerY, double centerZ, double radius );
     /**
      * Destructor of the octree node
      */
     virtual ~WOctNode();
+    /**
+     * The octree instance uses this method to instantiate a new node of the same class.
+     * \param centerX X coordinate of the octree node center.
+     * \param centerY Y coordinate of the octree node center.
+     * \param centerZ Z coordinate of the octree node center.
+     * \param radius Range from the center point that the node covers in each X/Y/Z 
+     *               direction.
+     * \return New node instance of the same class.
+     */
+    virtual WOctNode* newInstance( double centerX, double centerY, double centerZ, double radius );
     /**
      * Returns an octree child object of a particular case.
      * \param drawer Corresponding index (0-7) of vX/vY/vZ which depict which octree node
@@ -99,10 +114,21 @@ public:
      */
     size_t getGroupNr();
     /**
+     * Indicates whether the node was assigned a group.
+     * \return was assigned a group ID or not.
+     */
+    bool hasGroup();
+    /**
      * Sets the octree node group ID. It's usually calculated regarding the leaf voxel neighbors.
-     * \param groupNr The voxel group ID.
+     * \param groupNr The voxel group ID to assign.
      */
     void setGroupNr( size_t groupNr );
+
+    /**
+     * Returns the total subnode count including the current one.
+     * \return The total subnode count including the current one.
+     */
+    size_t getTotalNodeCount();
 
     /**
      * Determines which X coordinate axis case a m_child has.
@@ -123,7 +149,16 @@ public:
      * \param y Y coordinate to update.
      * \param z Z coordinate to update.
      */
-    void updateMinMax( double x, double y, double z );
+    void touchPosition( double x, double y, double z );
+
+    /**
+     * Method that is executed when inflating the octree using coordinates.
+     * It can be useful to overwrite this method when inheriting from that class.
+     * \param x Inflated X coordinate.
+     * \param y Inflated Y coordinate.
+     * \param z Inflated Z coordinate.
+     */
+    virtual void onTouchPosition( double x, double y, double z );
     /**
      * Returns the count of registered points.
      * \return Registered points count.
@@ -187,6 +222,10 @@ private:
      * The node group ID. This number usually corresponds to its voxel neighborship.
      */
     size_t m_groupNr; //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
+    /**
+     * Indicates whether the node was assigned a group.
+     */
+    bool m_hasGroup;
     /**
      * Point count of the node.
      */

@@ -108,8 +108,8 @@ void WMElevationImageExport::properties()
                             "depth for the octree search tree.", 0, m_propCondition );
     m_detailDepth->setMin( -3 );
     m_detailDepth->setMax( 4 );
-    m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
-                            "in meters for the octree search tree.", 1.0  );
+    m_detailDepthLabel = m_properties->addProperty( "Voxel width meters: ", "Resulting detail depth "
+                            "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
 
 
@@ -117,7 +117,7 @@ void WMElevationImageExport::properties()
     imageModes->addItem( "Minimals", "Minimal elevation values." );
     imageModes->addItem( "Maximals", "Maximal elevation values." );
     imageModes->addItem( "Point count", "Store point count to each pixel." );
-    m_elevImageMode = m_properties->addProperty( "Color mode", "Choose one of the available colorings.",
+    m_elevImageMode = m_properties->addProperty( "Elev. image mode", "Choose one of the available colorings.",
                                                  imageModes->getSelectorFirst(), m_propCondition );
     WPropertyHelper::PC_SELECTONLYONE::addTo( m_elevImageMode );
     m_minElevImageZ = m_properties->addProperty( "Min. Z value: ",
@@ -176,8 +176,8 @@ void WMElevationImageExport::moduleMain()
             size_t count = verts->size()/3;
             setProgressSettings( count );
 
-            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
-            m_elevationImage = new WQuadTree( m_detailDepthLabel->get() );
+            m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
+            m_elevationImage = new WQuadTree( pow( 2.0, m_detailDepth->get() ) );
 
             boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
             for( size_t vertex = 0; vertex < count; vertex++)

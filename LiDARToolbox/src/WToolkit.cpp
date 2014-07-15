@@ -31,10 +31,15 @@
 #include <core/kernel/WModule.h>
 
 #include "buildingsDetection/WMBuildingsDetection.h"
+#include "buildingsDetectionByPCA/WMBuildingsDetectionByPCA.h"
 #include "elevationImageExport/WMElevationImageExport.h"
+#include "pointsCrop/WMPointsCrop.h"
 #include "pointsCutOutliers/WMPointsCutOutliers.h"
 #include "pointsGroupSelector/WMPointsGroupSelector.h"
 #include "readLAS/WMReadLAS.h"
+#include "surfaceDetectionByLari/WMSurfaceDetectionByLari.h"
+#include "surfaceDetectionByPCL/WMSurfaceDetectionByPCL.h"
+#include "wallDetectionByPCA/WMWallDetectionByPCA.h"
 
 // #include "WToolkit.h"
 
@@ -51,10 +56,15 @@
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
     m.push_back( boost::shared_ptr< WModule >( new WMBuildingsDetection ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMBuildingsDetectionByPCA ) );
     m.push_back( boost::shared_ptr< WModule >( new WMElevationImageExport ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMPointsCrop ) );
     m.push_back( boost::shared_ptr< WModule >( new WMPointsCutOutliers ) );
     m.push_back( boost::shared_ptr< WModule >( new WMPointsGroupSelector ) );
     m.push_back( boost::shared_ptr< WModule >( new WMReadLAS ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMSurfaceDetectionByLari ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMSurfaceDetectionByPCL ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMWallDetectionByPCA ) );
 }
 
 /**

@@ -98,8 +98,8 @@ void WMPointsCutOutliers::properties()
                             "depth for the octree search tree.", 0, m_propCondition );
     m_detailDepth->setMin( -3 );
     m_detailDepth->setMax( 4 );
-    m_detailDepthLabel = m_properties->addProperty( "Detail Depth meters: ", "Resulting detail depth "
-                            "in meters for the octree search tree.", 1.0, m_propCondition  );
+    m_detailDepthLabel = m_properties->addProperty( "Voxel width meters: ", "Resulting detail depth "
+                            "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
 
     WModule::properties();
@@ -132,11 +132,11 @@ void WMPointsCutOutliers::moduleMain()
 
         boost::shared_ptr< WDataSetPoints > points = m_input->getData();
 //        std::cout << "Execute cycle\r\n";
-        m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) );
+        m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
         if  ( points )
         {
             WCutOutliersDeamon groups = WCutOutliersDeamon();
-            groups.setDetailDepth( m_detailDepthLabel->get( true ) );
+            groups.setDetailDepth( pow( 2.0, m_detailDepth->get() ) );
             setProgressSettings( 3 );
 
             boost::shared_ptr< WDataSetPoints > cutPoints = groups.cutOutliers( points );

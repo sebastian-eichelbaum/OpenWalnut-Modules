@@ -34,7 +34,7 @@ class WBoyGlobalColoring : public WObjectNDIP< WColoring_I >
 public:
     /**
      * Constructor.
-     */;
+     */
     WBoyGlobalColoring();
 
     /**

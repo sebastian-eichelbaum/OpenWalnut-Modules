@@ -61,7 +61,7 @@ void WBuildingDetector::detectBuildings( boost::shared_ptr< WDataSetPoints > poi
     projectDrawableAreas( zones2d->getRootNode(), minimalMaxima, targetShowables );
 
     fetchBuildingVoxels( zones3d->getRootNode(), targetShowables, m_targetGrouped3d );
-    m_targetGrouped3d->groupNeighbourLeafs();
+    m_targetGrouped3d->groupNeighbourLeafsFromRoot();
 
     //targetShowables->setExportElevationImageSettings( -16.0, 8.0 );
     //targetShowables->exportElevationImage( "/home/renegade/Dokumente/Projekte/OpenWalnut@Eclipse/elevation images/targetShowables.bmp", 1 );

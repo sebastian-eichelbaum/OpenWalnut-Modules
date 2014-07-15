@@ -181,8 +181,6 @@ WDataSetFibers::SPtr WBoyGlobalColoring::operator()( WProgress::SPtr progress, W
         ++*progress;
 
         size_t sidx = fibStart->at( fidx ) * 3;
-        double x1, y1, z1; // actual vertex
-        double x2, y2, z2; // next vertex
         WVector3d vec;
         WVector3d col;
 

@@ -196,29 +196,19 @@ private:
      * Info tab property: Maximal z value of output x coordunates.
      */
     WPropDouble m_zMax;
-    /**
-     * Voxel count that is cut off and kept regarding the ISO value.
-     */
-
-    WPropDouble m_stubSize;
 
     /**
-     * Voxel count that is cut off and kept regarding the ISO value.
+     * Multiplier that is applied on the input data set color intensity.
      */
     WPropDouble m_contrast;
     /**
-     * Determines the resolution of the smallest octree nodes in 2^n meters
+     * Determines the resolution of the smallest octree node's radius in 2^n meters
      */
     WPropInt m_detailDepth;
     /**
      * Determines the resolution of the smallest octree nodes in meters
      */
     WPropDouble m_detailDepthLabel;
-    /**
-     * Depicting the input data set points showing the point outline instead of regions
-     * depicted as cubes that cover existing points.
-     */
-    WPropBool m_showTetraedersInsteadOfOctreeCubes;
     /**
      * Depicting the input data set points showing the point outline instead of regions
      * depicted as cubes that cover existing points.

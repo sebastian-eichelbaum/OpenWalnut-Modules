@@ -59,6 +59,20 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
+
+# -----------------------------------------------------------------------------------------------------------------------------------------------
+# Add Point Cloud Library for Nearest Neighbor Search
+# -----------------------------------------------------------------------------------------------------------------------------------------------
+# Code has been written with PCL v1.5
+# FIND_PACKAGE( PCL 1.5 REQUIRED COMPONENTS common kdtree registration )
+
+FIND_PACKAGE( PCL REQUIRED COMPONENTS common kdtree search registration segmentation )
+INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS} )
+LINK_DIRECTORIES( ${PCL_LIBRARY_DIRS} )
+ADD_DEFINITIONS( ${PCL_DEFINITIONS} )
+LIST( APPEND ADDITIONAL_LIBS ${PCL_SEGMENTATION_LIBRARIES};)
+
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
 # Setup all modules
@@ -73,10 +87,10 @@ INCLUDE( OpenWalnut )
 # Please see the documentation of SETUP_MODULE as it shows how to add custom dependencies (third-party libs)
 
 SETUP_MODULE( 
-    ${PROJECT_NAME}   # use project name as module(-toolbox) name
-    "."               # where to find the sources
-    "liblas.so"       # no additonal dependencies
-    ""                # no sources to exclude
+    ${PROJECT_NAME}                 # use project name as module(-toolbox) name
+    "."                             # where to find the sources
+    "liblas.so;${ADDITIONAL_LIBS}"  # no additonal dependencies
+    ""                              # no sources to exclude
 )
 
 # Tell CMake that we want to use the WToolboxVersion header in our Modules. It gets created automatically if you keep this line.
