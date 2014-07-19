@@ -24,6 +24,7 @@
 
 #include <vector>
 #include "WSurfaceDetectorLari.h"
+#include "../common/math/leastSquares/WLeastSquares.h"
 
 
 WSurfaceDetectorLari::WSurfaceDetectorLari()
@@ -43,8 +44,10 @@ WSurfaceDetectorLari::WSurfaceDetectorLari()
 WSurfaceDetectorLari::~WSurfaceDetectorLari()
 {
 }
+
 boost::shared_ptr< WDataSetPoints > WSurfaceDetectorLari::detectSurfaces( vector<vector<double> >* inputPoints )
 {
+    //TODO(aschwarzkopf): After draft stage refine in several methods and remove comments
     cout << "Attempting to analyze " << inputPoints->size() << " points" << endl;
     WRealtimeTimer timer;
     timer.reset();
@@ -66,20 +69,35 @@ boost::shared_ptr< WDataSetPoints > WSurfaceDetectorLari::detectSurfaces( vector
     vector<WKdTreeND*>* processedPoints = deletableTree->getAllLeafNodes();
     cout << "Attempting PCA for " << processedPoints->size() << " points" << endl;
 
+    //Generating properties for each existing point
     for( size_t index = 0; index < processedPoints->size(); index++ )
     {
+        //Getting nearest n points
         WKdTreePcaProps* pointProps = ( WKdTreePcaProps*)(processedPoints->at( index ) );
         vector<double> pointOfInterest = pointProps->getNodePoints()->at( 0 );
         pointSearcher.setSearchedPoint( pointOfInterest );
         vector<WPointDistance>* nearestPoints = pointSearcher.getNearestPoints();
         vector<WPosition>* points = WPointSearcher::convertToPointSet( nearestPoints );
+
+        //Calculating Eigen properties
         pca.analyzeData( points );
         pointProps->createGeoProps();
-        pointProps->getGeoProps()->setEigenVectors( pca.getDirections() );
+        WLariGeoProps* geoProps = pointProps->getGeoProps();
+        geoProps->setEigenVectors( pca.getDirections() );
         vector<double> eigenValues = pca.getEigenValues();
-        vector<double> nLambdaI;
-        double sumLambda = 0;
+        vector<double> nLambdaI;    //TODO(aschwarzkopf): Unused
+        double sumLambda = 0;        //TODO(aschwarzkopf): Unused
+        geoProps->setEigenValues( eigenValues );
 
+        //Adding parameter space information
+        WLeastSquares leastSquares;
+        leastSquares.analyzeData( points );
+        geoProps->setParametersXYZ0( leastSquares.getParametersXYZ0() );
+        //for(size_t index = 0; index < geoProps->getParametersXYZ0().size(); index++)
+        //    cout << geoProps->getParametersXYZ0()[index] << "    ";
+        //cout << endl;
+
+        //Displaying points and classification
         for( size_t i = 0; i < eigenValues.size(); i++ )
             sumLambda += eigenValues[i];
         for( size_t i = 0; i < eigenValues.size(); i++ )
@@ -100,7 +118,6 @@ boost::shared_ptr< WDataSetPoints > WSurfaceDetectorLari::detectSurfaces( vector
                 outColors->push_back( 0.50 );
         }
 
-        pointProps->getGeoProps()->setEigenValues( eigenValues );
         delete nearestPoints;
         delete points;
         //outputPointSet.printNearestPoints(nearestPoints, "Default point set");

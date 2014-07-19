@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSCROP_H
-#define WMPOINTSCROP_H
+#ifndef WMPOINTSTRANSFORM_H
+#define WMPOINTSTRANSFORM_H
 
 
 #include <liblas/liblas.hpp>
@@ -42,7 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctree.h"
 
 
 
@@ -77,18 +77,18 @@ class WGEManagedGroupNode;
  * Crops a point data set to a selection or cuts away a cube area.
  * \ingroup modules
  */
-class WMPointsCrop: public WModule
+class WMPointsTransform: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMPointsCrop();
+    WMPointsTransform();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsCrop();
+    virtual ~WMPointsTransform();
 
     /**
      * Gives back the name of this module.
@@ -158,7 +158,7 @@ private:
      * a selection or to cut away a cube area.
      * \return The cropped or cut point data set.
      */
-    boost::shared_ptr< WDataSetPoints > getCroppedPointSet();
+    boost::shared_ptr< WDataSetPoints > getTransformedPointSet();
 
     /**
      * WDataSetPoints data input (proposed for LiDAR data).
@@ -189,6 +189,10 @@ private:
     WDataSetPoints::ColorArray m_colors;
 
     /**
+     * Options for surface features.
+     */
+    WPropGroup m_pointsCropGroup;
+    /**
      * Minimal X value of the selection.
      */
     WPropDouble m_fromX;
@@ -212,11 +216,56 @@ private:
      * Maximal Z value of the selection.
      */
     WPropDouble m_toZ;
-
     /**
      * Switch to cut away the selection instead of to crop the area.
      */
     WPropBool m_cutInsteadOfCrop;
+
+    /**
+     * Options for surface features.
+     */
+    WPropGroup m_translatePointsGroup;
+    /**
+     * X coordinate translation offset.
+     */
+    WPropDouble m_translateX;
+    /**
+     * Y coordinate translation offset.
+     */
+    WPropDouble m_translateY;
+    /**
+     * Z coordinate translation offset.
+     */
+    WPropDouble m_translateZ;
+
+    /**
+     * Rotation options.
+     */
+    WPropGroup m_groupRotation;
+    /**
+     * 1st applied rotation: Along the plane XY
+     */
+    WPropDouble m_rotation1AngleXY;
+    /**
+     * 2nd applied rotation: Along the plane XY
+     */
+    WPropDouble m_rotation2AngleYZ;
+    /**
+     * 3rd applied rotation: Along the plane XY
+     */
+    WPropDouble m_rotation3AngleXZ;
+    /**
+     * Rotation anchor on the X coordinate.
+     */
+    WPropDouble m_rotationAnchorX;
+    /**
+     * Rotation anchor on the Y coordinate.
+     */
+    WPropDouble m_rotationAnchorY;
+    /**
+     * Rotation anchor on the Z coordinate.
+     */
+    WPropDouble m_rotationAnchorZ;
 
     /**
      * Minimal X coordinate of input points.
@@ -244,4 +293,4 @@ private:
     double m_maxZ;
 };
 
-#endif  // WMPOINTSCROP_H
+#endif  // WMPOINTSTRANSFORM_H

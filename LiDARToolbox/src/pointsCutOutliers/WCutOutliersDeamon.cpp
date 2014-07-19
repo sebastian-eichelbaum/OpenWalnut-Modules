@@ -26,8 +26,8 @@
 #include <vector>
 
 #include "WCutOutliersDeamon.h"
-#include "../datastructures/octree/WOctNode.h"
-#include "../datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctNode.h"
+#include "../common/datastructures/octree/WOctree.h"
 
 WCutOutliersDeamon::WCutOutliersDeamon()
 {

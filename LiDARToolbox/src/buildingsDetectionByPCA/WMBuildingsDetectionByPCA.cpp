@@ -42,7 +42,7 @@
 #include "WMBuildingsDetectionByPCA.xpm"
 #include "WMBuildingsDetectionByPCA.h"
 #include "WPCADetector.h"
-#include "../datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctree.h"
 
 // This line is needed by the module loader to actually find your module.
 //W_LOADABLE_MODULE( WMBuildingsDetectionByPCA )

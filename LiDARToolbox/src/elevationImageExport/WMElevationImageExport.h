@@ -42,7 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/quadtree/WQuadTree.h"
+#include "../common/datastructures/quadtree/WQuadTree.h"
 
 
 
@@ -70,7 +70,7 @@
 #include "bitmapImage/WBmpSaver.h"
 
 #include "WElevationImageOutliner.h"
-#include "../datastructures/WDataSetPointsGrouped.h"
+#include "../common/datastructures/WDataSetPointsGrouped.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;

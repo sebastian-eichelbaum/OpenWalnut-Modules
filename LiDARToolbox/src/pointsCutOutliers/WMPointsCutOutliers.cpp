@@ -41,7 +41,7 @@
 #include "core/kernel/WModuleInputData.h"
 #include "WMPointsCutOutliers.xpm"
 #include "WMPointsCutOutliers.h"
-#include "../datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctree.h"
 #include "WCutOutliersDeamon.h"
 
 // This line is needed by the module loader to actually find your module.

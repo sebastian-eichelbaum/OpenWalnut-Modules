@@ -40,3 +40,11 @@ void WLariGeoProps::setEigenVectors( vector<WVector3d> eigenVectors )
 {
     m_eigenVectors = eigenVectors;
 }
+void WLariGeoProps::setParametersXYZ0( vector<double> parametersXYZ0 )
+{
+    m_parametersXYZ0 = parametersXYZ0;
+}
+vector<double> WLariGeoProps::getParametersXYZ0()
+{
+    return m_parametersXYZ0;
+}

@@ -160,6 +160,8 @@ private:
      * Path of the LiDAR input file (www.liblas.org)
      */
     WPropFilename m_lasFile; //!< The mesh will be read from this file.
+
+    WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
     /**
      * The maximal width of the output data.
      */
