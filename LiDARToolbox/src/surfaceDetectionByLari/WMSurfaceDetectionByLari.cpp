@@ -92,9 +92,9 @@ void WMSurfaceDetectionByLari::properties()
 {
     m_nbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
     m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
-                                                            "whole render process took.", 0.0 );
+                                            "whole render process took.", 0.0 );
     m_infoPointsPerSecond = m_infoProperties->addProperty( "Points per second: ",
-                                                            "The current speed in points per second.", 0.0 );
+                                            "The current speed in points per second.", 0.0 );
     m_xMin = m_infoProperties->addProperty( "X min.: ", "Minimal x coordinate of all input points.", 0.0 );
     m_xMax = m_infoProperties->addProperty( "X max.: ", "Maximal x coordinate of all input points.", 0.0 );
     m_yMin = m_infoProperties->addProperty( "Y min.: ", "Minimal y coordinate of all input points.", 0.0 );
@@ -107,12 +107,15 @@ void WMSurfaceDetectionByLari::properties()
     double minRange = 0.01;
     m_numberPointsK = m_properties->addProperty( "Number points K=", "", 12, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
-    m_surfaceNLambda1Min = m_properties->addProperty( "Surface N Lambda 1 >=", "", 0.4, m_propCondition );
-    m_surfaceNLambda1Max = m_properties->addProperty( "Surface N Lambda 1 <", "", 0.63, m_propCondition );
-    m_surfaceNLambda2Min = m_properties->addProperty( "Surface N Lambda 2 >=", "", 0.3, m_propCondition );
-    m_surfaceNLambda2Max = m_properties->addProperty( "Surface N Lambda 2 <", "", 0.6, m_propCondition );
-    m_surfaceNLambda3Min = m_properties->addProperty( "Surface N Lambda 3 >=", "", 0.0, m_propCondition );
-    m_surfaceNLambda3Max = m_properties->addProperty( "Surface N Lambda 3 <", "", 0.1, m_propCondition );
+
+    m_planarGroup = m_properties->addPropertyGroup( "Planar feature properties",
+                                            "All conditions must be met to detect as a surface." );
+    m_surfaceNLambda1Min = m_planarGroup->addProperty( "N Lambda 1 >=", "", 0.3, m_propCondition );
+    m_surfaceNLambda1Max = m_planarGroup->addProperty( "N Lambda 1 <", "", 0.7, m_propCondition );
+    m_surfaceNLambda2Min = m_planarGroup->addProperty( "N Lambda 2 >=", "", 0.0, m_propCondition );
+    m_surfaceNLambda2Max = m_planarGroup->addProperty( "N Lambda 2 <", "", 1.0, m_propCondition );
+    m_surfaceNLambda3Min = m_planarGroup->addProperty( "N Lambda 3 >=", "", 0.0, m_propCondition );
+    m_surfaceNLambda3Max = m_planarGroup->addProperty( "N Lambda 3 <", "", 1.0, m_propCondition );
 
     m_surfaceNLambda1Min->setMin( 0.0 );
     m_surfaceNLambda1Min->setMax( 1.0 - minRange );
@@ -129,12 +132,14 @@ void WMSurfaceDetectionByLari::properties()
     m_surfaceNLambda3Max->setMin( m_surfaceNLambda3Min->get() );
     m_surfaceNLambda3Max->setMax( 1.0 );
 
-    m_cylNLambda1Min = m_properties->addProperty( "Cylinder N Lambda 1 >=", "", 0.4, m_propCondition );
-    m_cylNLambda1Max = m_properties->addProperty( "Cylinder N Lambda 1 <", "", 0.63, m_propCondition );
-    m_cylNLambda2Min = m_properties->addProperty( "Cylinder N Lambda 2 >=", "", 0.3, m_propCondition );
-    m_cylNLambda2Max = m_properties->addProperty( "Cylinder N Lambda 2 <", "", 0.6, m_propCondition );
-    m_cylNLambda3Min = m_properties->addProperty( "Cylinder N Lambda 3 >=", "", 0.0, m_propCondition );
-    m_cylNLambda3Max = m_properties->addProperty( "Cylinder N Lambda 3 <", "", 0.1, m_propCondition );
+    m_cylindricalGroup = m_properties->addPropertyGroup( "Linear and Cylindrical feature properties",
+                                            "All conditions must be met to detect as a surface." );
+    m_cylNLambda1Min = m_cylindricalGroup->addProperty( "N Lambda 1 >=", "", 0.8, m_propCondition );
+    m_cylNLambda1Max = m_cylindricalGroup->addProperty( "N Lambda 1 <", "", 1.0, m_propCondition );
+    m_cylNLambda2Min = m_cylindricalGroup->addProperty( "N Lambda 2 >=", "", 0.0, m_propCondition );
+    m_cylNLambda2Max = m_cylindricalGroup->addProperty( "N Lambda 2 <", "", 1.0, m_propCondition );
+    m_cylNLambda3Min = m_cylindricalGroup->addProperty( "N Lambda 3 >=", "", 0.0, m_propCondition );
+    m_cylNLambda3Max = m_cylindricalGroup->addProperty( "N Lambda 3 <", "", 1.0, m_propCondition );
 
     m_cylNLambda1Min->setMin( 0.0 );
     m_cylNLambda1Min->setMax( 1.0 - minRange );

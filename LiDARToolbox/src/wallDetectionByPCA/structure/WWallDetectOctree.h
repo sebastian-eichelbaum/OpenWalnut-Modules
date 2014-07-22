@@ -26,7 +26,7 @@
 #define WWALLDETECTOCTREE_H
 
 #include <vector>
-#include "../../datastructures/octree/WOctree.h"
+#include "../../common/datastructures/octree/WOctree.h"
 #include "WWallDetectOctNode.h"
 
 using std::cout;

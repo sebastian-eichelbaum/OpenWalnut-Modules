@@ -42,9 +42,9 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/quadtree/WQuadTree.h"
+#include "../common/datastructures/quadtree/WQuadTree.h"
 
-#include "../datastructures/WDataSetPointsGrouped.h"
+#include "../common/datastructures/WDataSetPointsGrouped.h"
 
 
 
@@ -224,6 +224,12 @@ private:
      * Maximal radius within which the nearest neighbors are examined.
      */
     WPropDouble m_maxPointDistanceR;
+
+
+    /**
+     * Options for surface features.
+     */
+    WPropGroup m_planarGroup;
     /**
      * The lower limit of the first normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
@@ -254,6 +260,12 @@ private:
      * feature as planar. The eigen values are sorted descending.
      */
     WPropDouble m_surfaceNLambda3Max;
+
+
+    /**
+     * Options for cylindrical features.
+     */
+    WPropGroup m_cylindricalGroup;
     /**
      * The lower limit of the first normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.

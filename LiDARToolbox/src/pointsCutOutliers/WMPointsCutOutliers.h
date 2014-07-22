@@ -42,7 +42,7 @@
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctree.h"
 
 
 

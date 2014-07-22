@@ -93,6 +93,8 @@ void WMReadLAS::properties()
     m_lasFile = m_properties->addProperty( "LiDAR file", "", WPathHelper::getAppPath() );
     WPropertyHelper::PC_PATHEXISTS::addTo( m_lasFile );
 
+    m_reloadData = m_properties->addProperty( "Reload data:",  "Refresh", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
+
     m_outputDataWidth = m_properties->addProperty( "Data set width: ",
                             "Outpt area size which is of the area input*input meters^2.",
                             200, m_propCondition );
@@ -176,6 +178,9 @@ void WMReadLAS::moduleMain()
         {
         }
         refreshScrollBars();
+
+        m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );
+        m_reloadData->get( true );
 
 //         woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )

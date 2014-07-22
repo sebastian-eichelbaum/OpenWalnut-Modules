@@ -50,6 +50,16 @@ public:
      * \param eigenVectors The eigen vectors of a poinnt in relation to its neighbors.
      */
     void setEigenVectors( vector<WVector3d> eigenVectors );
+    /**
+     * Sets the parameter domain coordinates of the point.
+     * \param parametersXYZ0 The parameter domain coordinates of the point.
+     */
+    void setParametersXYZ0( vector<double> parametersXYZ0 );
+    /**
+     * Returns the parameter domain coordinates of the point.
+     * \return The parameter domain coordinates of the point.
+     */
+    vector<double> getParametersXYZ0();
 
 private:
     /**
@@ -60,6 +70,10 @@ private:
      * The eigen vectors of a poinnt in relation to its neighbors.
      */
     vector<WVector3d> m_eigenVectors;
+    /**
+     * Parameter domain coordinates of the point.
+     */
+    vector<double> m_parametersXYZ0;
 };
 
 #endif  // WLARIGEOPROPS_H

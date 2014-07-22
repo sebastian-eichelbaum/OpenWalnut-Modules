@@ -26,7 +26,7 @@
 #ifndef WWALLDETECTOCTNODE_H
 #define WWALLDETECTOCTNODE_H
 #include <vector>
-#include "../../datastructures/octree/WOctNode.h"
+#include "../../common/datastructures/octree/WOctNode.h"
 #include "core/common/math/linearAlgebra/WPosition.h"
 #include "core/dataHandler/WDataSetPoints.h"
 #include "core/common/math/linearAlgebra/WVectorFixed.h"

@@ -25,7 +25,7 @@
 #ifndef WKDTREEPCAPROPS_H
 #define WKDTREEPCAPROPS_H
 
-#include "../../datastructures/kdtree/WKdTreeND.h"
+#include "../../common/datastructures/kdtree/WKdTreeND.h"
 #include "WLariGeoProps.h"
 
 /**

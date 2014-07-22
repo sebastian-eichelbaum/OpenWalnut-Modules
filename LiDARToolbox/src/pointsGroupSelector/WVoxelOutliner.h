@@ -28,8 +28,8 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/octree/WOctNode.h"
-#include "../datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctNode.h"
+#include "../common/datastructures/octree/WOctree.h"
 
 /**
  * Tool to draw an octree to a WTriangle mesh in order to e. g. display it using the plugin 

@@ -28,10 +28,10 @@
 
 #include <vector>
 
-#include "../../datastructures/quadtree/WQuadNode.h"
-#include "../../datastructures/quadtree/WQuadTree.h"
-#include "../../datastructures/octree/WOctree.h"
-#include "../../datastructures/WDataSetPointsGrouped.h"
+#include "../../common/datastructures/quadtree/WQuadNode.h"
+#include "../../common/datastructures/quadtree/WQuadTree.h"
+#include "../../common/datastructures/octree/WOctree.h"
+#include "../../common/datastructures/WDataSetPointsGrouped.h"
 
 /**
  * Image object. Currently it's used for saving bmp files.

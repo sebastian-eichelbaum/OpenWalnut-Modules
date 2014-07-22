@@ -43,7 +43,7 @@
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
 
-#include "../datastructures/WDataSetPointsGrouped.h"
+#include "../common/datastructures/WDataSetPointsGrouped.h"
 
 
 
@@ -69,10 +69,10 @@
 
 #include "bitmapImage/WBmpImage.h"
 #include "bitmapImage/WBmpSaver.h"
-#include "../datastructures/quadtree/WQuadTree.h"
-#include "../datastructures/quadtree/WQuadNode.h"
-#include "../datastructures/octree/WOctree.h"
-#include "../datastructures/octree/WOctNode.h"
+#include "../common/datastructures/quadtree/WQuadTree.h"
+#include "../common/datastructures/quadtree/WQuadNode.h"
+#include "../common/datastructures/octree/WOctree.h"
+#include "../common/datastructures/octree/WOctNode.h"
 
 /**
  * Tool that outlines an elevation imate to a triangle mesh.

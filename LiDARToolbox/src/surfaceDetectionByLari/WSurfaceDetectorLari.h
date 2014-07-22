@@ -30,7 +30,7 @@
 
 #include "core/dataHandler/WDataSetPoints.h"
 #include "structure/WKdTreePcaProps.h"
-#include "../datastructures/kdtree/WPointSearcher.h"
+#include "../common/datastructures/kdtree/WPointSearcher.h"
 #include "core/common/math/principalComponentAnalysis/WPrincipalComponentAnalysis.h"
 #include "core/common/WRealtimeTimer.h"
 

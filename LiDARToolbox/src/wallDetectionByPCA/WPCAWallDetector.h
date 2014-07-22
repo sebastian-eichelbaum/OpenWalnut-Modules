@@ -29,8 +29,8 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/quadtree/WQuadNode.h"
-#include "../datastructures/quadtree/WQuadTree.h"
+#include "../common/datastructures/quadtree/WQuadNode.h"
+#include "../common/datastructures/quadtree/WQuadTree.h"
 #include "structure/WWallDetectOctree.h"
 #include "structure/WWallDetectOctNode.h"
 #include "core/common/math/principalComponentAnalysis/WPrincipalComponentAnalysis.h"

@@ -28,7 +28,7 @@
 #include <vector>
 #include "core/graphicsEngine/WTriangleMesh.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "../datastructures/octree/WOctNode.h"
+#include "../common/datastructures/octree/WOctNode.h"
 
 /**
  * This is an outliers cut algorithm it simply groups all the points in cube groups. 

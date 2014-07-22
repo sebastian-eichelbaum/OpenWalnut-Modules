@@ -39,44 +39,44 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
-#include "WMPointsCrop.xpm"
-#include "WMPointsCrop.h"
-#include "../datastructures/octree/WOctree.h"
+#include "WMPointsTransform.xpm"
+#include "WMPointsTransform.h"
+#include "../common/datastructures/octree/WOctree.h"
 
 // This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMPointsCrop )
+//W_LOADABLE_MODULE( WMPointsTransform )
 //TODO(aschwarzkopf): Reenable above after solving the toolbox problem
 
-WMPointsCrop::WMPointsCrop():
+WMPointsTransform::WMPointsTransform():
     WModule(),
     m_propCondition( new WCondition() )
 {
 }
 
-WMPointsCrop::~WMPointsCrop()
+WMPointsTransform::~WMPointsTransform()
 {
 }
 
-boost::shared_ptr< WModule > WMPointsCrop::factory() const
+boost::shared_ptr< WModule > WMPointsTransform::factory() const
 {
-    return boost::shared_ptr< WModule >( new WMPointsCrop() );
+    return boost::shared_ptr< WModule >( new WMPointsTransform() );
 }
 
-const char** WMPointsCrop::getXPMIcon() const
+const char** WMPointsTransform::getXPMIcon() const
 {
-    return WMPointsCrop_xpm;
+    return WMPointsTransform_xpm;
 }
-const std::string WMPointsCrop::getName() const
+const std::string WMPointsTransform::getName() const
 {
-    return "Points - Crop";
+    return "Points - Transform";
 }
 
-const std::string WMPointsCrop::getDescription() const
+const std::string WMPointsTransform::getDescription() const
 {
     return "Crops point data to a selection.";
 }
 
-void WMPointsCrop::connectors()
+void WMPointsTransform::connectors()
 {
     m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
 
@@ -88,26 +88,58 @@ void WMPointsCrop::connectors()
     WModule::connectors();
 }
 
-void WMPointsCrop::properties()
+void WMPointsTransform::properties()
 {
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     double number_range = 1000000000.0;
-    m_fromX = m_properties->addProperty( "X min.: ", "Cut boundary.", -number_range, m_propCondition  );
-    m_toX = m_properties->addProperty( "X max.: ", "Cut boundary.", number_range, m_propCondition  );
-    m_fromY = m_properties->addProperty( "Y min.: ", "Cut boundary.", -number_range, m_propCondition  );
-    m_toY = m_properties->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition  );
-    m_fromZ = m_properties->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition  );
-    m_toZ = m_properties->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition  );
-    m_cutInsteadOfCrop = m_properties->addProperty( "Cut: ", "Cut instead of crop.", false, m_propCondition  );
+    m_pointsCropGroup = m_properties->addPropertyGroup( "Point set cropping",
+                                            "Options to crop the point set" );
+    m_fromX = m_pointsCropGroup->addProperty( "X min.: ", "Cut boundary.", -number_range, m_propCondition  );
+    m_toX = m_pointsCropGroup->addProperty( "X max.: ", "Cut boundary.", number_range, m_propCondition  );
+    m_fromY = m_pointsCropGroup->addProperty( "Y min.: ", "Cut boundary.", -number_range, m_propCondition  );
+    m_toY = m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition  );
+    m_fromZ = m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition  );
+    m_toZ = m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition  );
+    m_cutInsteadOfCrop = m_pointsCropGroup->addProperty( "Cut: ", "Cut instead of crop.", false, m_propCondition  );
+
+    m_translatePointsGroup = m_properties->addPropertyGroup( "Point translation",
+                                            "Translates the points by the following amount of XYZ offset after cropping." );
+    m_translateX = m_translatePointsGroup->addProperty( "X offset: ", "Translates the point set across the X axis by "
+                                                        "that offset.", 0.0, m_propCondition  );
+    m_translateY = m_translatePointsGroup->addProperty( "Y offset: ", "Translates the point set across the Y axis by "
+                                                        "that offset.", 0.0, m_propCondition  );
+    m_translateZ = m_translatePointsGroup->addProperty( "Z offset: ", "Translates the point set across the Z axis by "
+                                                        "that offset.", 0.0, m_propCondition  );
+
+    m_groupRotation = m_properties->addPropertyGroup( "Rotation options",
+                                            "Applis rotation across three planes in sequence." );
+    m_rotation1AngleXY = m_groupRotation->addProperty( "1st rot. (plane XY)", "First applied rotation: Along the plane "
+                                            "on the coordinate axis X and Y.", 0.0, m_propCondition  );
+    m_rotation1AngleXY->setMin( -180.0 );
+    m_rotation1AngleXY->setMax( 180.0 );
+    m_rotation2AngleYZ = m_groupRotation->addProperty( "2nd rot. (plane YZ)", "First applied rotation: Along the plane "
+                                            "on the coordinate axis Y and Z.", 0.0, m_propCondition  );
+    m_rotation2AngleYZ->setMin( -180.0 );
+    m_rotation2AngleYZ->setMax( 180.0 );
+    m_rotation3AngleXZ = m_groupRotation->addProperty( "3rd rot. (plane XZ)", "First applied rotation: Along the plane "
+                                            "on the coordinate axis X and Z.", 0.0, m_propCondition  );
+    m_rotation3AngleXZ->setMin( -180.0 );
+    m_rotation3AngleXZ->setMax( 180.0 );
+    m_rotationAnchorX = m_groupRotation->addProperty( "X anchor: ", "X coordinate of the rotation anchor.",
+                                                      0.0, m_propCondition  );
+    m_rotationAnchorY = m_groupRotation->addProperty( "Y anchor: ", "Y coordinate of the rotation anchor.",
+                                                      0.0, m_propCondition  );
+    m_rotationAnchorZ = m_groupRotation->addProperty( "Z anchor: ", "Z coordinate of the rotation anchor.",
+                                                      0.0, m_propCondition  );
 
     WModule::properties();
 }
 
-void WMPointsCrop::requirements()
+void WMPointsTransform::requirements()
 {
 }
 
-void WMPointsCrop::moduleMain()
+void WMPointsTransform::moduleMain()
 {
     infoLog() << "Thrsholding example main routine started";
 
@@ -136,7 +168,7 @@ void WMPointsCrop::moduleMain()
             m_colors = points->getColors();
             setProgressSettings( m_verts->size() * 2 / 3 );
             initBoundingBox();
-            m_output->updateData( getCroppedPointSet() );
+            m_output->updateData( getTransformedPointSet() );
             m_progressStatus->finish();
         }
 
@@ -159,14 +191,14 @@ void WMPointsCrop::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
-void WMPointsCrop::setProgressSettings( size_t steps )
+void WMPointsTransform::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
     std::string headerText = "Loading data";
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
-void WMPointsCrop::initBoundingBox()
+void WMPointsTransform::initBoundingBox()
 {
     size_t count = m_verts->size() / 3;
     if( m_verts->size() == 0 )
@@ -199,7 +231,7 @@ void WMPointsCrop::initBoundingBox()
     m_toZ->setMin( m_fromZ->get() );
     m_toZ->setMax( m_maxZ );
 }
-boost::shared_ptr< WDataSetPoints > WMPointsCrop::getCroppedPointSet()
+boost::shared_ptr< WDataSetPoints > WMPointsTransform::getTransformedPointSet()
 {
     WDataSetPoints::VertexArray outVertices(
             new WDataSetPoints::VertexArray::element_type() );
@@ -207,20 +239,46 @@ boost::shared_ptr< WDataSetPoints > WMPointsCrop::getCroppedPointSet()
             new WDataSetPoints::ColorArray::element_type() );
 
     size_t count = m_verts->size() / 3;
+    WPosition offset( m_translateX->get(), m_translateY->get(), m_translateZ->get() );
     for( size_t index = 0; index < count; index++)
     {
         double x = m_verts->at( index * 3 );
         double y = m_verts->at( index * 3 + 1 );
         double z = m_verts->at( index * 3 + 2 );
+        double angleXY = m_rotation1AngleXY->get() * M_PI / 180.0;
+        double angleYZ = m_rotation2AngleYZ->get() * M_PI / 180.0;
+        double angleXZ = m_rotation3AngleXZ->get() * M_PI / 180.0;
         bool isInsideSelection = x >= m_fromX->get() && x <= m_toX->get()
                 &&  y >= m_fromY->get() && y <= m_toY->get()
                 &&  z >= m_fromZ->get() && z <= m_toZ->get();
         if( isInsideSelection != m_cutInsteadOfCrop->get() )
+        {
+            x += offset[0];
+            y += offset[1];
+            z += offset[2];
+
+            x -= m_rotationAnchorX->get();
+            y -= m_rotationAnchorY->get();
+            z -= m_rotationAnchorZ->get();
+            double old = x;
+            x = x*cos( angleXY ) - y*sin( angleXY );
+            y = old*sin( angleXY ) + y*cos( angleXY );
+            old = y;
+            y = y*cos( angleYZ ) - z*sin( angleYZ );
+            z = old*sin( angleYZ ) + z*cos( angleYZ );
+            old = x;
+            x = x*cos( angleXZ ) - z*sin( angleXZ );
+            z = old*sin( angleXZ ) + z*cos( angleXZ );
+            x += m_rotationAnchorX->get();
+            y += m_rotationAnchorY->get();
+            z += m_rotationAnchorZ->get();
+
+            outVertices->push_back( x );
+            outVertices->push_back( y );
+            outVertices->push_back( z );
             for( size_t item = 0; item < 3; item++ )
-            {
-                outVertices->push_back( m_verts->at( index * 3 + item ) );
                 outColors->push_back( m_colors->at( index * 3 + item ) );
-            }
+        }
         m_progressStatus->increment( 1 );
     }
     if( outVertices->size() == 0 )
