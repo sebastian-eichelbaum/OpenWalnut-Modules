@@ -54,6 +54,7 @@
 #include "core/graphicsEngine/WGraphicsEngine.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
+
 #include "WMFiberStipples.h"
 #include "WMFiberStipples.xpm"
 
@@ -275,7 +276,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_pos->setMax( maxV[axis] );
 
     // if this is done the first time, set the slices to the center of the dataset
-    if( m_first && !m_posIC->getData() )
+    if( m_first )
     {
         m_first = false;
         m_pos->set( midBB[axis] );
@@ -377,6 +378,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_output->dirtyBound();
 }
 
+
 void WMFiberStipples::moduleMain()
 {
     // get notified about data changes
@@ -384,7 +386,6 @@ void WMFiberStipples::moduleMain()
     m_moduleState.add( m_probIC->getDataChangedCondition() );
     m_moduleState.add( m_colIC->getDataChangedCondition() );
     m_moduleState.add( m_vectorIC->getDataChangedCondition() );
-    m_moduleState.add( m_posIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -417,17 +418,6 @@ void WMFiberStipples::moduleMain()
 
         // determine which axis to draw stipples
         size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
-
-        if( m_posIC->getData() )
-        {
-            WPosition pos = m_posIC->getData()->getProperty();
-            double offset = 0.0001; // when the geodes share the exact positions their graphic output will interfere
-            if( m_pos->get() != pos[axis] + offset )
-            {
-                m_pos->set( pos[axis] + offset );
-                continue;
-            }
-        }
 
         if( m_sampleRes->changed() )
         {

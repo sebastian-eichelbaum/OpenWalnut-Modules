@@ -184,7 +184,7 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     m_pos->setMin( minV[axis] );
     m_pos->setMax( maxV[axis] );
 
-    if( m_first && !m_posIC->getData() )
+    if( m_first )
     {
         m_first = false;
         m_pos->set( midBB[axis] );
@@ -223,7 +223,6 @@ void WMIsoLines::moduleMain()
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_scalarIC->getDataChangedCondition() );
-    m_moduleState.add( m_posIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -247,17 +246,6 @@ void WMIsoLines::moduleMain()
         if( m_shutdownFlag() )
         {
             break;
-        }
-
-        if( m_posIC->getData() )
-        {
-          WPosition pos = m_posIC->getData()->getProperty();
-          double offset = 0.0001; // when the geodes share the exact positions their graphic output will interfere
-          if( m_pos->get() != pos[axis] + offset )
-          {
-                m_pos->set( pos[axis] + offset );
-                continue;
-            }
         }
 
         // save data behind connectors since it might change during processing

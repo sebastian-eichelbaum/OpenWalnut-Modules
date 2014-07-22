@@ -24,17 +24,23 @@
 
 #include <string>
 
+#include <boost/bind.hpp>
+
 #include "core/common/WCondition.h"
-#include "core/common/WPropTransfer.h"
 #include "core/common/WItemSelectionItemTyped.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
-#include "core/kernel/WModuleInputData.h"
+#include "core/kernel/WKernel.h"
+#include "core/kernel/WSelectionManager.h"
 #include "WMAbstractSliceModule.h"
 
 WMAbstractSliceModule::WMAbstractSliceModule()
     : WModule(),
       m_propCondition( new WCondition() )
 {
+    // subscribe to slice positions of the kernel. Whenever they change, the currently selected axis is choosen to update m_pos
+    WKernel::getRunningKernel()->getSelectionManager()->getPropAxialPos()->getUpdateCondition()->subscribeSignal( boost::bind( &WMAbstractSliceModule::updatePos, this ) );
+    WKernel::getRunningKernel()->getSelectionManager()->getPropSagittalPos()->getUpdateCondition()->subscribeSignal( boost::bind( &WMAbstractSliceModule::updatePos, this ) );
+    WKernel::getRunningKernel()->getSelectionManager()->getPropCoronalPos()->getUpdateCondition()->subscribeSignal( boost::bind( &WMAbstractSliceModule::updatePos, this ) );
 }
 
 WMAbstractSliceModule::~WMAbstractSliceModule()
@@ -43,9 +49,24 @@ WMAbstractSliceModule::~WMAbstractSliceModule()
 
 void WMAbstractSliceModule::connectors()
 {
-    m_posIC = WModuleInputData< WPositionTransfer >::createAndAdd( shared_from_this(), "positions", "Slice positions in x,y,z" );
-
     WModule::connectors();
+}
+
+void WMAbstractSliceModule::updatePos()
+{
+    WPropDouble pos;
+    switch( m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue() )
+    {
+      case 0 : pos = WKernel::getRunningKernel()->getSelectionManager()->getPropSagittalPos(); break;
+      case 1 : pos = WKernel::getRunningKernel()->getSelectionManager()->getPropCoronalPos(); break;
+      case 2 : pos = WKernel::getRunningKernel()->getSelectionManager()->getPropAxialPos(); break;
+      default : warnLog() << "This indicates a bug: no valid axis selected";
+                return;
+    }
+    double offset = 0.001; // This offset is used to put the graphics slightly over the slice position not onto the same, as then
+    // graphics would start to flicker
+
+    m_pos->set( pos->get() + offset );
 }
 
 void WMAbstractSliceModule::properties()
