@@ -421,9 +421,10 @@ void WMFiberStipples::moduleMain()
         if( m_posIC->getData() )
         {
             WPosition pos = m_posIC->getData()->getProperty();
-            if( m_pos->get() != pos[axis] )
+            double offset = 0.0001; // when the geodes share the exact positions their graphic output will interfere
+            if( m_pos->get() != pos[axis] + offset )
             {
-                m_pos->set( pos[axis] );
+                m_pos->set( pos[axis] + offset );
                 continue;
             }
         }
