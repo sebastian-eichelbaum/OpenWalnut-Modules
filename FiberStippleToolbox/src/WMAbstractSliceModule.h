@@ -27,7 +27,7 @@
 
 #include <string>
 
-#include "WPropTransfer.h"
+#include "core/common/WPropTransfer.h"
 #include "core/kernel/WModule.h"
 
 // forward declarations to reduce compile dependencies
@@ -118,7 +118,7 @@ protected:
     /**
      * Connector for external WPropDouble, so the slice type and position of this module can be controlled from another module.
      */
-    boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_sliceIC;
+    boost::shared_ptr< WModuleInputData< WPositionTransfer > > m_posIC;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -149,11 +149,6 @@ protected:
      * Needed for recreating the geometry.
      */
     boost::shared_ptr< WCondition > m_propCondition;
-
-    /**
-     * External property controlling linear translation of the given slice.
-     */
-    WPropDouble m_externPropSlider;
 
 private:
 };

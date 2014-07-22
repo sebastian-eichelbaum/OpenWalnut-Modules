@@ -184,7 +184,7 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
     m_pos->setMin( minV[axis] );
     m_pos->setMax( maxV[axis] );
 
-    if( m_first && !m_externPropSlider )
+    if( m_first && !m_posIC->getData() )
     {
         m_first = false;
         m_pos->set( midBB[axis] );
@@ -223,7 +223,7 @@ void WMIsoLines::moduleMain()
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_scalarIC->getDataChangedCondition() );
-    m_moduleState.add( m_sliceIC->getDataChangedCondition() );
+    m_moduleState.add( m_posIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -240,41 +240,23 @@ void WMIsoLines::moduleMain()
         infoLog() << "Waiting ...";
         m_moduleState.wait();
 
+        // determine axis to draw contours for
+        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
+
         // woke up since the module is requested to finish?
         if( m_shutdownFlag() )
         {
             break;
         }
 
-        if( m_sliceIC->getData() && !m_externPropSlider )
+        if( m_posIC->getData() )
         {
-            m_externPropSlider = m_sliceIC->getData()->getProperty();
-            m_moduleState.add( m_externPropSlider->getCondition() );
-            if( selectAxis( m_externPropSlider->getName() ) <= 2 )
+            WPosition pos = m_posIC->getData()->getProperty();
+            if( m_pos->get() != pos[axis] )
             {
-                m_sliceSelection->set( m_axes->getSelector( selectAxis( m_externPropSlider->getName() ) ) );
+                m_pos->set( pos[axis] );
+                continue;
             }
-            else
-            {
-                errorLog() << "Bug! External slice property with invalid name => axis selection failed, name was: " << m_externPropSlider->getName();
-            }
-            WModule::properties();
-            infoLog() << "Added external slice position control.";
-        }
-
-        if( !m_sliceIC->getData() && m_externPropSlider )
-        {
-            m_moduleState.remove( m_externPropSlider->getCondition() );
-            m_externPropSlider.reset();
-            infoLog() << "Removed external slice position control.";
-        }
-
-        if( m_externPropSlider && m_externPropSlider->changed() )
-        {
-            // update slice position
-            debugLog() << "External slice position has changed.";
-            m_pos->set( m_externPropSlider->get( true ) );
-            continue; // do not regenerate geometry incase of slide updates
         }
 
         // save data behind connectors since it might change during processing
@@ -291,7 +273,6 @@ void WMIsoLines::moduleMain()
         m_isovalue->setMin( 0.0 );
         m_isovalue->setMax( 1.0 );
 
-        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
         initOSG( scalarData, m_resolution->get(), axis );
 
         wge::bindTexture( m_output, scalarData->getTexture(), 0, "u_scalarData" );

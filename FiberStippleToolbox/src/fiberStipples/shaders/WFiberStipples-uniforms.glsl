@@ -100,12 +100,6 @@ uniform float u_minRange;
 uniform float u_maxRange;
 
 /**
- * Middle point of the quad in texture coordinates, needed for scaling the
- * projection of the principal diffusion direction to fit inside quad.
- */
-uniform vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
-
-/**
  * How much slices with random quads are used.
  */
 uniform int u_numDensitySlices;

@@ -25,11 +25,11 @@
 #include <string>
 
 #include "core/common/WCondition.h"
+#include "core/common/WPropTransfer.h"
 #include "core/common/WItemSelectionItemTyped.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WModuleInputData.h"
 #include "WMAbstractSliceModule.h"
-#include "WPropTransfer.h"
 
 WMAbstractSliceModule::WMAbstractSliceModule()
     : WModule(),
@@ -43,7 +43,7 @@ WMAbstractSliceModule::~WMAbstractSliceModule()
 
 void WMAbstractSliceModule::connectors()
 {
-    m_sliceIC = WModuleInputData< WPropDoubleTransfer >::createAndAdd( shared_from_this(), "slice", "Slice and its position." );
+    m_posIC = WModuleInputData< WPositionTransfer >::createAndAdd( shared_from_this(), "positions", "Slice positions in x,y,z" );
 
     WModule::connectors();
 }

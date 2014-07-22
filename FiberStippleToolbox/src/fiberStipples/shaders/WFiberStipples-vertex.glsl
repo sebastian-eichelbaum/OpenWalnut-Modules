@@ -39,7 +39,15 @@ void main()
     gl_TexCoord[3] = gl_MultiTexCoord3; // for selecting quads within a single hierarchy level
 
     // compute texture coordinates from worldspace coordinates for texture access
+//     mat4 m;
+//     m[0] = vec4(0.0);
+//     m[1] = vec4(0.0);
+//     m[2] = vec4(0.0);
+//     m[3] = vec4(0.0);
+//     m[0][0]=m[1][1]=m[2][2]=m[3][3]=1.0;
+//     m[0][3]=152.315;
     vec3 texturePosition = ( u_WorldTransform * gl_Vertex ).xyz;
+//     vec3 texturePosition = ( m * gl_Vertex ).xyz;
     v_textPos = texturePosition;
     texturePosition.x /= u_pixelSizeX * u_probTractSizeX;
     texturePosition.y /= u_pixelSizeY * u_probTractSizeY;
@@ -62,10 +70,10 @@ void main()
     // if( true )
     {
          // transform position, the 4th component must be explicitly set, as otherwise they would have been scaled
-         gl_Position = gl_ModelViewProjectionMatrix * ( vec4( u_glyphSize * gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );
+       gl_Position = gl_ModelViewProjectionMatrix * ( vec4( u_glyphSize * gl_TexCoord[0].xyz + gl_Vertex.xyz, 1.0 ) );
     }
     else
     {
-         gl_Position = ftransform(); // discard those vertices
+       gl_Position = ftransform(); // discard those vertices
     }
 }
