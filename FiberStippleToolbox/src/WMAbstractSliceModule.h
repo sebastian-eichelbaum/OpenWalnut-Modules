@@ -27,13 +27,11 @@
 
 #include <string>
 
-#include "WPropTransfer.h"
 #include "core/kernel/WModule.h"
 
 // forward declarations to reduce compile dependencies
 class WGEManagedGroupNode;
 template< class T > class WItemSelectionItemTyped;
-template< class T > class WModuleInputData;
 
 /**
  * Module containing convinience stuff for slice based modules.
@@ -86,6 +84,12 @@ protected:
     virtual void moduleMain() = 0;
 
     /**
+     * If the slice positions in the kernel change, our m_pos is updated. This make all slice modules easy to use with navigation slices.
+     * \note If there is no navigation slice module, there should be no trouble.
+     */
+    virtual void updatePos();
+
+    /**
      * Initialize the connectors this module is using.
      */
     virtual void connectors();
@@ -116,11 +120,6 @@ protected:
     std::pair< WVector3d, WVector3d > sliceBaseVectors( const WVector3d& sizes, const size_t axis ) const;
 
     /**
-     * Connector for external WPropDouble, so the slice type and position of this module can be controlled from another module.
-     */
-    boost::shared_ptr< WModuleInputData< WPropDoubleTransfer > > m_sliceIC;
-
-    /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_output;
@@ -149,11 +148,6 @@ protected:
      * Needed for recreating the geometry.
      */
     boost::shared_ptr< WCondition > m_propCondition;
-
-    /**
-     * External property controlling linear translation of the given slice.
-     */
-    WPropDouble m_externPropSlider;
 
 private:
 };

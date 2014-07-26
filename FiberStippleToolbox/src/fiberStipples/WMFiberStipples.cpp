@@ -54,6 +54,7 @@
 #include "core/graphicsEngine/WGraphicsEngine.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
+
 #include "WMFiberStipples.h"
 #include "WMFiberStipples.xpm"
 
@@ -163,7 +164,7 @@ void WMFiberStipples::properties()
     m_directionScale->setMin( 0.0 );
     m_directionScale->setMax( 1.0 );
 
-    // call WModule's initialization
+    // call inherited properties init as well
     WMAbstractSliceModule::properties();
 }
 
@@ -237,10 +238,10 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     geometry->setTexCoordArray( 1, texcoords1 );
     geometry->setTexCoordArray( 2, texcoords2 );
     geometry->setTexCoordArray( 3, texcoords3 );
-    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
     geometry->setNormalArray( normals );
     geometry->setColorArray( colors );
+    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
+    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
     geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
 
     osg::ref_ptr< osg::Geode > geode = new osg::Geode();
@@ -275,7 +276,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_pos->setMax( maxV[axis] );
 
     // if this is done the first time, set the slices to the center of the dataset
-    if( m_first && !m_externPropSlider )
+    if( m_first )
     {
         m_first = false;
         m_pos->set( midBB[axis] );
@@ -377,6 +378,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     m_output->dirtyBound();
 }
 
+
 void WMFiberStipples::moduleMain()
 {
     // get notified about data changes
@@ -384,7 +386,6 @@ void WMFiberStipples::moduleMain()
     m_moduleState.add( m_probIC->getDataChangedCondition() );
     m_moduleState.add( m_colIC->getDataChangedCondition() );
     m_moduleState.add( m_vectorIC->getDataChangedCondition() );
-    m_moduleState.add( m_sliceIC->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -415,29 +416,9 @@ void WMFiberStipples::moduleMain()
             break;
         }
 
-        if( m_sliceIC->getData() && !m_externPropSlider )
-        {
-            m_externPropSlider = m_sliceIC->getData()->getProperty();
-            m_pos->set( m_externPropSlider->get( true ) );
-            m_moduleState.add( m_externPropSlider->getCondition() );
-            if( selectAxis( m_externPropSlider->getName() ) <= 2 )
-            {
-                m_sliceSelection->set( m_axes->getSelector( selectAxis( m_externPropSlider->getName() ) ) );
-            }
-            else
-            {
-                errorLog() << "Bug! External slice property with invalid name => axis selection failed, name was: " << m_externPropSlider->getName();
-            }
-            WModule::properties();
-            infoLog() << "Added external slice position control.";
-        }
+        // determine which axis to draw stipples
+        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
 
-        if( !m_sliceIC->getData() && m_externPropSlider )
-        {
-            m_moduleState.remove( m_externPropSlider->getCondition() );
-            m_externPropSlider.reset();
-            infoLog() << "Removed external slice position control.";
-        }
         if( m_sampleRes->changed() )
         {
             debugLog() << "New poission sampling resolution";
@@ -447,30 +428,24 @@ void WMFiberStipples::moduleMain()
             m_samplers = splitSamplingPoisson( WSampler2DPoisson( m_sampleRes->get( true ) ), numDensitySlices, splitProgress );
         }
 
-        if( m_externPropSlider && m_externPropSlider->changed() )
-        {
-            // update slice position
-            debugLog() << "External slice position has changed.";
-            m_pos->set( m_externPropSlider->get( true ) );
-            continue; // do not regenerate geometry incase of slide updates
-        }
-
         // save data behind connectors since it might change during processing
         boost::shared_ptr< WDataSetVector > vectors = m_vectorIC->getData();
         boost::shared_ptr< WDataSetScalar > probTract = m_probIC->getData();
         boost::shared_ptr< WDataSetScalar > col = m_colIC->getData();
 
-        if( !( vectors && probTract && col ) || !boost::dynamic_pointer_cast< WGridRegular3D >( probTract->getGrid() ) ) // if data valid
+        if( !( vectors && probTract ) || !boost::dynamic_pointer_cast< WGridRegular3D >( probTract->getGrid() ) ) // if data valid
         {
             continue;
         }
 
-        size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
         initOSG( probTract, axis, numDensitySlices );
 
         wge::bindTexture( m_output, vectors->getTexture(), 0, "u_vectors" );
         wge::bindTexture( m_output, probTract->getTexture(), 1, "u_probTract" );
-        wge::bindTexture( m_output, col->getTexture(), 2, "u_col" );
+        if( col )
+        {
+            wge::bindTexture( m_output, col->getTexture(), 2, "u_col" );
+        }
     }
 
     m_output->clear();

@@ -235,6 +235,12 @@ void main()
     vec3 bVecNorm = normalize( u_bVec );
     vec3 projectedDirectionTextCoords = 0.5 * vec3( dot( aVecNorm, diffusionDirection ), dot( bVecNorm, diffusionDirection ), 0.0 );
 
+    /**
+     * Middle point of the quad in texture coordinates, needed for scaling the
+     * projection of the principal diffusion direction to fit inside quad.
+     */
+    vec3 middlePoint_tex = vec3( 0.5, 0.5, 0.0 );
+
     vec3 scaledFocalPoint1 = middlePoint_tex + u_scale * projectedDirectionTextCoords;
     vec3 scaledFocalPoint2 = middlePoint_tex - u_scale * projectedDirectionTextCoords;
     vec3 focalPoint1 = middlePoint_tex + projectedDirectionTextCoords;
@@ -357,7 +363,7 @@ void main()
           if( u_outline ) {
             dist = dist - radius;
             for( int i = u_outlineSteps; i > 0; --i ) {
-              float f = ( i / float(u_outlineSteps) );
+              float f = ( i / float( u_outlineSteps) );
               if( u_outlineDark ) {
                 if( dist < f * u_outlineWidth ) {
                   gl_FragColor =vec4( (c * (1-f) ).rgb, c.a );
