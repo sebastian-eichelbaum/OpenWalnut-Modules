@@ -41,6 +41,10 @@
 #include "surfaceDetectionByPCL/WMSurfaceDetectionByPCL.h"
 #include "wallDetectionByPCA/WMWallDetectionByPCA.h"
 
+#include "tempLeastSquaresTest/WMTempLeastSquaresTest.h"
+#include "tempRandomPoints/WMTempRandomPoints.h"
+
+
 // #include "WToolkit.h"
 
 /**
@@ -65,6 +69,9 @@ extern "C" void WLoadModule( WModuleList& m ) // NOLINT
     m.push_back( boost::shared_ptr< WModule >( new WMSurfaceDetectionByLari ) );
     m.push_back( boost::shared_ptr< WModule >( new WMSurfaceDetectionByPCL ) );
     m.push_back( boost::shared_ptr< WModule >( new WMWallDetectionByPCA ) );
+
+    m.push_back( boost::shared_ptr< WModule >( new WMTempLeastSquaresTest ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMTempRandomPoints ) );
 }
 
 /**

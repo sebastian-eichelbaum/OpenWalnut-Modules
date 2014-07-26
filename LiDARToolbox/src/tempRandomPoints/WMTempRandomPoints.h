@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSTRANSFORM_H
-#define WMPOINTSTRANSFORM_H
+#ifndef WMTEMPRANDOMPOINTS_H
+#define WMTEMPRANDOMPOINTS_H
 
 
 #include <liblas/liblas.hpp>
@@ -68,28 +68,32 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
+
+#include "../common/math/leastSquares/WLeastSquares.h"
+
+
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Transforms a point set: Available options: Cropping, stretching, translation and 
- * rotation.
+ * Creates a cubical or spherical random set of points.
+ * Use a transformation plugin to get a customized point set.
  * \ingroup modules
  */
-class WMPointsTransform: public WModule
+class WMTempRandomPoints: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMPointsTransform();
+    WMTempRandomPoints();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsTransform();
+    virtual ~WMTempRandomPoints();
 
     /**
      * Gives back the name of this module.
@@ -143,28 +147,24 @@ private:
      * \param steps Points count as reference to the progress bar.
      */
     void setProgressSettings( size_t steps );
+    /**
+     * Returns a pseudo random number. It depends on a counter. The aim is to get 
+     * reproducable results.
+     * \return Pseudo random number between 0 and 1.
+     */
+    double getNextRandomNumber();
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
     /**
-     * Calculates the bounding box of the input point data set. Minimals and
-     * maximals of X/Y/Z are set.
-     */
-    void initBoundingBox();
-    /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
      * a selection or to cut away a cube area.
      * \return The cropped or cut point data set.
      */
-    boost::shared_ptr< WDataSetPoints > getTransformedPointSet();
-
-    /**
-     * WDataSetPoints data input (proposed for LiDAR data).
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+    boost::shared_ptr< WDataSetPoints > getRandomPoints();
     /**
      * Processed point data with cut off outliers.
      */
@@ -188,127 +188,28 @@ private:
      * Colors of the input point data set that are also passed through.
      */
     WDataSetPoints::ColorArray m_colors;
+    /**
+     * The last random number It's stored to calculate a next number deterministically. 
+     * Reproducable results are produced that way
+     */
+    double m_currentRandomNumber;
 
     /**
-     * Options for surface features.
+     * Settings for the random point generator.
      */
-    WPropGroup m_pointsCropGroup;
+    WPropGroup m_groupRandomPointGenerator;
     /**
-     * Minimal X value of the selection.
+     * Organizes points in a spherical space instead of in a qubical one.
      */
-    WPropDouble m_fromX;
+    WPropBool m_isSphericalSpace;
     /**
-     * Maximal X value of the selection.
+     * Point count in the random point set.
      */
-    WPropDouble m_toX;
+    WPropInt m_pointCount;
     /**
-     * Maximal Y value of the selection.
+     * Initial number for the random number generator.
      */
-    WPropDouble m_fromY;
-    /**
-     * Minimal Y value of the selection.
-     */
-    WPropDouble m_toY;
-    /**
-     * Minimal Z value of the selection.
-     */
-    WPropDouble m_fromZ;
-    /**
-     * Maximal Z value of the selection.
-     */
-    WPropDouble m_toZ;
-    /**
-     * Switch to cut away the selection instead of to crop the area.
-     */
-    WPropBool m_cutInsteadOfCrop;
-
-    /**
-     * Options for surface features.
-     */
-    WPropGroup m_translatePointsGroup;
-    /**
-     * X coordinate translation offset.
-     */
-    WPropDouble m_translateX;
-    /**
-     * Y coordinate translation offset.
-     */
-    WPropDouble m_translateY;
-    /**
-     * Z coordinate translation offset.
-     */
-    WPropDouble m_translateZ;
-
-    /**
-     * Group that multiplies each coordinate by a factor.
-     */
-    WPropGroup m_groupMultiplyPoints;
-    /**
-     * Each X coordinate is multiplied by this value
-     */
-    WPropDouble m_factorX;
-    /**
-     * Each Y coordinate is multiplied by this value
-     */
-    WPropDouble m_factorY;
-    /**
-     * Each Z coordinate is multiplied by this value
-     */
-    WPropDouble m_factorZ;
-
-    /**
-     * Rotation options.
-     */
-    WPropGroup m_groupRotation;
-    /**
-     * 1st applied rotation: Along the plane XY
-     */
-    WPropDouble m_rotation1AngleXY;
-    /**
-     * 2nd applied rotation: Along the plane XY
-     */
-    WPropDouble m_rotation2AngleYZ;
-    /**
-     * 3rd applied rotation: Along the plane XY
-     */
-    WPropDouble m_rotation3AngleXZ;
-    /**
-     * Rotation anchor on the X coordinate.
-     */
-    WPropDouble m_rotationAnchorX;
-    /**
-     * Rotation anchor on the Y coordinate.
-     */
-    WPropDouble m_rotationAnchorY;
-    /**
-     * Rotation anchor on the Z coordinate.
-     */
-    WPropDouble m_rotationAnchorZ;
-
-    /**
-     * Minimal X coordinate of input points.
-     */
-    double m_minX;
-    /**
-     * Maximal X coordinate of input points.
-     */
-    double m_maxX;
-    /**
-     * Minimal Y coordinate of input points.
-     */
-    double m_minY;
-    /**
-     * Maximal Y coordinate of input points.
-     */
-    double m_maxY;
-    /**
-     * Minimal Z coordinate of input points.
-     */
-    double m_minZ;
-    /**
-     * Maximal Z coordinate of input points.
-     */
-    double m_maxZ;
+    WPropDouble m_initRandomNumber;
 };
 
-#endif  // WMPOINTSTRANSFORM_H
+#endif  // WMTEMPRANDOMPOINTS_H

@@ -111,6 +111,15 @@ void WMPointsTransform::properties()
     m_translateZ = m_translatePointsGroup->addProperty( "Z offset: ", "Translates the point set across the Z axis by "
                                                         "that offset.", 0.0, m_propCondition  );
 
+    m_groupMultiplyPoints = m_properties->addPropertyGroup( "Coordinate multiplication",
+                                            "Multiplies each X, Y and Z value by a factor." );
+    m_factorX = m_groupMultiplyPoints->addProperty( "X factor: ", "Number which multiplies each X coordinate.",
+                                                    1.0, m_propCondition  );
+    m_factorY = m_groupMultiplyPoints->addProperty( "Y factor: ", "Number which multiplies each X coordinate.",
+                                                    1.0, m_propCondition  );
+    m_factorZ = m_groupMultiplyPoints->addProperty( "Z factor: ", "Number which multiplies each X coordinate.",
+                                                    1.0, m_propCondition  );
+
     m_groupRotation = m_properties->addPropertyGroup( "Rotation options",
                                             "Applis rotation across three planes in sequence." );
     m_rotation1AngleXY = m_groupRotation->addProperty( "1st rot. (plane XY)", "First applied rotation: Along the plane "
@@ -256,6 +265,10 @@ boost::shared_ptr< WDataSetPoints > WMPointsTransform::getTransformedPointSet()
             x += offset[0];
             y += offset[1];
             z += offset[2];
+
+            x *= m_factorX->get();
+            y *= m_factorY->get();
+            z *= m_factorZ->get();
 
             x -= m_rotationAnchorX->get();
             y -= m_rotationAnchorY->get();

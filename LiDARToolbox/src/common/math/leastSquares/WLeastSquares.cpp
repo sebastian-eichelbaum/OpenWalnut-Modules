@@ -148,8 +148,36 @@ vector<double> WLeastSquares::getParametersXYZ0()
     double squaredSum = 0;
     for( size_t index = 0; index < m_dimensions; index++ )
         squaredSum += pow( m_hessescheNormalForm[index], 2.0 );
-    for(size_t index = 0; index < m_dimensions; index++)
+    for( size_t index = 0; index < m_dimensions; index++ )
         parameters.push_back( -m_hessescheNormalForm[index] *
                 m_hessescheNormalForm[ m_dimensions] / squaredSum );
     return parameters;
+}
+double WLeastSquares::getDistanceToPlane( WPosition point )
+{
+    double normalAbsolute = 0;
+    for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
+        normalAbsolute += pow( m_hessescheNormalForm[dimension], 2.0 );
+    normalAbsolute = pow( normalAbsolute, 0.5 );
+
+    double distance = 0;
+    for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
+        distance += point[dimension] * m_hessescheNormalForm[dimension];
+    return ( distance + m_hessescheNormalForm[m_dimensions] ) / normalAbsolute;
+}
+WPosition WLeastSquares::getNearestPointTo( WPosition point )
+{
+    double amountN = m_hessescheNormalForm[m_dimensions];
+    double amountR = 0;
+    for(size_t dimension = 0; dimension < m_dimensions; dimension++ )
+    {
+        amountN += m_hessescheNormalForm[dimension] * point[dimension];
+        amountR += m_hessescheNormalForm[dimension] * m_hessescheNormalForm[dimension];
+    }
+    double r = -amountN / amountR;
+
+    WPosition cuttingPoint( point[0], point[1], point[2] );
+    for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
+        cuttingPoint[dimension] += m_hessescheNormalForm[dimension] * r;
+    return cuttingPoint;
 }

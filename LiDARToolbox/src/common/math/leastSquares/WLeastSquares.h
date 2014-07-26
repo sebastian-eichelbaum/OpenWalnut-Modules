@@ -73,6 +73,21 @@ public:
      * \return Parameter space coordinates corresponding to Lari/Habib 2014.
      */
     vector<double> getParametersXYZ0();
+    /**
+     * Returns a point distance to the currently calculated plane.
+     * analyzeData() must have been executes.
+     * \param point Point from which the plane distance is calculated.
+     * \return Perpendicular distance from a point to the plane calculated py the least 
+     *         squares algorithm.
+     */
+    double getDistanceToPlane( WPosition point );
+    /**
+     * Returns a nearest point to the input point's coordinate that lies on the 
+     * calculated plane.
+     * \param point Point to get the nearest coordinate on the plane of.
+     * \return The nearest coordinate on the calculates plane of an arbitrary point.
+     */
+    WPosition getNearestPointTo( WPosition point );
 
 private:
     /**
