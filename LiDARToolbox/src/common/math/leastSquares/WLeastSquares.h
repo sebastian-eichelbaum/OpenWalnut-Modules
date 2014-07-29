@@ -73,6 +73,15 @@ public:
      * \return Parameter space coordinates corresponding to Lari/Habib 2014.
      */
     vector<double> getParametersXYZ0();
+
+    /**
+     * Calculates a plane formula of the parameter domain using the approach of 
+     * Lari/Habib using the Hessesche normal form as input plane formula.
+     * \param hessescheNormalForm The Hessesche normal formula of a plane.
+     * \return Parameters X_0, Y_0 and Z_0 that describe a plane using the approach of 
+     *         Lari/Habib.
+     */
+    static vector<double> getParametersXYZ0( vector<double> hessescheNormalForm );
     /**
      * Returns a point distance to the currently calculated plane.
      * analyzeData() must have been executes.
@@ -88,6 +97,14 @@ public:
      * \return The nearest coordinate on the calculates plane of an arbitrary point.
      */
     WPosition getNearestPointTo( WPosition point );
+    /**
+     * Returns a nearest point to the input point's coordinate that lies on the 
+     * calculated plane.
+     * \param planeHessescheNormalForm Plane on which the nearest point is found.
+     * \param point Point to get the nearest coordinate on the plane of.
+     * \return The nearest coordinate on the calculates plane of an arbitrary point.
+     */
+    static WPosition getNearestPointTo( vector<double> planeHessescheNormalForm, WPosition point );
 
 private:
     /**

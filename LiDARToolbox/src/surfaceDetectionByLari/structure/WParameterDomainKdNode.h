@@ -22,24 +22,33 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WLARIGEOPROPS_H
-#define WLARIGEOPROPS_H
+#ifndef WPARAMETERDOMAINKDNODE_H
+#define WPARAMETERDOMAINKDNODE_H
 
 #include <vector>
+#include "../../common/datastructures/kdtree/WKdTreeND.h"
 #include "core/common/math/linearAlgebra/WVectorFixed.h"
 
-using std::vector;
-
 /**
- * This class holds all necessary parameters for each single point used by the process 
- * of the Lari/Habib (2014).
+ * This kd tree node enables nodes to hold metadata for each single point used by the 
+ * process of the Lari/Habib (2014).
  */
-class WLariGeoProps
+class WParameterDomainKdNode : public WKdTreeND
 {
 public:
-    explicit WLariGeoProps();
+    /**
+     * Instantiates the kd tree node
+     * \param dimensions The dimensions count
+     */
+    explicit WParameterDomainKdNode( size_t dimensions );
 
-    virtual ~WLariGeoProps();
+    virtual ~WParameterDomainKdNode();
+    /**
+     * Returns the eigen value of the point in relation to its neighbor points.
+     * \return Point's Eigen Values in relation to its neighbor points.
+     */
+    vector<double> getEigenValues();
+
     /**
      * Sets the eigens values of the point in relation to its neighbors.
      * \param eigenValues The eigen values of a poinnt in relation to its neighbors.
@@ -61,6 +70,15 @@ public:
      */
     vector<double> getParametersXYZ0();
 
+protected:
+    /**
+     * Enables the derived kd tree node class to create a new instance of that kd tree 
+     * node class type.
+     * \param dimensions The dimension count of the new kd tree node.
+     * \return a new kd tree node instance of that class.
+     */
+    virtual WKdTreeND* getNewInstance( size_t dimensions );
+
 private:
     /**
      * The eigen values of a poinnt in relation to its neighbors.
@@ -76,4 +94,4 @@ private:
     vector<double> m_parametersXYZ0;
 };
 
-#endif  // WLARIGEOPROPS_H
+#endif  // WPARAMETERDOMAINKDNODE_H

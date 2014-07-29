@@ -29,7 +29,8 @@
 #include <vector>
 
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WKdTreePcaProps.h"
+#include "structure/WParameterDomainKdNode.h"
+#include "structure/WSpatialDomainKdNode.h"
 #include "../common/datastructures/kdtree/WPointSearcher.h"
 #include "core/common/math/principalComponentAnalysis/WPrincipalComponentAnalysis.h"
 #include "core/common/WRealtimeTimer.h"
@@ -57,7 +58,19 @@ public:
      *         ones have linear/cylindrical features. Magenta ones meet both and grey 
      *         none of both criterias.
      */
-    boost::shared_ptr< WDataSetPoints > detectSurfaces( vector<vector<double> >* inputPoints );
+    void analyzeData( vector<vector<double> >* inputPoints );
+    /**
+     * Returns the parameter domain points. Each parameter point depicts a best fitted 
+     * plane formula of each corresponding input point of the spatial domain.
+     * \return The whole set of points of the parameter domain.
+     */
+    WParameterDomainKdNode* getParameterDomain();
+    /**
+     * Returns the input points that belong to the spatial domain.
+     * \return The whole point set of the spatial domain.
+     */
+    WSpatialDomainKdNode* getSpatialDomain();
+
     /**
      * Calculates whether a point's eigen values in relation to its neighbors have 
      * planar features.
@@ -111,8 +124,14 @@ public:
 
 private:
     /**
-     * The maximal count of analyzed neighbors of an 
-     * examined input point.
+     * Links the corresponding points of the spatial domain to the parameter domain. 
+     * Afterwards each point is assigned its best fitted plane's properties. And each 
+     * parameter domain point will know which points of the spatial domain belong to it.
+     */
+    void linkSpatialAndParameterDomain();
+
+    /**
+     * The maximal count of analyzed neighbors of an examined input point.
      */
     size_t m_numberPointsK;
     /**
@@ -139,6 +158,15 @@ private:
      * linear/cylindrical. The eigen values are sorted descending.
      */
     vector<double> m_cylindricalNLambdaMax;
+    /**
+     * the parameter domain points. Each parameter point depicts a best fitted plane 
+     * formula of each corresponding input point of the spatial domain.
+     */
+    WSpatialDomainKdNode* m_spadialDomain;
+    /**
+     * The input points that belong to the spatial domain.
+     */
+    WParameterDomainKdNode* m_parameterDomain;
 };
 
 #endif  // WSURFACEDETECTORLARI_H

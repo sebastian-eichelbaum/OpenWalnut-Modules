@@ -67,6 +67,7 @@
 #include "core/common/WItemSelectionItemTyped.h"
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
+#include "WLariOutliner.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -160,11 +161,22 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
-
     /**
-     * WDataSetPointsGrouped data output as point groups depicting each building
+     * Output point set that depicts the input points of the spatial domains. Points are 
+     * hilighted if they belong to the planar or linear/cylindrical domain.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputSpatialDomain;
+    /**
+     * Output point set that depicts the parameter domain. Each point of that depicts 
+     * a planar formula (in relation to its neighbors) of each input point of the 
+     * spatial domain.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputParameterDomain;
+    /**
+     * Output connector that depicts best fitted planes of each input point in relation 
+     * to its neighbors.
+     */
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputLeastSquaresPlanes;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
@@ -296,6 +308,11 @@ private:
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda3Max;
+
+    /**
+     * Width of each square that depichts a best fitted plane of each input point.
+     */
+    WPropDouble m_squareWidth;    //TODO(aschwarzkopf): Remove in future
 
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,

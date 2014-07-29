@@ -184,54 +184,66 @@ void WMTempLeastSquaresTest::analyzeBestFittedPlane()
         }
         vector<double> planeFormula = leastSquares.getHessescheNormalForm();
 
-        size_t strongestDimension = 0;
-        double strongestDimensionExtent = 0;
-        for( size_t dimension = 0; dimension < cuttingPoint.size(); dimension++ )
-            if( planeFormula[dimension] > strongestDimensionExtent )
-            {
-                strongestDimension = dimension;
-                strongestDimensionExtent = planeFormula[dimension];
-            }
-        size_t dimensionVec1 = strongestDimension == 0 ?1 :0;
-        size_t dimensionVec2 = strongestDimension == 2 ?1 :2;
-        cout << "Vec1: " << dimensionVec1 << "    Vec2: " << dimensionVec2 << "    Strongest: " << strongestDimension << endl;
-        WVector3d vector1( 0, 0, 0 );
-        vector1[dimensionVec1] = planeFormula[strongestDimension];
-        vector1[strongestDimension] = - planeFormula[dimensionVec1]/* / planeFormula[strongestDimension]*/;
-        vector1 = getNormalizedVector( vector1 );
-        WPosition vector2( planeFormula[1] * vector1[2] - planeFormula[2] * vector1[1],
-                           planeFormula[2] * vector1[0] - planeFormula[0] * vector1[2],
-                           planeFormula[0] * vector1[1] - planeFormula[1] * vector1[0] );
-        WPosition vector3( vector1[1] * vector2[2] - vector1[2] * vector2[1],
-                           vector1[2] * vector2[0] - vector1[0] * vector2[2],
-                           vector1[0] * vector2[1] - vector1[1] * vector2[0] );
-        cout << "Reverse transformation: " << vector3 << endl;
         boost::shared_ptr< WTriangleMesh > outputMesh( new WTriangleMesh( 0, 0 ) );
-        for( double factor = 1.0; factor >= -2.0; factor -= 2.0 )
-            for( double vectorN = 1.0; vectorN >= -2.0; vectorN -= 2.0 )
-            {
-                WPosition vecN( 0.0, 0.0, 0.0 );
-                for( size_t dimension = 0; dimension < cuttingPoint.size(); dimension++ )
-                    vecN[dimension] = maxDistance * 1.5 * ( vector1[dimension] * vectorN + vector2[dimension] * factor );
-                outputMesh->addVertex( vecN );
-            }
-        outputMesh->addTriangle( 2, 0, 1 );
-        outputMesh->addTriangle( 3, 2, 1 );
+        outlineNormalPlane( planeFormula, mean, maxDistance * 1.5, outputMesh );
+
         m_output->updateData( outputMesh );
 
-        std::cout << "Mean: " << mean << std::endl;
+        std::cout << "analyzeBestFittedPlane() - Mean: " << mean << std::endl;
 
-        std::cout << "Distance to mean: " << leastSquares.getDistanceToPlane( mean ) << std::endl;
+        std::cout << "analyzeBestFittedPlane() - Distance to mean: " << leastSquares.getDistanceToPlane( mean ) << std::endl;
 
-        std::cout << "Nearest point:  " << cuttingPoint << std::endl;
+        std::cout << "analyzeBestFittedPlane() - Nearest point:  " << cuttingPoint << std::endl;
 
-        std::cout << "Its distance to plane: " << leastSquares.getDistanceToPlane( cuttingPoint ) << std::endl;
+        std::cout << "analyzeBestFittedPlane() - Its distance to plane: " << leastSquares.getDistanceToPlane( cuttingPoint ) << std::endl;
 
-        std::cout << "Plane: ";
+        std::cout << "analyzeBestFittedPlane() - Plane: ";
         for( size_t index = 0; index < planeFormula.size(); index++ )
             std::cout << planeFormula[index] << ", ";
         std::cout << endl << endl;
     }
+}
+void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessescheNormalForm,
+        WPosition nearestPoint, double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh )
+{
+    WPosition cuttingPoint = WLeastSquares::getNearestPointTo( planeHessescheNormalForm, nearestPoint );
+    //std::cout << "outlineNormalPlane() - Nearest point:  " << cuttingPoint << std::endl;
+    size_t strongestDimension = 0;
+    double strongestDimensionExtent = 0;
+    for( size_t dimension = 0; dimension < cuttingPoint.size(); dimension++ )
+        if( planeHessescheNormalForm[dimension] > strongestDimensionExtent )
+        {
+            strongestDimension = dimension;
+            strongestDimensionExtent = planeHessescheNormalForm[dimension];
+        }
+    size_t dimensionVec1 = strongestDimension == 0 ?1 :0;
+    //size_t dimensionVec2 = strongestDimension == 2 ?1 :2;
+    //cout << "Vec1: " << dimensionVec1 << "    Vec2: " << dimensionVec2 << "    Strongest: " << strongestDimension << endl;
+    WVector3d normalVector( planeHessescheNormalForm[0], planeHessescheNormalForm[1], planeHessescheNormalForm[2] );
+    normalVector = getNormalizedVector( normalVector );
+    WVector3d vector1( 0, 0, 0 );
+    vector1[dimensionVec1] = normalVector[strongestDimension];
+    vector1[strongestDimension] = - normalVector[dimensionVec1]/* / planeHessescheNormalForm[strongestDimension]*/;
+    vector1 = getNormalizedVector( vector1 );
+    WPosition vector2( normalVector[1] * vector1[2] - normalVector[2] * vector1[1],
+                        normalVector[2] * vector1[0] - normalVector[0] * vector1[2],
+                        normalVector[0] * vector1[1] - normalVector[1] * vector1[0] );
+    WPosition vector3( vector1[1] * vector2[2] - vector1[2] * vector2[1],
+                        vector1[2] * vector2[0] - vector1[0] * vector2[2],
+                        vector1[0] * vector2[1] - vector1[1] * vector2[0] );
+    //cout << "Reverse transformation: " << vector3 << endl;
+    size_t count = targetTriangleMesh->vertSize();
+    for( double factor = 1.0; factor >= -2.0; factor -= 2.0 )
+        for( double vectorN = 1.0; vectorN >= -2.0; vectorN -= 2.0 )
+        {
+            WPosition vecN( 0.0, 0.0, 0.0 );
+            for( size_t dimension = 0; dimension < cuttingPoint.size(); dimension++ )
+                vecN[dimension] = cuttingPoint[dimension] + planeRadius * (
+                        vector1[dimension] * vectorN + vector2[dimension] * factor );
+            targetTriangleMesh->addVertex( vecN );
+        }
+    targetTriangleMesh->addTriangle( 2 + count, 0 + count, 1 + count );
+    targetTriangleMesh->addTriangle( 3 + count, 2 + count, 1 + count );
 }
 WPosition WMTempLeastSquaresTest::getNormalizedVector( WVector3d vector )
 {

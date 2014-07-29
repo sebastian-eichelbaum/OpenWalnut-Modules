@@ -39,95 +39,84 @@ WSurfaceDetectorLari::WSurfaceDetectorLari()
     m_cylindricalNLambdaMin.resize( 3 );
     m_cylindricalNLambdaMax.reserve( 3 );
     m_cylindricalNLambdaMax.resize( 3 );
+    m_spadialDomain = new WSpatialDomainKdNode( 3 );
 }
 
 WSurfaceDetectorLari::~WSurfaceDetectorLari()
 {
 }
 
-boost::shared_ptr< WDataSetPoints > WSurfaceDetectorLari::detectSurfaces( vector<vector<double> >* inputPoints )
+void WSurfaceDetectorLari::analyzeData( vector<vector<double> >* inputPoints )
 {
     //TODO(aschwarzkopf): After draft stage refine in several methods and remove comments
     cout << "Attempting to analyze " << inputPoints->size() << " points" << endl;
-    WRealtimeTimer timer;
-    timer.reset();
-    WKdTreePcaProps* deletableTree = new WKdTreePcaProps( 3 );
-    deletableTree->add( inputPoints );
-    cout << "WKdTreeND took " << timer.elapsed() << " seconds." << endl;
+    delete m_spadialDomain;
+    m_spadialDomain = new WSpatialDomainKdNode( 3 );
+    m_parameterDomain = new WParameterDomainKdNode( 3 );
+    m_spadialDomain->add( inputPoints );
+    vector<vector<double> >* parameterPoints = new vector<vector<double> >();
 
-    WDataSetPoints::VertexArray outVertices(
-            new WDataSetPoints::VertexArray::element_type() );
-    WDataSetPoints::ColorArray outColors(
-            new WDataSetPoints::ColorArray::element_type() );
-
-    timer.reset();
-    WPointSearcher pointSearcher;
-    pointSearcher.setExaminedKdTree( deletableTree );
+    WPointSearcher pointSearcher( m_spadialDomain );
     pointSearcher.setMaxResultPointCount( m_numberPointsK );
     pointSearcher.setMaxSearchDistance( m_maxPointDistanceR );
-    WPrincipalComponentAnalysis pca;
-    vector<WKdTreeND*>* processedPoints = deletableTree->getAllLeafNodes();
-    cout << "Attempting PCA for " << processedPoints->size() << " points" << endl;
+    vector<WKdTreeND*>* spatialNodes = m_spadialDomain->getAllLeafNodes();
 
     //Generating properties for each existing point
-    for( size_t index = 0; index < processedPoints->size(); index++ )
+    for( size_t index = 0; index < spatialNodes->size(); index++ )
     {
         //Getting nearest n points
-        WKdTreePcaProps* pointProps = ( WKdTreePcaProps*)(processedPoints->at( index ) );
-        vector<double> pointOfInterest = pointProps->getNodePoints()->at( 0 );
-        pointSearcher.setSearchedPoint( pointOfInterest );
+        WSpatialDomainKdNode* spatialDomainNode = ( WSpatialDomainKdNode* )( spatialNodes->at( index ) );
+        vector<double> spatialCoordinate = spatialDomainNode->getNodePoints()->at( 0 );
+        pointSearcher.setSearchedPoint( spatialCoordinate );
         vector<WPointDistance>* nearestPoints = pointSearcher.getNearestPoints();
         vector<WPosition>* points = WPointSearcher::convertToPointSet( nearestPoints );
 
         //Calculating Eigen properties
+        WPrincipalComponentAnalysis pca;
         pca.analyzeData( points );
-        pointProps->createGeoProps();
-        WLariGeoProps* geoProps = pointProps->getGeoProps();
-        geoProps->setEigenVectors( pca.getDirections() );
+        spatialDomainNode->setEigenVectors( pca.getDirections() );
         vector<double> eigenValues = pca.getEigenValues();
-        vector<double> nLambdaI;    //TODO(aschwarzkopf): Unused
-        double sumLambda = 0;        //TODO(aschwarzkopf): Unused
-        geoProps->setEigenValues( eigenValues );
+        spatialDomainNode->setEigenValues( eigenValues );
 
         //Adding parameter space information
         WLeastSquares leastSquares;
         leastSquares.analyzeData( points );
-        geoProps->setParametersXYZ0( leastSquares.getParametersXYZ0() );
-        //for(size_t index = 0; index < geoProps->getParametersXYZ0().size(); index++)
-        //    cout << geoProps->getParametersXYZ0()[index] << "    ";
-        //cout << endl;
-
-        //Displaying points and classification
-        for( size_t i = 0; i < eigenValues.size(); i++ )
-            sumLambda += eigenValues[i];
-        for( size_t i = 0; i < eigenValues.size(); i++ )
-            nLambdaI.push_back( eigenValues[i] / sumLambda );
-        for( size_t dimension = 0; dimension < pointOfInterest.size(); dimension++ )
-            outVertices->push_back( pointOfInterest[dimension] );
-        bool isPlanar = calculateIsPlanarPoint( eigenValues );
-        bool isCylindrical = calculateIsCylindricalPoint( eigenValues );
-        if( isPlanar || isCylindrical )
-        {
-            outColors->push_back( isPlanar ?1 :0 );
-            outColors->push_back( isCylindrical ?0.5 :0 );
-            outColors->push_back( isCylindrical ?1.0 :0 );
-        }
-        else
-        {
-            for( size_t colorCh = 0; colorCh < 3; colorCh++ )
-                outColors->push_back( 0.50 );
-        }
+        spatialDomainNode->setHessescheNormalForm( leastSquares.getHessescheNormalForm() );
+        parameterPoints->push_back( leastSquares.getParametersXYZ0() );
 
         delete nearestPoints;
         delete points;
-        //outputPointSet.printNearestPoints(nearestPoints, "Default point set");
     }
-    cout << "WPointSearcher took " << timer.elapsed() << " seconds." << endl;
-    delete deletableTree;
-
-    boost::shared_ptr< WDataSetPoints > outputPoints(
-            new WDataSetPoints( outVertices, outColors ) );
-    return outputPoints;
+    m_parameterDomain->add( parameterPoints );
+    linkSpatialAndParameterDomain();
+}
+void WSurfaceDetectorLari::linkSpatialAndParameterDomain()
+{
+    WPointSearcher pointSearcher( m_spadialDomain );
+    pointSearcher.setMaxResultPointCount( 1 );
+    pointSearcher.setMaxSearchDistance( 0.0 );
+    vector<WKdTreeND*>* parameterNodes = m_parameterDomain->getAllLeafNodes();
+    size_t noSuccess = 0;
+    size_t success = 0;
+    for( size_t index = 0; index < parameterNodes->size(); index++ )
+    {
+        WParameterDomainKdNode* parameterDomainNode = ( WParameterDomainKdNode* )( parameterNodes->at( index ) );
+        vector<double> parameterCoordinate = parameterDomainNode->getNodePoints()->at( 0 );
+        pointSearcher.setSearchedPoint( parameterCoordinate );
+        vector<WPointDistance>* nearestPoints = pointSearcher.getNearestPoints();
+        noSuccess += nearestPoints->size() == 0 ?1 :0;
+        success += nearestPoints->size() > 0 ?1 :0;
+    }
+    std::cout << "sussess: " << success << std::endl;
+    std::cout << "no sussess: " << noSuccess << std::endl;
+}
+WParameterDomainKdNode* WSurfaceDetectorLari::getParameterDomain()
+{
+    return m_parameterDomain;
+}
+WSpatialDomainKdNode* WSurfaceDetectorLari::getSpatialDomain()
+{
+    return m_spadialDomain;
 }
 bool WSurfaceDetectorLari::calculateIsPlanarPoint( vector<double> eigenValues )
 {

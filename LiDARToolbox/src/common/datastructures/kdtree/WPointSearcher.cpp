@@ -27,12 +27,13 @@
 
 #include "WPointSearcher.h"
 
-WPointSearcher::WPointSearcher()
+WPointSearcher::WPointSearcher( WKdTreeND* kdTree )
 {
     m_distanceSteps = 4;
     m_examinedKdTree = 0;
     m_maxResultPointCount = 50;
     m_maxSearchDistance = 0.5;
+    m_examinedKdTree = kdTree;
 }
 WPointSearcher::~WPointSearcher()
 {

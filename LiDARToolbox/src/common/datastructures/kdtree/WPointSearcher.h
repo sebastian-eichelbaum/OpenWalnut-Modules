@@ -45,8 +45,9 @@ class WPointSearcher
 public:
     /**
      * Instantiates the points searcher.
+     * \param kdTree Assigned source kd tree to search points.
      */
-    WPointSearcher();
+    explicit WPointSearcher( WKdTreeND* kdTree );
     /**
      * Destroys the points searcher
      */

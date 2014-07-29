@@ -119,6 +119,17 @@ public:
      * \return The icon.
      */
     virtual const char** getXPMIcon() const;
+    /**
+     * Outlines a best fitted plane of an input point.
+     * \param planeHessescheNormalForm The Hessesche normal formula of the point's 
+     *                                 fitted plane.
+     * \param nearestPoint The output plane will be drawn on the nearest zone of that 
+     *                     point coordinate.
+     * \param planeRadius Radius (wiidth/2.0) of the drawn plane.
+     * \param targetTriangleMesh Output triangle mesh where the new plane will be drawn.
+     */
+    static void outlineNormalPlane( vector<double> planeHessescheNormalForm, WPosition nearestPoint,
+            double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh );
 
 protected:
     /**

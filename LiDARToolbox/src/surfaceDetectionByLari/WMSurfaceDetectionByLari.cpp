@@ -80,10 +80,19 @@ void WMSurfaceDetectionByLari::connectors()
 {
     m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
 
-    m_outputPoints = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
-                new WModuleOutputData< WDataSetPoints >( shared_from_this(), "points", "The loaded mesh." ) );
+    m_outputSpatialDomain = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
+            new WModuleOutputData< WDataSetPoints >( shared_from_this(),
+                    "Spatial domain points", "//TODO: description" ) );
+    m_outputParameterDomain = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
+            new WModuleOutputData< WDataSetPoints >( shared_from_this(),
+                    "Parameter domain points", "//TODO: description" ) );
+    m_outputLeastSquaresPlanes = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
+            new WModuleOutputData< WTriangleMesh >( shared_from_this(),
+                    "Least Squares Planes", "//TODO: description" ) );
 
-    addConnector( m_outputPoints );
+    addConnector( m_outputSpatialDomain );
+    addConnector( m_outputParameterDomain );
+    addConnector( m_outputLeastSquaresPlanes );
 //    addConnector( m_buildings );
     WModule::connectors();
 }
@@ -107,6 +116,8 @@ void WMSurfaceDetectionByLari::properties()
     double minRange = 0.01;
     m_numberPointsK = m_properties->addProperty( "Number points K=", "", 12, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
+
+    m_squareWidth = m_properties->addProperty( "Plane outline size: ", "", 0.2, m_propCondition );
 
     m_planarGroup = m_properties->addPropertyGroup( "Planar feature properties",
                                             "All conditions must be met to detect as a surface." );
@@ -224,20 +235,24 @@ void WMSurfaceDetectionByLari::moduleMain()
                 m_progressStatus->increment( 1 );
             }
 
-            WSurfaceDetectorLari detector = WSurfaceDetectorLari();
-            detector.setNumberPointsK( m_numberPointsK->get() );
-            detector.setMaxPointDistanceR( m_maxPointDistanceR->get() );
-            detector.setPlanarNLambdaRange( 0, m_surfaceNLambda1Min->get(), m_surfaceNLambda1Max->get() );
-            detector.setPlanarNLambdaRange( 1, m_surfaceNLambda2Min->get(), m_surfaceNLambda2Max->get() );
-            detector.setPlanarNLambdaRange( 2, m_surfaceNLambda3Min->get(), m_surfaceNLambda3Max->get() );
-            detector.setCylindricalNLambdaRange( 0, m_cylNLambda1Min->get(), m_cylNLambda1Max->get() );
-            detector.setCylindricalNLambdaRange( 1, m_cylNLambda2Min->get(), m_cylNLambda2Max->get() );
-            detector.setCylindricalNLambdaRange( 2, m_cylNLambda3Min->get(), m_cylNLambda3Max->get() );
-            boost::shared_ptr< WDataSetPoints > pointsLari = detector.detectSurfaces( inputPointsVector );
-            //delete detector;
+            WSurfaceDetectorLari* detector = new WSurfaceDetectorLari();
+            detector->setNumberPointsK( m_numberPointsK->get() );
+            detector->setMaxPointDistanceR( m_maxPointDistanceR->get() );
+            detector->setPlanarNLambdaRange( 0, m_surfaceNLambda1Min->get(), m_surfaceNLambda1Max->get() );
+            detector->setPlanarNLambdaRange( 1, m_surfaceNLambda2Min->get(), m_surfaceNLambda2Max->get() );
+            detector->setPlanarNLambdaRange( 2, m_surfaceNLambda3Min->get(), m_surfaceNLambda3Max->get() );
+            detector->setCylindricalNLambdaRange( 0, m_cylNLambda1Min->get(), m_cylNLambda1Max->get() );
+            detector->setCylindricalNLambdaRange( 1, m_cylNLambda2Min->get(), m_cylNLambda2Max->get() );
+            detector->setCylindricalNLambdaRange( 2, m_cylNLambda3Min->get(), m_cylNLambda3Max->get() );
 
+            detector->analyzeData( inputPointsVector );
+            WLariOutliner outliner( detector );
+            m_outputSpatialDomain->updateData( outliner.outlineSpatialDomain() );
+            m_outputParameterDomain->updateData( outliner.outlineParameterDomain() );
+            m_outputLeastSquaresPlanes->updateData( outliner.outlineLeastSquaresPlanes( m_squareWidth->get() ) );
+
+            //delete detector;
             delete inputPointsVector;
-            m_outputPoints->updateData( pointsLari );
 
             m_nbPoints->set( count );
             m_infoRenderTimeSeconds->set( timer.elapsed() );

@@ -24,27 +24,44 @@
 
 #include <iostream>
 #include <vector>
-#include "WLariGeoProps.h"
+#include "WSpatialDomainKdNode.h"
 
-WLariGeoProps::WLariGeoProps()
+WSpatialDomainKdNode::WSpatialDomainKdNode( size_t dimensions ) : WKdTreeND( dimensions )
 {
 }
-WLariGeoProps::~WLariGeoProps()
+WSpatialDomainKdNode::~WSpatialDomainKdNode()
 {
 }
-void WLariGeoProps::setEigenValues( vector<double> eigenValues )
+
+
+vector<double> WSpatialDomainKdNode::getEigenValues()
+{
+    return m_eigenValues;
+}
+
+vector<double> WSpatialDomainKdNode::getHessescheNormalForm()
+{
+    return m_hessescheNormalForm;
+}
+vector<double> WSpatialDomainKdNode::getParametersXYZ0()
+{
+    return WLeastSquares::getParametersXYZ0( m_hessescheNormalForm );
+}
+WKdTreeND* WSpatialDomainKdNode::getNewInstance( size_t dimensions )
+{
+    return new WSpatialDomainKdNode( dimensions );
+}
+
+
+void WSpatialDomainKdNode::setEigenValues( vector<double> eigenValues )
 {
     m_eigenValues = eigenValues;
 }
-void WLariGeoProps::setEigenVectors( vector<WVector3d> eigenVectors )
+void WSpatialDomainKdNode::setEigenVectors( vector<WVector3d> eigenVectors )
 {
     m_eigenVectors = eigenVectors;
 }
-void WLariGeoProps::setParametersXYZ0( vector<double> parametersXYZ0 )
+void WSpatialDomainKdNode::setHessescheNormalForm( vector<double> hessescheNormalForm )
 {
-    m_parametersXYZ0 = parametersXYZ0;
-}
-vector<double> WLariGeoProps::getParametersXYZ0()
-{
-    return m_parametersXYZ0;
+    m_hessescheNormalForm = hessescheNormalForm;
 }

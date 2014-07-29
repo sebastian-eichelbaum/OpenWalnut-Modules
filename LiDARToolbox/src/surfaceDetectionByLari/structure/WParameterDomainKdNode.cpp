@@ -24,27 +24,40 @@
 
 #include <iostream>
 #include <vector>
-#include "WKdTreePcaProps.h"
+#include "WParameterDomainKdNode.h"
 
-WKdTreePcaProps::WKdTreePcaProps( size_t dimensions ) : WKdTreeND( dimensions )
+WParameterDomainKdNode::WParameterDomainKdNode( size_t dimensions ) : WKdTreeND( dimensions )
 {
-    m_geoProps = 0;
 }
-WKdTreePcaProps::~WKdTreePcaProps()
+WParameterDomainKdNode::~WParameterDomainKdNode()
 {
-    if(m_geoProps != 0)
-        delete m_geoProps;
 }
-WKdTreeND* WKdTreePcaProps::getNewInstance( size_t dimensions )
+
+
+vector<double> WParameterDomainKdNode::getEigenValues()
 {
-    return new WKdTreePcaProps( dimensions );
+    return m_eigenValues;
 }
-void WKdTreePcaProps::createGeoProps()
+
+WKdTreeND* WParameterDomainKdNode::getNewInstance( size_t dimensions )
 {
-    if(m_geoProps == 0)
-        m_geoProps = new WLariGeoProps();
+    return new WParameterDomainKdNode( dimensions );
 }
-WLariGeoProps* WKdTreePcaProps::getGeoProps()
+
+
+void WParameterDomainKdNode::setEigenValues( vector<double> eigenValues )
 {
-    return m_geoProps;
+    m_eigenValues = eigenValues;
+}
+void WParameterDomainKdNode::setEigenVectors( vector<WVector3d> eigenVectors )
+{
+    m_eigenVectors = eigenVectors;
+}
+void WParameterDomainKdNode::setParametersXYZ0( vector<double> parametersXYZ0 )
+{
+    m_parametersXYZ0 = parametersXYZ0;
+}
+vector<double> WParameterDomainKdNode::getParametersXYZ0()
+{
+    return m_parametersXYZ0;
 }
