@@ -39,6 +39,11 @@ namespace laslibb
     {
         m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 0;
         filePath = 0;
+        m_fromX = 0;
+        m_fromY = 0;
+        m_dataSetWidth = 200;
+        m_translateToCenter = true;
+        m_contrast = 0.005;
     }
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
@@ -64,8 +69,7 @@ namespace laslibb
         filePath = path;
     }
 
-    boost::shared_ptr< WDataSetPoints > WLasReader::getPoints(
-            size_t fromX, size_t fromY, size_t dataSetWidth, bool moveToCenter )
+    boost::shared_ptr< WDataSetPoints > WLasReader::getPoints()
     {
         WDataSetPoints::VertexArray vertices(
                 new WDataSetPoints::VertexArray::element_type() );
@@ -85,8 +89,8 @@ namespace laslibb
         size_t count = header.GetPointRecordsCount();
         setProgressSettings( count );
         size_t addedPoints = 0;
-        float xOffset = fromX + dataSetWidth / 2;
-        float yOffset = fromY + dataSetWidth / 2;
+        float xOffset = m_fromX + m_dataSetWidth / 2;
+        float yOffset = m_fromY + m_dataSetWidth / 2;
         float zOffset = ( m_zMax - m_zMin ) / 2;
 
 //        double oldTime = 0.0; //TODO(schwarzkopf): remove that commented lines in final version
@@ -140,10 +144,10 @@ namespace laslibb
             if  ( v < m_intensityMin ) m_intensityMin = v;
             if  ( v > m_intensityMax ) m_intensityMax = v;
 
-            if  ( dataSetWidth == 0 || ( x >= fromX && x < fromX+dataSetWidth
-                    && y >= fromY && y < fromY+dataSetWidth ) )
+            if  ( m_dataSetWidth == 0 || ( x >= m_fromX && x < m_fromX+m_dataSetWidth
+                    && y >= m_fromY && y < m_fromY+m_dataSetWidth ) )
             {
-                if  ( moveToCenter )
+                if  ( m_translateToCenter )
                 {
                     x -= xOffset;
                     y -= yOffset;
@@ -153,7 +157,7 @@ namespace laslibb
                 vertices->push_back( y );
                 vertices->push_back( z );
                 for  ( int color = 0; color < 3; color++ )
-                    colors->push_back( v );
+                    colors->push_back( v * m_contrast );
                 addedPoints++;
             }
 //            std::cout << i << ": " << x << " " << " " << y << " " << z << " " << v << "\r\n";
@@ -178,6 +182,20 @@ namespace laslibb
         m_outputPoints = outputPoints;
 
         return m_outputPoints;
+    }
+    void WLasReader::setDataSetRegion( size_t fromX, size_t fromY, size_t dataSetWidth )
+    {
+        m_fromX = fromX;
+        m_fromY = fromY;
+        m_dataSetWidth = dataSetWidth;
+    }
+    void WLasReader::setTranslateToCenter( bool translateToCenter )
+    {
+        m_translateToCenter = translateToCenter;
+    }
+    void WLasReader::setContrast( double contrast )
+    {
+        m_contrast = contrast;
     }
     float WLasReader::getXMin()
     {

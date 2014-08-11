@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <vector>
+#include <limits>
 
 #include "WPointSearcher.h"
 
@@ -37,8 +38,8 @@ WPointSearcher::WPointSearcher( WKdTreeND* kdTree )
 }
 WPointSearcher::~WPointSearcher()
 {
-    m_searchedPoint.resize( 0 );
-    m_searchedPoint.reserve( 0 );
+    m_searchedCoordinate.resize( 0 );
+    m_searchedCoordinate.reserve( 0 );
 }
 vector<WPosition>* WPointSearcher::convertToPointSet( vector<WPointDistance>* pointDistances )
 {
@@ -55,11 +56,12 @@ vector<WPointDistance>* WPointSearcher::getNearestPoints()
 {
     vector<WPointDistance>* nearestPoints = new vector<WPointDistance>();
     double index = 1;
-    for( index = 1; index <= m_distanceSteps
+    size_t distanceSteps = m_maxResultPointCount == std::numeric_limits< size_t >::max() ?1 :m_distanceSteps;
+    for( index = 1; index <= distanceSteps
             && nearestPoints->size() < m_maxResultPointCount; index++ )
     {
-        nearestPoints->resize( 0 );
-        nearestPoints->reserve( 0 );
+        delete nearestPoints;
+        nearestPoints = new vector<WPointDistance>();
         double maxDistance = m_maxSearchDistance * pow( 2.0, - ( double )m_distanceSteps + ( double )index );
         fetchNearestPoints( m_examinedKdTree, nearestPoints, maxDistance );
         //cout << "Attempt at max distance: " << maxDistance << "    size = " << nearestPoints->size() << endl;
@@ -81,7 +83,7 @@ void WPointSearcher::setExaminedKdTree( WKdTreeND* kdTree )
 }
 void WPointSearcher::setSearchedPoint( vector<double> searchedPoint )
 {
-    m_searchedPoint = searchedPoint;
+    m_searchedCoordinate = searchedPoint;
 }
 void WPointSearcher::setMaxSearchDistance( double distance )
 {
@@ -93,24 +95,25 @@ void WPointSearcher::setMaxResultPointCount( size_t maxPointCount )
 }
 void WPointSearcher::fetchNearestPoints( WKdTreeND* currentNode, vector<WPointDistance>* targetPoints, double maxDistance )
 {
-    vector<vector<double> >* nodePoints = currentNode->getNodePoints();
+    vector<WKdPointND* >* nodePoints = currentNode->getNodePoints();
     WKdTreeND* lowerChild = currentNode->getLowerChild();
     WKdTreeND* higherChild = currentNode->getHigherChild();
     if( nodePoints->size() > 0 && lowerChild == 0 && higherChild == 0)
     {
         for( size_t index = 0; index < nodePoints->size(); index++ )
         {
-            vector<double> point = nodePoints->at( index );
-            if( WPointDistance::getPointDistance( m_searchedPoint, point ) <= maxDistance )
-                targetPoints->push_back( WPointDistance( m_searchedPoint, point ) );
+            WKdPointND* point = nodePoints->at( index );
+            if( WPointDistance::getPointDistance( m_searchedCoordinate, point->getCoordinate() ) <= maxDistance )
+                targetPoints->push_back( WPointDistance( m_searchedCoordinate, nodePoints->at( index ) ) );
         }
     }
     else
     {
         if( nodePoints->size() == 0 && lowerChild != 0 && higherChild != 0 )
         {
+            double splittingDimension = currentNode->getSplittingDimension();
             double splittingPosition = currentNode->getSplittingPosition();
-            double pointCoord = m_searchedPoint.at( currentNode->getSplittingDimension() );
+            double pointCoord = m_searchedCoordinate.at( splittingDimension );
             if( pointCoord < splittingPosition + maxDistance )
                 fetchNearestPoints( currentNode->getLowerChild(), targetPoints, maxDistance );
             if( pointCoord > splittingPosition - maxDistance )

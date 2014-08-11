@@ -40,7 +40,7 @@ WPCAWallDetector::~WPCAWallDetector()
 }
 void WPCAWallDetector::analyze()
 {
-    analyzeNode( ( WWallDetectOctNode* )( m_analyzableOctree->getRootNode() ) );
+    analyzeNode( static_cast<WWallDetectOctNode*>( m_analyzableOctree->getRootNode() ) );
 }
 void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
 {
@@ -61,7 +61,7 @@ void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                analyzeNode( ( WWallDetectOctNode* )( node->getChild( child ) ) );
+                analyzeNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ) );
     }
 }
 boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSetPoints::VertexArray inputVertices )
@@ -80,7 +80,7 @@ boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSet
         WOctNode* octNode = m_analyzableOctree->getLeafNode( x, y, z );
         if( octNode != 0 )
         {
-            WWallDetectOctNode* node = ( WWallDetectOctNode* )octNode;
+            WWallDetectOctNode* node = static_cast<WWallDetectOctNode*>( octNode );
             size_t groupSize = m_analyzableOctree->getNodeCountOfGroup( node->getGroupNr() );
             bool groupMatch = groupSize >= m_minimalGroupSize && groupSize <= m_maximalGroupSize;
             bool pointCountMatch = node->getPointCount() >= m_minimalPointsPerVoxel;
@@ -111,7 +111,7 @@ boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSet
 boost::shared_ptr< WTriangleMesh > WPCAWallDetector::getOutline()
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
-    drawNode( ( WWallDetectOctNode* )( m_analyzableOctree->getRootNode() ), tmpMesh );
+    drawNode( static_cast<WWallDetectOctNode*>( m_analyzableOctree->getRootNode() ), tmpMesh );
     return tmpMesh;
 }
 
@@ -134,7 +134,7 @@ void WPCAWallDetector::drawNode( WWallDetectOctNode* node, boost::shared_ptr< WT
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                drawNode( ( WWallDetectOctNode* )(node->getChild( child ) ), outputMesh );
+                drawNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ), outputMesh );
     }
 }
 void WPCAWallDetector::drawLeafNodeCube( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )

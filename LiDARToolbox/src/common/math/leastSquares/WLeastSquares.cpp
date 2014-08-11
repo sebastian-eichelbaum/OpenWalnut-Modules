@@ -52,6 +52,13 @@ vector<double> WLeastSquares::getHessescheNormalForm()
 {
     return m_hessescheNormalForm;
 }
+vector<double> WLeastSquares::getNormalVectorNotNormalized()
+{
+    vector<double> normalVector;
+    for( size_t dimension = 0; dimension < m_hessescheNormalForm.size() - 1; dimension++ )
+        normalVector.push_back( m_hessescheNormalForm[dimension] );
+    return normalVector;
+}
 void WLeastSquares::calculatePerpendicularDimension()
 {
     WPrincipalComponentAnalysis pca;

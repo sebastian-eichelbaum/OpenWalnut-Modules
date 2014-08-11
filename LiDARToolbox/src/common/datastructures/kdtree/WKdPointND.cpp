@@ -23,45 +23,32 @@
 //---------------------------------------------------------------------------
 
 #include <iostream>
+#include <algorithm>
 #include <vector>
-#include "WSpatialDomainKdNode.h"
+#include "WKdPointND.h"
 
-WSpatialDomainKdNode::WSpatialDomainKdNode( size_t dimensions ) : WKdTreeND( dimensions )
+using std::cout;
+using std::endl;
+WKdPointND::WKdPointND( vector<double> coordinate )
 {
+    m_coordinate = coordinate;
 }
-WSpatialDomainKdNode::~WSpatialDomainKdNode()
+WKdPointND::WKdPointND( double x, double y, double z )
 {
+    m_coordinate = vector<double>( 3, 0 );
+    m_coordinate[0] = x;
+    m_coordinate[1] = y;
+    m_coordinate[2] = z;
 }
-
-
-vector<double> WSpatialDomainKdNode::getEigenValues()
+WKdPointND::~WKdPointND()
 {
-    return m_eigenValues;
-}
-
-vector<double> WSpatialDomainKdNode::getHessescheNormalForm()
-{
-    return m_hessescheNormalForm;
-}
-vector<double> WSpatialDomainKdNode::getParametersXYZ0()
-{
-    return WLeastSquares::getParametersXYZ0( m_hessescheNormalForm );
-}
-WKdTreeND* WSpatialDomainKdNode::getNewInstance( size_t dimensions )
-{
-    return new WSpatialDomainKdNode( dimensions );
 }
 
-
-void WSpatialDomainKdNode::setEigenValues( vector<double> eigenValues )
+size_t WKdPointND::getDimensionCount()
 {
-    m_eigenValues = eigenValues;
+    return m_coordinate.size();
 }
-void WSpatialDomainKdNode::setEigenVectors( vector<WVector3d> eigenVectors )
+vector<double> WKdPointND::getCoordinate()
 {
-    m_eigenVectors = eigenVectors;
-}
-void WSpatialDomainKdNode::setHessescheNormalForm( vector<double> hessescheNormalForm )
-{
-    m_hessescheNormalForm = hessescheNormalForm;
+    return m_coordinate;
 }

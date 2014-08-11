@@ -130,6 +130,13 @@ public:
      */
     static void outlineNormalPlane( vector<double> planeHessescheNormalForm, WPosition nearestPoint,
             double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh );
+    /**
+     * Transforms a vector so that its euclidian distance becomes 1.0. The directions 
+     * remains the same.
+     * \param vector Vector to normalize.
+     * \return The normalized vector.
+     */
+    static WPosition getNormalizedVector( WVector3d vector );
 
 protected:
     /**
@@ -158,13 +165,6 @@ private:
      * \param steps Points count as reference to the progress bar.
      */
     void setProgressSettings( size_t steps );
-    /**
-     * Transforms a vector so that its euclidian distance becomes 1.0. The directions 
-     * remains the same.
-     * \param vector Vector to normalize.
-     * \return The normalized vector.
-     */
-    static WPosition getNormalizedVector( WVector3d vector );
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.

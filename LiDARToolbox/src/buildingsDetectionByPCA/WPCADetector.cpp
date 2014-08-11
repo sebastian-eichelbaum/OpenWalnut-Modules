@@ -50,7 +50,7 @@ void WPCADetector::setMinPointsPerVoxelToDraw( size_t minPointsPerVoxelToDraw )
 }
 void WPCADetector::analyze()
 {
-    analyzeNode( ( WPcaDetectOctNode* )( m_analyzableOctree->getRootNode() ) );
+    analyzeNode( static_cast<WPcaDetectOctNode*>( m_analyzableOctree->getRootNode() ) );
 }
 void WPCADetector::analyzeNode( WPcaDetectOctNode* node )
 {
@@ -71,13 +71,13 @@ void WPCADetector::analyzeNode( WPcaDetectOctNode* node )
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                analyzeNode( ( WPcaDetectOctNode* )( node->getChild( child ) ) );
+                analyzeNode( static_cast<WPcaDetectOctNode*>( node->getChild( child ) ) );
     }
 }
 boost::shared_ptr< WTriangleMesh > WPCADetector::getOutline()
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
-    drawNode( ( WPcaDetectOctNode* )( m_analyzableOctree->getRootNode() ), tmpMesh );
+    drawNode( static_cast<WPcaDetectOctNode*>( m_analyzableOctree->getRootNode() ), tmpMesh );
     return tmpMesh;
 }
 
@@ -96,7 +96,7 @@ void WPCADetector::drawNode( WPcaDetectOctNode* node, boost::shared_ptr< WTriang
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                drawNode( ( WPcaDetectOctNode* )(node->getChild( child ) ), outputMesh );
+                drawNode( static_cast<WPcaDetectOctNode*>( node->getChild( child ) ), outputMesh );
     }
 }
 void WPCADetector::drawLeafNode( WPcaDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )

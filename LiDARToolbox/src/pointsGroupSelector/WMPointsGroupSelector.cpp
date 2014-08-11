@@ -80,7 +80,7 @@ const std::string WMPointsGroupSelector::getDescription() const
 void WMPointsGroupSelector::connectors()
 {
     m_input = WModuleInputData< WDataSetPointsGrouped >::createAndAdd( shared_from_this(),
-            "Grouped data set points input.", "Brouped points that can be observed separately." );
+            "Grouped data set points input.", "Grouped points that can be observed separately." );
 
     m_outputTrimesh = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
                 new WModuleOutputData< WTriangleMesh >( shared_from_this(),
@@ -109,10 +109,7 @@ void WMPointsGroupSelector::properties()
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
 
-    m_contrast = m_properties->addProperty( "Contrast: ",
-                            "This is the value that multiplies the input colors before assigning to the output. "
-                            "Note that the output has the range between 0.0 and 1.0.\r\nHint: Look ath the intensity "
-                            "maximum param in the information tab of the ReadLAS plugin.", 0.005, m_propCondition );
+
     m_detailDepth = m_properties->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
                             "depth for the octree search tree.", 0, m_propCondition );
     m_detailDepth->setMin( -3 );
@@ -122,6 +119,8 @@ void WMPointsGroupSelector::properties()
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
     m_highlightUsingColors = m_properties->addProperty( "Hilight using colors: ",
                             "Hilights output ddata groups using colors.", true, m_propCondition );
+    m_clearInputColor = m_properties->addProperty( "Clear input color: ",
+                            "Hilights output ddata groups using colors.", false, m_propCondition );
 
     m_selectedShowableBuilding = m_properties->addProperty( "Showable building idx: ",
             "Index of the showable building. 0 means all "
@@ -181,7 +180,6 @@ void WMPointsGroupSelector::moduleMain()
             m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
             WOctree* m_tree = new WOctree( pow( 2.0, m_detailDepth->get() ) );
 
-            float contrast = m_contrast->get();
             for  ( size_t vertex = 0; vertex < count; vertex++)
             {
                 float x = verts->at( vertex*3 );
@@ -194,6 +192,8 @@ void WMPointsGroupSelector::moduleMain()
                     float r = colors->at( vertex*3 );
                     float g = colors->at( vertex*3+1 );
                     float b = colors->at( vertex*3+2 );
+                    if( m_clearInputColor->get() )
+                        r = g = b = 1.0;
                     if( m_highlightUsingColors->get() )
                     {
                         r *= WOctree::calcColor( group, 0 );
@@ -203,9 +203,9 @@ void WMPointsGroupSelector::moduleMain()
                     outputVertices->push_back( x );
                     outputVertices->push_back( y );
                     outputVertices->push_back( z );
-                    outputColors->push_back( r*contrast );
-                    outputColors->push_back( g*contrast );
-                    outputColors->push_back( b*contrast );
+                    outputColors->push_back( r );
+                    outputColors->push_back( g );
+                    outputColors->push_back( b );
 
                     m_progressStatus->increment( 1 );
                     m_tree->registerPoint( x, y, z );

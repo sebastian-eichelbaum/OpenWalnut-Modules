@@ -27,6 +27,7 @@
 
 #include <vector>
 #include <algorithm>
+#include "WKdPointND.h"
 
 using std::vector;
 using std::size_t;
@@ -46,6 +47,9 @@ public:
      * \param dimensions The dimension count of the kd tree.
      */
     explicit WKdTreeND( size_t dimensions );
+    /**
+     * Destroys an n dimensional kd tree node.
+     */
     virtual ~WKdTreeND();
     /**
      * Adds points to the kd tree. It's better to add all the points into an empty tree.
@@ -53,7 +57,7 @@ public:
      * unbalanced binary tree inside adding a larger amount of points.
      * \param addables Points to add.
      */
-    void add( vector<vector<double> >* addables );
+    void add( vector<WKdPointND*>* addables );
     /**
      * Says whether a kd tree node can be split or not. Firstly the method to determine 
      * the splitting dimension should be executed. A true value is returned if the 
@@ -65,14 +69,14 @@ public:
      * Fetches all the points from a kd tree node into a list.
      * \param targetPointSet Target point list to put points to.
      */
-    void fetchPoints( vector<vector<double> >* targetPointSet );
+    void fetchPoints( vector<WKdPointND* >* targetPointSet );
 //    double getAreaMin(size_t dimension); //TODO(aschwarzkopf): Consider to purge in future
 //    double getAreaMax(size_t dimension); //TODO(aschwarzkopf): Consider to purge in future
     /**
-     * Returns all the leaf nodes of the kd tree.
-     * \return All the leaf nodes of the kd tree.
+     * Returns all points that belont to a kd tree leaf node.
+     * \return all points that belong to a kd tree leaf node.
      */
-    vector<WKdTreeND*>* getAllLeafNodes();
+    vector<WKdPointND*>* getAllPoints();
     /**
      * Returns the dimension count of the kd tree.
      * \return The dimension count of the kd tree.
@@ -101,7 +105,7 @@ public:
      * return points.
      * \return The points of a kd tree node.
      */
-    vector<vector<double> >* getNodePoints();
+    vector<WKdPointND*>* getNodePoints();
     /**
      * Returns the dimension across which the current node is split.
      * \return The dimension across which the current node is split.
@@ -125,19 +129,24 @@ protected:
 
 private:
     /**
+     * Returns all the leaf nodes of the kd tree.
+     * \return All the leaf nodes of the kd tree.
+     */
+    vector<WKdTreeND*>* getAllLeafNodes();
+    /**
      * This method is used by the method to add new points. It puts points either to the 
      * node of the lower or higher position across the splitting dimension. The method is 
      * executed after the splitting dimension and position are calculated.
      * \param newPoints Points to append to child nodes.
      */
-    void addPointsToChildren( vector<vector<double> >* newPoints );
+    void addPointsToChildren( vector<WKdPointND* >* newPoints );
     /**
      * Calculates the splitting position between the two child nodes. It calculates the 
      * median of all input points across the splitting dimension between two children. 
      * Always check out the splitting dimension before that.
      * \param points Input points to calculate the median across the splitted dimension.
      */
-    void calculateSplittingPosition( vector<vector<double> >* points );
+    void calculateSplittingPosition( vector<WKdPointND* >* points );
     /**
      * Determines the new splitting dimension between two child nodes. Afterwards the 
      * splitting position can be calculated across that dimension after executing that 
@@ -145,7 +154,7 @@ private:
      * \param inputPoints Input points to analyse the most optimal splitting dimension.
      * \return The kd tree node can be split or not.
      */
-    bool determineNewSplittingDimension( vector<vector<double> >* inputPoints );
+    bool determineNewSplittingDimension( vector<WKdPointND* >* inputPoints );
     /**
      * Fetches all kd tree leaf nodes into a node list.
      * \param targetNodeList The target list where leaf nodes are put.
@@ -200,7 +209,7 @@ private:
     /**
      * Points covered by a kd tree node.
      */
-    vector<vector<double> >* m_points;
+    vector<WKdPointND* >* m_points;
 
 
 //    vector<double> areaMin;    //TODO(aschwarzkopf): Decide later whether to keep or not: It can be easily purged.

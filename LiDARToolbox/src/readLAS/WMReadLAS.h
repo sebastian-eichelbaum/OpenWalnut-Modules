@@ -178,6 +178,10 @@ private:
      * Enables to put the output data to the coordinate system center
      */
     WPropBool m_translateDataToCenter;
+    /**
+     * Multiplier that is applied on the input data set color intensity.
+     */
+    WPropDouble m_contrast;
 
     WPropInt m_nbVertices; //!< Info-property showing the number of vertices in the mesh.
     /**

@@ -162,16 +162,21 @@ private:
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
     /**
-     * Output point set that depicts the input points of the spatial domains. Points are 
-     * hilighted if they belong to the planar or linear/cylindrical domain.
+     * Output connector that depicts planar groups using the context of the spatial 
+     * domain.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputSpatialDomain;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputSpatialDomainGroups;
+    /**
+     * Output connector that depicts planar groups using the context of the parameter 
+     * domain.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputSpatialDomainCategories;
     /**
      * Output point set that depicts the parameter domain. Each point of that depicts 
      * a planar formula (in relation to its neighbors) of each input point of the 
      * spatial domain.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputParameterDomain;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputParameterDomain;
     /**
      * Output connector that depicts best fitted planes of each input point in relation 
      * to its neighbors.
@@ -226,7 +231,18 @@ private:
     WPropDouble m_zMax;
 
 
-
+    /**
+     * Setting that regards the planar formula of each spatial point in relation to its 
+     * neighborship. This variable is the maximal angular deviation of plane formulas 
+     * between two points.
+     */
+    WPropDouble m_segmentationMaxAngleDegrees;
+    /**
+     * Setting that regards the planar formula of each spatial point in relation to its 
+     * neighborship. This variable is the maximal difference between two plane normal 
+     * distance to the origin.
+     */
+    WPropDouble m_segmentationPlaneDistance;
     /**
      * The maximal count of analyzed neighbors of an 
      * examined input point.

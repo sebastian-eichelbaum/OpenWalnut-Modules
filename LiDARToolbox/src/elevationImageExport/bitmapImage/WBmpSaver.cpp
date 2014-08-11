@@ -96,8 +96,8 @@ void WBmpSaver::saveImage( WBmpImage* image, const char* path )
     info[26] = (unsigned char)( sizeData>>16 );
     info[27] = (unsigned char)( sizeData>>24 );
 
-    stream.write( ( char* )file, sizeof( file ) );
-    stream.write( ( char* )info, sizeof( info ) );
+    stream.write( reinterpret_cast<char*>( file ), sizeof( file ) );
+    stream.write( reinterpret_cast<char*>( info ), sizeof( info ) );
 
     unsigned char pad[3] = {0, 0, 0};
 
@@ -110,9 +110,9 @@ void WBmpSaver::saveImage( WBmpImage* image, const char* path )
             pixel[1] = image->getG( x, y );
             pixel[2] = image->getR( x, y );
 
-            stream.write( ( char* )pixel, 3 );
+            stream.write( reinterpret_cast<char*>( pixel ), 3 );
         }
-        stream.write( ( char* )( pad ), padSize );
+        stream.write( reinterpret_cast<char*>( pad ), padSize );
     }
     stream.close();
 }

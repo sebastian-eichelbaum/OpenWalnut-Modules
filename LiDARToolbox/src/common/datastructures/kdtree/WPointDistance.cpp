@@ -30,10 +30,10 @@ WPointDistance::WPointDistance()
 {
     m_pointDistance = 0;
 }
-WPointDistance::WPointDistance( vector<double> sourcePoint, vector<double> comparedPoint )
+WPointDistance::WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint )
 {
-    m_comparedCoordinate = comparedPoint;
-    m_pointDistance = getPointDistance( sourcePoint, comparedPoint );
+    m_comparedPoint = comparedPoint;
+    m_pointDistance = getPointDistance( sourcePoint, getComparedPoint()->getCoordinate() );
 }
 
 WPointDistance::~WPointDistance()
@@ -41,7 +41,11 @@ WPointDistance::~WPointDistance()
 }
 vector<double> WPointDistance::getComparedCoordinate()
 {
-    return m_comparedCoordinate;
+    return m_comparedPoint->getCoordinate();
+}
+WKdPointND* WPointDistance::getComparedPoint()
+{
+    return m_comparedPoint;
 }
 double WPointDistance::getDistance()
 {

@@ -29,6 +29,7 @@
 #include <vector>
 #include "WPointDistance.h"
 #include "WKdTreeND.h"
+#include "WKdPointND.h"
 #include "core/common/math/linearAlgebra/WPosition.h"
 
 using std::cout;
@@ -89,13 +90,8 @@ public:
      * \param maxPointCount The maximal neighbor count that is found for a coordinate.
      */
     void setMaxResultPointCount( size_t maxPointCount );
-    /**
-     * A performance setting that has no effect on the result. Often the limited point 
-     * count is covered by a significantly smaller radius than the limit.
-     * Searching through the nodes it firstly traverses nodes of a smaller distance. The 
-     * first radius is searched radius divided by pow(2, steps).
-     */
-    size_t m_distanceSteps;
+
+private:
     /**
      * Kd tree where nearest points are searched.
      */
@@ -103,7 +99,7 @@ public:
     /**
      * The coordinate of which nearest points will be returned.
      */
-    vector<double> m_searchedPoint;
+    vector<double> m_searchedCoordinate;
     /**
      * maximal euclidian distance within which neighbors are searched.
      */
@@ -112,8 +108,13 @@ public:
      * Maximal output neighbor count.
      */
     size_t m_maxResultPointCount;
-
-private:
+    /**
+     * A performance setting that has no effect on the result. Often the limited point
+     * count is covered by a significantly smaller radius than the limit.
+     * Searching through the nodes it firstly traverses nodes of a smaller distance. The
+     * first radius is searched radius divided by pow(2, steps).
+     */
+    size_t m_distanceSteps;
     /**
      * Fetches the nearest points into a point list using a kd tree node. It doesn't 
      * consider the maximal point count.

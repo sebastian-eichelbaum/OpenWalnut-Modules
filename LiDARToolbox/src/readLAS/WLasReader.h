@@ -73,15 +73,27 @@ namespace laslibb
 
         /**
          * Returns the read LiDAR data set points.
+         * \return LiDAR data set points containing intensities or colors.
+         */
+        boost::shared_ptr< WDataSetPoints > getPoints();
+        /**
+         * Sets from which data set region the point data should be loaded.
          * \param fromX The minimal read X coordinate.
          * \param fromY The minimal read Y coordinate.
          * \param dataSetWidth The width of the read data set.
          *         No cropping is applied using the value 0.
-         * \param moveToCenter Move the data to the center of the coordinate system.
-         * \return LiDAR data set points containing intensities or colors.
          */
-        boost::shared_ptr< WDataSetPoints > getPoints(
-                size_t fromX, size_t fromY, size_t dataSetWidth, bool moveToCenter );
+        void setDataSetRegion( size_t fromX, size_t fromY, size_t dataSetWidth );
+        /**
+         * Sets whether to move the input data to the coordinate system center.
+         * \param translateToCenter Move the data to the center of the coordinate system.
+         */
+        void setTranslateToCenter( bool translateToCenter );
+        /**
+         * Sets the value that multiplies the intensity of the color output.
+         * \param contrast The value that multiplies the intensity of the color output.
+         */
+        void setContrast( double contrast );
 
         /**
          * Returns the minimal X coordinate.
@@ -149,6 +161,27 @@ namespace laslibb
          * Input LAS file path.
          */
         const char* filePath;
+        /**
+         * The minimal read X coordinate.
+         */
+        double m_fromX;
+        /**
+         * The minimal read Y coordinate.
+         */
+        double m_fromY;
+        /**
+         * The width of the read data set. No cropping is applied using the value 0.
+         */
+        double m_dataSetWidth;
+        /**
+         * Setting whether to move the data to the center of the coordinate system.
+         */
+        bool m_translateToCenter;
+        /**
+         * The value that multiplies the intensity of the color output.
+         */
+        double m_contrast;
+
         /**
          * Minimal X coordinate in LAS file.
          */

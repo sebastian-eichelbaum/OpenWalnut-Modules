@@ -53,6 +53,9 @@ public:
      * \param dimensions Dimension definition of the space for the calculation.
      */
     explicit WLeastSquares( size_t dimensions );
+    /**
+     * Destroys the least squares adjustment instance.
+     */
     virtual ~WLeastSquares();
     /**
      * Launchs the least squares adjustment.
@@ -67,6 +70,11 @@ public:
      *         coordinate system orign.
      */
     vector<double> getHessescheNormalForm();
+    /**
+     * Returns a not normalized normal vector of the least squares adjustment result.
+     * \return A not normalized normal vector of the least squares adjustment result.
+     */
+    vector<double> getNormalVectorNotNormalized();
     /**
      * Returns the parameters X_0, Y_0 and Z_0 etc. of the best fitted plane in an n 
      * dimensional space.

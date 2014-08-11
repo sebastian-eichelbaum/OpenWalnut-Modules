@@ -151,20 +151,28 @@ private:
     /**
      * Calculates the bounding box of the input point data set. Minimals and
      * maximals of X/Y/Z are set.
+     * \param isFirstPointSet Tells whether the point set is the first one. So the first 
+     *                        coordinate will be overridden as min/max value for each 
+     *                        coordinate in the first check.
      */
-    void initBoundingBox();
+    void initBoundingBox( bool isFirstPointSet );
+    /**
+     * Assigns the bounding box value to the minimal and maximal values of the cropping 
+     * settings.
+     */
+    void setMinMax();
     /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
      * a selection or to cut away a cube area.
      * \return The cropped or cut point data set.
      */
-    boost::shared_ptr< WDataSetPoints > getTransformedPointSet();
+    void addTransformedPoints();
 
     /**
      * WDataSetPoints data input (proposed for LiDAR data).
      */
-    boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+    vector<boost::shared_ptr< WModuleInputData< WDataSetPoints > > > m_input;
     /**
      * Processed point data with cut off outliers.
      */
@@ -183,11 +191,19 @@ private:
     /**
      * Input point coordinates to crop.
      */
-    WDataSetPoints::VertexArray m_verts;
+    WDataSetPoints::VertexArray m_inVerts;
     /**
      * Colors of the input point data set that are also passed through.
      */
-    WDataSetPoints::ColorArray m_colors;
+    WDataSetPoints::ColorArray m_inColors;
+    /**
+     * Vertices of the output point data set.
+     */
+    WDataSetPoints::VertexArray m_outVerts;
+    /**
+     * Colors of the output point data set.
+     */
+    WDataSetPoints::ColorArray m_outColors;
 
     /**
      * Options for surface features.
@@ -309,6 +325,10 @@ private:
      * Maximal Z coordinate of input points.
      */
     double m_maxZ;
+    /**
+     * Sets how many points should be skipped after adding a single point to the output.
+     */
+    WPropInt m_skipRatio;
 };
 
 #endif  // WMPOINTSTRANSFORM_H

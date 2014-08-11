@@ -208,7 +208,7 @@ public:
     {
         GRAY = 1,
         RGB = 3,
-        RGBA =4
+        RGBA = 4
     };
 
     /**

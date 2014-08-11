@@ -27,6 +27,7 @@
 
 #include <vector>
 #include "../../common/datastructures/octree/WOctree.h"
+#include "../../common/math/vectors/WVectorMaths.h"
 #include "WWallDetectOctNode.h"
 
 using std::cout;
@@ -82,22 +83,6 @@ public:
      */
     void setMaxIsotropicThresholdForVoxelMerge( double isotropicThreshold );
     /**
-     * Calculates angle between two vectors
-     * \param vector1 First vector.
-     * \param vector2 Second vector.
-     * \return Angle of the two vectors using the decree scale.
-     */
-    static double getAngleOfVectors( WVector3d vector1, WVector3d vector2 );
-    /**
-     * Calculates the angle of two vectors. It has the range of 180°. Vectors
-     * showing exactly the same direction have 0°. Lying in the same line but
-     * pointing the opposite direction have the difference of 180°.
-     * \param vector1 First vector to calculate an angle between.
-     * \param vector2 Second vector to calculate an angle between.
-     * \return The angle between the two vectors.
-     */
-    static double getAngleOfNormals( WVector3d vector1, WVector3d vector2 );
-    /**
      * Returns how many nodes a group ID has.
      * \param groupNr The group ID.
      * \return Leaf node count of that croup.
@@ -119,10 +104,6 @@ public:
      * \return The node is isotropic or not.
      */
     bool isIsotropicNode( WWallDetectOctNode* node );
-    /**
-     * Radial amount of 90 degrees.
-     */
-    static const double ANGLE_90_DEGREES;
 
 protected:
     /**

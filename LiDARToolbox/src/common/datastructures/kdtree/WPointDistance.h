@@ -29,6 +29,7 @@
 
 #include <iostream>
 #include <vector>
+#include "WKdPointND.h"
 
 using std::vector;
 
@@ -52,7 +53,7 @@ public:
      * \param comparedPoint The second point that is used to calculate the distance 
      *                      between. The object stores its coordinates by that.
      */
-    WPointDistance( vector<double> sourcePoint, vector<double> comparedPoint );
+    WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint );
     /**
      * Object destructor
      */
@@ -62,6 +63,12 @@ public:
      * \return The compared point coordinate.
      */
     vector<double> getComparedCoordinate();
+    /**
+     * Returns the point that is considered within the current distance calculation 
+     * instance.
+     * \return Point that is considered within the current distance calculation instance.
+     */
+    WKdPointND* getComparedPoint();
     /**
      * Returns the distance between the reference point and the compared one.
      * \return The distance between the two instantiated points using the constructor.
@@ -81,6 +88,8 @@ public:
      * \return The distance of this object is smaller than the right one or not.
      */
     bool operator<( WPointDistance const& right ) const;
+
+private:
     /**
      * The euclidian distance between the two points instantiated using the constructor.
      */
@@ -89,7 +98,7 @@ public:
      * The unidimensional coordinate of the compared point instantiated using the 
      * constructor.
      */
-    vector<double> m_comparedCoordinate;
+    WKdPointND* m_comparedPoint;
 };
 
 #endif  // WPOINTDISTANCE_H

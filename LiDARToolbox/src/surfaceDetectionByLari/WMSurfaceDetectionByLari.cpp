@@ -80,17 +80,21 @@ void WMSurfaceDetectionByLari::connectors()
 {
     m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
 
-    m_outputSpatialDomain = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
+    m_outputSpatialDomainGroups = boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > >(
+            new WModuleOutputData< WDataSetPointsGrouped >( shared_from_this(),
+                    "Spatial domain point groups", "//TODO: description" ) );
+    m_outputSpatialDomainCategories = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
             new WModuleOutputData< WDataSetPoints >( shared_from_this(),
-                    "Spatial domain points", "//TODO: description" ) );
-    m_outputParameterDomain = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
-            new WModuleOutputData< WDataSetPoints >( shared_from_this(),
+                    "Spatial domain point categories", "//TODO: description" ) );
+    m_outputParameterDomain = boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > >(
+            new WModuleOutputData< WDataSetPointsGrouped >( shared_from_this(),
                     "Parameter domain points", "//TODO: description" ) );
     m_outputLeastSquaresPlanes = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
             new WModuleOutputData< WTriangleMesh >( shared_from_this(),
                     "Least Squares Planes", "//TODO: description" ) );
 
-    addConnector( m_outputSpatialDomain );
+    addConnector( m_outputSpatialDomainGroups );
+    addConnector( m_outputSpatialDomainCategories );
     addConnector( m_outputParameterDomain );
     addConnector( m_outputLeastSquaresPlanes );
 //    addConnector( m_buildings );
@@ -114,6 +118,8 @@ void WMSurfaceDetectionByLari::properties()
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
     double minRange = 0.01;
+    m_segmentationPlaneDistance = m_properties->addProperty( "Plane distance", "", .7, m_propCondition );
+    m_segmentationMaxAngleDegrees = m_properties->addProperty( "Plane angle", "", 7.0, m_propCondition );
     m_numberPointsK = m_properties->addProperty( "Number points K=", "", 12, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
 
@@ -218,24 +224,19 @@ void WMSurfaceDetectionByLari::moduleMain()
 
             WQuadTree* boundingBox = new WQuadTree( pow( 2.0, 3 ) );
 
-            vector<vector<double> >* inputPointsVector = new vector<vector<double> >();
-            inputPointsVector->reserve( count );
-            inputPointsVector->resize( count );
+            vector<WSpatialDomainKdPoint*>* inputPoints = new vector<WSpatialDomainKdPoint*>();
             for  ( size_t vertex = 0; vertex < count; vertex++)
             {
                 float x = inputVerts->at( vertex*3 );
                 float y = inputVerts->at( vertex*3+1 );
                 float z = inputVerts->at( vertex*3+2 );
-                inputPointsVector->at( vertex ).reserve( 3 );
-                inputPointsVector->at( vertex ).resize( 3 );
-                inputPointsVector->at( vertex )[0] = x;
-                inputPointsVector->at( vertex )[1] = y;
-                inputPointsVector->at( vertex )[2] = z;
+                inputPoints->push_back( new WSpatialDomainKdPoint( x, y, z ) );
                 boundingBox->registerPoint( x, y, z );
                 m_progressStatus->increment( 1 );
             }
 
             WSurfaceDetectorLari* detector = new WSurfaceDetectorLari();
+            detector->setSegmentationSettings( m_segmentationMaxAngleDegrees->get(), m_segmentationPlaneDistance->get() );
             detector->setNumberPointsK( m_numberPointsK->get() );
             detector->setMaxPointDistanceR( m_maxPointDistanceR->get() );
             detector->setPlanarNLambdaRange( 0, m_surfaceNLambda1Min->get(), m_surfaceNLambda1Max->get() );
@@ -245,14 +246,20 @@ void WMSurfaceDetectionByLari::moduleMain()
             detector->setCylindricalNLambdaRange( 1, m_cylNLambda2Min->get(), m_cylNLambda2Max->get() );
             detector->setCylindricalNLambdaRange( 2, m_cylNLambda3Min->get(), m_cylNLambda3Max->get() );
 
-            detector->analyzeData( inputPointsVector );
+            detector->analyzeData( inputPoints );
             WLariOutliner outliner( detector );
-            m_outputSpatialDomain->updateData( outliner.outlineSpatialDomain() );
+            cout << "Outlining spatial domain" << endl;
+            m_outputSpatialDomainGroups->updateData( outliner.outlineSpatialDomainGroups() );
+            cout << "Outlining parameter domain" << endl;
+            m_outputSpatialDomainCategories->updateData( outliner.outlineSpatialDomainCategories() );
+            cout << "Outlining parameter domain" << endl;
             m_outputParameterDomain->updateData( outliner.outlineParameterDomain() );
+            cout << "Outlining point planes" << endl;
             m_outputLeastSquaresPlanes->updateData( outliner.outlineLeastSquaresPlanes( m_squareWidth->get() ) );
+            cout << "Outlining done" << endl;
 
             //delete detector;
-            delete inputPointsVector;
+            delete inputPoints;
 
             m_nbPoints->set( count );
             m_infoRenderTimeSeconds->set( timer.elapsed() );

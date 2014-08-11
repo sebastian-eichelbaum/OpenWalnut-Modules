@@ -22,33 +22,46 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WSPATIALDOMAINKDNODE_H
-#define WSPATIALDOMAINKDNODE_H
+#ifndef WSPATIALDOMAINKDPOINT_H
+#define WSPATIALDOMAINKDPOINT_H
 
 #include <vector>
-#include "../../common/datastructures/kdtree/WKdTreeND.h"
+#include "../../common/datastructures/kdtree/WKdPointND.h"
 #include "core/common/math/linearAlgebra/WVectorFixed.h"
 #include "../../common/math/leastSquares/WLeastSquares.h"
 
 /**
- * This kd tree node enables nodes to hold metadata for each single point used by the 
- * process of the Lari/Habib (2014).
+ * Point information container that is used for surface detection approach of Lari/Habib.
  */
-class WSpatialDomainKdNode : public WKdTreeND
+class WSpatialDomainKdPoint : public WKdPointND
 {
 public:
     /**
-     * Instantiates the kd tree node
-     * \param dimensions The dimensions count
+     * Instantiates the point using an n dimensional coordinate.
+     * \param coordinate An n dimensional coordinate.
      */
-    explicit WSpatialDomainKdNode( size_t dimensions );
-
-    virtual ~WSpatialDomainKdNode();
+    explicit WSpatialDomainKdPoint( vector<double> coordinate );
+    /**
+     * Instantiates the point using a three dimensional coordinate.
+     * \param x X coordinate.
+     * \param y Y coordinate.
+     * \param z Z coordinate.
+     */
+    explicit WSpatialDomainKdPoint( double x, double y, double z );
+    /**
+     * Destroys the point meta data set.
+     */
+    virtual ~WSpatialDomainKdPoint();
     /**
      * Returns the eigen value of the point in relation to its neighbor points.
      * \return Point's Eigen Values in relation to its neighbor points.
      */
     vector<double> getEigenValues();
+    /**
+     * Returns the plane cluster ID of the point.
+     * \return Plane cluster ID of the point.
+     */
+    size_t getClusterID();
     /**
      * Returns the plane formula for the best fitted plane.
      * \return The hessesche Normal Form of the best fitted plane. First n numbers (by 
@@ -62,7 +75,11 @@ public:
      * \return The parameter domain coordinates of the point.
      */
     vector<double> getParametersXYZ0();
-
+    /**
+     * Tells whether planar parameters are valid.
+     * \return Has valid parameters or not.
+     */
+    bool hasValidParameters();
     /**
      * Sets the eigens values of the point in relation to its neighbors.
      * \param eigenValues The eigen values of a poinnt in relation to its neighbors.
@@ -80,15 +97,11 @@ public:
      *                            fitted plane.
      */
     void setHessescheNormalForm( vector<double> hessescheNormalForm );
-
-protected:
     /**
-     * Enables the derived kd tree node class to create a new instance of that kd tree 
-     * node class type.
-     * \param dimensions The dimension count of the new kd tree node.
-     * \return a new kd tree node instance of that class.
+     * Sets the plane cluster ID to the point.
+     * \param clusterID Plane cluster ID of the point.
      */
-    virtual WKdTreeND* getNewInstance( size_t dimensions );
+    void setClusterID( size_t clusterID );
 
 private:
     /**
@@ -103,6 +116,10 @@ private:
      * Space for the calculated Hessesche Normal Form.
      */
     vector<double> m_hessescheNormalForm;
+    /**
+     * Plane cluster ID of the point.
+     */
+    size_t m_clusterID;
 };
 
-#endif  // WSPATIALDOMAINKDNODE_H
+#endif  // WSPATIALDOMAINKDPOINT_H

@@ -60,8 +60,8 @@ WWallDetectOctree::~WWallDetectOctree()
 }*/
 bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
 {
-    WWallDetectOctNode* node1 = ( WWallDetectOctNode* ) octNode1;
-    WWallDetectOctNode* node2 = ( WWallDetectOctNode* ) octNode2;
+    WWallDetectOctNode* node1 = static_cast<WWallDetectOctNode*>( octNode1 );
+    WWallDetectOctNode* node2 = static_cast<WWallDetectOctNode*>( octNode2 );
     if( !( node1->hasEigenValuesAndVectors() ) || !( node2->hasEigenValuesAndVectors() )
             || node1->getPointCount() < m_minimalPointsPerVoxel
             || node2->getPointCount() < m_minimalPointsPerVoxel
@@ -69,16 +69,16 @@ bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
         return false;
 
     if( isLinearNode( node1 ) && isLinearNode( node2 ) )
-        return getAngleOfNormals( node1->getStrongestEigenVector(), node2->getStrongestEigenVector() )
+        return WVectorMaths::getAngleOfPlanes( node1->getStrongestEigenVector(), node2->getStrongestEigenVector() )
                 <= m_wallMaxAngleToNeighborVoxel;
     if( isLinearNode( node1 ) && !isLinearNode( node2 ) )
-        return getAngleOfNormals( node1->getStrongestEigenVector(), node2->getNormalVector() )
+        return WVectorMaths::getAngleOfPlanes( node1->getStrongestEigenVector(), node2->getNormalVector() )
                 > 90.0 - m_wallMaxAngleToNeighborVoxel;
     if( !isLinearNode( node1 ) && isLinearNode( node2 ) )
-        return getAngleOfNormals( node1->getNormalVector(), node2->getStrongestEigenVector() )
+        return WVectorMaths::getAngleOfPlanes( node1->getNormalVector(), node2->getStrongestEigenVector() )
                 > 90.0 - m_wallMaxAngleToNeighborVoxel;
 
-    return getAngleOfNormals( node1->getNormalVector(), node2->getNormalVector() )
+    return WVectorMaths::getAngleOfPlanes( node1->getNormalVector(), node2->getNormalVector() )
             <= m_wallMaxAngleToNeighborVoxel;
 }
 void WWallDetectOctree::setWallMaxAngleToNeighborVoxel( double angleDegrees )
@@ -97,25 +97,6 @@ void WWallDetectOctree::setMaxIsotropicThresholdForVoxelMerge( double isotropicT
 {
     m_maxIsotropicThresholdForVoxelMerge = isotropicThreshold;
 }
-double WWallDetectOctree::getAngleOfVectors( WVector3d vector1, WVector3d vector2 )
-{
-    double sum = 0;
-    double range1 = 0;
-    double range2 = 0;
-    for( size_t dimension = 0; dimension < vector1.size() && dimension < vector2.size(); dimension++ )
-    {
-        sum += vector1[dimension] * vector2[dimension];
-        range1 += pow( vector1[dimension], 2.0 );
-        range2 += pow( vector2[dimension], 2.0 );
-    }
-    sum = sum / pow( range1, 0.5 ) / pow( range2, 0.5 );
-    return acos( sum ) * 90.0 / ANGLE_90_DEGREES;
-}
-double WWallDetectOctree::getAngleOfNormals( WVector3d vector1, WVector3d vector2 )
-{
-    double angle = getAngleOfVectors( vector1, vector2 );
-    return angle > 90.0 ?180.0 - angle :angle;
-}
 bool WWallDetectOctree::isLinearNode( WWallDetectOctNode* node )
 {
     if( isIsotropicNode( node ) )
@@ -126,7 +107,6 @@ bool WWallDetectOctree::isIsotropicNode( WWallDetectOctNode* node )
 {
     return node->getIsotropicLevel() > m_maxIsotropicThresholdForVoxelMerge;
 }
-const double WWallDetectOctree::ANGLE_90_DEGREES = asin( 1.0 );
 
 size_t WWallDetectOctree::getNodeCountOfGroup( size_t groupNr )
 {
@@ -138,7 +118,7 @@ void WWallDetectOctree::generateNodeCountsOfGroups()
 {
     m_nodeCountsOfGroups.reserve( 0 );
     m_nodeCountsOfGroups.resize( 0 );
-    addGroupCountsFromNode( ( WWallDetectOctNode* )getRootNode() );
+    addGroupCountsFromNode( static_cast<WWallDetectOctNode*>( getRootNode() ) );
 }
 void WWallDetectOctree::addGroupCountsFromNode( WWallDetectOctNode* node )
 {
@@ -155,6 +135,6 @@ void WWallDetectOctree::addGroupCountsFromNode( WWallDetectOctNode* node )
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                addGroupCountsFromNode( ( WWallDetectOctNode* )( node->getChild( child ) ) );
+                addGroupCountsFromNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ) );
     }
 }

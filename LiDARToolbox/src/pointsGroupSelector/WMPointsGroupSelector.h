@@ -198,10 +198,6 @@ private:
     WPropDouble m_zMax;
 
     /**
-     * Multiplier that is applied on the input data set color intensity.
-     */
-    WPropDouble m_contrast;
-    /**
      * Determines the resolution of the smallest octree node's radius in 2^n meters
      */
     WPropInt m_detailDepth;
@@ -214,6 +210,10 @@ private:
      * depicted as cubes that cover existing points.
      */
     WPropBool m_highlightUsingColors;
+    /**
+     * Switch to remove color information:
+     */
+    WPropBool m_clearInputColor;
 
     /**
      * Property to choose an output building of a voxel group number. Currently 0 is 

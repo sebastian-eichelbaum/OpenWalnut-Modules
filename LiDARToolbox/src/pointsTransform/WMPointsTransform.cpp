@@ -51,6 +51,8 @@ WMPointsTransform::WMPointsTransform():
     WModule(),
     m_propCondition( new WCondition() )
 {
+    m_input.reserve( 5 );
+    m_input.resize( 5 );
 }
 
 WMPointsTransform::~WMPointsTransform()
@@ -78,11 +80,20 @@ const std::string WMPointsTransform::getDescription() const
 
 void WMPointsTransform::connectors()
 {
-    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
+    m_input[0] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 1",
+            "The first point set to display" );
+    m_input[1] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 2",
+            "The second point set to display" );
+    m_input[2] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 3",
+            "The third point set to display" );
+    m_input[3] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 4",
+            "The fourth point set to display" );
+    m_input[4] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 5",
+            "The fifth point set to display" );
 
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
-                        shared_from_this(), "points", "The loaded points." ) );
+                        shared_from_this(), "Transformed points", "The transformed point set." ) );
 
     addConnector( m_output );
     WModule::connectors();
@@ -94,13 +105,13 @@ void WMPointsTransform::properties()
     double number_range = 1000000000.0;
     m_pointsCropGroup = m_properties->addPropertyGroup( "Point set cropping",
                                             "Options to crop the point set" );
-    m_fromX = m_pointsCropGroup->addProperty( "X min.: ", "Cut boundary.", -number_range, m_propCondition  );
-    m_toX = m_pointsCropGroup->addProperty( "X max.: ", "Cut boundary.", number_range, m_propCondition  );
-    m_fromY = m_pointsCropGroup->addProperty( "Y min.: ", "Cut boundary.", -number_range, m_propCondition  );
-    m_toY = m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition  );
-    m_fromZ = m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition  );
-    m_toZ = m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition  );
-    m_cutInsteadOfCrop = m_pointsCropGroup->addProperty( "Cut: ", "Cut instead of crop.", false, m_propCondition  );
+    m_fromX = m_pointsCropGroup->addProperty( "X min.: ", "Cut boundary.", -number_range, m_propCondition );
+    m_toX = m_pointsCropGroup->addProperty( "X max.: ", "Cut boundary.", number_range, m_propCondition );
+    m_fromY = m_pointsCropGroup->addProperty( "Y min.: ", "Cut boundary.", -number_range, m_propCondition );
+    m_toY = m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition );
+    m_fromZ = m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition );
+    m_toZ = m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition );
+    m_cutInsteadOfCrop = m_pointsCropGroup->addProperty( "Cut: ", "Cut instead of crop.", false, m_propCondition );
 
     m_translatePointsGroup = m_properties->addPropertyGroup( "Point translation",
                                             "Translates the points by the following amount of XYZ offset after cropping." );
@@ -114,32 +125,37 @@ void WMPointsTransform::properties()
     m_groupMultiplyPoints = m_properties->addPropertyGroup( "Coordinate multiplication",
                                             "Multiplies each X, Y and Z value by a factor." );
     m_factorX = m_groupMultiplyPoints->addProperty( "X factor: ", "Number which multiplies each X coordinate.",
-                                                    1.0, m_propCondition  );
+                                                    1.0, m_propCondition );
     m_factorY = m_groupMultiplyPoints->addProperty( "Y factor: ", "Number which multiplies each X coordinate.",
-                                                    1.0, m_propCondition  );
+                                                    1.0, m_propCondition );
     m_factorZ = m_groupMultiplyPoints->addProperty( "Z factor: ", "Number which multiplies each X coordinate.",
-                                                    1.0, m_propCondition  );
+                                                    1.0, m_propCondition );
 
     m_groupRotation = m_properties->addPropertyGroup( "Rotation options",
                                             "Applis rotation across three planes in sequence." );
     m_rotation1AngleXY = m_groupRotation->addProperty( "1st rot. (plane XY)", "First applied rotation: Along the plane "
-                                            "on the coordinate axis X and Y.", 0.0, m_propCondition  );
+                                            "on the coordinate axis X and Y.", 0.0, m_propCondition );
     m_rotation1AngleXY->setMin( -180.0 );
     m_rotation1AngleXY->setMax( 180.0 );
     m_rotation2AngleYZ = m_groupRotation->addProperty( "2nd rot. (plane YZ)", "First applied rotation: Along the plane "
-                                            "on the coordinate axis Y and Z.", 0.0, m_propCondition  );
+                                            "on the coordinate axis Y and Z.", 0.0, m_propCondition );
     m_rotation2AngleYZ->setMin( -180.0 );
     m_rotation2AngleYZ->setMax( 180.0 );
     m_rotation3AngleXZ = m_groupRotation->addProperty( "3rd rot. (plane XZ)", "First applied rotation: Along the plane "
-                                            "on the coordinate axis X and Z.", 0.0, m_propCondition  );
+                                            "on the coordinate axis X and Z.", 0.0, m_propCondition );
     m_rotation3AngleXZ->setMin( -180.0 );
     m_rotation3AngleXZ->setMax( 180.0 );
     m_rotationAnchorX = m_groupRotation->addProperty( "X anchor: ", "X coordinate of the rotation anchor.",
-                                                      0.0, m_propCondition  );
+                                                      0.0, m_propCondition );
     m_rotationAnchorY = m_groupRotation->addProperty( "Y anchor: ", "Y coordinate of the rotation anchor.",
-                                                      0.0, m_propCondition  );
+                                                      0.0, m_propCondition );
     m_rotationAnchorZ = m_groupRotation->addProperty( "Z anchor: ", "Z coordinate of the rotation anchor.",
-                                                      0.0, m_propCondition  );
+                                                      0.0, m_propCondition );
+
+    m_skipRatio = m_groupRotation->addProperty( "Point skip ratio: ", "Point count that is skipped after "
+                                                "adding one point.", 0, m_propCondition  );
+    m_skipRatio->setMin( 0 );
+    m_skipRatio->setMax( 30 );
 
     WModule::properties();
 }
@@ -154,7 +170,8 @@ void WMPointsTransform::moduleMain()
 
     // get notified about data changes
     m_moduleState.setResetable( true, true );
-    m_moduleState.add( m_input->getDataChangedCondition() );
+    for( size_t pointset = 0; pointset < m_input.size(); pointset++ )
+        m_moduleState.add( m_input[pointset]->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -169,16 +186,39 @@ void WMPointsTransform::moduleMain()
         //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
-        boost::shared_ptr< WDataSetPoints > points = m_input->getData();
-//        std::cout << "Execute cycle\r\n";
-        if  ( points )
+        bool addedPoints = false;
+        WDataSetPoints::VertexArray newVertices(
+                new WDataSetPoints::VertexArray::element_type() );
+        m_outVerts = newVertices;
+        WDataSetPoints::ColorArray newColors(
+                new WDataSetPoints::ColorArray::element_type() );
+        m_outColors = newColors;
+        for(size_t pointset = 0; pointset < m_input.size(); pointset++)
         {
-            m_verts = points->getVertices();
-            m_colors = points->getColors();
-            setProgressSettings( m_verts->size() * 2 / 3 );
-            initBoundingBox();
-            m_output->updateData( getTransformedPointSet() );
-            m_progressStatus->finish();
+            boost::shared_ptr< WDataSetPoints > points = m_input[pointset]->getData();
+    //        std::cout << "Execute cycle\r\n";
+            if  ( points )
+            {
+                m_inVerts = points->getVertices();
+                m_inColors = points->getColors();
+                setProgressSettings( m_inVerts->size() * 2 / 3 );
+                initBoundingBox( !addedPoints );
+                addTransformedPoints();
+                m_progressStatus->finish();
+                addedPoints = true;
+            }
+        }
+        for( size_t item = 0; !addedPoints && item < 3; item++ )
+        {
+            m_outVerts->push_back( 0 );
+            m_outColors->push_back( 0 );
+        }
+        if( addedPoints && m_outVerts->size() > 0 )
+        {
+            setMinMax();
+            boost::shared_ptr< WDataSetPoints > outputPoints(
+                    new WDataSetPoints( m_outVerts, m_outColors ) );
+            m_output->updateData( outputPoints );
         }
 
 //        std::cout << "this is WOTree " << std::endl;
@@ -189,8 +229,7 @@ void WMPointsTransform::moduleMain()
             break;
         }
 
-        boost::shared_ptr< WDataSetPoints > points2 = m_input->getData();
-        if  ( !points2 )
+        if  ( !addedPoints )
         {
             continue;
         }
@@ -207,24 +246,33 @@ void WMPointsTransform::setProgressSettings( size_t steps )
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
-void WMPointsTransform::initBoundingBox()
+void WMPointsTransform::initBoundingBox( bool isFirstPointSet )
 {
-    size_t count = m_verts->size() / 3;
-    if( m_verts->size() == 0 )
+    size_t count = m_inVerts->size() / 3;
+    if( m_inVerts->size() == 0 )
         return;
     for( size_t index = 0; index < count; index++ )
     {
-        double x = m_verts->at( index * 3 );
-        double y = m_verts->at( index * 3 + 1 );
-        double z = m_verts->at( index * 3 + 2 );
-        if( index == 0 || x < m_minX ) m_minX = x;
-        if( index == 0 || x > m_maxX ) m_maxX = x;
-        if( index == 0 || y < m_minY ) m_minY = y;
-        if( index == 0 || y > m_maxY ) m_maxY = y;
-        if( index == 0 || z < m_minZ ) m_minZ = z;
-        if( index == 0 || z > m_maxZ ) m_maxZ = z;
+        double x = m_inVerts->at( index * 3 );
+        double y = m_inVerts->at( index * 3 + 1 );
+        double z = m_inVerts->at( index * 3 + 2 );
+        if( index == 0 && isFirstPointSet )
+        {
+            m_minX = m_maxX = x;
+            m_minY = m_maxY = y;
+            m_minZ = m_maxZ = z;
+        }
+        if( x < m_minX ) m_minX = x;
+        if( x > m_maxX ) m_maxX = x;
+        if( y < m_minY ) m_minY = y;
+        if( y > m_maxY ) m_maxY = y;
+        if( z < m_minZ ) m_minZ = z;
+        if( z > m_maxZ ) m_maxZ = z;
         m_progressStatus->increment( 1 );
     }
+}
+void WMPointsTransform::setMinMax()
+{
     m_fromX->setMin( m_minX );
     m_fromX->setMax( m_maxX );
     m_toX->setMin( m_fromX->get() );
@@ -240,27 +288,24 @@ void WMPointsTransform::initBoundingBox()
     m_toZ->setMin( m_fromZ->get() );
     m_toZ->setMax( m_maxZ );
 }
-boost::shared_ptr< WDataSetPoints > WMPointsTransform::getTransformedPointSet()
+void WMPointsTransform::addTransformedPoints()
 {
-    WDataSetPoints::VertexArray outVertices(
-            new WDataSetPoints::VertexArray::element_type() );
-    WDataSetPoints::ColorArray outColors(
-            new WDataSetPoints::ColorArray::element_type() );
-
-    size_t count = m_verts->size() / 3;
+    double angleXY = m_rotation1AngleXY->get() * M_PI / 180.0;
+    double angleYZ = m_rotation2AngleYZ->get() * M_PI / 180.0;
+    double angleXZ = m_rotation3AngleXZ->get() * M_PI / 180.0;
+    size_t count = m_inVerts->size() / 3;
     WPosition offset( m_translateX->get(), m_translateY->get(), m_translateZ->get() );
     for( size_t index = 0; index < count; index++)
     {
-        double x = m_verts->at( index * 3 );
-        double y = m_verts->at( index * 3 + 1 );
-        double z = m_verts->at( index * 3 + 2 );
-        double angleXY = m_rotation1AngleXY->get() * M_PI / 180.0;
-        double angleYZ = m_rotation2AngleYZ->get() * M_PI / 180.0;
-        double angleXZ = m_rotation3AngleXZ->get() * M_PI / 180.0;
+        double x = m_inVerts->at( index * 3 );
+        double y = m_inVerts->at( index * 3 + 1 );
+        double z = m_inVerts->at( index * 3 + 2 );
         bool isInsideSelection = x >= m_fromX->get() && x <= m_toX->get()
                 &&  y >= m_fromY->get() && y <= m_toY->get()
                 &&  z >= m_fromZ->get() && z <= m_toZ->get();
-        if( isInsideSelection != m_cutInsteadOfCrop->get() )
+        size_t modulo = m_skipRatio->get() + 1;
+        bool isPointSkipped = index % ( modulo ) != 0;
+        if( isInsideSelection != m_cutInsteadOfCrop->get() && !isPointSkipped )
         {
             x += offset[0];
             y += offset[1];
@@ -286,23 +331,12 @@ boost::shared_ptr< WDataSetPoints > WMPointsTransform::getTransformedPointSet()
             y += m_rotationAnchorY->get();
             z += m_rotationAnchorZ->get();
 
-            outVertices->push_back( x );
-            outVertices->push_back( y );
-            outVertices->push_back( z );
+            m_outVerts->push_back( x );
+            m_outVerts->push_back( y );
+            m_outVerts->push_back( z );
             for( size_t item = 0; item < 3; item++ )
-                outColors->push_back( m_colors->at( index * 3 + item ) );
+                m_outColors->push_back( m_inColors->at( index * 3 + item ) );
         }
         m_progressStatus->increment( 1 );
     }
-    if( outVertices->size() == 0 )
-    {
-        for( size_t item = 0; item < 3; item++ )
-        {
-            outVertices->push_back( 0 );
-            outColors->push_back( 0 );
-        }
-    }
-    boost::shared_ptr< WDataSetPoints > outputPoints(
-            new WDataSetPoints( outVertices, outColors ) );
-    return outputPoints;
 }

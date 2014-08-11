@@ -112,6 +112,10 @@ void WMReadLAS::properties()
                             "Translates X and Y coordinates to center. Minimal and maximal "
                             "possible coordinates are -/+'Data set width'/2."
                             ".", true, m_propCondition );
+    m_contrast = m_properties->addProperty( "Contrast: ",
+                            "This is the value that multiplies the input colors before assigning to the output. "
+                            "Note that the output has the range between 0.0 and 1.0.\r\nHint: Look ath the intensity "
+                            "maximum param in the information tab of the ReadLAS plugin.", 0.005, m_propCondition );
 
     m_nbVertices = m_infoProperties->addProperty( "Points", "The number of vertices in the loaded scan.", 0 );
     m_nbVertices->setMax( std::numeric_limits< int >::max() );
@@ -158,9 +162,10 @@ void WMReadLAS::moduleMain()
         reader.setInputFilePath( m_lasFile->get().c_str() );
         try
         {
-            boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints(
-                    m_scrollBarX->get( true ), m_scrollBarY->get( true ), m_outputDataWidth->get( true ),
-                    m_translateDataToCenter->get( true ) );
+            reader.setDataSetRegion( m_scrollBarX->get( true ), m_scrollBarY->get( true ),
+                    m_outputDataWidth->get( true ) );
+            reader.setTranslateToCenter( m_translateDataToCenter->get( true ) );
+            boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints();
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
             WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
             m_nbVertices->set( tmpPointSet->size() );
