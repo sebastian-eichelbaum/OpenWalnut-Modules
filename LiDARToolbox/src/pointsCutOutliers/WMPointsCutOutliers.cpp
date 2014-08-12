@@ -25,7 +25,6 @@
 #include <string>
 
 #include <fstream>  // std::ifstream
-#include <iostream> // std::cout
 #include <vector>
 
 #include <osg/Geometry>
@@ -80,11 +79,11 @@ const std::string WMPointsCutOutliers::getDescription() const
 
 void WMPointsCutOutliers::connectors()
 {
-    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
+    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "" );
 
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
-                        shared_from_this(), "points", "The loaded points." ) );
+                        shared_from_this(), "points", "" ) );
 
     addConnector( m_output );
 //    addConnector( m_buildings );
@@ -93,7 +92,6 @@ void WMPointsCutOutliers::connectors()
 
 void WMPointsCutOutliers::properties()
 {
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     m_detailDepth = m_properties->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
                             "depth for the octree search tree.", 0, m_propCondition );
     m_detailDepth->setMin( -3 );
@@ -111,8 +109,6 @@ void WMPointsCutOutliers::requirements()
 
 void WMPointsCutOutliers::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
@@ -127,11 +123,9 @@ void WMPointsCutOutliers::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         boost::shared_ptr< WDataSetPoints > points = m_input->getData();
-//        std::cout << "Execute cycle\r\n";
         m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
         if  ( points )
         {
@@ -145,7 +139,6 @@ void WMPointsCutOutliers::moduleMain()
             m_progressStatus->finish();
         }
 
-//        std::cout << "this is WOTree " << std::endl;
 
         // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )
@@ -164,10 +157,11 @@ void WMPointsCutOutliers::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMPointsCutOutliers::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
-    std::string headerText = "Loading data";
+    std::string headerText = "Processing data";
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }

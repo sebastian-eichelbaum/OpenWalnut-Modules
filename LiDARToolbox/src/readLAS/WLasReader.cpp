@@ -24,7 +24,6 @@
 
 #include <liblas/liblas.hpp>
 #include <fstream>  // std::ifstream
-#include <iostream> // std::cout
 
 #include <string>
 #include <vector>
@@ -93,11 +92,6 @@ namespace laslibb
         float yOffset = m_fromY + m_dataSetWidth / 2;
         float zOffset = ( m_zMax - m_zMin ) / 2;
 
-//        double oldTime = 0.0; //TODO(schwarzkopf): remove that commented lines in final version
-//        size_t oldI = 0;
-//        size_t timeIdx = 0;
-//        size_t crashCount = 0;
-
         for  ( size_t i = 0; i < count; i++ )
         {
             double x, y, z;
@@ -109,25 +103,6 @@ namespace laslibb
             y = point.GetY();
             z = point.GetZ();
             v = point.GetIntensity(); //TODO(schwarzkopf): Still had no colored data set to check some liblas functions.
-//            { //TODO(schwarzkopf): remove that commented lines in final version
-//                double thisTime = point.GetTime();
-//                if(oldTime != thisTime)
-//                {
-//                    if(oldTime>thisTime)
-//                    {
-//                        crashCount++;
-//                        std::cout << "crash!! " << oldTime << "\t" << thisTime-oldTime << std::endl;
-//                    }
-//                    double diff = thisTime-oldTime;
-//                    std::cout << diff << "\t" << ( i - oldI ) << std::endl;
-//                    oldTime = thisTime;
-//                    oldI = i;
-//                    timeIdx++;
-//                }
-//                //std::cout << "Point stuff: " << point.GetFlightLineEdge() << "\t" <<
-//                //        point.GetPointSourceID() << "\t" << point.GetRawX() << "\t" <<
-//                //        timeIdx << std::endl;
-//            }
             if  ( i == 0 )
             {
                 m_xMin = m_xMax = x;
@@ -160,13 +135,9 @@ namespace laslibb
                     colors->push_back( v * m_contrast );
                 addedPoints++;
             }
-//            std::cout << i << ": " << x << " " << " " << y << " " << z << " " << v << "\r\n";
             m_progressStatus->increment( 1 );
         }
-//        std::cout << "Time/point count: " << timeIdx << " / " << count <<
-//                "\tInvalid order occurances: " << crashCount<< std::endl;
         m_progressStatus->finish();
-//        std::cout << "Added points: " << addedPoints << std::endl;
 
         if  ( addedPoints == 0 )
         {
@@ -229,4 +200,4 @@ namespace laslibb
     {
         return m_intensityMax;
     }
-} /* namespace std */
+} /* namespace laslibb */

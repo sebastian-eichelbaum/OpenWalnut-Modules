@@ -100,11 +100,11 @@ void WMReadLAS::properties()
                             200, m_propCondition );
     m_outputDataWidth->setMin( 0 );
 
-    m_scrollBarX = m_properties->addProperty( "Scope selection X: ",
+    m_sliderX = m_properties->addProperty( "Scope selection X: ",
                             "X range will be drawn between input and input+'Data set "
                             "width'.", 0, m_propCondition );
 
-    m_scrollBarY = m_properties->addProperty( "Scope selection Y: ",
+    m_sliderY = m_properties->addProperty( "Scope selection Y: ",
                             "YY range will be drawn between input and input+'Data set "
                             "width'.", 0, m_propCondition );
 
@@ -154,16 +154,14 @@ void WMReadLAS::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
-
-        std::cout << "cycle" << std::endl;
 
         reader.setInputFilePath( m_lasFile->get().c_str() );
         try
         {
-            reader.setDataSetRegion( m_scrollBarX->get( true ), m_scrollBarY->get( true ),
-                    m_outputDataWidth->get( true ) );
+            reader.setDataSetRegion( m_sliderX->get( true ),
+                                     m_sliderY->get( true ),
+                                     m_outputDataWidth->get( true ) );
             reader.setTranslateToCenter( m_translateDataToCenter->get( true ) );
             boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints();
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
@@ -187,13 +185,11 @@ void WMReadLAS::moduleMain()
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );
         m_reloadData->get( true );
 
-//         woke up since the module is requested to finish?
-        if  ( m_shutdownFlag() )
+        // woke up since the module is requested to finish?
+        if( m_shutdownFlag() )
         {
             break;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
@@ -202,23 +198,19 @@ void WMReadLAS::refreshScrollBars()
 {
     size_t dataWidth = ( m_outputDataWidth->get() + 1 ) / 2;
     m_outputDataWidth->set( dataWidth = dataWidth * 2 );
-//    double x = m_scrollBarX->get();
-//    double y = m_scrollBarY->get();
 
     if  ( m_outputDataWidth == 0 ) return;
 
     size_t dividend = reader.getXMin() / dataWidth;
-    m_scrollBarX->setMin( dividend * dataWidth );
+    m_sliderX->setMin( dividend * dataWidth );
     dividend = reader.getXMax() / dataWidth;
-    m_scrollBarX->setMax( dividend * dataWidth );
+    m_sliderX->setMax( dividend * dataWidth );
 
     dividend = reader.getYMin() / dataWidth;
-    m_scrollBarY->setMin( dividend * dataWidth );
+    m_sliderY->setMin( dividend * dataWidth );
     dividend = reader.getYMax() / dataWidth;
-    m_scrollBarY->setMax( dividend * dataWidth );
+    m_sliderY->setMax( dividend * dataWidth );
 
-//    m_scrollBarX->set( x );
-//    m_scrollBarY->set( y );
-    m_scrollBarX->get( true );
-    m_scrollBarY->get( true );
+    m_sliderX->get( true );
+    m_sliderY->get( true );
 }

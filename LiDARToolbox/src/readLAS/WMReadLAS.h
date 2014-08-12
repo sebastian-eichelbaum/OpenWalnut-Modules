@@ -169,11 +169,11 @@ private:
     /**
      * Scrollbar that changes the minimal output X value
      */
-    WPropInt m_scrollBarX;
+    WPropInt m_sliderX;
     /**
      * Scrollbar that changes the minimal output Y value
      */
-    WPropInt m_scrollBarY;
+    WPropInt m_sliderY;
     /**
      * Enables to put the output data to the coordinate system center
      */
