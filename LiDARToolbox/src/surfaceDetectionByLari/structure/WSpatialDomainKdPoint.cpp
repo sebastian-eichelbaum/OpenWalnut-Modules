@@ -55,18 +55,17 @@ vector<double> WSpatialDomainKdPoint::getParametersXYZ0()
     return WLeastSquares::getParametersXYZ0( m_hessescheNormalForm );
 }
 
-
-void WSpatialDomainKdPoint::setEigenValues( vector<double> eigenValues )
+double WSpatialDomainKdPoint::getDistanceToNthNearestNeighbor()
 {
-    m_eigenValues = eigenValues;
+    return m_distanceToNthNearestNeighbor;
 }
-void WSpatialDomainKdPoint::setEigenVectors( vector<WVector3d> eigenVectors )
+size_t WSpatialDomainKdPoint::getIndexInInputArray()
 {
-    m_eigenVectors = eigenVectors;
+    return m_indexInInputArray;
 }
-void WSpatialDomainKdPoint::setHessescheNormalForm( vector<double> hessescheNormalForm )
+double WSpatialDomainKdPoint::getLocalPointDensity()
 {
-    m_hessescheNormalForm = hessescheNormalForm;
+    return m_kNearestPoints / ( M_PI * pow( m_distanceToNthNearestNeighbor, 2.0 ) );
 }
 bool WSpatialDomainKdPoint::hasValidParameters()
 {
@@ -81,4 +80,31 @@ bool WSpatialDomainKdPoint::hasValidParameters()
 void WSpatialDomainKdPoint::setClusterID( size_t clusterID )
 {
     m_clusterID = clusterID;
+}
+void WSpatialDomainKdPoint::setDistanceToNthNearestNeighbor( double distanceToNthNearestNeighbor )
+{
+    m_distanceToNthNearestNeighbor = distanceToNthNearestNeighbor;
+}
+void WSpatialDomainKdPoint::setEigenValues( vector<double> eigenValues )
+{
+    m_eigenValues = eigenValues;
+    for( size_t index = 0; index < m_eigenValues.size(); index++ )
+        if( m_eigenValues[index] < 0.0 )
+            m_eigenValues[index] = 0.0;
+}
+void WSpatialDomainKdPoint::setEigenVectors( vector<WVector3d> eigenVectors )
+{
+    m_eigenVectors = eigenVectors;
+}
+void WSpatialDomainKdPoint::setHessescheNormalForm( vector<double> hessescheNormalForm )
+{
+    m_hessescheNormalForm = hessescheNormalForm;
+}
+void WSpatialDomainKdPoint::setKNearestPoints( size_t kNearestPoints )
+{
+    m_kNearestPoints = kNearestPoints;
+}
+void WSpatialDomainKdPoint::setIndexInInputArray( size_t indexInInputArray )
+{
+    m_indexInInputArray = indexInInputArray;
 }

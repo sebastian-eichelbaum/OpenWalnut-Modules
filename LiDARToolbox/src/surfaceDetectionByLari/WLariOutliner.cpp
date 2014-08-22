@@ -27,9 +27,9 @@
 #include "../common/math/leastSquares/WLeastSquares.h"
 
 
-WLariOutliner::WLariOutliner( WSurfaceDetectorLari* surfaceDetector )
+WLariOutliner::WLariOutliner( WLariPointClassifier* pointClassifier )
 {
-    m_surfaceDetector = surfaceDetector;
+    m_pointClassifier = pointClassifier;
 }
 
 WLariOutliner::~WLariOutliner()
@@ -43,16 +43,19 @@ boost::shared_ptr< WDataSetPointsGrouped > WLariOutliner::outlineParameterDomain
             new WDataSetPointsGrouped::ColorArray::element_type() );
     WDataSetPointsGrouped::GroupArray outGroups(
             new WDataSetPointsGrouped::GroupArray::element_type() );
-    vector<WKdPointND*>* parameters = m_surfaceDetector->getParameterDomain()->getAllPoints();
+    vector<WKdPointND*>* parameters = m_pointClassifier->getParameterDomain()->getAllPoints();
     for( size_t index = 0; index < parameters->size(); index++ )
     {
         WParameterDomainKdPoint* parameter = static_cast<WParameterDomainKdPoint*>( parameters->at( index ) );
-        vector<double> parameterCoordinate = parameter->getCoordinate();
-        for( size_t dimension = 0; dimension < parameterCoordinate.size(); dimension++ )
-            outVertices->push_back( parameterCoordinate[dimension] );
-        for( size_t colorCh = 0; colorCh < 3; colorCh++ )
-            outColors->push_back( 1.0 );
-        outGroups->push_back( parameter->getSpatialPoint()->getClusterID() );
+        if( m_pointClassifier->calculateIsPlanarPoint( parameter->getSpatialPoint()->getEigenValues() ) )
+        {
+            vector<double> parameterCoordinate = parameter->getCoordinate();
+            for( size_t dimension = 0; dimension < parameterCoordinate.size(); dimension++ )
+                outVertices->push_back( parameterCoordinate[dimension] );
+            for( size_t colorCh = 0; colorCh < 3; colorCh++ )
+                outColors->push_back( 1.0 );
+            outGroups->push_back( parameter->getSpatialPoint()->getClusterID() );
+        }
     }
     boost::shared_ptr< WDataSetPointsGrouped > outputPoints(
             new WDataSetPointsGrouped( outVertices, outColors, outGroups ) );
@@ -66,16 +69,19 @@ boost::shared_ptr< WDataSetPointsGrouped > WLariOutliner::outlineSpatialDomainGr
             new WDataSetPointsGrouped::ColorArray::element_type() );
     WDataSetPointsGrouped::GroupArray outGroups(
             new WDataSetPointsGrouped::GroupArray::element_type() );
-    vector<WKdPointND*>* spatialDomainPoints = m_surfaceDetector->getSpatialDomain()->getAllPoints();
+    vector<WKdPointND*>* spatialDomainPoints = m_pointClassifier->getSpatialDomain()->getAllPoints();
     for( size_t index = 0; index < spatialDomainPoints->size(); index++ )
     {
         WSpatialDomainKdPoint* spatialPoint = static_cast<WSpatialDomainKdPoint*>( spatialDomainPoints->at( index ) );
-        vector<double> spatialCoordinate = spatialPoint->getCoordinate();
-        for( size_t dimension = 0; dimension < spatialCoordinate.size(); dimension++ )
-            outVertices->push_back( spatialCoordinate[dimension] );
-        outGroups->push_back( spatialPoint->getClusterID() );
+        if( m_pointClassifier->calculateIsPlanarPoint( spatialPoint->getEigenValues() ) )
+        {
+            vector<double> spatialCoordinate = spatialPoint->getCoordinate();
+            for( size_t dimension = 0; dimension < spatialCoordinate.size(); dimension++ )
+                outVertices->push_back( spatialCoordinate[dimension] );
+            outGroups->push_back( spatialPoint->getClusterID() );
             for( size_t colorCh = 0; colorCh < 3; colorCh++ )
                 outColors->push_back( 1.0 );
+        }
     }
     boost::shared_ptr< WDataSetPointsGrouped > outputPoints(
             new WDataSetPointsGrouped( outVertices, outColors, outGroups ) );
@@ -85,7 +91,7 @@ boost::shared_ptr< WDataSetPoints > WLariOutliner::outlineSpatialDomainCategorie
 {
     WDataSetPoints::VertexArray outVertices( new WDataSetPoints::VertexArray::element_type() );
     WDataSetPoints::ColorArray outColors( new WDataSetPoints::ColorArray::element_type() );
-    vector<WKdPointND*>* spatialDomainPoints = m_surfaceDetector->getSpatialDomain()->getAllPoints();
+    vector<WKdPointND*>* spatialDomainPoints = m_pointClassifier->getSpatialDomain()->getAllPoints();
     for( size_t index = 0; index < spatialDomainPoints->size(); index++ )
     {
         WSpatialDomainKdPoint* spatialPoint = static_cast<WSpatialDomainKdPoint*>( spatialDomainPoints->at( index ) );
@@ -100,8 +106,8 @@ boost::shared_ptr< WDataSetPoints > WLariOutliner::outlineSpatialDomainCategorie
             nLambdaI.push_back( eigenValues[i] / sumLambda );
         for( size_t dimension = 0; dimension < spatialCoordinate.size(); dimension++ )
             outVertices->push_back( spatialCoordinate[dimension] );
-        bool isPlanar = m_surfaceDetector->calculateIsPlanarPoint( eigenValues );
-        bool isCylindrical = m_surfaceDetector->calculateIsCylindricalPoint( eigenValues );
+        bool isPlanar = m_pointClassifier->calculateIsPlanarPoint( eigenValues );
+        bool isCylindrical = m_pointClassifier->calculateIsCylindricalPoint( eigenValues );
             if( isPlanar || isCylindrical )
             {
                 outColors->push_back( isPlanar ?1 :0 );
@@ -121,7 +127,7 @@ boost::shared_ptr< WDataSetPoints > WLariOutliner::outlineSpatialDomainCategorie
 boost::shared_ptr< WTriangleMesh > WLariOutliner::outlineLeastSquaresPlanes( double squaresWidth )
 {
     boost::shared_ptr< WTriangleMesh > outputMesh( new WTriangleMesh( 0, 0 ) );
-    vector<WKdPointND*>* spatialNodes = m_surfaceDetector->getSpatialDomain()->getAllPoints();
+    vector<WKdPointND*>* spatialNodes = m_pointClassifier->getSpatialDomain()->getAllPoints();
     for( size_t index = 0; index < spatialNodes->size(); index++ )
     {
         WSpatialDomainKdPoint* spatialDomainPoint = static_cast<WSpatialDomainKdPoint*>( spatialNodes->at( index ) );

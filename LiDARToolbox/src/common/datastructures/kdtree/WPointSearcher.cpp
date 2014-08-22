@@ -28,6 +28,13 @@
 
 #include "WPointSearcher.h"
 
+WPointSearcher::WPointSearcher()
+{
+    m_distanceSteps = 4;
+    m_examinedKdTree = 0;
+    m_maxResultPointCount = 50;
+    m_maxSearchDistance = 0.5;
+}
 WPointSearcher::WPointSearcher( WKdTreeND* kdTree )
 {
     m_distanceSteps = 4;
@@ -54,7 +61,7 @@ vector<WPosition>* WPointSearcher::convertToPointSet( vector<WPointDistance>* po
 }
 vector<WPointDistance>* WPointSearcher::getNearestPoints()
 {
-    vector<WPointDistance>* nearestPoints = new vector<WPointDistance>();
+    vector<WPointDistance>* nearestPoints = new vector<WPointDistance>(); //TODO(aschwarzkopf): Only debugging step over crashes on that line.
     double index = 1;
     size_t distanceSteps = m_maxResultPointCount == std::numeric_limits< size_t >::max() ?1 :m_distanceSteps;
     for( index = 1; index <= distanceSteps
@@ -62,7 +69,7 @@ vector<WPointDistance>* WPointSearcher::getNearestPoints()
     {
         delete nearestPoints;
         nearestPoints = new vector<WPointDistance>();
-        double maxDistance = m_maxSearchDistance * pow( 2.0, - ( double )m_distanceSteps + ( double )index );
+        double maxDistance = m_maxSearchDistance * pow( 2.0, - ( double )distanceSteps + ( double )index );
         fetchNearestPoints( m_examinedKdTree, nearestPoints, maxDistance );
         //cout << "Attempt at max distance: " << maxDistance << "    size = " << nearestPoints->size() << endl;
     }
@@ -81,7 +88,7 @@ void WPointSearcher::setExaminedKdTree( WKdTreeND* kdTree )
 {
     m_examinedKdTree = kdTree;
 }
-void WPointSearcher::setSearchedPoint( vector<double> searchedPoint )
+void WPointSearcher::setSearchedPoint( const vector<double>& searchedPoint )
 {
     m_searchedCoordinate = searchedPoint;
 }

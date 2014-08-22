@@ -44,6 +44,7 @@ using std::vector;
 class WPointSearcher
 {
 public:
+    explicit WPointSearcher();
     /**
      * Instantiates the points searcher.
      * \param kdTree Assigned source kd tree to search points.
@@ -79,7 +80,7 @@ public:
      * Sets the coordinate of the point to get its neighbors afterwarts.
      * \param searchedPoint Coordinate to search for neighbors.
      */
-    void setSearchedPoint( vector<double> searchedPoint );
+    void setSearchedPoint( const vector<double>& searchedPoint );
     /**
      * Sets the maximal distance of neighbors.
      * \param distance The maximal distance of neighbors.

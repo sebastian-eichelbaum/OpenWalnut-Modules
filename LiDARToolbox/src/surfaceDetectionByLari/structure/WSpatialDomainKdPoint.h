@@ -71,6 +71,23 @@ public:
      */
     vector<double> getHessescheNormalForm();
     /**
+     * Returns the distance to the n-th nearest neighbor.
+     * \return The distance to the n-th nearest neighbor.
+     */
+    double getDistanceToNthNearestNeighbor();
+    /**
+     * Gets the input point array index of this point's coordinate.
+     * \return Index within the input point array of this point.
+     */
+    size_t getIndexInInputArray();
+    /**
+     * Returns the local point density index. It corresponds to the point count per 
+     * square meter. It is calculated the k nearest point count and the n-th nearest 
+     * point distance
+     * \return Local point density index.
+     */
+    double getLocalPointDensity();
+    /**
      * Returns the parameter domain coordinates of the point.
      * \return The parameter domain coordinates of the point.
      */
@@ -102,6 +119,21 @@ public:
      * \param clusterID Plane cluster ID of the point.
      */
     void setClusterID( size_t clusterID );
+    /**
+     * Sets the count of k nearest point count.
+     * \param kNearestPoints K nearest points.
+     */
+    void setKNearestPoints( size_t kNearestPoints );
+    /**
+     * Sets the distance to the n-th nearest point.
+     * \param distanceToNthNearestNeighbor Distance to n-th nearest neighbor.
+     */
+    void setDistanceToNthNearestNeighbor( double distanceToNthNearestNeighbor );
+    /**
+     * Sets the input point array index of this point's coordinate.
+     * \param indexInInputArray Index within the input point array of this point.
+     */
+    void setIndexInInputArray( size_t indexInInputArray );
 
 private:
     /**
@@ -120,6 +152,18 @@ private:
      * Plane cluster ID of the point.
      */
     size_t m_clusterID;
+    /**
+     * Count of k nearest neighbors.
+     */
+    size_t m_kNearestPoints;
+    /**
+     * Distance to the n-th nearest neighbor.
+     */
+    double m_distanceToNthNearestNeighbor;
+    /**
+     * Index within the input point array of this point.
+     */
+    size_t m_indexInInputArray;
 };
 
 #endif  // WSPATIALDOMAINKDPOINT_H

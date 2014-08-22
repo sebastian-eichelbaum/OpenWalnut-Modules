@@ -29,6 +29,7 @@
 WPointDistance::WPointDistance()
 {
     m_pointDistance = 0;
+    m_comparedPoint = 0;
 }
 WPointDistance::WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint )
 {
@@ -51,15 +52,11 @@ double WPointDistance::getDistance()
 {
     return m_pointDistance;
 }
-double WPointDistance::getPointDistance( vector<double> point1, vector<double> point2 )
+double WPointDistance::getPointDistance( const vector<double>& point1, const vector<double>& point2 )
 {    //TODO(aschwarzkopf): Not verified that the euclidian distance is calculated right also for points above 3 dimensions.
     double distance = 0;
     for( size_t index = 0; index < point1.size() && index < point2.size(); index++ )
-    {
-        double coord1 = point1[index];
-        double coord2 = point2[index];
-        distance += pow( coord1 - coord2, 2 );
-    }
+        distance += pow( point1[index] - point2[index], 2 );
     return pow( distance, 0.5 );
 }
 bool WPointDistance::operator<( WPointDistance const& right ) const

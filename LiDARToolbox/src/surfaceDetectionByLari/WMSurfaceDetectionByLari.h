@@ -68,6 +68,8 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 #include "WLariOutliner.h"
+#include "WLariBoundaryDetector.h"
+#include "clusterDetection/WLariBruteforceClustering.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -252,6 +254,12 @@ private:
      * Maximal radius within which the nearest neighbors are examined.
      */
     WPropDouble m_maxPointDistanceR;
+    /**
+     * Switch that enables the modified convex hull detection to separate spatially 
+     * disconnected point clusters thet were previously segmented by a peak detection 
+     * approach of Lari/Habib.
+     */
+    WPropBool m_applyBoundaryDetection;
 
 
     /**
@@ -337,6 +345,10 @@ private:
      * Plugin progress status.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+    /**
+     * Applied CPU thread count.
+     */
+    WPropInt m_cpuThreadCount;
 };
 
 #endif  // WMSURFACEDETECTIONBYLARI_H

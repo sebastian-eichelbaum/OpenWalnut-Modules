@@ -31,6 +31,29 @@ using std::cout;
 using std::endl;
 WKdTreeND::WKdTreeND()
 {
+    m_dimensions = 3;
+//    areaMin.reserve( 3 );
+//    areaMin.resize( 3 );
+//    areaMax.reserve( 3 );
+//    areaMax.resize( 3 );
+//    hasBoundMin.reserve( 3 );
+//    hasBoundMin.resize( 3 );
+//    hasBoundMax.reserve( 3 );
+//    hasBoundMax.resize( 3 );
+//    for( size_t index = 0; index < 3; index++ )
+//    {
+//        areaMin[index] = 0;
+//        areaMax[index] = 0;
+//        hasBoundMin[index] = false;
+//        hasBoundMax[index] = false;
+//    }
+    m_splittingDimension = 0;
+    m_splittingPosition = 0.0;
+    m_allowDoubles = true;
+    m_points = new vector<WKdPointND* >();
+    m_parentSplittingDimension = 3;
+    m_higherChild = 0;
+    m_lowerChild = 0;
 }
 WKdTreeND::WKdTreeND( size_t dimensions )
 {

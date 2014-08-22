@@ -81,7 +81,7 @@ public:
      * \param point2 Second point for calculating the distance.
      * \return Euclidian distance between that two points.
      */
-    static double getPointDistance( vector<double> point1, vector<double> point2 );
+    static double getPointDistance( const vector<double>& point1, const vector<double>& point2 );
     /**
      * Operator for sorting a vector<WPointDistance> using std::sort.
      * \param right The right compared object to this one.

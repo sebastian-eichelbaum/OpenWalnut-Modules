@@ -28,7 +28,7 @@
 #include <iostream>
 #include <vector>
 
-#include "WSurfaceDetectorLari.h"
+#include "WLariPointClassifier.h"
 #include "core/dataHandler/WDataSetPoints.h"
 #include "structure/WParameterDomainKdPoint.h"
 #include "structure/WSpatialDomainKdPoint.h"
@@ -53,10 +53,10 @@ class WLariOutliner
 public:
     /**
      * Instantiates the Lari/Habib segmentation result outliner.
-     * \param surfaceDetector Lari/Habib segmentation insgance to access the spatial and 
-     * parameter domain.
+     * \param pointClassifier Lari/Habib segmentation insgance to access the spatial and 
+     *                        parameter domain.
      */
-    explicit WLariOutliner( WSurfaceDetectorLari* surfaceDetector );
+    explicit WLariOutliner( WLariPointClassifier* pointClassifier );
     /**
      * Destroys the result outlining instance.
      */
@@ -90,10 +90,11 @@ public:
 
 private:
     /**
-     * Assigned Surface detection instance that uses the approach of Lari/Habib. It's 
-     * used to retirieve a corresponding spatial or parameter domain.
+     * Point classification instance. By this way spatial and parameter domain points 
+     * are fetched. But also points can be classified whether they areplanar, 
+     * cylindrical or rough surface.
      */
-    WSurfaceDetectorLari* m_surfaceDetector;
+    WLariPointClassifier* m_pointClassifier;
 };
 
 #endif  // WLARIOUTLINER_H

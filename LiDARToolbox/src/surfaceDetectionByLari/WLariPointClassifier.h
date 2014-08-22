@@ -22,11 +22,12 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WSURFACEDETECTORLARI_H
-#define WSURFACEDETECTORLARI_H
+#ifndef WLARIPOINTCLASSIFIER_H
+#define WLARIPOINTCLASSIFIER_H
 
 #include <iostream>
 #include <vector>
+#include <boost/thread.hpp>
 
 #include "core/dataHandler/WDataSetPoints.h"
 #include "structure/WParameterDomainKdPoint.h"
@@ -44,23 +45,18 @@ using std::cout;
 using std::endl;
 using std::vector;
 
-/**
- * Class that dues the surface detection using the approaches of Lari/abib (2014). This 
- * class is in a very early stage and no purpose at the moment.
- */
-class WSurfaceDetectorLari
+
+class WLariPointClassifier
 {
 public:
-    explicit WSurfaceDetectorLari();
-
-    virtual ~WSurfaceDetectorLari();
+    explicit WLariPointClassifier();
     /**
-     * Detects the surfaces using the approach of Lari/Habib (2014). At the moment it 
-     * only colors points whether they have either planar or linear/cylindrical features.
-     * \param inputPoints nput points to process.
-     * \return The points that are added a color. Red points have either planar and blue 
-     *         ones have linear/cylindrical features. Magenta ones meet both and grey 
-     *         none of both criterias.
+     * Destroys the surface detection instance
+     */
+    virtual ~WLariPointClassifier();
+    /**
+     * Analyzes input point data.
+     * \param inputPoints Input point data to analyze.
      */
     void analyzeData( vector<WSpatialDomainKdPoint*>* inputPoints );
     /**
@@ -74,7 +70,6 @@ public:
      * \return The whole point set of the spatial domain.
      */
     WKdTreeND* getSpatialDomain();
-
     /**
      * Calculates whether a point's eigen values in relation to its neighbors have 
      * planar features.
@@ -102,6 +97,11 @@ public:
      */
     void setMaxPointDistanceR( double maxPointDistance );
     /**
+     * Sets the applied CPU thread count.
+     * \param cpuThreadCount Applied CPU thread count.
+     */
+    void setCpuThreadCount( size_t cpuThreadCount );
+    /**
      * Returns the numbers sum of an array.
      * \param allNumbers The numbers to sum.
      * \return Result = number 1 + number 2 + number 3 + . . . ).
@@ -125,54 +125,23 @@ public:
      * \param max The higher limit of the lamba of that index.
      */
     void setCylindricalNLambdaRange( size_t lambdaIndex, double min, double max );
-    /**
-     * Sets the main segmentation settings of the segmentation algorithm. They regard 
-     * the planar formula of each spatial point in relation to its 
-     * neighborship.
-     * \param maxAngleDegrees Maximal angular deviation of plane formulas between two 
-     *                        points.
-     * \param planeDistance Maximal difference between two plane perpendicular distances 
-     *                      to the origin.
-     */
-    void setSegmentationSettings( double maxAngleDegrees, double planeDistance );
 
 private:
     /**
-     * Initializes the extent sizes of each parameter.
+     * Classifies points using Eigen Value analyses (Eigen Values and Eigen Vectors) and 
+     * least squares adjustment. The method uses multithreading.
+     * \param spatialPoints Spatial domain points to analyze.
+     * \param parameterPoints List of assigned parameter domain points that are 
+     *                        initialized in this method.
      */
-    void initExtentSizes();
+    void classifyPoints( vector<WSpatialDomainKdPoint*>* spatialPoints, vector<WParameterDomainKdPoint*>* parameterPoints );
     /**
-     * Detects surface clusters. It takes information of each parameter point 
-     * (represents a plane formula) how many others it contains in the same planar 
-     * extent group. At first biggest parameter extents are segmented to a plane until 
-     * no parameter point remains
+     * Classifies points using Eigen Value analyses (Eigen Values and Eigen Vectors) and 
+     * least squares adjustment. The method Apply this method for every thread index.
+     * \param spatialPoints Spatial domain points to analyze.
+     * \param threadIndex CPU thread index.
      */
-    void detectClustersByBruteForce();
-    /**
-     * Returns the masimal euclidian distance within an extent from the peak center in 
-     * the parameter domain kd tree.
-     * \param parametersXYZ0 Parameter domain coordinate from which the maximal 
-     *                       euclidian distance to the farest extent point is determined.
-     * \return The maximal euclidian distance from the peak center to the farest 
-     *         belonging parameter to the plane within the parameter domain.
-     */
-    double getMaxParameterDistance( vector<double> parametersXYZ0 );
-    /**
-     * Returns the points within the parameter domain which belong to an extent of a 
-     * plane.
-     * \param parametersXYZ0 Peak center coordinate which depicts the region.
-     * \return Parameter domain points that belong to the extent of a particular plane 
-     *         formula.
-     */
-    vector<WParameterDomainKdPoint*>* getParametersOfExtent( vector<double> parametersXYZ0 );
-    /**
-     * Tells wehther two parameters can belong to the same extent or can belong to the 
-     * same plane.
-     * \param parameters1 First parameter to check.
-     * \param parameters2 Second parameter to check.
-     * \return parameters can belont to the same extent or not.
-     */
-    bool isParameterOfSameExtent( vector<double> parameters1, vector<double> parameters2 );
+    void classifyPointsAtThread( vector<WSpatialDomainKdPoint*>* spatialPoints, size_t threadIndex );
 
     /**
      * The maximal count of analyzed neighbors of an examined input point.
@@ -203,18 +172,6 @@ private:
      */
     vector<double> m_cylindricalNLambdaMax;
     /**
-     * Setting that regards the planar formula of each spatial point in relation to its 
-     * neighborship. This variable is the maximal angular deviation of plane formulas 
-     * between two points.
-     */
-    double m_segmentationMaxAngleDegrees;
-    /**
-     * Setting that regards the planar formula of each spatial point in relation to its 
-     * neighborship. This variable is the maximal difference between two plane normal 
-     * distance to the origin.
-     */
-    double m_segmentationPlaneDistance;
-    /**
      * the parameter domain points. Each parameter point depicts a best fitted plane 
      * formula of each corresponding input point of the spatial domain.
      */
@@ -223,6 +180,15 @@ private:
      * The input points that belong to the spatial domain.
      */
     WKdTreeND* m_parameterDomain;
+
+    /**
+     * CPU threads count for multithreading support.
+     */
+    size_t m_cpuThreadCount;
+    /**
+     * CPU threads object for multithreading support.
+     */
+    vector<boost::thread*> m_cpuThreads;
 };
 
-#endif  // WSURFACEDETECTORLARI_H
+#endif  // WLARIPOINTCLASSIFIER_H

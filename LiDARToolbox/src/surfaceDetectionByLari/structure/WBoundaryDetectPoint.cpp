@@ -23,42 +23,36 @@
 //---------------------------------------------------------------------------
 
 #include <iostream>
-#include <algorithm>
 #include <vector>
-#include "WKdPointND.h"
+#include "WBoundaryDetectPoint.h"
 
-using std::cout;
-using std::endl;
-WKdPointND::WKdPointND( vector<double> coordinate )
+WBoundaryDetectPoint::WBoundaryDetectPoint( vector<double> coordinate ) : WKdPointND( coordinate[0], coordinate[1] )
 {
-    m_coordinate = coordinate;
+    if( coordinate.size() >= 3 )
+        m_zCoordinate = coordinate[2];
 }
-WKdPointND::WKdPointND( double x, double y )
+WBoundaryDetectPoint::WBoundaryDetectPoint( double x, double y, double z ) : WKdPointND( x, y )
 {
-    m_coordinate = vector<double>( 2, 0 );
-    m_coordinate[0] = x;
-    m_coordinate[1] = y;
+    m_zCoordinate = z;
 }
-WKdPointND::WKdPointND( double x, double y, double z )
-{
-    m_coordinate = vector<double>( 3, 0 );
-    m_coordinate[0] = x;
-    m_coordinate[1] = y;
-    m_coordinate[2] = z;
-}
-WKdPointND::~WKdPointND()
+WBoundaryDetectPoint::~WBoundaryDetectPoint()
 {
 }
 
-size_t WKdPointND::getDimensionCount()
+
+WSpatialDomainKdPoint* WBoundaryDetectPoint::getSpatialPoint()
 {
-    return m_coordinate.size();
+    return m_assignedSpatialPoint;
 }
-vector<double> WKdPointND::getCoordinate()
+bool WBoundaryDetectPoint::isAddedToPlane()
 {
-    return m_coordinate;
+    return m_isAddedToPlane;
 }
-void WKdPointND::setCoordinate( vector<double> coordinate )
+void WBoundaryDetectPoint::setIsAddedToPlane( bool isAddedToPlane )
 {
-    m_coordinate = coordinate;
+    m_isAddedToPlane = isAddedToPlane;
+}
+void WBoundaryDetectPoint::setSpatialPoint( WSpatialDomainKdPoint* assignedSpatialPoint )
+{
+    m_assignedSpatialPoint = assignedSpatialPoint;
 }

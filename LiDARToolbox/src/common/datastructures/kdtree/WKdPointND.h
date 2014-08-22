@@ -45,6 +45,12 @@ public:
      */
     explicit WKdPointND( vector<double> coordinate );
     /**
+     * Instance to create a two dimensional kd tree point instance.
+     * \param x Three dimensional X coordinate of the new kd tree point.
+     * \param y Three dimensional Y coordinate of the new kd tree point.
+     */
+    WKdPointND( double x, double y );
+    /**
      * Instance to create a three dimensional kd tree point instance.
      * \param x X coordinate of the new kd tree point.
      * \param y Y coordinate of the new kd tree point.
@@ -66,6 +72,11 @@ public:
      * \return Coordinate of a kd tree point.
      */
     vector<double> getCoordinate();
+    /**
+     * Sets coordinate of the point.
+     * \param coordinate Point's coordinate.
+     */
+    void setCoordinate( vector<double> coordinate );
 
 private:
     /**
