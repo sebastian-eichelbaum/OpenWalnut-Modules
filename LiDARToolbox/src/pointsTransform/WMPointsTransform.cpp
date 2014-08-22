@@ -102,6 +102,11 @@ void WMPointsTransform::connectors()
 void WMPointsTransform::properties()
 {
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
+
+    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
+                                            "whole render process took.", 0.0 );
+
+
     double number_range = 1000000000.0;
     m_pointsCropGroup = m_properties->addPropertyGroup( "Point set cropping",
                                             "Options to crop the point set" );
@@ -186,6 +191,8 @@ void WMPointsTransform::moduleMain()
         //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
+        WRealtimeTimer timer;
+        timer.reset();
         bool addedPoints = false;
         WDataSetPoints::VertexArray newVertices(
                 new WDataSetPoints::VertexArray::element_type() );
@@ -220,6 +227,7 @@ void WMPointsTransform::moduleMain()
                     new WDataSetPoints( m_outVerts, m_outColors ) );
             m_output->updateData( outputPoints );
         }
+        m_infoRenderTimeSeconds->set( timer.elapsed() );
 
 //        std::cout << "this is WOTree " << std::endl;
 
@@ -262,12 +270,18 @@ void WMPointsTransform::initBoundingBox( bool isFirstPointSet )
             m_minY = m_maxY = y;
             m_minZ = m_maxZ = z;
         }
-        if( x < m_minX ) m_minX = x;
-        if( x > m_maxX ) m_maxX = x;
-        if( y < m_minY ) m_minY = y;
-        if( y > m_maxY ) m_maxY = y;
-        if( z < m_minZ ) m_minZ = z;
-        if( z > m_maxZ ) m_maxZ = z;
+        if( x < m_minX )
+            m_minX = x;
+        if( x > m_maxX )
+            m_maxX = x;
+        if( y < m_minY )
+            m_minY = y;
+        if( y > m_maxY )
+            m_maxY = y;
+        if( z < m_minZ )
+            m_minZ = z;
+        if( z > m_maxZ )
+            m_maxZ = z;
         m_progressStatus->increment( 1 );
     }
 }
@@ -290,53 +304,45 @@ void WMPointsTransform::setMinMax()
 }
 void WMPointsTransform::addTransformedPoints()
 {
-    double angleXY = m_rotation1AngleXY->get() * M_PI / 180.0;
-    double angleYZ = m_rotation2AngleYZ->get() * M_PI / 180.0;
-    double angleXZ = m_rotation3AngleXZ->get() * M_PI / 180.0;
+    double angleXY = m_rotation1AngleXY->get();
+    double angleYZ = m_rotation2AngleYZ->get();
+    double angleXZ = m_rotation3AngleXZ->get();
+    vector<double>* point = new vector<double>( 3, 0.0 );
     size_t count = m_inVerts->size() / 3;
-    WPosition offset( m_translateX->get(), m_translateY->get(), m_translateZ->get() );
+    vector<double> offset = WVectorMaths::new3dVector( m_translateX->get(), m_translateY->get(), m_translateZ->get() );
+    vector<double> factor = WVectorMaths::new3dVector( m_factorX->get(), m_factorY->get(), m_factorZ->get() );
+    vector<double> rotationAnchor = WVectorMaths::new3dVector(
+            m_rotationAnchorX->get(), m_rotationAnchorY->get(), m_rotationAnchorZ->get() );
+    vector<double>* rotationAnchorInverted = WVectorMaths::copyVectorForPointer( rotationAnchor );
+    WVectorMaths::invertVector( rotationAnchorInverted );
     for( size_t index = 0; index < count; index++)
     {
-        double x = m_inVerts->at( index * 3 );
-        double y = m_inVerts->at( index * 3 + 1 );
-        double z = m_inVerts->at( index * 3 + 2 );
-        bool isInsideSelection = x >= m_fromX->get() && x <= m_toX->get()
-                &&  y >= m_fromY->get() && y <= m_toY->get()
-                &&  z >= m_fromZ->get() && z <= m_toZ->get();
+        point->at( 0 ) = m_inVerts->at( index * 3 );
+        point->at( 1 ) = m_inVerts->at( index * 3 + 1 );
+        point->at( 2 ) = m_inVerts->at( index * 3 + 2 );
+        bool isInsideSelection = point->at( 0 ) >= m_fromX->get() && point->at( 0 ) <= m_toX->get()
+                &&  point->at( 1 ) >= m_fromY->get() && point->at( 1 ) <= m_toY->get()
+                &&  point->at( 2 ) >= m_fromZ->get() && point->at( 2 ) <= m_toZ->get();
         size_t modulo = m_skipRatio->get() + 1;
         bool isPointSkipped = index % ( modulo ) != 0;
         if( isInsideSelection != m_cutInsteadOfCrop->get() && !isPointSkipped )
         {
-            x += offset[0];
-            y += offset[1];
-            z += offset[2];
+            WVectorMaths::addVector( point, offset );
+            WVectorMaths::multiplyVector( point, factor );
 
-            x *= m_factorX->get();
-            y *= m_factorY->get();
-            z *= m_factorZ->get();
+            WVectorMaths::addVector( point, *rotationAnchorInverted );
+            WVectorMaths::rotateVector( point, 0, 1, angleXY );
+            WVectorMaths::rotateVector( point, 1, 2, angleYZ );
+            WVectorMaths::rotateVector( point, 0, 2, angleXZ );
+            WVectorMaths::addVector( point, rotationAnchor );
 
-            x -= m_rotationAnchorX->get();
-            y -= m_rotationAnchorY->get();
-            z -= m_rotationAnchorZ->get();
-            double old = x;
-            x = x*cos( angleXY ) - y*sin( angleXY );
-            y = old*sin( angleXY ) + y*cos( angleXY );
-            old = y;
-            y = y*cos( angleYZ ) - z*sin( angleYZ );
-            z = old*sin( angleYZ ) + z*cos( angleYZ );
-            old = x;
-            x = x*cos( angleXZ ) - z*sin( angleXZ );
-            z = old*sin( angleXZ ) + z*cos( angleXZ );
-            x += m_rotationAnchorX->get();
-            y += m_rotationAnchorY->get();
-            z += m_rotationAnchorZ->get();
-
-            m_outVerts->push_back( x );
-            m_outVerts->push_back( y );
-            m_outVerts->push_back( z );
             for( size_t item = 0; item < 3; item++ )
+            {
+                m_outVerts->push_back( point->at( item ) );
                 m_outColors->push_back( m_inColors->at( index * 3 + item ) );
+            }
         }
         m_progressStatus->increment( 1 );
     }
+    delete rotationAnchorInverted;
 }

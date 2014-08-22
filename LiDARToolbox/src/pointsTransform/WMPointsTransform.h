@@ -67,6 +67,7 @@
 #include "core/common/WItemSelectionItemTyped.h"
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
+#include "../common/math/vectors/WVectorMaths.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -205,6 +206,11 @@ private:
      */
     WDataSetPoints::ColorArray m_outColors;
 
+
+    /**
+     * Wall time of the point transformation routine.
+     */
+    WPropDouble m_infoRenderTimeSeconds;
     /**
      * Options for surface features.
      */
