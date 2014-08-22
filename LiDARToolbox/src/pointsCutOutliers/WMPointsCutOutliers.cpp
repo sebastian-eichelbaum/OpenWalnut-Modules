@@ -24,7 +24,7 @@
 
 #include <string>
 
-#include <fstream>  // std::ifstream
+#include <fstream>
 #include <vector>
 
 #include <osg/Geometry>
@@ -79,11 +79,11 @@ const std::string WMPointsCutOutliers::getDescription() const
 
 void WMPointsCutOutliers::connectors()
 {
-    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "" );
+    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
 
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
-                        shared_from_this(), "points", "" ) );
+                        shared_from_this(), "points", "The loaded points." ) );
 
     addConnector( m_output );
 //    addConnector( m_buildings );
