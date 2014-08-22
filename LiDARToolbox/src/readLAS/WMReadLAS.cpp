@@ -163,6 +163,7 @@ void WMReadLAS::moduleMain()
                                      m_sliderY->get( true ),
                                      m_outputDataWidth->get( true ) );
             reader.setTranslateToCenter( m_translateDataToCenter->get( true ) );
+            reader.setContrast( m_contrast->get() );
             boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints();
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
             WDataSetPoints::ColorArray colors = tmpPointSet->getColors();

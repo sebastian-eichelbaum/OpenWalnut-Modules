@@ -29,8 +29,8 @@
 #include <liblas/liblas.hpp>
 #include <string>
 
-#include <fstream>  // std::ifstream
-#include <iostream> // std::cout
+#include <fstream>
+#include <iostream>
 
 #include "core/kernel/WModule.h"
 
