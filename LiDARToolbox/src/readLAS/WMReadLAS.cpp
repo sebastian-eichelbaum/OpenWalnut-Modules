@@ -89,7 +89,6 @@ void WMReadLAS::connectors()
 
 void WMReadLAS::properties()
 {
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     m_lasFile = m_properties->addProperty( "LiDAR file", "", WPathHelper::getAppPath() );
     WPropertyHelper::PC_PATHEXISTS::addTo( m_lasFile );
 
@@ -137,8 +136,6 @@ void WMReadLAS::requirements()
 
 void WMReadLAS::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_propCondition );

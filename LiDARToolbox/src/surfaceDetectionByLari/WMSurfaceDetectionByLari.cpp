@@ -128,9 +128,9 @@ void WMSurfaceDetectionByLari::properties()
     m_squareWidth = m_properties->addProperty( "Plane outline size: ", "", 0.2, m_propCondition );
 
     //TODO(aschwarzkopf): Resolve changing the thread count during execution.
-    //WPropInt m_cpuThreadCount = m_properties->addProperty( "CPU threads: ", "", 8, m_propCondition );
-    //m_cpuThreadCount->setMin( 4 );
-    //m_cpuThreadCount->setMax( 24 );
+    m_cpuThreadCount = m_properties->addProperty( "CPU threads: ", "", 8, m_propCondition );
+    m_cpuThreadCount->setMin( 4 );
+    m_cpuThreadCount->setMax( 24 );
 
     m_planarGroup = m_properties->addPropertyGroup( "Planar feature properties",
                                             "All conditions must be met to detect as a surface." );
@@ -245,7 +245,7 @@ void WMSurfaceDetectionByLari::moduleMain()
             WLariPointClassifier* classifier = new WLariPointClassifier();
             classifier->setNumberPointsK( m_numberPointsK->get() );
             classifier->setMaxPointDistanceR( m_maxPointDistanceR->get() );
-            //classifier->setCpuThreadCount( m_cpuThreadCount->get() );
+            classifier->setCpuThreadCount( m_cpuThreadCount->get() );
             classifier->setPlanarNLambdaRange( 0, m_surfaceNLambda1Min->get(), m_surfaceNLambda1Max->get() );
             classifier->setPlanarNLambdaRange( 1, m_surfaceNLambda2Min->get(), m_surfaceNLambda2Max->get() );
             classifier->setPlanarNLambdaRange( 2, m_surfaceNLambda3Min->get(), m_surfaceNLambda3Max->get() );
@@ -256,7 +256,7 @@ void WMSurfaceDetectionByLari::moduleMain()
 
             WLariBruteforceClustering* clustering = new WLariBruteforceClustering( classifier );
             clustering->setSegmentationSettings( m_segmentationMaxAngleDegrees->get(), m_segmentationPlaneDistance->get() );
-            //clustering.setCpuThreadCount( m_cpuThreadCount->get() );
+            clustering->setCpuThreadCount( m_cpuThreadCount->get() );
             clustering->detectClustersByBruteForce();
 
             WLariBoundaryDetector* boundaryDetector = new WLariBoundaryDetector();

@@ -52,7 +52,6 @@ namespace laslibb
     }
     WLasReader::~WLasReader()
     {
-        // TODO(schwarzkopf): Auto-generated destructor stub
     }
 
     void WLasReader::setProgressSettings( size_t steps )
