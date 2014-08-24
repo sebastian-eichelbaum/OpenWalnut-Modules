@@ -101,8 +101,6 @@ void WMPointsTransform::connectors()
 
 void WMPointsTransform::properties()
 {
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
     m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
                                             "whole render process took.", 0.0 );
 
@@ -171,8 +169,6 @@ void WMPointsTransform::requirements()
 
 void WMPointsTransform::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     for( size_t pointset = 0; pointset < m_input.size(); pointset++ )
@@ -188,7 +184,6 @@ void WMPointsTransform::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         WRealtimeTimer timer;
@@ -203,7 +198,6 @@ void WMPointsTransform::moduleMain()
         for(size_t pointset = 0; pointset < m_input.size(); pointset++)
         {
             boost::shared_ptr< WDataSetPoints > points = m_input[pointset]->getData();
-    //        std::cout << "Execute cycle\r\n";
             if  ( points )
             {
                 m_inVerts = points->getVertices();
@@ -229,8 +223,6 @@ void WMPointsTransform::moduleMain()
         }
         m_infoRenderTimeSeconds->set( timer.elapsed() );
 
-//        std::cout << "this is WOTree " << std::endl;
-
         // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )
         {
@@ -241,8 +233,6 @@ void WMPointsTransform::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );

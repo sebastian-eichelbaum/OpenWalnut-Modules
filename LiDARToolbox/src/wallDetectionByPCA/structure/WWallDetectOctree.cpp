@@ -35,29 +35,6 @@ WWallDetectOctree::~WWallDetectOctree()
 {
     m_wallMaxAngleToNeighborVoxel = 20.0;
 }
-/*vector<WOctNode*> WWallDetectOctree::getNeighborsOfNode( WOctNode* node )
-{
-    double x = node->getCenter( 0 );
-    double y = node->getCenter( 1 );
-    double z = node->getCenter( 2 );
-    double d = node->getRadius() * 2.0;
-    vector<WOctNode*> neighbors;    //TODO(aschwarzkopf): Some elements are missing and
-                    //check by additional bool variable whether has been checked instead.
-    neighbors.push_back( getLeafNode( x-d, y-d, z ) );
-    neighbors.push_back( getLeafNode( x  , y-d, z ) );
-    neighbors.push_back( getLeafNode( x+d, y-d, z ) );
-    neighbors.push_back( getLeafNode( x-d, y  , z ) );
-    neighbors.push_back( getLeafNode( x-d, y-d, z-d ) );
-    neighbors.push_back( getLeafNode( x  , y-d, z-d ) );
-    neighbors.push_back( getLeafNode( x+d, y-d, z-d ) );
-    neighbors.push_back( getLeafNode( x-d, y  , z-d ) );
-    neighbors.push_back( getLeafNode( x  , y  , z-d ) );
-    neighbors.push_back( getLeafNode( x+d, y  , z-d ) );
-    neighbors.push_back( getLeafNode( x-d, y+d, z-d ) );
-    neighbors.push_back( getLeafNode( x  , y+d, z-d ) );
-    neighbors.push_back( getLeafNode( x+d, y+d, z-d ) );
-    return neighbors;
-}*/
 bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
 {
     WWallDetectOctNode* node1 = static_cast<WWallDetectOctNode*>( octNode1 );

@@ -84,7 +84,6 @@ void WMSurfaceDetectionByPCL::connectors()
                 new WModuleOutputData< WDataSetPointsGrouped >( shared_from_this(), "Grouped points", "The loaded mesh." ) );
 
     addConnector( m_outputPointsGrouped );
-//    addConnector( m_buildings );
     WModule::connectors();
 }
 
@@ -102,8 +101,6 @@ void WMSurfaceDetectionByPCL::properties()
     m_infoZMin = m_infoProperties->addProperty( "Z min.: ", "Minimal z coordinate of all input points.", 0.0 );
     m_infoZMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
 
-
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
     m_clusterSizeMin = m_properties->addProperty( "Cluster size min.: ",
@@ -128,9 +125,6 @@ void WMSurfaceDetectionByPCL::requirements()
 
 void WMSurfaceDetectionByPCL::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
@@ -144,11 +138,9 @@ void WMSurfaceDetectionByPCL::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         boost::shared_ptr< WDataSetPoints > points = m_input->getData();
-//        std::cout << "Execute cycle\r\n";
         if  ( points )
         {
             WRealtimeTimer timer;
@@ -202,8 +194,6 @@ void WMSurfaceDetectionByPCL::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );

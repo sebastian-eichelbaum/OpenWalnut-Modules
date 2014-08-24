@@ -98,12 +98,6 @@ boost::shared_ptr< WDataSetPoints > WLariOutliner::outlineSpatialDomainCategorie
         vector<double> spatialCoordinate = spatialPoint->getCoordinate();
         vector<double> eigenValues = spatialPoint->getEigenValues();
 
-        double sumLambda = 0;        //TODO(aschwarzkopf): Unused
-        for( size_t i = 0; i < eigenValues.size(); i++ )
-            sumLambda += eigenValues[i];
-        vector<double> nLambdaI;    //TODO(aschwarzkopf): Unused
-        for( size_t i = 0; i < eigenValues.size(); i++ )
-            nLambdaI.push_back( eigenValues[i] / sumLambda );
         for( size_t dimension = 0; dimension < spatialCoordinate.size(); dimension++ )
             outVertices->push_back( spatialCoordinate[dimension] );
         bool isPlanar = m_pointClassifier->calculateIsPlanarPoint( eigenValues );
@@ -135,7 +129,7 @@ boost::shared_ptr< WTriangleMesh > WLariOutliner::outlineLeastSquaresPlanes( dou
         WPosition spatialPoint( 0.0, 0.0, 0.0 );
         for( size_t dimension = 0; dimension < spatialCoordinate.size(); dimension++ )
             spatialPoint[dimension] = spatialCoordinate[dimension];
-        vector<double> planeFormula = spatialDomainPoint->getHessescheNormalForm();
+        vector<double> planeFormula = spatialDomainPoint->getHesseNormalForm();
 
         WMTempLeastSquaresTest::outlineNormalPlane( planeFormula, spatialPoint, squaresWidth / 2.0, outputMesh );
     }

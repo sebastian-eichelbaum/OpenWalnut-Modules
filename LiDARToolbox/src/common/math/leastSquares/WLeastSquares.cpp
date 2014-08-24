@@ -46,17 +46,17 @@ void WLeastSquares::analyzeData( vector<WPosition>* data )
     calculatePerpendicularDimension();
     clearMatrices();
     calculateMatrices();
-    calculateHessescheNormalForm();
+    calculateHesseNormalForm();
 }
-vector<double> WLeastSquares::getHessescheNormalForm()
+vector<double> WLeastSquares::getHesseNormalForm()
 {
-    return m_hessescheNormalForm;
+    return m_hesseNormalForm;
 }
 vector<double> WLeastSquares::getNormalVectorNotNormalized()
 {
     vector<double> normalVector;
-    for( size_t dimension = 0; dimension < m_hessescheNormalForm.size() - 1; dimension++ )
-        normalVector.push_back( m_hessescheNormalForm[dimension] );
+    for( size_t dimension = 0; dimension < m_hesseNormalForm.size() - 1; dimension++ )
+        normalVector.push_back( m_hesseNormalForm[dimension] );
     return normalVector;
 }
 void WLeastSquares::calculatePerpendicularDimension()
@@ -127,39 +127,39 @@ void WLeastSquares::calculateMatrices()
         }
     }
 }
-void WLeastSquares::calculateHessescheNormalForm()
+void WLeastSquares::calculateHesseNormalForm()
 {
     MatrixXd matrixX = m_matrixA.inverse()*m_matrixB;
 
-    m_hessescheNormalForm.reserve( m_dimensions + 1 );
-    m_hessescheNormalForm.resize( m_dimensions + 1 );
-    for( size_t index = 0; index < m_hessescheNormalForm.size(); index++ )
+    m_hesseNormalForm.reserve( m_dimensions + 1 );
+    m_hesseNormalForm.resize( m_dimensions + 1 );
+    for( size_t index = 0; index < m_hesseNormalForm.size(); index++ )
     {
         size_t indexMat = index <= m_verticalDimension ?index : index - 1;
 
-        m_hessescheNormalForm[index] =
+        m_hesseNormalForm[index] =
                 index != m_verticalDimension
                 ?-matrixX( indexMat, 0 ) :1;
     }
 
     double sumSquared = 0;
     for( size_t index = 0; index < m_dimensions; index++ )
-        sumSquared += pow( m_hessescheNormalForm[index], 2.0 );
+        sumSquared += pow( m_hesseNormalForm[index], 2.0 );
     sumSquared = pow( sumSquared, 0.5 );
     //for( size_t index = 0; index < m_dimensions; index++ )
-    //    m_hessescheNormalForm[index] /= sumSquared;
+    //    m_hesseNormalForm[index] /= sumSquared;
 }
 vector<double> WLeastSquares::getParametersXYZ0()
 {
-    return getParametersXYZ0( m_hessescheNormalForm );
+    return getParametersXYZ0( m_hesseNormalForm );
 }
-vector<double> WLeastSquares::getParametersXYZ0( vector<double> hessescheNormalForm )
+vector<double> WLeastSquares::getParametersXYZ0( vector<double> hesseNormalForm )
 {
     vector<double> parameters;
-    double a = hessescheNormalForm[0];
-    double b = hessescheNormalForm[1];
-    double c = hessescheNormalForm[2];
-    double d = hessescheNormalForm[3];
+    double a = hesseNormalForm[0];
+    double b = hesseNormalForm[1];
+    double c = hesseNormalForm[2];
+    double d = hesseNormalForm[3];
     double a2 = a * a;
     double b2 = b * b;
     double c2 = c * c;
@@ -174,32 +174,32 @@ double WLeastSquares::getDistanceToPlane( WPosition point )
 {
     double normalAbsolute = 0;
     for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
-        normalAbsolute += pow( m_hessescheNormalForm[dimension], 2.0 );
+        normalAbsolute += pow( m_hesseNormalForm[dimension], 2.0 );
     normalAbsolute = pow( normalAbsolute, 0.5 );
 
     double distance = 0;
     for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
-        distance += point[dimension] * m_hessescheNormalForm[dimension];
-    return ( distance + m_hessescheNormalForm[m_dimensions] ) / normalAbsolute;
+        distance += point[dimension] * m_hesseNormalForm[dimension];
+    return ( distance + m_hesseNormalForm[m_dimensions] ) / normalAbsolute;
 }
 WPosition WLeastSquares::getNearestPointTo( WPosition point )
 {
-    return getNearestPointTo( m_hessescheNormalForm, point );
+    return getNearestPointTo( m_hesseNormalForm, point );
 }
-WPosition WLeastSquares::getNearestPointTo( vector<double> planeHessescheNormalForm, WPosition point )
+WPosition WLeastSquares::getNearestPointTo( vector<double> planeHesseNormalForm, WPosition point )
 {
-    double dimensions = planeHessescheNormalForm.size() - 1;
-    double amountN = planeHessescheNormalForm[dimensions];
+    double dimensions = planeHesseNormalForm.size() - 1;
+    double amountN = planeHesseNormalForm[dimensions];
     double amountR = 0;
     for(size_t dimension = 0; dimension < dimensions; dimension++ )
     {
-        amountN += planeHessescheNormalForm[dimension] * point[dimension];
-        amountR += planeHessescheNormalForm[dimension] * planeHessescheNormalForm[dimension];
+        amountN += planeHesseNormalForm[dimension] * point[dimension];
+        amountR += planeHesseNormalForm[dimension] * planeHesseNormalForm[dimension];
     }
     double r = -amountN / amountR;
 
     WPosition cuttingPoint( point[0], point[1], point[2] );
     for( size_t dimension = 0; dimension < dimensions; dimension++ )
-        cuttingPoint[dimension] += planeHessescheNormalForm[dimension] * r;
+        cuttingPoint[dimension] += planeHesseNormalForm[dimension] * r;
     return cuttingPoint;
 }

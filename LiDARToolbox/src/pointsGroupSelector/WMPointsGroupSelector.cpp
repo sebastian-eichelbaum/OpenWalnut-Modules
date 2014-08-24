@@ -106,9 +106,6 @@ void WMPointsGroupSelector::properties()
     m_zMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
 
 
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
-
 
     m_detailDepth = m_properties->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
                             "depth for the octree search tree.", 0, m_propCondition );
@@ -139,9 +136,6 @@ void WMPointsGroupSelector::requirements()
 
 void WMPointsGroupSelector::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
@@ -155,7 +149,6 @@ void WMPointsGroupSelector::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         boost::shared_ptr< WDataSetPointsGrouped > points = m_input->getData();
@@ -244,8 +237,6 @@ void WMPointsGroupSelector::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );

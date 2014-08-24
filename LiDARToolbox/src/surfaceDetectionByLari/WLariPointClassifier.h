@@ -46,6 +46,12 @@ using std::endl;
 using std::vector;
 
 
+/**
+ * Class that adds classification meta to points in relation to its neighbor points. The 
+ * meta contains such things as eigenvalues, eigenvectors (Both calculated by Principal 
+ * Component Analysis) and the Hesse normal form (calculated using least squares 
+ * adjustment).
+ */
 class WLariPointClassifier
 {
 public:

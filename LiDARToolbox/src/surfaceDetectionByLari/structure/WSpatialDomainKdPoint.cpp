@@ -46,13 +46,13 @@ vector<double> WSpatialDomainKdPoint::getEigenValues()
     return m_eigenValues;
 }
 
-vector<double> WSpatialDomainKdPoint::getHessescheNormalForm()
+vector<double> WSpatialDomainKdPoint::getHesseNormalForm()
 {
-    return m_hessescheNormalForm;
+    return m_hesseNormalForm;
 }
 vector<double> WSpatialDomainKdPoint::getParametersXYZ0()
 {
-    return WLeastSquares::getParametersXYZ0( m_hessescheNormalForm );
+    return WLeastSquares::getParametersXYZ0( m_hesseNormalForm );
 }
 
 double WSpatialDomainKdPoint::getDistanceToNthNearestNeighbor()
@@ -96,9 +96,9 @@ void WSpatialDomainKdPoint::setEigenVectors( vector<WVector3d> eigenVectors )
 {
     m_eigenVectors = eigenVectors;
 }
-void WSpatialDomainKdPoint::setHessescheNormalForm( vector<double> hessescheNormalForm )
+void WSpatialDomainKdPoint::setHesseNormalForm( vector<double> hesseNormalForm )
 {
-    m_hessescheNormalForm = hessescheNormalForm;
+    m_hesseNormalForm = hesseNormalForm;
 }
 void WSpatialDomainKdPoint::setKNearestPoints( size_t kNearestPoints )
 {

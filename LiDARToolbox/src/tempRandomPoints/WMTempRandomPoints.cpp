@@ -89,7 +89,6 @@ void WMTempRandomPoints::connectors()
 
 void WMTempRandomPoints::properties()
 {
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     m_groupRandomPointGenerator = m_properties->addPropertyGroup( "Random point generator settings",
                                             "Options that are applied on the random point generator." );
     m_isSphericalSpace = m_groupRandomPointGenerator->addProperty( "Is spherical: ", "Organize points in a spherical space.",
@@ -111,9 +110,6 @@ void WMTempRandomPoints::requirements()
 
 void WMTempRandomPoints::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_propCondition );
 
@@ -123,24 +119,19 @@ void WMTempRandomPoints::moduleMain()
     m_rootNode = osg::ref_ptr< WGEManagedGroupNode >( new WGEManagedGroupNode( m_active ) );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
 
-    // main loop
+
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
 
         m_output->updateData( getRandomPoints() );
 
-//        std::cout << "this is WOTree " << std::endl;
 
-        // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )
         {
             break;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );

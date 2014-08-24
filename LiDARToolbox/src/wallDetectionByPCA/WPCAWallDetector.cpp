@@ -204,10 +204,6 @@ void WPCAWallDetector::drawLeafNodeNormalVector( WWallDetectOctNode* node, boost
     double eigen1_s = eigen1 * 3.0 / 5.0;
     double eigen2 = pow( node->getEigenValues()[1], 0.5 ) * 2.0;
     double eigen3 = pow( node->getEigenValues()[2], 0.5 ) * 2.0;
-    /*double eigen1 = 1;
-    double eigen1_s = 1;
-    double eigen2 = 1;
-    double eigen3 = 1;*/
 
     outputMesh->addVertex( meanX - vec2_x * eigen2, meanY - vec2_y * eigen2, meanZ - vec2_z * eigen2 );
     outputMesh->addVertex( meanX + vec1_x * eigen1, meanY + vec1_y * eigen1, meanZ + vec1_z * eigen1 );

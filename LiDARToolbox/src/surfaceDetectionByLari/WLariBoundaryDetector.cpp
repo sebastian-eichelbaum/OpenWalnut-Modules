@@ -48,7 +48,6 @@ void WLariBoundaryDetector::detectBoundaries( WKdTreeND* parameterDomain )
     cout << "detectBoundaries()" << endl;
     initSpatialDomain( parameterDomain );
 
-    //TODO(aschwarzkopf): Remove apply only for biggest cluster:
     for( size_t cluster = 0; cluster < m_spatialInputClusters->size(); cluster++ )
         detectInputCluster( m_spatialInputClusters->at( cluster ) );
 }
@@ -105,7 +104,6 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
         WBoundaryDetectPoint* clusterPoint = new WBoundaryDetectPoint( *coordinate );
         clusterPoint->setSpatialPoint( currentPoint );
         clusterPoints->push_back( clusterPoint );
-        //currentPoint->setCoordinate( coordinate );
         currentPoint->setClusterID( 9 );
         delete coordinate;
     }
@@ -155,7 +153,6 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
         initOneOutsidePoint();
         for( size_t index = 0; index < clusterPoints->size(); index++ )
         {
-            //cout << "Detecting whether in bounds[" << m_currentBoundary->size() << "] P " << index << "/" << clusterPoints->size() << endl;
             WBoundaryDetectPoint* currentPoint = clusterPoints->at( index );
             const vector<double>& coordinate = currentPoint->getCoordinate();
             if( pointBelongsToBoundingBox( coordinate ) && pointIsInBounds( coordinate ) )
@@ -182,18 +179,10 @@ void WLariBoundaryDetector::initTransformationCoordinateSystem( vector<WSpatialD
     vector<double>* meanNormalVector = new vector<double>( 3, 0.0 );
     for( size_t index = 0; index < currentPoints->size(); index++ )
     {
-        //cout << "init[" << index << "] (" << meanNormalVector[0] << ", " << meanNormalVector[1] << ", " << meanNormalVector[2] << endl;
         vector<double>* currentPoint = WVectorMaths::copyVectorForPointer( currentPoints->at( index )->getParametersXYZ0() );
         WVectorMaths::normalizeVector( currentPoint );
         if( WVectorMaths::isValidVector( *currentPoint ) )
-        //{
             WVectorMaths::addVector( meanNormalVector, *currentPoint );
-        //}
-        //else
-        //{
-            //cout << "!!! FOUND INVALID EXTENT !!!  P[" << index << "](" << currentPoint[0] << ", "
-            //        << currentPoint[1] << ", " << currentPoint[2] << ")" << endl;
-        //}
         delete currentPoint;
     }
     WVectorMaths::normalizeVector( meanNormalVector );
@@ -204,9 +193,6 @@ void WLariBoundaryDetector::initTransformationCoordinateSystem( vector<WSpatialD
 }
 WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
 {
-    //if( m_currentBoundary->size() == 5 )
-    //    cout << "The garbled point breakpoint" << endl;
-
     WBoundaryDetectPoint* previousPoint = m_currentBoundary->size() >= 2
             ?m_currentBoundary->at( m_currentBoundary->size() - 2 )
             :new WBoundaryDetectPoint( m_currentBoundary->at( 0 )->getCoordinate()[0] - 1.0,
@@ -215,7 +201,6 @@ WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
 
     m_clusterSearcher.setSearchedPoint( currentPoint->getCoordinate() );
     vector<WPointDistance>*  nearestPoints = m_clusterSearcher.getNearestPoints();
-    //cout << "getNextBoundPoint(): m_clusterSearcher.getNearestPoints() - " << nearestPoints->size() << " nearest points found" << endl;
     WBoundaryDetectPoint* nextPoint = 0;
     double narrowestAngle = 361;
     for( size_t index = 0; index < nearestPoints->size(); index++ )
@@ -233,9 +218,6 @@ WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
 
     if( m_currentBoundary->size() < 2 )
         delete previousPoint;
-    //if( nextPoint != 0 )
-    //    cout << "getNextBoundPoint() - P" << m_currentBoundary->size() << "(" << nextPoint->getCoordinate()[0]
-    //            << ", " << nextPoint->getCoordinate()[1] << ") @" << narrowestAngle << "°" << endl;
     return nextPoint;
 }
 bool WLariBoundaryDetector::pointCanProceedBound( WPointDistance nextPointDistance )
@@ -325,24 +307,18 @@ bool WLariBoundaryDetector::pointIsInBounds( const vector<double>& point )
     bool isInBounds = false;
     for( size_t bound = 0; bound < m_currentBoundary->size() - 1; bound++ )
     {
-        //if( bound == 114 )
-        //    cout << "garbled point" << endl;
-        //cout << "    pointIsInBounds() [" << bound << "]" << endl;
         if( pointLiesOnBound( point, bound ) )
             return true;
 
         if( pointHitsBound( point, bound ) )
-        {
+            isInBounds = !isInBounds;
             //TODO(aschwarzkopf): Implement an appropriate routine to handle when intersection hits exactly on points.
             //TODO(aschwarzkopf): Possible solution: Move m_oneOutsidePoint until bound points do not hit exactly.
-            isInBounds = !isInBounds;
-        }
     }
     return isInBounds;
 }
 bool WLariBoundaryDetector::pointLiesOnBound( const vector<double>& point, size_t boundNr )
 {
-    //cout << "        pointLiesOnBound()" << endl;
     const vector<double> boundPoint1 = m_currentBoundary->at( boundNr )->getCoordinate();
     double secondIndex = boundNr + 1;
     while( boundNr >= m_currentBoundary->size() )
@@ -354,7 +330,6 @@ bool WLariBoundaryDetector::pointLiesOnBound( const vector<double>& point, size_
 }
 bool WLariBoundaryDetector::pointHitsBound( const vector<double>& point, size_t boundNr )
 {
-    //cout << "        pointHitsBound()" << endl;
     const vector<double> boundPoint1 = m_currentBoundary->at( boundNr )->getCoordinate();
     size_t secondIndex = boundNr + 1;
     while( secondIndex >= m_currentBoundary->size() )

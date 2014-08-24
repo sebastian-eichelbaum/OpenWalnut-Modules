@@ -52,7 +52,6 @@ WLariPointClassifier::~WLariPointClassifier()
 
 void WLariPointClassifier::analyzeData( vector<WSpatialDomainKdPoint*>* inputPoints )
 {
-    //TODO(aschwarzkopf): After draft stage refine in several methods and remove comments
     cout << "Attempting to analyze " << inputPoints->size() << " points" << endl;
     delete m_spatialDomain;
     delete m_parameterDomain;
@@ -63,7 +62,6 @@ void WLariPointClassifier::analyzeData( vector<WSpatialDomainKdPoint*>* inputPoi
 
     classifyPoints( inputPoints, parameterPoints );
 
-    //Generating properties for each existing point
     cout << "Adding " << parameterPoints->size() << " parameter points" << endl;
     m_parameterDomain->add( reinterpret_cast<vector<WKdPointND*>*>( parameterPoints ) );
 }
@@ -100,17 +98,11 @@ void WLariPointClassifier::classifyPoints( vector<WSpatialDomainKdPoint*>* spati
 }
 void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*>* spatialPoints, size_t threadIndex )
 {
-    //cout << (spatialPoints->size()) << " " << (parameterPoints->size()) << " " << threadIndex << endl;
     WPointSearcher spatialSearcher( m_spatialDomain );
     spatialSearcher.setMaxResultPointCount( m_numberPointsK );
     spatialSearcher.setMaxSearchDistance( m_maxPointDistanceR );
     for( size_t index = threadIndex; index < spatialPoints->size(); index += m_cpuThreadCount )
     {
-        if( index == 1061 )
-            cout << "Garbled classified point - " << index << endl;
-
-        //cout << "Thread " << threadIndex << ", index " << index << endl;
-        //Getting nearest n points
         WSpatialDomainKdPoint* spatialPoint = spatialPoints->at( index );
         vector<double> spatialCoordinate = spatialPoint->getCoordinate();
         spatialSearcher.setSearchedPoint( spatialCoordinate );
@@ -119,17 +111,15 @@ void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*
         spatialPoint->setKNearestPoints( points->size() );
         spatialPoint->setDistanceToNthNearestNeighbor( nearestPoints->at( points->size() - 1 ).getDistance() );
 
-        //Calculating Eigen properties
         WPrincipalComponentAnalysis pca;
         pca.analyzeData( points );
         spatialPoint->setEigenVectors( pca.getDirections() );
         vector<double> eigenValues = pca.getEigenValues();
         spatialPoint->setEigenValues( eigenValues );
 
-        //Adding parameter space information
         WLeastSquares leastSquares;
         leastSquares.analyzeData( points );
-        spatialPoint->setHessescheNormalForm( leastSquares.getHessescheNormalForm() );
+        spatialPoint->setHesseNormalForm( leastSquares.getHesseNormalForm() );
 
         delete nearestPoints;
         delete points;

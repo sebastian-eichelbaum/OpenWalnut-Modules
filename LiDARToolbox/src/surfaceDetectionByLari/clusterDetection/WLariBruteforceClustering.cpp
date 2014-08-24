@@ -43,15 +43,13 @@ WLariBruteforceClustering::~WLariBruteforceClustering()
 
 void WLariBruteforceClustering::detectClustersByBruteForce()
 {
-    vector<WKdPointND*>* parameterNodes = m_parameterDomain->getAllPoints(); //AW: D A S   H E I S S T   K E I N E   W A R T E S C H L A N G E ! ! !
+    vector<WKdPointND*>* parameterNodes = m_parameterDomain->getAllPoints();
     size_t currentClusterID = 0;
     while( parameterNodes->size() > 0 )
     {
         initExtentSizes( parameterNodes );
-        //cout << "Detecting cluster - " << parameterNodes->size() << " left" << endl;
         WParameterDomainKdPoint* biggestExtentPoint = 0;
         int mostNeighborsCount = 0;
-//        cout << "Looking for biggest extent" << endl;
         for( size_t index = 0; index < parameterNodes->size(); index++ )
         {
             WParameterDomainKdPoint* parameterPoint = static_cast<WParameterDomainKdPoint*>( parameterNodes->at( index ) );
@@ -61,7 +59,6 @@ void WLariBruteforceClustering::detectClustersByBruteForce()
                 mostNeighborsCount = parameterPoint->getExtentPointCount();
             }
         }
-//        cout << "Looking for neighbors of biggest extent" << endl;
         addExtentCluster( biggestExtentPoint, currentClusterID++ );
 
         vector<WKdPointND*>* oldParameterNodes = parameterNodes;
@@ -92,7 +89,6 @@ vector<WParameterDomainKdPoint*>* WLariBruteforceClustering::getParametersOfExte
     parameterSearcher.setMaxSearchDistance( maxParameterDistance );
     parameterSearcher.setSearchedPoint( parametersXYZ0 );
     vector<WPointDistance>* nearestPoints = parameterSearcher.getNearestPoints();
-    //cout << "Considering "<<nearestPoints->size()<<" nearest points\t";
     vector<WParameterDomainKdPoint*>* neighborParameters = new vector<WParameterDomainKdPoint*>();
     for( size_t index = 0; index < nearestPoints->size(); index++ )
         if( isParameterOfSameExtent( parametersXYZ0, nearestPoints->at(index).getComparedCoordinate() ) )
@@ -178,14 +174,11 @@ double WLariBruteforceClustering::getMaxParameterDistance( const vector<double>&
     parameterFar[1] = rotationY * distanceFar;
     distanceNear = WPointDistance::getPointDistance( extent, parameterNear );
     distanceFar = WPointDistance::getPointDistance( extent, parameterFar );
-    //cout << " )\tDistance: " << distanceNear<<", "<<distanceFar<<"\t";
     return distanceNear > distanceFar ?distanceNear :distanceFar;
 }
 bool WLariBruteforceClustering::isParameterOfSameExtent( const vector<double>& parameters1, const vector<double>& parameters2 )
 {
     vector<double> origin( 3, 0 );
-    //for( size_t index = 0; index < parameters1.size(); index++ )
-    //    origin.push_back( 0.0 );
     double distance1 = WPointDistance::getPointDistance( origin, parameters1 );
     double distance2 = WPointDistance::getPointDistance( origin, parameters2 );
     if( distance1 + distance2 == 0.0 )

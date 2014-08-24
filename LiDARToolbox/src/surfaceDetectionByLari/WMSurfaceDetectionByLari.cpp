@@ -97,7 +97,6 @@ void WMSurfaceDetectionByLari::connectors()
     addConnector( m_outputSpatialDomainCategories );
     addConnector( m_outputParameterDomain );
     addConnector( m_outputLeastSquaresPlanes );
-//    addConnector( m_buildings );
     WModule::connectors();
 }
 
@@ -127,7 +126,6 @@ void WMSurfaceDetectionByLari::properties()
 
     m_squareWidth = m_properties->addProperty( "Plane outline size: ", "", 0.2, m_propCondition );
 
-    //TODO(aschwarzkopf): Resolve changing the thread count during execution.
     m_cpuThreadCount = m_properties->addProperty( "CPU threads: ", "", 8, m_propCondition );
     m_cpuThreadCount->setMin( 4 );
     m_cpuThreadCount->setMax( 24 );
@@ -180,11 +178,6 @@ void WMSurfaceDetectionByLari::properties()
     m_cylNLambda3Max->setMin( m_cylNLambda3Min->get() );
     m_cylNLambda3Max->setMax( 1.0 );
 
-
-
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
-
     WModule::properties();
 }
 
@@ -194,23 +187,18 @@ void WMSurfaceDetectionByLari::requirements()
 
 void WMSurfaceDetectionByLari::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
 
-    // graphics setup
     m_rootNode = osg::ref_ptr< WGEManagedGroupNode >( new WGEManagedGroupNode( m_active ) );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
 
-    // main loop
+
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         m_surfaceNLambda1Max->setMin( m_surfaceNLambda1Min->get() );
@@ -300,7 +288,6 @@ void WMSurfaceDetectionByLari::moduleMain()
         m_reloadData->get( true );
 
 
-        // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )
         {
             break;
@@ -311,8 +298,6 @@ void WMSurfaceDetectionByLari::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );

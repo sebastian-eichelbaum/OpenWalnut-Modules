@@ -79,14 +79,13 @@ const std::string WMPointsCutOutliers::getDescription() const
 
 void WMPointsCutOutliers::connectors()
 {
-    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
+    m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "" );
 
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
-                        shared_from_this(), "points", "The loaded points." ) );
+                        shared_from_this(), "points", "" ) );
 
     addConnector( m_output );
-//    addConnector( m_buildings );
     WModule::connectors();
 }
 
@@ -109,7 +108,6 @@ void WMPointsCutOutliers::requirements()
 
 void WMPointsCutOutliers::moduleMain()
 {
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
@@ -151,8 +149,6 @@ void WMPointsCutOutliers::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );

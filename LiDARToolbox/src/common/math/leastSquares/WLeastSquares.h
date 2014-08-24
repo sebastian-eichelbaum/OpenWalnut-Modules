@@ -64,12 +64,12 @@ public:
     void analyzeData( vector<WPosition>* data );
     /**
      * Returns the plane formula for the best fitted plane.
-     * \return The hessesche Normal Form of the best fitted plane. First n numbers (by 
-     *         the dimensions coordinate count) represent the normal vector of the best 
+     * \return The Hesse normal form of the best fitted plane. First n numbers (by the 
+     *         dimensions coordinate count) represent the normal vector of the best 
      *         fitted plane. The last one is the perpendicular euclidian distance to the 
      *         coordinate system orign.
      */
-    vector<double> getHessescheNormalForm();
+    vector<double> getHesseNormalForm();
     /**
      * Returns a not normalized normal vector of the least squares adjustment result.
      * \return A not normalized normal vector of the least squares adjustment result.
@@ -84,12 +84,12 @@ public:
 
     /**
      * Calculates a plane formula of the parameter domain using the approach of 
-     * Lari/Habib using the Hessesche normal form as input plane formula.
-     * \param hessescheNormalForm The Hessesche normal formula of a plane.
+     * Lari/Habib using the Hesse normal form as input plane formula.
+     * \param hesseNormalForm The Hesse normal formula of a plane.
      * \return Parameters X_0, Y_0 and Z_0 that describe a plane using the approach of 
      *         Lari/Habib.
      */
-    static vector<double> getParametersXYZ0( vector<double> hessescheNormalForm );
+    static vector<double> getParametersXYZ0( vector<double> hesseNormalForm );
     /**
      * Returns a point distance to the currently calculated plane.
      * analyzeData() must have been executes.
@@ -108,11 +108,11 @@ public:
     /**
      * Returns a nearest point to the input point's coordinate that lies on the 
      * calculated plane.
-     * \param planeHessescheNormalForm Plane on which the nearest point is found.
+     * \param planeHesseNormalForm Plane on which the nearest point is found.
      * \param point Point to get the nearest coordinate on the plane of.
      * \return The nearest coordinate on the calculates plane of an arbitrary point.
      */
-    static WPosition getNearestPointTo( vector<double> planeHessescheNormalForm, WPosition point );
+    static WPosition getNearestPointTo( vector<double> planeHesseNormalForm, WPosition point );
 
 private:
     /**
@@ -131,9 +131,9 @@ private:
     void calculateMatrices();
     /**
      * The algorithm solves the matrix formula A*x=B. This method at first calculates 
-     * the matrix x and then the Hessesche Normal Form of the best fitted plane.
+     * the matrix x and then the Hesse Normal Form of the best fitted plane.
      */
-    void calculateHessescheNormalForm();
+    void calculateHesseNormalForm();
 
     /**
      * Dimension definition of the coordinate system.
@@ -144,9 +144,9 @@ private:
      */
     vector<WPosition>* m_positions;
     /**
-     * Space for the calculated Hessesche Normal Form.
+     * Space for the calculated Hesse normal form.
      */
-    vector<double> m_hessescheNormalForm;
+    vector<double> m_hesseNormalForm;
     /**
      * Dimension with the biggest eigen vector coordonate extent of the smallest Eigen Value.
      */
