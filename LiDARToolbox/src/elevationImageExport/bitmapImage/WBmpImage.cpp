@@ -121,7 +121,7 @@ void WBmpImage::importElevationImageDrawNode( WQuadNode* node, WQuadTree* quadTr
     if( node->getRadius() <= quadTree->getDetailLevel() )
     {
         int intensity = ( ( elevImageMode != 0
-                ?node->getElevationMax() :node->getElevationMin() )
+                ?node->getValueMax() :node->getValueMin() )
                 - m_minElevImageZ ) * m_intensityIncreasesPerMeter;
         if(elevImageMode == 2) intensity = node->getPointCount();
         if( intensity < 0 ) intensity = 0;

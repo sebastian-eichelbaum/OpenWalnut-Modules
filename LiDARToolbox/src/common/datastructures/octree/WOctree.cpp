@@ -26,16 +26,16 @@
 #include <vector>
 #include "WOctree.h"
 
-WOctree::WOctree( double detailDepth )
+WOctree::WOctree( double detailLevel )
 {
-    m_root = new WOctNode( 0.0, 0.0, 0.0, detailDepth );
-    m_detailLevel = detailDepth;
+    m_root = new WOctNode( 0.0, 0.0, 0.0, detailLevel );
+    m_detailLevel = detailLevel;
     m_cornerNeighborClass = 1;
 }
-WOctree::WOctree( double detailDepth, WOctNode* nodeType )
+WOctree::WOctree( double detailLevel, WOctNode* nodeType )
 {
-    m_root = nodeType->newInstance( 0.0, 0.0, 0.0, detailDepth );
-    m_detailLevel = detailDepth;
+    m_root = nodeType->newInstance( 0.0, 0.0, 0.0, detailLevel );
+    m_detailLevel = detailLevel;
     m_cornerNeighborClass = 1;
 }
 
@@ -226,6 +226,7 @@ const size_t WOctree::colors[] = {
 const size_t WOctree::colorCount = sizeof( colors ) / sizeof( colors[0] );
 float WOctree::calcColor( size_t groupNr, size_t colorChannel )
 {
+    groupNr *= 7;
     groupNr = colors[groupNr%colorCount];
     groupNr = ( groupNr >> ( 16-8*colorChannel ) ) & 0xff;
     return static_cast<float>( groupNr )/255.0f;

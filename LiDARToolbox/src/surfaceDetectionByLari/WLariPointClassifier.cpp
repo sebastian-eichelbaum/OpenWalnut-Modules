@@ -107,19 +107,19 @@ void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*
         vector<double> spatialCoordinate = spatialPoint->getCoordinate();
         spatialSearcher.setSearchedPoint( spatialCoordinate );
         vector<WPointDistance>* nearestPoints = spatialSearcher.getNearestPoints();
-        vector<WPosition>* points = WPointSearcher::convertToPointSet( nearestPoints );
+        vector<WPosition>* points = WPointDistance::convertToPointSet( nearestPoints );
         spatialPoint->setKNearestPoints( points->size() );
         spatialPoint->setDistanceToNthNearestNeighbor( nearestPoints->at( points->size() - 1 ).getDistance() );
 
         WPrincipalComponentAnalysis pca;
-        pca.analyzeData( points );
-        spatialPoint->setEigenVectors( pca.getDirections() );
+        pca.analyzeData( *points );
+        spatialPoint->setEigenVectors( pca.getEigenVectors() );
         vector<double> eigenValues = pca.getEigenValues();
         spatialPoint->setEigenValues( eigenValues );
 
         WLeastSquares leastSquares;
         leastSquares.analyzeData( points );
-        spatialPoint->setHesseNormalForm( leastSquares.getHesseNormalForm() );
+        spatialPoint->setHessianNormalForm( leastSquares.getHessianNormalForm() );
 
         delete nearestPoints;
         delete points;

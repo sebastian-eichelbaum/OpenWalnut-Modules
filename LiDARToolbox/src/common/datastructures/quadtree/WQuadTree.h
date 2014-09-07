@@ -36,10 +36,10 @@ class WQuadTree
 public:
     /**
      * Octree constructor
-     * \param detailDepth Supported quadtree node resolution resolution. Currently only
+     * \param detailLevel Supported quadtree node resolution resolution. Currently only
      *                    numbers covering 2^n results including negative n values.
      */
-    explicit WQuadTree( double detailDepth );
+    explicit WQuadTree( double detailLevel );
     /**
      * Octree destructor.
      */
@@ -50,10 +50,10 @@ public:
      * node detail level.
      * \param x X coordinate of the registerable point
      * \param y Y coordinate of the registerable point
-     * \param elevation Elevation to register. A x/Y square stores the min. and
-     *                  max. elevation.
+     * \param value Value to register. A x/y square stores the min. and
+     *                  max. value.
      */
-    void registerPoint( double x, double y, double elevation );
+    void registerPoint( double x, double y, double value );
     /**
      * Returns a leaf node of the maximum detail depth covering X/Y coordinates.
      * \param x X coordinate of the quadtree node.

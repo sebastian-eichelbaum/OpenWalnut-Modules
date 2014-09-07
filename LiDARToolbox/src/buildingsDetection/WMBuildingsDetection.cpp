@@ -107,7 +107,7 @@ void WMBuildingsDetection::properties()
                             "depth for the octree search tree.", 0 );
     m_detailDepth->setMin( -3 );
     m_detailDepth->setMax( 4 );
-    m_detailDepthLabel = m_properties->addProperty( "Voxel width meters: ", "Resulting detail depth "
+    m_detailDepthLabel = m_properties->addProperty( "Pixel width meters: ", "Resulting detail depth "
                             "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
     m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
 
@@ -205,8 +205,8 @@ void WMBuildingsDetection::moduleMain()
             m_xMax->set( boundingBox->getRootNode()->getXMax() );
             m_yMin->set( boundingBox->getRootNode()->getYMin() );
             m_yMax->set( boundingBox->getRootNode()->getYMax() );
-            m_zMin->set( boundingBox->getRootNode()->getElevationMin() );
-            m_zMax->set( boundingBox->getRootNode()->getElevationMax() );
+            m_zMin->set( boundingBox->getRootNode()->getValueMin() );
+            m_zMax->set( boundingBox->getRootNode()->getValueMax() );
             m_progressStatus->finish();
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );

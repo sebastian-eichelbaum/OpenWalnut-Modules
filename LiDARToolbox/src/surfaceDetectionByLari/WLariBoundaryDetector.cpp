@@ -49,7 +49,11 @@ void WLariBoundaryDetector::detectBoundaries( WKdTreeND* parameterDomain )
     initSpatialDomain( parameterDomain );
 
     for( size_t cluster = 0; cluster < m_spatialInputClusters->size(); cluster++ )
+    {
+        cout << "Modified convex hull on cluster " << m_spatialInputClusters->at( cluster )->size()
+                << " points. [" << cluster << "]" << endl;
         detectInputCluster( m_spatialInputClusters->at( cluster ) );
+    }
 }
 void WLariBoundaryDetector::setMaxPointDistanceR( double maxPointDistanceR )
 {
@@ -91,7 +95,6 @@ void WLariBoundaryDetector::transformPoint( vector<double>* transformable )
 
 void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* inputPointCluster )
 {
-    cout << "Modified convex hull on " << inputPointCluster->size() << " points." << endl;
     initTransformationCoordinateSystem( inputPointCluster );
     vector<WBoundaryDetectPoint*>* clusterPoints = new vector<WBoundaryDetectPoint*>();
     WBoundaryDetectPoint* mostLeftPoint = 0;
@@ -138,7 +141,8 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
         mostLeftPoint->setIsAddedToPlane( true );
         WBoundaryDetectPoint* boundPoint = getNextBoundPoint();
         bool isChainOpen = true;
-        while( boundPoint != 0 && isChainOpen && boundChainStillValid() )
+        bool isChainValid = true;
+        while( boundPoint != 0 && isChainOpen && isChainValid )
         {
             m_currentBoundary->push_back( boundPoint );
             boundPoint->getSpatialPoint()->setClusterID( m_currentClusterID );
@@ -147,11 +151,12 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
             if( m_currentBoundary->at( 0 ) == m_currentBoundary->at( m_currentBoundary->size() - 1 )
                     && m_currentBoundary->at( 1 ) == boundPoint )
                 isChainOpen = false;
+            isChainValid = boundChainStillValid();
         }
 
         initAABoundingBoxFromBoundary();
         initOneOutsidePoint();
-        for( size_t index = 0; index < clusterPoints->size(); index++ )
+        for( size_t index = 0; isChainValid && index < clusterPoints->size(); index++ )
         {
             WBoundaryDetectPoint* currentPoint = clusterPoints->at( index );
             const vector<double>& coordinate = currentPoint->getCoordinate();
@@ -164,12 +169,12 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
 
         m_currentClusterID++;
 
-
         vector<WBoundaryDetectPoint*>* oldPoints = clusterPoints;
         clusterPoints = new vector<WBoundaryDetectPoint*>();
         for( size_t index = 0; index < oldPoints->size(); index++ )
             if( !oldPoints->at( index )->isAddedToPlane() )
                 clusterPoints->push_back( oldPoints->at( index ) );
+        //TODO(aschwarzkopf): Merge invalid points group by distance.
     }
 }
 void WLariBoundaryDetector::initTransformationCoordinateSystem( vector<WSpatialDomainKdPoint*>* extentPointCluster )
@@ -207,12 +212,14 @@ WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
     {
         WBoundaryDetectPoint* currentNextPoint = static_cast<WBoundaryDetectPoint*>( nearestPoints->at(
                 index ).getComparedPoint() ); //TODO(aschwarzkopf): Can't watch coordinates using expressions
-        double nextAngle = getAngleToNextPoint( previousPoint, currentPoint, currentNextPoint );
-        bool lineIntersectsPrevious = isResultingBoundIntersection( currentNextPoint );
-        if( pointCanProceedBound( nearestPoints->at(index) ) && nextAngle < narrowestAngle && !lineIntersectsPrevious )
+        if( lastBoundaryPointCanReachPoint( nearestPoints->at(index) ) )
         {
-            narrowestAngle = nextAngle;
-            nextPoint = currentNextPoint;
+            double nextAngle = getAngleToNextPoint( previousPoint, currentPoint, currentNextPoint );
+            if( nextAngle < narrowestAngle && !isResultingBoundIntersection( currentNextPoint ) )
+            {
+                narrowestAngle = nextAngle;
+                nextPoint = currentNextPoint;
+            }
         }
     }
 
@@ -220,7 +227,7 @@ WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
         delete previousPoint;
     return nextPoint;
 }
-bool WLariBoundaryDetector::pointCanProceedBound( WPointDistance nextPointDistance )
+bool WLariBoundaryDetector::lastBoundaryPointCanReachPoint( WPointDistance nextPointDistance )
 {
     double distance = nextPointDistance.getDistance();
     if( distance == 0.0 )
@@ -245,28 +252,31 @@ double WLariBoundaryDetector::getAngleToNextPoint( WBoundaryDetectPoint* previou
     double angleToPrevious = WVectorMaths::getAngleToAxisComplete( vectorPoint->at( 0 ), vectorPoint->at( 1 ) );
     delete currentPointCoords;
     delete vectorPoint;
-    while( angleToPrevious < 0.0 )
-        angleToPrevious += 360.0;
-    while( angleToNext <= angleToPrevious )
+    while( angleToNext < 0.0 )
         angleToNext += 360.0;
-    return angleToNext - angleToPrevious;
+    while( angleToPrevious <= angleToNext )
+        angleToPrevious += 360.0;
+    return angleToPrevious - angleToNext;
 }
 bool WLariBoundaryDetector::isResultingBoundIntersection( WBoundaryDetectPoint* nextPoint )
 {
-    if( m_currentBoundary->size() < 3 )
-        return false;
-    WBoundaryDetectPoint* prePreviousPoint = m_currentBoundary->at( m_currentBoundary->size() - 3 );
-    WBoundaryDetectPoint* previousPoint = m_currentBoundary->at( m_currentBoundary->size() - 2 );
     WBoundaryDetectPoint* currentPoint = m_currentBoundary->at( m_currentBoundary->size() - 1 );
-    double previousAngle = getAngleToNextPoint( prePreviousPoint, previousPoint, currentPoint );
-    if( previousAngle > 180.0 )
-        return false;
-    double currentAngle = getAngleToNextPoint( previousPoint, currentPoint, nextPoint );
-    if( currentAngle > 180.0 )
-        return false;
-    double nextAngle = WVectorMaths::getLawOfCosinesAlphaByPoints(
-            previousPoint->getCoordinate(), currentPoint->getCoordinate(), nextPoint->getCoordinate() );
-    return nextAngle >= previousAngle;
+    for( size_t index = 1; index < m_currentBoundary->size() - 1; index++ )
+    {
+        const vector<double>& boundP1 = m_currentBoundary->at( index - 1 )->getCoordinate();
+        const vector<double>& boundP2 = m_currentBoundary->at( index )->getCoordinate();
+        const vector<double>& current = currentPoint->getCoordinate();
+        const vector<double>& next = nextPoint->getCoordinate();
+        if( WVectorMaths::linesCanIntersectBounded( boundP1, boundP2, current, next )
+                && WVectorMaths::getEuclidianDistance( boundP1, current ) > 0.0
+                && WVectorMaths::getEuclidianDistance( boundP2, current ) > 0.0
+                && WVectorMaths::getEuclidianDistance( boundP1, next ) > 0.0
+                && WVectorMaths::getEuclidianDistance( boundP2, next ) > 0.0
+                && !WVectorMaths::isPointOnLine2d( current, boundP1, boundP2 )
+                && !WVectorMaths::isPointOnLine2d( next, boundP1, boundP2 ) )
+            return true;
+    }
+    return false;
 }
 void WLariBoundaryDetector::initAABoundingBoxFromBoundary()
 {
@@ -348,6 +358,6 @@ bool WLariBoundaryDetector::boundChainStillValid()
     bool isBoundValid = m_currentBoundary->at( middle - 1 ) != m_currentBoundary->at( last - 1 )
             || m_currentBoundary->at( middle ) != m_currentBoundary->at( last );
     if( !isBoundValid )
-        cout << "!BOUND NOT VALID!!! - please restart procedure" << endl;
+        cout << "!!!BOUND NOT VALID!!! - on chain size of " << m_currentBoundary->size() << ". Sipping boundary points." << endl;
     return isBoundValid;
 }

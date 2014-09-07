@@ -31,7 +31,7 @@
 #include <core/kernel/WModule.h>
 
 #include "buildingsDetection/WMBuildingsDetection.h"
-#include "buildingsDetectionByPCA/WMBuildingsDetectionByPCA.h"
+#include "treeDetectionByPCA/WMTreeDetectionByPCA.h"
 #include "elevationImageExport/WMElevationImageExport.h"
 #include "pointsTransform/WMPointsTransform.h"
 #include "pointsCutOutliers/WMPointsCutOutliers.h"
@@ -60,7 +60,7 @@
 extern "C" void WLoadModule( WModuleList& m ) // NOLINT
 {
     m.push_back( boost::shared_ptr< WModule >( new WMBuildingsDetection ) );
-    m.push_back( boost::shared_ptr< WModule >( new WMBuildingsDetectionByPCA ) );
+    m.push_back( boost::shared_ptr< WModule >( new WMTreeDetectionByPCA ) );
     m.push_back( boost::shared_ptr< WModule >( new WMElevationImageExport ) );
     m.push_back( boost::shared_ptr< WModule >( new WMPointsCutOutliers ) );
     m.push_back( boost::shared_ptr< WModule >( new WMPointsGroupSelector ) );

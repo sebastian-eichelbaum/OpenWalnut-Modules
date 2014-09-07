@@ -179,7 +179,7 @@ void WMTempLeastSquaresTest::analyzeBestFittedPlane()
             if(distance > maxDistance)
                 maxDistance = distance;
         }
-        vector<double> planeFormula = leastSquares.getHesseNormalForm();
+        vector<double> planeFormula = leastSquares.getHessianNormalForm();
 
         boost::shared_ptr< WTriangleMesh > outputMesh( new WTriangleMesh( 0, 0 ) );
         outlineNormalPlane( planeFormula, mean, maxDistance * 1.5, outputMesh );
@@ -200,22 +200,22 @@ void WMTempLeastSquaresTest::analyzeBestFittedPlane()
         std::cout << endl << endl;
     }
 }
-void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHesseNormalForm,
+void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessianNormalForm,
         WPosition nearestPoint, double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh )
 {
-    WPosition cuttingPoint = WLeastSquares::getNearestPointTo( planeHesseNormalForm, nearestPoint );
+    WPosition cuttingPoint = WLeastSquares::getNearestPointTo( planeHessianNormalForm, nearestPoint );
 
     size_t strongestDimension = 0;
     double strongestDimensionExtent = 0;
     for( size_t dimension = 0; dimension < cuttingPoint.size(); dimension++ )
-        if( planeHesseNormalForm[dimension] > strongestDimensionExtent )
+        if( planeHessianNormalForm[dimension] > strongestDimensionExtent )
         {
             strongestDimension = dimension;
-            strongestDimensionExtent = planeHesseNormalForm[dimension];
+            strongestDimensionExtent = planeHessianNormalForm[dimension];
         }
     size_t dimensionVec1 = strongestDimension == 0 ?1 :0;
 
-    WVector3d normalVector( planeHesseNormalForm[0], planeHesseNormalForm[1], planeHesseNormalForm[2] );
+    WVector3d normalVector( planeHessianNormalForm[0], planeHessianNormalForm[1], planeHessianNormalForm[2] );
     normalVector = getNormalizedVector( normalVector );
     WVector3d vector1( 0, 0, 0 );
     vector1[dimensionVec1] = normalVector[strongestDimension];

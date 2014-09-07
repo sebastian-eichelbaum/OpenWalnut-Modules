@@ -69,7 +69,7 @@ const char** WMTempRandomPoints::getXPMIcon() const
 }
 const std::string WMTempRandomPoints::getName() const
 {
-    return "[Temp.] Random points";
+    return "Random Points";
 }
 
 const std::string WMTempRandomPoints::getDescription() const

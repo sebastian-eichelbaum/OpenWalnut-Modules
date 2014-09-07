@@ -92,13 +92,13 @@ public:
     double getCenter( size_t dimension );
 
     /**
-     * Updates minimal and maximal X/Y/elevation value parameters. The point count is incremented by 1.
+     * Updates minimal and maximal x/y/value value parameters. The point count is incremented by 1.
      * It doesn't alter or add any node.
      * \param x X coordinate to update.
      * \param y Y coordinate to update.
-     * \param elevation Elevation to update.
+     * \param value Value to update.
      */
-    void updateMinMax( double x, double y, double elevation );
+    void updateMinMax( double x, double y, double value );
 
     /**
      * Returns the count of registered points using updateMinMax().
@@ -126,15 +126,15 @@ public:
      */
     double getYMax();
     /**
-     * Returns the minimal elevation.
-     * \return The minimal elevation.
+     * Returns the minimal value of the node.
+     * \return The minimal value of the node.
      */
-    double getElevationMin();
+    double getValueMin();
     /**
-     * Returns the maximal elevation.
-     * \return The maximal elevation.
+     * Returns the maximal value of the node.
+     * \return The maximal value of the node.
      */
-    double getElevationMax();
+    double getValueMax();
 
     /**
      * Determines which X coordinate axis case an m_child has.
@@ -199,13 +199,13 @@ private:
      */
     double m_yMax;
     /**
-     * Minimal elevation.
+     * Minimal value.
      */
-    double m_zMin;
+    double m_valueMin;
     /**
-     * Maximal elevation.
+     * Maximal value.
      */
-    double m_zMax;
+    double m_valueMax;
 
     //TODO(schwarzkopf): Implement the following parameter another way somewhere else.
     /**

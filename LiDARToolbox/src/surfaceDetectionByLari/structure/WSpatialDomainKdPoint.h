@@ -64,12 +64,12 @@ public:
     size_t getClusterID();
     /**
      * Returns the plane formula for the best fitted plane.
-     * \return The hesse Normal Form of the best fitted plane. First n numbers (by 
+     * \return The hessian Normal Form of the best fitted plane. First n numbers (by 
      *         the dimensions coordinate count) represent the normal vector of the best 
      *         fitted plane. The last one is the perpendicular euclidian distance to the 
      *         coordinate system orign.
      */
-    vector<double> getHesseNormalForm();
+    vector<double> getHessianNormalForm();
     /**
      * Returns the distance to the n-th nearest neighbor.
      * \return The distance to the n-th nearest neighbor.
@@ -108,12 +108,12 @@ public:
      */
     void setEigenVectors( vector<WVector3d> eigenVectors );
     /**
-     * Sets the Hesse normal form of the point's best fitted plane in relation to its 
+     * Sets the Hessian normal form of the point's best fitted plane in relation to its 
      * neighbors.
-     * \param hesseNormalForm The Hesse normal formula of the point's best 
+     * \param hessianNormalForm The Hessian normal formula of the point's best 
      *                            fitted plane.
      */
-    void setHesseNormalForm( vector<double> hesseNormalForm );
+    void setHessianNormalForm( vector<double> hessianNormalForm );
     /**
      * Sets the plane cluster ID to the point.
      * \param clusterID Plane cluster ID of the point.
@@ -145,9 +145,9 @@ private:
      */
     vector<WVector3d> m_eigenVectors;
     /**
-     * Space for the calculated Hesse Normal Form.
+     * Space for the calculated Hessian Normal Form.
      */
-    vector<double> m_hesseNormalForm;
+    vector<double> m_hessianNormalForm;
     /**
      * Plane cluster ID of the point.
      */

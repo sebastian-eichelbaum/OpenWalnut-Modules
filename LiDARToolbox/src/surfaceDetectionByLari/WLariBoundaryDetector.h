@@ -121,14 +121,15 @@ private:
      */
     void initTransformationCoordinateSystem( vector<WSpatialDomainKdPoint*>* extentPointCluster );
     /**
-     * Tells whether a point (nested into a distance object) can be appended to tne last 
-     * added bound chain object. It regards the distance limits defined by the bound and 
-     * the addable point.
-     * \param nextPoint Point (nested into the distance object) to be verified for being 
-     *                  able to be added.
-     * \return Point can procceed the bound or not.
+     * Tells whether a point can reach the last added boundary point. Usually every
+     * point has information about the distance to the n nearest neighbour. If one side
+     * includes the other side point in respect to this distance, then these two points
+     * are able to reach each other.
+     * \param nextPoint Point to be checked whether it can reach the last added boundary
+     *                  point.
+     * \return last b oundary point can reach the point or not.
      */
-    bool pointCanProceedBound( WPointDistance nextPoint );
+    bool lastBoundaryPointCanReachPoint( WPointDistance nextPoint );
     /**
      * Calculates and returns the next point that belongs to the current bound point chain.
      * \return The next bound chain point.

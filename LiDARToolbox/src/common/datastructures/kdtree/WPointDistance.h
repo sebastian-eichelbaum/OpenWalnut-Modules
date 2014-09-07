@@ -30,6 +30,7 @@
 #include <iostream>
 #include <vector>
 #include "WKdPointND.h"
+#include "core/common/math/linearAlgebra/WPosition.h"
 
 using std::vector;
 
@@ -75,13 +76,12 @@ public:
      */
     double getDistance();
     /**
-     * Static method that calculates the euclidian distance between two arbitrary 
-     * unidimensional points.
-     * \param point1 First point for calculating the distance.
-     * \param point2 Second point for calculating the distance.
-     * \return Euclidian distance between that two points.
+     * Static method that fetches coordinates of WPointDistance sets into a three 
+     * dimensional WPosition point list.
+     * \param pointDistances Point distance data sets to fetch positions from.
+     * \return A WPosition list. That type is very commonly used in OpenWalnut.
      */
-    static double getPointDistance( const vector<double>& point1, const vector<double>& point2 );
+    static vector<WPosition>* convertToPointSet( vector<WPointDistance>* pointDistances );
     /**
      * Operator for sorting a vector<WPointDistance> using std::sort.
      * \param right The right compared object to this one.

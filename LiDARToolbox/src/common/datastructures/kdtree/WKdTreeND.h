@@ -112,10 +112,30 @@ public:
      */
     size_t getSplittingDimension();
     /**
-     * Returns the splitting position of the splitted dimension.
-     * \return The splitting position of the splitted dimension.
+     * Return whether the node has neither points nor child nodes.
+     * \return Node has no contents.
      */
-    double getSplittingPosition();
+    bool isEmpty();
+    /**
+     * Tells whether a position hits a lower or higher case or roughly said in the area
+     * before or after the splitting position. There actually was a case when an average
+     * of two positions had to be calculated what was unsuccessful because the numbers
+     * were too close that the position was either the coordinate from first or second
+     * point. Therefore getSplittingPosition is not public any more. Regard
+     * getSplittingDimension() when executing that method.
+     * \param position Position which has to be checked whether it is before or after
+     *                 the splitting position of the kd-node within the splitting
+     *                 dimension.
+     * \return Coordinate belongs either to the lower or higher coordinate child.
+     */
+    bool isLowerKdNodeCase( double position );
+    /**
+     * Removes a point. The pointer reference must equal to the removable point. No 
+     * points are removed if another point with the same coordinate exists.
+     * \param removablePoint Point to be removed from the kd-tree.
+     * \return Point was found and successfully removed or not.
+     */
+    bool removePoint( WKdPointND* removablePoint );
 
 protected:
     /**
@@ -128,6 +148,16 @@ protected:
     virtual WKdTreeND* getNewInstance( size_t dimensions );
 
 private:
+    /**
+     * Assigns zero to pointers. It makes sense for some operations when some nodes have to be deleted but 
+     */
+    void assignZeroToPointers();
+    /**
+     * Copies pointer value to a node. No actual copies are created. So every change 
+     * would be shared. Other node parameters are copied.
+     * \param copiedNode Object which should be copied by pointers.
+     */
+    void copyPointersFrom( WKdTreeND* copiedNode );
     /**
      * Returns all the leaf nodes of the kd tree.
      * \return All the leaf nodes of the kd tree.
@@ -177,7 +207,7 @@ private:
      * The splitting dimension of the parent kd tree node. It is considered to determine 
      * the splitting dimension of the current kd tree node.
      */
-    size_t m_parentSplittingDimension;    //ggf. wegschmeißen
+    size_t m_parentSplittingDimension;    //TODO(aschwarzkopf): ggf. wegschmeißen
     //TODO(aschwarzkopf): Ggf. Sinn: Nicht bis ins Letzte unterteilen, ggf. nur über einem Threshold
     /**
      * The kd tree node child which is on the lower position across the splitting 
@@ -198,8 +228,13 @@ private:
      */
     size_t m_splittingDimension;
     /**
-     * Children of a kd tree node are separated by a plane. The splitting dimension axis * is perpendicular to that. This position variable is the intersection between this 
+     * Children of a kd tree node are separated by a plane. The splitting dimension axis
+     * is perpendicular to that. This position variable is the intersection between this
      * plane and axis.
+     * This field should not be accessible publically. There actually was a case when an
+     * average of two positions had to be calculated what was unsuccessful because the
+     * numbers were too close that the position was either the coordinate from first or
+     * second point. Try to use isLowerKdNodeCase() instead.
      */
     double m_splittingPosition;
     /**

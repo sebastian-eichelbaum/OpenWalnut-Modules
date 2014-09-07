@@ -175,8 +175,8 @@ void WMSurfaceDetectionByPCL::moduleMain()
             m_infoXMax->set( boundingBox->getRootNode()->getXMax() );
             m_infoYMin->set( boundingBox->getRootNode()->getYMin() );
             m_infoYMax->set( boundingBox->getRootNode()->getYMax() );
-            m_infoZMin->set( boundingBox->getRootNode()->getElevationMin() );
-            m_infoZMax->set( boundingBox->getRootNode()->getElevationMax() );
+            m_infoZMin->set( boundingBox->getRootNode()->getValueMin() );
+            m_infoZMax->set( boundingBox->getRootNode()->getValueMax() );
             m_progressStatus->finish();
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );

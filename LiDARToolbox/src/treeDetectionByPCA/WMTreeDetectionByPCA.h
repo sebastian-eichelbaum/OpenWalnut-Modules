@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMBUILDINGSDETECTIONBYPCA_H
-#define WMBUILDINGSDETECTIONBYPCA_H
+#ifndef WMTREEDETECTIONBYPCA_H
+#define WMTREEDETECTIONBYPCA_H
 
 
 #include <liblas/liblas.hpp>
@@ -79,18 +79,18 @@ class WGEManagedGroupNode;
  * Data is analyzed considering areas covered by voxels which get a threshold area how 
  * much isotropic they are. It's useful to watch where the area is planar or isotropic.
  */
-class WMBuildingsDetectionByPCA: public WModule
+class WMTreeDetectionByPCA: public WModule
 {
 public:
     /**
      * Starts the instance.
      */
-    WMBuildingsDetectionByPCA();
+    WMTreeDetectionByPCA();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMBuildingsDetectionByPCA();
+    virtual ~WMTreeDetectionByPCA();
 
     /**
      * Gives back the name of this module.
@@ -206,4 +206,4 @@ private:
     boost::shared_ptr< WProgress > m_progressStatus;
 };
 
-#endif  // WMBUILDINGSDETECTIONBYPCA_H
+#endif  // WMTREEDETECTIONBYPCA_H

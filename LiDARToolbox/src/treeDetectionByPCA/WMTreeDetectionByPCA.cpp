@@ -39,45 +39,45 @@
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WKernel.h"
 #include "core/kernel/WModuleInputData.h"
-#include "WMBuildingsDetectionByPCA.xpm"
-#include "WMBuildingsDetectionByPCA.h"
+#include "WMTreeDetectionByPCA.xpm"
+#include "WMTreeDetectionByPCA.h"
 #include "WPCADetector.h"
 #include "../common/datastructures/octree/WOctree.h"
 
 // This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMBuildingsDetectionByPCA )
+//W_LOADABLE_MODULE( WMTreeDetectionByPCA )
 //TODO(aschwarzkopf): Reenable above after solving the toolbox problem
 
-WMBuildingsDetectionByPCA::WMBuildingsDetectionByPCA():
+WMTreeDetectionByPCA::WMTreeDetectionByPCA():
     WModule(),
     m_propCondition( new WCondition() )
 {
 }
 
-WMBuildingsDetectionByPCA::~WMBuildingsDetectionByPCA()
+WMTreeDetectionByPCA::~WMTreeDetectionByPCA()
 {
 }
 
-boost::shared_ptr< WModule > WMBuildingsDetectionByPCA::factory() const
+boost::shared_ptr< WModule > WMTreeDetectionByPCA::factory() const
 {
-    return boost::shared_ptr< WModule >( new WMBuildingsDetectionByPCA() );
+    return boost::shared_ptr< WModule >( new WMTreeDetectionByPCA() );
 }
 
-const char** WMBuildingsDetectionByPCA::getXPMIcon() const
+const char** WMTreeDetectionByPCA::getXPMIcon() const
 {
-    return WMBuildingsDetectionByPCA_xpm;
+    return WMTreeDetectionByPCA_xpm;
 }
-const std::string WMBuildingsDetectionByPCA::getName() const
+const std::string WMTreeDetectionByPCA::getName() const
 {
-    return "Buildings Detection by PCA";
+    return "Tree Detection by PCA";
 }
 
-const std::string WMBuildingsDetectionByPCA::getDescription() const
+const std::string WMTreeDetectionByPCA::getDescription() const
 {
     return "Should draw values above some threshold.";
 }
 
-void WMBuildingsDetectionByPCA::connectors()
+void WMTreeDetectionByPCA::connectors()
 {
     m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
 
@@ -89,7 +89,7 @@ void WMBuildingsDetectionByPCA::connectors()
     WModule::connectors();
 }
 
-void WMBuildingsDetectionByPCA::properties()
+void WMTreeDetectionByPCA::properties()
 {
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
 
@@ -124,11 +124,11 @@ void WMBuildingsDetectionByPCA::properties()
     WModule::properties();
 }
 
-void WMBuildingsDetectionByPCA::requirements()
+void WMTreeDetectionByPCA::requirements()
 {
 }
 
-void WMBuildingsDetectionByPCA::moduleMain()
+void WMTreeDetectionByPCA::moduleMain()
 {
     infoLog() << "Thrsholding example main routine started";
 
@@ -203,7 +203,7 @@ void WMBuildingsDetectionByPCA::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
-void WMBuildingsDetectionByPCA::setProgressSettings( size_t steps )
+void WMTreeDetectionByPCA::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
     std::string headerText = "Loading data";

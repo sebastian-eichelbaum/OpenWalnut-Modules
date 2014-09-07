@@ -34,7 +34,7 @@ WQuadNode::WQuadNode( double centerX, double centerY, double radius )
 {
     m_pointCount = 0;
     m_id = 0;
-    m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 0;
+    m_xMin = m_xMax = m_yMin = m_yMax = m_valueMin = m_valueMax = 0;
     m_center[0] = centerX;
     m_center[1] = centerY;
     this->m_radius = radius;
@@ -111,20 +111,20 @@ double WQuadNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
-void WQuadNode::updateMinMax( double x, double y, double elevation )
+void WQuadNode::updateMinMax( double x, double y, double value )
 {
     if( !m_pointCount > 0 )
     {
         m_xMin = m_xMax = x;
         m_yMin = m_yMax = y;
-        m_zMin = m_zMax = elevation;
+        m_valueMin = m_valueMax = value;
     }
     if( x < m_xMin ) m_xMin = x;
     if( x > m_xMax ) m_xMax = x;
     if( y < m_yMin ) m_yMin = y;
     if( y > m_yMax ) m_yMax = y;
-    if( elevation < m_zMin ) m_zMin = elevation;
-    if( elevation > m_zMax ) m_zMax = elevation;
+    if( value < m_valueMin ) m_valueMin = value;
+    if( value > m_valueMax ) m_valueMax = value;
     m_pointCount++;
 }
 
@@ -156,13 +156,13 @@ double WQuadNode::getYMax()
 {
     return m_yMax;
 }
-double WQuadNode::getElevationMin()
+double WQuadNode::getValueMin()
 {
-    return m_zMin;
+    return m_valueMin;
 }
-double WQuadNode::getElevationMax()
+double WQuadNode::getValueMax()
 {
-    return m_zMax;
+    return m_valueMax;
 }
 
 size_t WQuadNode::getID()

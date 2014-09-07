@@ -139,25 +139,10 @@ private:
      * \param threadIndex Thread index of multithreading.
      */
     void addExtentClusterAtThread( vector<WParameterDomainKdPoint*>* extentPoints, size_t clusterID, size_t threadIndex );
+
     /**
-     * Returns the masimal euclidian distance within an extent from the peak center in 
-     * the parameter domain kd tree.
-     * \param parametersXYZ0 Parameter domain coordinate from which the maximal 
-     *                       euclidian distance to the farest extent point is determined.
-     * \return The maximal euclidian distance from the peak center to the farest 
-     *         belonging parameter to the plane within the parameter domain.
-     */
-    double getMaxParameterDistance( const vector<double>& parametersXYZ0 );
-    /**
-     * Tells wehther two parameters can belong to the same extent or can belong to the 
-     * same plane.
-     * \param parameters1 First parameter to check.
-     * \param parameters2 Second parameter to check.
-     * \return parameters can belont to the same extent or not.
-     */
-    bool isParameterOfSameExtent( const vector<double>& parameters1, const vector<double>& parameters2 );
-    /**
-     * Parameter domain kd tree.
+     * Parameter domain kd tree. This point set is emptied during operation for more 
+     * speed. Assign a copy to that field.
      */
     WKdTreeND* m_parameterDomain;
     /**
@@ -171,7 +156,7 @@ private:
      * neighborship. This variable is the maximal difference between two plane normal 
      * distance to the origin.
      */
-    double m_segmentationPlaneDistance;
+    double m_segmentationMaxPlaneDistance;
     /**
      * CPU threads count for multithreading support.
      */

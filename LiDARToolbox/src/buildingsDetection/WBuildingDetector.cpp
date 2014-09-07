@@ -84,7 +84,7 @@ void WBuildingDetector::initMinimalMaxima( WQuadNode* sourceNode, WQuadTree* tar
         double coordX = sourceNode->getCenter( 0 );
         double coordY = sourceNode->getCenter( 1 );
         double d = m_minSearchDetailDepth / 2.0;
-        double height = sourceNode->getElevationMax();
+        double height = sourceNode->getValueMax();
         targetTree->registerPoint( coordX - d, coordY - d, height );
         targetTree->registerPoint( coordX - d, coordY + d, height );
         targetTree->registerPoint( coordX + d, coordY - d, height );
@@ -108,11 +108,11 @@ void WBuildingDetector::projectDrawableAreas( WQuadNode* sourceNode,
         WQuadNode* minimalNodeBigHeight = minimalMaxima->getLeafNode( coordX, coordY,
                 m_minSearchCutUntilAboveBigHeights );
         if( minimalNode == 0 || minimalNodeBigHeight == 0 ) return;
-        double minimalHeight = m_minSearchCutUntilAbove + minimalNode->getElevationMin();
-        double minimalHeightBigHeights = m_minSearchCutUntilAbove + minimalNodeBigHeight->getElevationMin();
-        if( sourceNode->getElevationMax() < minimalHeight
-            && sourceNode->getElevationMax() < minimalHeightBigHeights ) return;
-        targetTree->registerPoint( coordX, coordY, sourceNode->getElevationMax() );
+        double minimalHeight = m_minSearchCutUntilAbove + minimalNode->getValueMin();
+        double minimalHeightBigHeights = m_minSearchCutUntilAbove + minimalNodeBigHeight->getValueMin();
+        if( sourceNode->getValueMax() < minimalHeight
+            && sourceNode->getValueMax() < minimalHeightBigHeights ) return;
+        targetTree->registerPoint( coordX, coordY, sourceNode->getValueMax() );
     }
     else
     {

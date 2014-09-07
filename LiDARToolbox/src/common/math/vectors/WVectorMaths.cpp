@@ -123,12 +123,11 @@ double WVectorMaths::getEuclidianDistance( const vector<double>& distanceVector 
 }
 double WVectorMaths::getEuclidianDistance( const vector<double>& point1, const vector<double>& point2 )
 {
-    vector<double>* minuend = copyVectorForPointer( point1 );
-    invertVector( minuend );
-    addVector( minuend, point2 );
-    double euclidianDistance = getEuclidianDistance( *minuend );
-    delete minuend;
-    return euclidianDistance;
+    double sum = 0.0;
+    for( size_t dimension = 0; dimension < point1.size(); dimension++ )
+        sum += pow( point2[dimension] - point1[dimension], 2.0 );
+    sum = pow( sum, 0.5 );
+    return sum;
 }
 vector<double> WVectorMaths::getIntersectionPoint( const vector<double>& line1P1,
         const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 )

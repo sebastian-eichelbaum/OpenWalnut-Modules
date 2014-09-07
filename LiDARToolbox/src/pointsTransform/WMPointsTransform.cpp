@@ -51,8 +51,8 @@ WMPointsTransform::WMPointsTransform():
     WModule(),
     m_propCondition( new WCondition() )
 {
-    m_input.reserve( 5 );
-    m_input.resize( 5 );
+    m_input.reserve( 7 );
+    m_input.resize( 7 );
 }
 
 WMPointsTransform::~WMPointsTransform()
@@ -90,6 +90,10 @@ void WMPointsTransform::connectors()
             "The fourth point set to display" );
     m_input[4] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 5",
             "The fifth point set to display" );
+    m_input[5] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 6",
+            "The sixth point set to display" );
+    m_input[6] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 7",
+            "The seventh point set to display" );
 
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
@@ -160,6 +164,28 @@ void WMPointsTransform::properties()
     m_skipRatio->setMin( 0 );
     m_skipRatio->setMax( 30 );
 
+
+
+    m_colorEqualizer = m_properties->addPropertyGroup( "Color equalizer", "" );
+    m_contrastRed = m_colorEqualizer->addProperty( "Contrast red: ", "", 1.0, m_propCondition );
+    m_contrastRed->setMin( 0.0 );
+    m_contrastRed->setMax( 3.0 );
+    m_offsetRed = m_colorEqualizer->addProperty( "Offset red: ", "", 0.0, m_propCondition );
+    m_offsetRed->setMin( -1.0 );
+    m_offsetRed->setMax( 1.0 );
+    m_contrastGreen = m_colorEqualizer->addProperty( "Contrast green: ", "", 1.0, m_propCondition );
+    m_contrastGreen->setMin( 0.0 );
+    m_contrastGreen->setMax( 3.0 );
+    m_OffsetGreen = m_colorEqualizer->addProperty( "Offset green: ", "", 0.0, m_propCondition );
+    m_OffsetGreen->setMin( -1.0 );
+    m_OffsetGreen->setMax( 1.0 );
+    m_contrastBlue = m_colorEqualizer->addProperty( "Contrast blue: ", "", 1.0, m_propCondition );
+    m_contrastBlue->setMin( 0.0 );
+    m_contrastBlue->setMax( 3.0 );
+    m_offsetBlue = m_colorEqualizer->addProperty( "Offset blue: ", "", 0.0, m_propCondition );
+    m_offsetBlue->setMin( -1.0 );
+    m_offsetBlue->setMax( 1.0 );
+
     WModule::properties();
 }
 
@@ -206,7 +232,8 @@ void WMPointsTransform::moduleMain()
                 initBoundingBox( !addedPoints );
                 addTransformedPoints();
                 m_progressStatus->finish();
-                addedPoints = true;
+                if( points->size() > 0 )
+                    addedPoints = true;
             }
         }
         for( size_t item = 0; !addedPoints && item < 3; item++ )
@@ -305,6 +332,8 @@ void WMPointsTransform::addTransformedPoints()
             m_rotationAnchorX->get(), m_rotationAnchorY->get(), m_rotationAnchorZ->get() );
     vector<double>* rotationAnchorInverted = WVectorMaths::copyVectorForPointer( rotationAnchor );
     WVectorMaths::invertVector( rotationAnchorInverted );
+    vector<double> contrast = WVectorMaths::new3dVector( m_contrastRed->get(), m_contrastGreen->get(), m_contrastBlue->get() );
+    vector<double> colorOffset = WVectorMaths::new3dVector( m_offsetRed->get(), m_OffsetGreen->get(), m_offsetBlue->get() );
     for( size_t index = 0; index < count; index++)
     {
         point->at( 0 ) = m_inVerts->at( index * 3 );
@@ -329,7 +358,9 @@ void WMPointsTransform::addTransformedPoints()
             for( size_t item = 0; item < 3; item++ )
             {
                 m_outVerts->push_back( point->at( item ) );
-                m_outColors->push_back( m_inColors->at( index * 3 + item ) );
+
+                double color = m_inColors->at( index * 3 + item ) * contrast[item] + colorOffset[item];
+                m_outColors->push_back( color < 0.0 ?0.0 :( color > 1.0?1.0 :color ) );
             }
         }
         m_progressStatus->increment( 1 );

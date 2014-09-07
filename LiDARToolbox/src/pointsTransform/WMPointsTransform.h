@@ -308,6 +308,35 @@ private:
     WPropDouble m_rotationAnchorZ;
 
     /**
+     * Color equalizer settings group.
+     */
+    WPropGroup m_colorEqualizer;
+    /**
+     * Red contrast - Factor that is applied before adding the red offset.
+     */
+    WPropDouble m_contrastRed;
+    /**
+     * Green contrast - Factor that is applied before adding the green offset.
+     */
+    WPropDouble m_contrastGreen;
+    /**
+     * Blue contrast - Factor that is applied before adding the blue offset.
+     */
+    WPropDouble m_contrastBlue;
+    /**
+     * Red offset.- Offset that is added after applying the red factor.
+     */
+    WPropDouble m_offsetRed;
+    /**
+     * Green offset.- Offset that is added after applying the green factor.
+     */
+    WPropDouble m_OffsetGreen;
+    /**
+     * Blue offset.- Offset that is added after applying the blue factor.
+     */
+    WPropDouble m_offsetBlue;
+
+    /**
      * Minimal X coordinate of input points.
      */
     double m_minX;

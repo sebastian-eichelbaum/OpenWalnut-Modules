@@ -39,19 +39,19 @@ class WOctree
 public:
     /**
      * Octree constructor.
-     * \param detailDepth Supported octree node resolution resolution. It equals the 
+     * \param detailLevel Supported octree node resolution resolution. It equals the 
      *                    node's radius. Currently only numbers covering 2^n results 
      *                    including negative n values.
      */
-    explicit WOctree( double detailDepth );
+    explicit WOctree( double detailLevel );
     /**
      * Creates an octree node using a particular node type.
-     * \param detailDepth Supported octree node resolution resolution. It equals the 
+     * \param detailLevel Supported octree node resolution resolution. It equals the 
      *                    node's radius. Currently only numbers covering 2^n results 
      *                    including negative n values.
      * \param nodeType nodeType Type of this node will be used for all children of the root.
      */
-    WOctree( double detailDepth, WOctNode* nodeType );
+    WOctree( double detailLevel, WOctNode* nodeType );
     /**
      * Octree destructor.
      */

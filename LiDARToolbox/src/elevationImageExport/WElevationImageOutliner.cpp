@@ -117,7 +117,7 @@ size_t WElevationImageOutliner::getVertexID(
     double y = node->getCenter( 1 );
     WQuadNode* existingNode = m_vertices->getLeafNode( x, y );
     if( existingNode != 0 ) return existingNode->getID();
-    double elevation = elevImageMode != 0 ?node->getElevationMax() :node->getElevationMin();
+    double elevation = elevImageMode != 0 ?node->getValueMax() :node->getValueMin();
     if( elevImageMode == 2 ) elevation = node->getPointCount();
     m_vertices->registerPoint( x, y, elevation );
     existingNode = m_vertices->getLeafNode( x, y );

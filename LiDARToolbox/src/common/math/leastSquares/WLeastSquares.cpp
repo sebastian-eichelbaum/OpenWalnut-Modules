@@ -24,6 +24,7 @@
 
 #include <vector>
 #include "WLeastSquares.h"
+#include "../../math/vectors/WVectorMaths.h"
 
 WLeastSquares::WLeastSquares()
 {
@@ -44,25 +45,24 @@ void WLeastSquares::analyzeData( vector<WPosition>* data )
 {
     m_positions = data;
     calculatePerpendicularDimension();
-    clearMatrices();
     calculateMatrices();
-    calculateHesseNormalForm();
+    calculateHessianNormalForm();
 }
-vector<double> WLeastSquares::getHesseNormalForm()
+vector<double> WLeastSquares::getHessianNormalForm()
 {
-    return m_hesseNormalForm;
+    return m_hessianNormalForm;
 }
 vector<double> WLeastSquares::getNormalVectorNotNormalized()
 {
     vector<double> normalVector;
-    for( size_t dimension = 0; dimension < m_hesseNormalForm.size() - 1; dimension++ )
-        normalVector.push_back( m_hesseNormalForm[dimension] );
+    for( size_t dimension = 0; dimension < m_hessianNormalForm.size() - 1; dimension++ )
+        normalVector.push_back( m_hessianNormalForm[dimension] );
     return normalVector;
 }
 void WLeastSquares::calculatePerpendicularDimension()
 {
     WPrincipalComponentAnalysis pca;
-    pca.analyzeData( m_positions );
+    pca.analyzeData( *m_positions );
     vector<double> eigenValues = pca.getEigenValues();
     double smallestEigenValue = eigenValues[0];
     size_t perpendicularEigenVector = 0;
@@ -75,7 +75,7 @@ void WLeastSquares::calculatePerpendicularDimension()
         }
 
     m_verticalDimension = 0;
-    WVector3d eigenVector = pca.getDirections()[perpendicularEigenVector];
+    WVector3d eigenVector = pca.getEigenVectors()[perpendicularEigenVector];
     double biggestValue = abs( eigenVector[0] );
     for( size_t index = 0; index < eigenVector.size(); index++ )
         if( abs( eigenVector[index] ) > biggestValue )
@@ -84,82 +84,48 @@ void WLeastSquares::calculatePerpendicularDimension()
             m_verticalDimension = index;
         }
 }
-void WLeastSquares::clearMatrices()
-{
-    MatrixXd newMatrixA( m_dimensions, m_dimensions );
-    m_matrixA = newMatrixA;
-    MatrixXd newMatrixB( m_dimensions, 1 );
-    m_matrixB = newMatrixB;
-
-    for( size_t row = 0; row < m_dimensions; row++ )
-    {
-        for( size_t col = 0; col < m_dimensions; col++ )
-            m_matrixA( row, col ) = 0.0;
-        m_matrixB( row, 0 ) = 0.0;
-    }
-}
 void WLeastSquares::calculateMatrices()
 {
-    for( size_t index = 0; index < m_positions->size(); index++ )
+    if( m_positions->size() > 0 )
     {
-        WPosition pos = m_positions->at( index );
-        for( size_t row = 0; row < m_dimensions; row++ )
-        {
-            size_t rowMat = row <= m_verticalDimension ?row :row - 1;
-            if( row == m_verticalDimension ) rowMat = m_dimensions - 1;
-            for( size_t col = 0; col < m_dimensions; col++ )
-            {
-                size_t colMat = col <= m_verticalDimension ?col :col - 1;
-                if( col == m_verticalDimension )
-                    colMat = m_dimensions - 1;
+        MatrixXd newMatrixX( m_positions->size(), m_dimensions );
+        m_matrixX = newMatrixX;
+        MatrixXd newMatrixY( m_positions->size(), 1 );
+        m_matrixY = newMatrixY;
 
-                double resultA = 1.0;
-                if( row != m_verticalDimension )
-                    resultA *= pos[row];
-                if( col != m_verticalDimension )
-                    resultA *= pos[col];
-                m_matrixA( rowMat, colMat ) += resultA;
-            }
-            double resultB = pos[m_verticalDimension];
-            if( row != m_verticalDimension )
-                resultB *= pos[row];
-            m_matrixB( rowMat, 0 ) += resultB;
+        for( size_t row = 0; row < m_positions->size(); row++ )
+        {
+            for( size_t col = 1; col < m_dimensions; col++ )
+                m_matrixX( row, col ) = m_positions->at( row )
+                        [col <= m_verticalDimension ?col - 1 :col];
+            m_matrixX( row, 0 ) = 1.0;
+            m_matrixY( row, 0 ) = m_positions->at( row )[m_verticalDimension];
         }
     }
 }
-void WLeastSquares::calculateHesseNormalForm()
+void WLeastSquares::calculateHessianNormalForm()
 {
-    MatrixXd matrixX = m_matrixA.inverse()*m_matrixB;
-
-    m_hesseNormalForm.reserve( m_dimensions + 1 );
-    m_hesseNormalForm.resize( m_dimensions + 1 );
-    for( size_t index = 0; index < m_hesseNormalForm.size(); index++ )
-    {
-        size_t indexMat = index <= m_verticalDimension ?index : index - 1;
-
-        m_hesseNormalForm[index] =
-                index != m_verticalDimension
-                ?-matrixX( indexMat, 0 ) :1;
-    }
-
-    double sumSquared = 0;
-    for( size_t index = 0; index < m_dimensions; index++ )
-        sumSquared += pow( m_hesseNormalForm[index], 2.0 );
-    sumSquared = pow( sumSquared, 0.5 );
-    //for( size_t index = 0; index < m_dimensions; index++ )
-    //    m_hesseNormalForm[index] /= sumSquared;
+    MatrixXd matrixXTranspose = m_matrixX.transpose();
+    MatrixXd result = ( matrixXTranspose * m_matrixX ).inverse() * matrixXTranspose * m_matrixY;
+    m_hessianNormalForm.reserve( m_dimensions + 1 );
+    m_hessianNormalForm.resize( m_dimensions + 1 );
+    m_hessianNormalForm[m_hessianNormalForm.size() - 1] = -result( 0, 0 );
+    m_hessianNormalForm[m_verticalDimension] = 1.0;
+    for( size_t index = 1; index < m_dimensions; index++ )
+        m_hessianNormalForm[index <= m_verticalDimension ?index - 1 :index] =
+                -result( index, 0 );
 }
-vector<double> WLeastSquares::getParametersXYZ0()
+vector<double> WLeastSquares::getParametersXYZ0_()
 {
-    return getParametersXYZ0( m_hesseNormalForm );
+    return getParametersXYZ0( m_hessianNormalForm );
 }
-vector<double> WLeastSquares::getParametersXYZ0( vector<double> hesseNormalForm )
+vector<double> WLeastSquares::getParametersXYZ0( const vector<double>& hessianNormalForm )
 {
     vector<double> parameters;
-    double a = hesseNormalForm[0];
-    double b = hesseNormalForm[1];
-    double c = hesseNormalForm[2];
-    double d = hesseNormalForm[3];
+    double a = hessianNormalForm[0];
+    double b = hessianNormalForm[1];
+    double c = hessianNormalForm[2];
+    double d = hessianNormalForm[3];
     double a2 = a * a;
     double b2 = b * b;
     double c2 = c * c;
@@ -174,32 +140,32 @@ double WLeastSquares::getDistanceToPlane( WPosition point )
 {
     double normalAbsolute = 0;
     for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
-        normalAbsolute += pow( m_hesseNormalForm[dimension], 2.0 );
+        normalAbsolute += pow( m_hessianNormalForm[dimension], 2.0 );
     normalAbsolute = pow( normalAbsolute, 0.5 );
 
     double distance = 0;
     for( size_t dimension = 0; dimension < m_dimensions; dimension++ )
-        distance += point[dimension] * m_hesseNormalForm[dimension];
-    return ( distance + m_hesseNormalForm[m_dimensions] ) / normalAbsolute;
+        distance += point[dimension] * m_hessianNormalForm[dimension];
+    return ( distance + m_hessianNormalForm[m_dimensions] ) / normalAbsolute;
 }
 WPosition WLeastSquares::getNearestPointTo( WPosition point )
 {
-    return getNearestPointTo( m_hesseNormalForm, point );
+    return getNearestPointTo( m_hessianNormalForm, point );
 }
-WPosition WLeastSquares::getNearestPointTo( vector<double> planeHesseNormalForm, WPosition point )
+WPosition WLeastSquares::getNearestPointTo( const vector<double>& planeHessianNormalForm, WPosition point )
 {
-    double dimensions = planeHesseNormalForm.size() - 1;
-    double amountN = planeHesseNormalForm[dimensions];
+    double dimensions = planeHessianNormalForm.size() - 1;
+    double amountN = planeHessianNormalForm[dimensions];
     double amountR = 0;
     for(size_t dimension = 0; dimension < dimensions; dimension++ )
     {
-        amountN += planeHesseNormalForm[dimension] * point[dimension];
-        amountR += planeHesseNormalForm[dimension] * planeHesseNormalForm[dimension];
+        amountN += planeHessianNormalForm[dimension] * point[dimension];
+        amountR += planeHessianNormalForm[dimension] * planeHessianNormalForm[dimension];
     }
     double r = -amountN / amountR;
 
     WPosition cuttingPoint( point[0], point[1], point[2] );
     for( size_t dimension = 0; dimension < dimensions; dimension++ )
-        cuttingPoint[dimension] += planeHesseNormalForm[dimension] * r;
+        cuttingPoint[dimension] += planeHessianNormalForm[dimension] * r;
     return cuttingPoint;
 }

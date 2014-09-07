@@ -129,7 +129,7 @@ boost::shared_ptr< WTriangleMesh > WLariOutliner::outlineLeastSquaresPlanes( dou
         WPosition spatialPoint( 0.0, 0.0, 0.0 );
         for( size_t dimension = 0; dimension < spatialCoordinate.size(); dimension++ )
             spatialPoint[dimension] = spatialCoordinate[dimension];
-        vector<double> planeFormula = spatialDomainPoint->getHesseNormalForm();
+        vector<double> planeFormula = spatialDomainPoint->getHessianNormalForm();
 
         WMTempLeastSquaresTest::outlineNormalPlane( planeFormula, spatialPoint, squaresWidth / 2.0, outputMesh );
     }

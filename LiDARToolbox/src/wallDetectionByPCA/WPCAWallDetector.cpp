@@ -50,10 +50,10 @@ void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
         if(node->getPointCount() >= 3 )
         {
             WPrincipalComponentAnalysis pca;
-            pca.analyzeData( node->getInputPoints() );
+            pca.analyzeData( *( node->getInputPoints() ) );
             node->clearInputData();
             node->setMean( pca.getMean() );
-            node->setEigenVectors( pca.getDirections() );
+            node->setEigenVectors( pca.getEigenVectors() );
             node->setEigenValues( pca.getEigenValues() );
         }
     }

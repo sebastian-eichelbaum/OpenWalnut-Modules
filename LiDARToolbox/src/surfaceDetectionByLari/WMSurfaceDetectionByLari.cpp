@@ -68,7 +68,7 @@ const char** WMSurfaceDetectionByLari::getXPMIcon() const
 }
 const std::string WMSurfaceDetectionByLari::getName() const
 {
-    return "Surface Detection by Lari";
+    return "Surface Detection by Lari/Habib";
 }
 
 const std::string WMSurfaceDetectionByLari::getDescription() const
@@ -103,7 +103,7 @@ void WMSurfaceDetectionByLari::connectors()
 void WMSurfaceDetectionByLari::properties()
 {
     m_nbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
-    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
+    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (minutes): ", "Time in seconds that the "
                                             "whole render process took.", 0.0 );
     m_infoPointsPerSecond = m_infoProperties->addProperty( "Points per second: ",
                                             "The current speed in points per second.", 0.0 );
@@ -119,7 +119,7 @@ void WMSurfaceDetectionByLari::properties()
     double minRange = 0.01;
     m_segmentationPlaneDistance = m_properties->addProperty( "Plane distance", "", .7, m_propCondition );
     m_segmentationMaxAngleDegrees = m_properties->addProperty( "Plane angle", "", 7.0, m_propCondition );
-    m_numberPointsK = m_properties->addProperty( "Number points K=", "", 12, m_propCondition );
+    m_numberPointsK = m_properties->addProperty( "Number points K=", "", 40, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
 
     m_applyBoundaryDetection = m_properties->addProperty( "Detect boundries: ", "", true, m_propCondition );
@@ -132,12 +132,12 @@ void WMSurfaceDetectionByLari::properties()
 
     m_planarGroup = m_properties->addPropertyGroup( "Planar feature properties",
                                             "All conditions must be met to detect as a surface." );
-    m_surfaceNLambda1Min = m_planarGroup->addProperty( "N Lambda 1 >=", "", 0.3, m_propCondition );
-    m_surfaceNLambda1Max = m_planarGroup->addProperty( "N Lambda 1 <", "", 0.7, m_propCondition );
-    m_surfaceNLambda2Min = m_planarGroup->addProperty( "N Lambda 2 >=", "", 0.0, m_propCondition );
-    m_surfaceNLambda2Max = m_planarGroup->addProperty( "N Lambda 2 <", "", 1.0, m_propCondition );
+    m_surfaceNLambda1Min = m_planarGroup->addProperty( "N Lambda 1 >=", "", 0.4, m_propCondition );
+    m_surfaceNLambda1Max = m_planarGroup->addProperty( "N Lambda 1 <", "", 0.63, m_propCondition );
+    m_surfaceNLambda2Min = m_planarGroup->addProperty( "N Lambda 2 >=", "", 0.3, m_propCondition );
+    m_surfaceNLambda2Max = m_planarGroup->addProperty( "N Lambda 2 <", "", 0.6, m_propCondition );
     m_surfaceNLambda3Min = m_planarGroup->addProperty( "N Lambda 3 >=", "", 0.0, m_propCondition );
-    m_surfaceNLambda3Max = m_planarGroup->addProperty( "N Lambda 3 <", "", 1.0, m_propCondition );
+    m_surfaceNLambda3Max = m_planarGroup->addProperty( "N Lambda 3 <", "", 0.1, m_propCondition );
 
     m_surfaceNLambda1Min->setMin( 0.0 );
     m_surfaceNLambda1Min->setMax( 1.0 - minRange );
@@ -278,10 +278,10 @@ void WMSurfaceDetectionByLari::moduleMain()
             m_xMax->set( boundingBox->getRootNode()->getXMax() );
             m_yMin->set( boundingBox->getRootNode()->getYMin() );
             m_yMax->set( boundingBox->getRootNode()->getYMax() );
-            m_zMin->set( boundingBox->getRootNode()->getElevationMin() );
-            m_zMax->set( boundingBox->getRootNode()->getElevationMax() );
+            m_zMin->set( boundingBox->getRootNode()->getValueMin() );
+            m_zMax->set( boundingBox->getRootNode()->getValueMax() );
             delete boundingBox;
-            m_infoRenderTimeSeconds->set( timer.elapsed() );
+            m_infoRenderTimeSeconds->set( timer.elapsed() / 60.0 );
             m_progressStatus->finish();
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );

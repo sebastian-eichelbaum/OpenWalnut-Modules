@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "WPointDistance.h"
+#include "../../math/vectors/WVectorMaths.h"
 
 WPointDistance::WPointDistance()
 {
@@ -34,7 +35,7 @@ WPointDistance::WPointDistance()
 WPointDistance::WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint )
 {
     m_comparedPoint = comparedPoint;
-    m_pointDistance = getPointDistance( sourcePoint, getComparedPoint()->getCoordinate() );
+    m_pointDistance = WVectorMaths::getEuclidianDistance( sourcePoint, getComparedPoint()->getCoordinate() );
 }
 
 WPointDistance::~WPointDistance()
@@ -52,12 +53,16 @@ double WPointDistance::getDistance()
 {
     return m_pointDistance;
 }
-double WPointDistance::getPointDistance( const vector<double>& point1, const vector<double>& point2 )
-{    //TODO(aschwarzkopf): Not verified that the euclidian distance is calculated right also for points above 3 dimensions.
-    double distance = 0;
-    for( size_t index = 0; index < point1.size() && index < point2.size(); index++ )
-        distance += pow( point1[index] - point2[index], 2 );
-    return pow( distance, 0.5 );
+vector<WPosition>* WPointDistance::convertToPointSet( vector<WPointDistance>* pointDistances )
+{
+    vector<WPosition>* pointSet = new vector<WPosition>();
+    for( size_t index = 0; index < pointDistances->size(); index++ )
+    {
+        vector<double> coordinate = pointDistances->at( index ).getComparedCoordinate();
+        if( coordinate.size() == 3 )
+            pointSet->push_back( WPosition( coordinate[0], coordinate[1], coordinate[2] ) );
+    }
+    return pointSet;
 }
 bool WPointDistance::operator<( WPointDistance const& right ) const
 {

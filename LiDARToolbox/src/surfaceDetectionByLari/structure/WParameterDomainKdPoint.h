@@ -39,7 +39,7 @@ class WParameterDomainKdPoint : public WKdPointND
 public:
     /**
      * Instantiates a parameter domain point in an n dimensional space. A parameter 
-     * coordinate used here is calculated using the Hesse normal form as follows: 
+     * coordinate used here is calculated using the Hessian normal form as follows: 
      * X_0=(-A*D)(A^2+B^2+C^2), Y_0=(-B*D)(A^2+B^2+C^2), Z_0=(-C*D)(A^2+B^2+C^2), ...
      * \param coordinate Parameter space coordinate corresponding to the Lari/Habib 
      *                   approach.
@@ -47,7 +47,7 @@ public:
     explicit WParameterDomainKdPoint( vector<double> coordinate );
     /**
      * Instantiates a parameter domain point in an three dimensional space. A parameter 
-     * coordinate used here is calculated using the Hesse normal form as follows: 
+     * coordinate used here is calculated using the Hessian normal form as follows: 
      * X_0=(-A*D)(A^2+B^2+C^2), Y_0=(-B*D)(A^2+B^2+C^2), Z_0=(-C*D)(A^2+B^2+C^2), ...
      * \param x0 X_0 coordinate of the parameter space-
      * \param y0 Y_0 coordinate of the parameter space-

@@ -193,8 +193,8 @@ void WMElevationImageExport::moduleMain()
             m_xMax->set( m_elevationImage->getRootNode()->getXMax() );
             m_yMin->set( m_elevationImage->getRootNode()->getYMin() );
             m_yMax->set( m_elevationImage->getRootNode()->getYMax() );
-            m_zMin->set( m_elevationImage->getRootNode()->getElevationMin() );
-            m_zMax->set( m_elevationImage->getRootNode()->getElevationMax() );
+            m_zMin->set( m_elevationImage->getRootNode()->getValueMin() );
+            m_zMax->set( m_elevationImage->getRootNode()->getValueMax() );
             m_elevationImageOutliner->setExportElevationImageSettings(
                     m_minElevImageZ->get( true ), m_intensityIncreasesPerMeter->get() );
             m_elevationImageOutliner->setShowElevationInMeshColor( m_showElevationInMeshColor->get() );
