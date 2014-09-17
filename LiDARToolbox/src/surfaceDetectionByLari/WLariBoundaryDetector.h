@@ -101,12 +101,12 @@ public:
 
 private:
     /**
-     * Initializes the spatial domain points. Points are grouped by the grop ID, 
-     * originally groping by the same planar formula in relation to other point 
-     * neighbors.
-     * \param parameterDomain Parameter domain to fetch planar points..
+     * Groups spatial domain points using their group ID that was previously assigned by 
+     * a planar cluster detection approoach. It allows to search points of a particular 
+     * group ID faster.
+     * \param parameterDomain Parameter domain to fetch planar points.
      */
-    void initSpatialDomain( WKdTreeND* parameterDomain );
+    void groupPointsByGroupID( WKdTreeND* parameterDomain );
     /**
      * Splits a single point group that can be spatially disconnected.
      * \param inputPointCluster Input point group to be further splitted.

@@ -66,8 +66,8 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
-#include "bitmapImage/WBmpImage.h"
-#include "bitmapImage/WBmpSaver.h"
+#include "../common/algorithms/bitmapImage/WBmpImage.h"
+#include "../common/algorithms/bitmapImage/WBmpSaver.h"
 
 #include "WElevationImageOutliner.h"
 #include "../common/datastructures/WDataSetPointsGrouped.h"

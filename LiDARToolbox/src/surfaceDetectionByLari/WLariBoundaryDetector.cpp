@@ -46,7 +46,7 @@ WLariBoundaryDetector::~WLariBoundaryDetector()
 void WLariBoundaryDetector::detectBoundaries( WKdTreeND* parameterDomain )
 {
     cout << "detectBoundaries()" << endl;
-    initSpatialDomain( parameterDomain );
+    groupPointsByGroupID( parameterDomain );
 
     for( size_t cluster = 0; cluster < m_spatialInputClusters->size(); cluster++ )
     {
@@ -62,9 +62,9 @@ void WLariBoundaryDetector::setMaxPointDistanceR( double maxPointDistanceR )
 }
 
 
-void WLariBoundaryDetector::initSpatialDomain( WKdTreeND* parameterDomain )
+void WLariBoundaryDetector::groupPointsByGroupID( WKdTreeND* parameterDomain )
 {
-    cout << "initSpatialDomain()" << endl;
+    cout << "groupPointsByGroupID()" << endl;
     vector<WKdPointND*>* parameterPoints = parameterDomain->getAllPoints();
     m_spatialInputClusters = new vector<vector<WSpatialDomainKdPoint*>*>();
 
@@ -75,7 +75,7 @@ void WLariBoundaryDetector::initSpatialDomain( WKdTreeND* parameterDomain )
         size_t currentInputClusterID = spatialPoint->getClusterID();
         if( currentInputClusterID >= parameterPoints->size() )
         {
-            cout << "!!!UNKNOWN EXCEPTION!!! initSpatialDomain() - clusterID " << currentInputClusterID
+            cout << "!!!UNKNOWN EXCEPTION!!! groupPointsByGroupID() - clusterID " << currentInputClusterID
                     << " above point count " << parameterPoints->size() << " (" << index << "/" << parameterPoints->size()
                     << ")" << "   Input array index = " << spatialPoint->getIndexInInputArray() << endl;
         }

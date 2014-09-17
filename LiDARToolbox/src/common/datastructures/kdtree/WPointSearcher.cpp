@@ -55,7 +55,7 @@ vector<WPointDistance>* WPointSearcher::getNearestPoints()
 {
     m_foundPoints = new vector<WPointDistance>(); //TODO(aschwarzkopf): Only debugging step over crashes on that line.
     double index = 1;
-    size_t distanceSteps = m_maxResultPointCount == std::numeric_limits< size_t >::max() ?1 :m_distanceSteps;
+    size_t distanceSteps = m_maxResultPointCount == numeric_limits< size_t >::max() ?1 :m_distanceSteps;
     for( index = 1; index <= distanceSteps
             && m_foundPoints->size() < m_maxResultPointCount; index++ )
     {
@@ -77,7 +77,7 @@ vector<WPointDistance>* WPointSearcher::getNearestPoints()
 }
 size_t WPointSearcher::getNearestNeighborCount()
 {
-    if( m_maxResultPointCount == std::numeric_limits< size_t >::max() )
+    if( m_maxResultPointCount == numeric_limits< size_t >::max() )
     {
         return getNearestNeighborCountInfiniteMaxCount( m_examinedKdTree );
     }
@@ -140,7 +140,7 @@ void WPointSearcher::setMaxResultPointCount( size_t maxPointCount )
 }
 void WPointSearcher::setMaxResultPointCountInfinite()
 {
-    m_maxResultPointCount = std::numeric_limits< size_t >::max();
+    m_maxResultPointCount = numeric_limits< size_t >::max();
 }
 void WPointSearcher::traverseNodePoints( WKdTreeND* currentNode, double maxDistance )
 {

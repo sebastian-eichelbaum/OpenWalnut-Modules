@@ -1,5 +1,5 @@
 /* XPM */
-static const char * WMPointsGroupSelector_xpm[] = {
+static const char * WMPointGroupsTransform_xpm[] = {
 "32 32 5 1",
 " 	c #FFFFFF",
 ".	c #3E3E3E",

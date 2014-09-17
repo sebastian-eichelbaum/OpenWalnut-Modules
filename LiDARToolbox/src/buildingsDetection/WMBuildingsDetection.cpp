@@ -196,6 +196,14 @@ void WMBuildingsDetection::moduleMain()
                     outputGroups->push_back( buildingVoxel->getGroupNr() );
                 }
             }
+            if( outputVerts->size() == 0)
+            {
+                for( size_t dimension = 0; dimension < 3; dimension++ )
+                    outputVerts->push_back( 0.0 );
+                for( size_t colorChannel = 0; colorChannel < 3; colorChannel++ )
+                    outputColors->push_back( 0.0 );
+                outputGroups->push_back( 0 );
+            }
             boost::shared_ptr< WDataSetPointsGrouped > output(
                     new WDataSetPointsGrouped( outputVerts, outputColors, outputGroups ) );
             m_outputPointsGrouped->updateData( output );

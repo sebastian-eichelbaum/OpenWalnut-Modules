@@ -98,14 +98,6 @@ public:
 
 private:
     /**
-     * Returns the points within the parameter domain which belong to an extent of a 
-     * plane.
-     * \param parametersXYZ0 Peak center coordinate which depicts the region.
-     * \return Parameter domain points that belong to the extent of a particular plane 
-     *         formula.
-     */
-    vector<WParameterDomainKdPoint*>* getParametersOfExtent( const vector<double>& parametersXYZ0 );
-    /**
      * Initializes the extent sizes of each parameter for those parameter domain points 
      * that are tagged to be refreshed. When points are clustered, neighbor parameter 
      * domain points neighbor counts change when points are removed from waiting list.
@@ -139,6 +131,14 @@ private:
      * \param threadIndex Thread index of multithreading.
      */
     void addExtentClusterAtThread( vector<WParameterDomainKdPoint*>* extentPoints, size_t clusterID, size_t threadIndex );
+    /**
+     * Returns the points within the parameter domain which belong to an extent of a 
+     * plane.
+     * \param parametersXYZ0 Peak center coordinate which depicts the region.
+     * \return Parameter domain points that belong to the extent of a particular plane 
+     *         formula.
+     */
+    vector<WParameterDomainKdPoint*>* getParametersOfExtent( const vector<double>& parametersXYZ0 );
 
     /**
      * Parameter domain kd tree. This point set is emptied during operation for more 

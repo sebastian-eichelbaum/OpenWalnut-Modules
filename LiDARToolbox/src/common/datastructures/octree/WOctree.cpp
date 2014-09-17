@@ -226,7 +226,7 @@ const size_t WOctree::colors[] = {
 const size_t WOctree::colorCount = sizeof( colors ) / sizeof( colors[0] );
 float WOctree::calcColor( size_t groupNr, size_t colorChannel )
 {
-    groupNr *= 7;
+    groupNr = ( groupNr * 7 ) + 9;
     groupNr = colors[groupNr%colorCount];
     groupNr = ( groupNr >> ( 16-8*colorChannel ) ) & 0xff;
     return static_cast<float>( groupNr )/255.0f;

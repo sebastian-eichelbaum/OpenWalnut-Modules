@@ -125,7 +125,7 @@ void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*
         delete points;
     }
 }
-bool WLariPointClassifier::calculateIsPlanarPoint( vector<double> eigenValues )
+bool WLariPointClassifier::calculateIsPlanarPoint( const vector<double>& eigenValues )
 {
     double sum = getVectorSum( eigenValues );
     for( size_t index = 0; index < eigenValues.size(); index++ )
@@ -137,7 +137,7 @@ bool WLariPointClassifier::calculateIsPlanarPoint( vector<double> eigenValues )
     }
     return true;
 }
-bool WLariPointClassifier::calculateIsCylindricalPoint( vector<double> eigenValues )
+bool WLariPointClassifier::calculateIsCylindricalPoint( const vector<double>& eigenValues )
 {
     double sum = getVectorSum( eigenValues );
     for( size_t index = 0; index < eigenValues.size(); index++ )
@@ -149,7 +149,7 @@ bool WLariPointClassifier::calculateIsCylindricalPoint( vector<double> eigenValu
     }
     return true;
 }
-double WLariPointClassifier::getVectorSum( vector<double> allNumbers )
+double WLariPointClassifier::getVectorSum( const vector<double>& allNumbers )
 {
     double value = 0;
     for( size_t index = 0; index < allNumbers.size(); index++ )

@@ -91,20 +91,6 @@ void WLariBruteforceClustering::setCpuThreadCount( size_t cpuThreadCount )
 }
 
 
-vector<WParameterDomainKdPoint*>* WLariBruteforceClustering::getParametersOfExtent( const vector<double>& parametersXYZ0 )
-{
-    WParameterSpaceSearcher parameterSearcher;
-    parameterSearcher.setExaminedKdTree( m_parameterDomain );
-    parameterSearcher.setSegmentationSettings( m_segmentationMaxAngleDegrees, m_segmentationMaxPlaneDistance );
-    parameterSearcher.setSearchedPeakCenter( parametersXYZ0 );
-    vector<WPointDistance>* nearestPoints = parameterSearcher.getNearestPoints();
-    vector<WParameterDomainKdPoint*>* neighborParameters = new vector<WParameterDomainKdPoint*>();
-    for( size_t index = 0; index < nearestPoints->size(); index++ )
-        neighborParameters->push_back( static_cast<WParameterDomainKdPoint*>
-                ( nearestPoints->at( index ).getComparedPoint() ) );
-    delete nearestPoints;
-    return neighborParameters;
-}
 void WLariBruteforceClustering::initExtentSizes( vector<WKdPointND*>* pointsToProcess )
 {
     size_t threads = m_cpuThreadCount < pointsToProcess->size() ?m_cpuThreadCount :pointsToProcess->size();
@@ -127,6 +113,8 @@ void WLariBruteforceClustering::initExtentSizesAtThread( vector<WKdPointND*>* po
             parameterSearcher.setSearchedPeakCenter( refreshable->getCoordinate() );
             size_t count = parameterSearcher.getNearestNeighborCount();
 
+            if( count > 10000 )
+                cout << "!WARNING! - Extent " << index << "/" << pointsToProcess->size() << " with size " << count << "!" << endl;
             refreshable->setExtentPointCount( count );
             refreshable->tagToRefresh( false );
         }
@@ -164,4 +152,17 @@ void WLariBruteforceClustering::addExtentClusterAtThread( vector<WParameterDomai
         }
     }
 }
-
+vector<WParameterDomainKdPoint*>* WLariBruteforceClustering::getParametersOfExtent( const vector<double>& parametersXYZ0 )
+{
+    WParameterSpaceSearcher parameterSearcher;
+    parameterSearcher.setExaminedKdTree( m_parameterDomain );
+    parameterSearcher.setSegmentationSettings( m_segmentationMaxAngleDegrees, m_segmentationMaxPlaneDistance );
+    parameterSearcher.setSearchedPeakCenter( parametersXYZ0 );
+    vector<WPointDistance>* nearestPoints = parameterSearcher.getNearestPoints();
+    vector<WParameterDomainKdPoint*>* neighborParameters = new vector<WParameterDomainKdPoint*>();
+    for( size_t index = 0; index < nearestPoints->size(); index++ )
+        neighborParameters->push_back( static_cast<WParameterDomainKdPoint*>
+                ( nearestPoints->at( index ).getComparedPoint() ) );
+    delete nearestPoints;
+    return neighborParameters;
+}

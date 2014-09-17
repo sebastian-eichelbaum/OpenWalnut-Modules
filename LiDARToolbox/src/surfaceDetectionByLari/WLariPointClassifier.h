@@ -82,14 +82,14 @@ public:
      * \param eigenValues Eigen values to examine.
      * \return The point has planar featues or not.
      */
-    bool calculateIsPlanarPoint( vector<double> eigenValues );
+    bool calculateIsPlanarPoint( const vector<double>& eigenValues );
     /**
      * Calculates whether a point's eigen values in relation to its neighbors have 
      * linear/cylindrical features.
      * \param eigenValues Eigen values to examine.
      * \return The point has linear/cylindrical featues or not.
      */
-    bool calculateIsCylindricalPoint( vector<double> eigenValues );
+    bool calculateIsCylindricalPoint( const vector<double>& eigenValues );
     /**
      * Setup method for the process - The maximal count of analyzed neighbors of an 
      * examined input point.
@@ -112,7 +112,7 @@ public:
      * \param allNumbers The numbers to sum.
      * \return Result = number 1 + number 2 + number 3 + . . . ).
      */
-    static double getVectorSum( vector<double> allNumbers );
+    static double getVectorSum( const vector<double>& allNumbers );
     /**
      * Sets the normalized lambda range condition. All of them must be met in order to 
      * detect a point as planar.

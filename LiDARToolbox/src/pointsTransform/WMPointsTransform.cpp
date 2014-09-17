@@ -94,12 +94,18 @@ void WMPointsTransform::connectors()
             "The sixth point set to display" );
     m_input[6] = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Input 7",
             "The seventh point set to display" );
+    m_inputSubtraction = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "Subtraction",
+            "Points that are subtracted from the output" );
 
     m_output = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
                 new WModuleOutputData< WDataSetPoints >(
                         shared_from_this(), "Transformed points", "The transformed point set." ) );
-
     addConnector( m_output );
+    m_outputPointsGrouped = boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > >(
+                new WModuleOutputData< WDataSetPointsGrouped >(
+                        shared_from_this(), "Transformed points with group ID", "The transformed point set with group IDs." ) );
+    addConnector( m_outputPointsGrouped );
+
     WModule::connectors();
 }
 
@@ -107,6 +113,14 @@ void WMPointsTransform::properties()
 {
     m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
                                             "whole render process took.", 0.0 );
+    m_infoInputPointCount = m_infoProperties->addProperty( "Input points: ", "", 0 );
+    m_infoOutputPointCount = m_infoProperties->addProperty( "Output points: ", "", 0 );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "X min: ", "", 0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "X max: ", "", 0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Y min: ", "", 0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Y max: ", "", 0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Z min: ", "", 0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Z max: ", "", 0 ) );
 
 
     double number_range = 1000000000.0;
@@ -118,7 +132,10 @@ void WMPointsTransform::properties()
     m_toY = m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition );
     m_fromZ = m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition );
     m_toZ = m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition );
-    m_cutInsteadOfCrop = m_pointsCropGroup->addProperty( "Cut: ", "Cut instead of crop.", false, m_propCondition );
+    m_cutInsteadOfCrop = m_pointsCropGroup->addProperty( "Invert: ", "Cut instead of crop.", false, m_propCondition );
+    m_disablePointCrop = m_pointsCropGroup->addProperty( "Disable cuts: ", "", false, m_propCondition );
+    m_pointSubtractionRadius = m_pointsCropGroup->addProperty( "Subtr. r.: ", "Radius of subtracted coordinates "
+                                                        "(most right input connector)", 0.0, m_propCondition );
 
     m_translatePointsGroup = m_properties->addPropertyGroup( "Point translation",
                                             "Translates the points by the following amount of XYZ offset after cropping." );
@@ -166,25 +183,38 @@ void WMPointsTransform::properties()
 
 
 
-    m_colorEqualizer = m_properties->addPropertyGroup( "Color equalizer", "" );
-    m_contrastRed = m_colorEqualizer->addProperty( "Contrast red: ", "", 1.0, m_propCondition );
+    m_groupColorEqualizer = m_properties->addPropertyGroup( "Color equalizer", "" );
+    m_contrastRed = m_groupColorEqualizer->addProperty( "Contrast red: ", "", 1.0, m_propCondition );
     m_contrastRed->setMin( 0.0 );
     m_contrastRed->setMax( 3.0 );
-    m_offsetRed = m_colorEqualizer->addProperty( "Offset red: ", "", 0.0, m_propCondition );
+    m_offsetRed = m_groupColorEqualizer->addProperty( "Offset red: ", "", 0.0, m_propCondition );
     m_offsetRed->setMin( -1.0 );
     m_offsetRed->setMax( 1.0 );
-    m_contrastGreen = m_colorEqualizer->addProperty( "Contrast green: ", "", 1.0, m_propCondition );
+    m_contrastGreen = m_groupColorEqualizer->addProperty( "Contrast green: ", "", 1.0, m_propCondition );
     m_contrastGreen->setMin( 0.0 );
     m_contrastGreen->setMax( 3.0 );
-    m_OffsetGreen = m_colorEqualizer->addProperty( "Offset green: ", "", 0.0, m_propCondition );
+    m_OffsetGreen = m_groupColorEqualizer->addProperty( "Offset green: ", "", 0.0, m_propCondition );
     m_OffsetGreen->setMin( -1.0 );
     m_OffsetGreen->setMax( 1.0 );
-    m_contrastBlue = m_colorEqualizer->addProperty( "Contrast blue: ", "", 1.0, m_propCondition );
+    m_contrastBlue = m_groupColorEqualizer->addProperty( "Contrast blue: ", "", 1.0, m_propCondition );
     m_contrastBlue->setMin( 0.0 );
     m_contrastBlue->setMax( 3.0 );
-    m_offsetBlue = m_colorEqualizer->addProperty( "Offset blue: ", "", 0.0, m_propCondition );
+    m_offsetBlue = m_groupColorEqualizer->addProperty( "Offset blue: ", "", 0.0, m_propCondition );
     m_offsetBlue->setMin( -1.0 );
     m_offsetBlue->setMax( 1.0 );
+
+
+    m_groupFileOperations = m_properties->addPropertyGroup( "File equalizer", "" );
+    m_inputFile = m_groupFileOperations->addProperty( "Input path: ", "", WPathHelper::getAppPath() );
+    WPropertyHelper::PC_PATHEXISTS::addTo( m_inputFile );
+    m_reloadPointsTrigger = m_groupFileOperations->addProperty( "Load points:",  "Load from file", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
+    m_outputFile = m_groupFileOperations->addProperty( "Output path: ", "", WPathHelper::getAppPath() );
+    m_savePointsTrigger = m_groupFileOperations->addProperty( "Save points:",  "Save to file", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
+
+
+    m_pointGroupOptionsGroup = m_properties->addPropertyGroup( "Options for point group output", "" );
+    m_assignedGroupID = m_pointGroupOptionsGroup->addProperty( "Assigned point group: ", "", 0, m_propCondition );
+    m_assignedGroupID->setMin( 0 );
 
     WModule::properties();
 }
@@ -199,6 +229,7 @@ void WMPointsTransform::moduleMain()
     m_moduleState.setResetable( true, true );
     for( size_t pointset = 0; pointset < m_input.size(); pointset++ )
         m_moduleState.add( m_input[pointset]->getDataChangedCondition() );
+    m_moduleState.add( m_inputSubtraction->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
@@ -213,14 +244,20 @@ void WMPointsTransform::moduleMain()
         m_moduleState.wait();
 
         WRealtimeTimer timer;
+        setProgressSettings( 10 );
         timer.reset();
-        bool addedPoints = false;
         WDataSetPoints::VertexArray newVertices(
                 new WDataSetPoints::VertexArray::element_type() );
         m_outVerts = newVertices;
         WDataSetPoints::ColorArray newColors(
                 new WDataSetPoints::ColorArray::element_type() );
         m_outColors = newColors;
+        WDataSetPointsGrouped::GroupArray newGroups(
+                new WDataSetPointsGrouped::GroupArray::element_type() );
+        m_outGroups = newGroups;
+        m_infoInputPointCount->set( 0 );
+        m_pointSubtraction.initSubtraction( m_inputSubtraction->getData(), m_pointSubtractionRadius->get() );
+        bool addedPoints = onFileLoad();
         for(size_t pointset = 0; pointset < m_input.size(); pointset++)
         {
             boost::shared_ptr< WDataSetPoints > points = m_input[pointset]->getData();
@@ -229,13 +266,14 @@ void WMPointsTransform::moduleMain()
                 m_inVerts = points->getVertices();
                 m_inColors = points->getColors();
                 setProgressSettings( m_inVerts->size() * 2 / 3 );
+                m_infoInputPointCount->set( m_infoInputPointCount->get() + m_inVerts->size() / 3 );
                 initBoundingBox( !addedPoints );
                 addTransformedPoints();
-                m_progressStatus->finish();
                 if( points->size() > 0 )
                     addedPoints = true;
             }
         }
+        m_infoOutputPointCount->set( m_outVerts->size() / 3 );
         for( size_t item = 0; !addedPoints && item < 3; item++ )
         {
             m_outVerts->push_back( 0 );
@@ -247,7 +285,14 @@ void WMPointsTransform::moduleMain()
             boost::shared_ptr< WDataSetPoints > outputPoints(
                     new WDataSetPoints( m_outVerts, m_outColors ) );
             m_output->updateData( outputPoints );
+
+            boost::shared_ptr< WDataSetPointsGrouped > outputPointsGrouped(
+                    new WDataSetPointsGrouped( m_outVerts, m_outColors, m_outGroups ) );
+            m_outputPointsGrouped->updateData( outputPointsGrouped );
+
+            onFileSave();
         }
+        m_progressStatus->finish();
         m_infoRenderTimeSeconds->set( timer.elapsed() );
 
         // woke up since the module is requested to finish?
@@ -318,6 +363,13 @@ void WMPointsTransform::setMinMax()
     m_fromZ->setMax( m_maxZ );
     m_toZ->setMin( m_fromZ->get() );
     m_toZ->setMax( m_maxZ );
+
+    m_infoBoundingBoxMin[0]->set( m_minX );
+    m_infoBoundingBoxMax[0]->set( m_maxX );
+    m_infoBoundingBoxMin[1]->set( m_minY );
+    m_infoBoundingBoxMax[1]->set( m_maxY );
+    m_infoBoundingBoxMin[2]->set( m_minZ );
+    m_infoBoundingBoxMax[2]->set( m_maxZ );
 }
 void WMPointsTransform::addTransformedPoints()
 {
@@ -344,7 +396,8 @@ void WMPointsTransform::addTransformedPoints()
                 &&  point->at( 2 ) >= m_fromZ->get() && point->at( 2 ) <= m_toZ->get();
         size_t modulo = m_skipRatio->get() + 1;
         bool isPointSkipped = index % ( modulo ) != 0;
-        if( isInsideSelection != m_cutInsteadOfCrop->get() && !isPointSkipped )
+        bool remainsAfterCropping = isInsideSelection != m_cutInsteadOfCrop->get() || m_disablePointCrop->get();
+        if( remainsAfterCropping && !isPointSkipped && !m_pointSubtraction.pointsExistNearCoordinate( *point ) )
         {
             WVectorMaths::addVector( point, offset );
             WVectorMaths::multiplyVector( point, factor );
@@ -362,8 +415,39 @@ void WMPointsTransform::addTransformedPoints()
                 double color = m_inColors->at( index * 3 + item ) * contrast[item] + colorOffset[item];
                 m_outColors->push_back( color < 0.0 ?0.0 :( color > 1.0?1.0 :color ) );
             }
+            m_outGroups->push_back( m_assignedGroupID->get() );
         }
         m_progressStatus->increment( 1 );
     }
     delete rotationAnchorInverted;
+}
+bool WMPointsTransform::onFileLoad()
+{
+    bool addedPoints = false;
+    m_pointInputFile.setFilePath( m_inputFile->get().c_str() );
+    setProgressSettings( 10 );
+    if( m_reloadPointsTrigger->get() )
+        m_pointInputFile.loadWDataSetPoints();
+    if( m_pointInputFile.containsData() )
+    {
+        m_inVerts = m_pointInputFile.getVertices();
+        m_inColors = m_pointInputFile.getColors();
+        setProgressSettings( m_inVerts->size() * 2 / 3 );
+        m_infoInputPointCount->set( m_infoInputPointCount->get() + m_inVerts->size() / 3 );
+        initBoundingBox( !addedPoints );
+        addTransformedPoints();
+        if( m_inVerts->size() > 0 )
+            addedPoints = true;
+    }
+    m_reloadPointsTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, true );
+    return addedPoints;
+}
+void WMPointsTransform::onFileSave()
+{
+    if( m_savePointsTrigger->get(true) )
+    {
+        m_pointOutputFile.setFilePath( m_outputFile->get().c_str() );
+        m_pointOutputFile.saveWDataSetPoints( m_outVerts, m_outColors );
+    }
+    m_savePointsTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, true );
 }

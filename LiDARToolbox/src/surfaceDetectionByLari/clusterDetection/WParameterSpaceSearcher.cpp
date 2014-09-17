@@ -79,7 +79,7 @@ bool WParameterSpaceSearcher::pointCanBelongToPointSet( const vector<double>& po
 }
 
 double WParameterSpaceSearcher::getMaxParameterDistance( const vector<double>& parametersXYZ0 )
-{
+{   //TODO(aschwarzkopf): Implement a better bounding box concept later.
     vector<double> extent( 3, 0.0 );
     vector<double> origin( 3, 0.0 );
     extent[0] = WVectorMaths::getEuclidianDistance( origin, parametersXYZ0 );

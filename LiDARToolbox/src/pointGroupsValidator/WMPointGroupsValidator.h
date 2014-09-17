@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSGROUPSELECTOR_H
-#define WMPOINTSGROUPSELECTOR_H
+#ifndef WMPOINTGROUPSVALIDATOR_H
+#define WMPOINTGROUPSVALIDATOR_H
 
 
 #include <liblas/liblas.hpp>
@@ -41,11 +41,11 @@
 
 #include <osg/ShapeDrawable>
 #include <osg/Geode>
-#include "../common/datastructures/octree/WOctree.h"
-
-#include "../common/datastructures/WDataSetPointsGrouped.h"
 #include "core/dataHandler/WDataSetPoints.h"
-
+#include "../surfaceDetectionByLari/structure/WSpatialDomainKdPoint.h"
+#include "../common/math/vectors/WVectorMaths.h"
+#include "WGroupValidator.h"
+#include "WExportCSV.h"
 
 
 //!.Unnecessary imports
@@ -68,6 +68,10 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
+
+
+using std::vector;
+
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
 class WDataSetScalar;
@@ -78,18 +82,18 @@ class WGEManagedGroupNode;
  * group can be displayed in a single color depicting all groups..
  * \ingroup modules
  */
-class WMPointsGroupSelector: public WModule
+class WMPointGroupsValidator: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMPointsGroupSelector();
+    WMPointGroupsValidator();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsGroupSelector();
+    virtual ~WMPointGroupsValidator();
 
     /**
      * Gives back the name of this module.
@@ -144,87 +148,93 @@ private:
      */
     void setProgressSettings( size_t steps );
 
-    /**
-     * WDataSetPointsGrouped data input (Grouped point data).
-     */
-    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_input;
 
-    /**
-     * Data output connector for triangle mesh output.
-     */
-    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
-    /**
-     * Data output connector for data set points output.
-     */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
 
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+    /**
+     * Groups that depict an ideal segmentation result. This point set comes ofteh from 
+     * manual editing or assigning.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_inputReferenceGroupPoints;
+    /**
+     * Groups that should be validated. Usually this point sets arases from a 
+     * segmentation process that comes from a module that should be validated.
+     */
+    boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_inputValidatedGroupPoints;
+    /**
+     * Points from reference groups that are not segmented in a point set to be 
+     * validated.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputNotSegmented;
+    /**
+     * Usually not segmented points maybe tell nothing about the area coverage itself. 
+     * Points wihtin that are also points that were not detected in the group. But they 
+     * are added here only if they are far enough apart from detected points to be 
+     * validated (using a distance threshold).
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPointsOfMissingAreas;
+    /**
+     * Points of reference groups that have a wrong group in the point group dataset to 
+     * be validated.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputFalseSegmented;
+
 
     /**
      * Needed for recreating the geometry, incase when resolution changes.
      */
     boost::shared_ptr< WCondition > m_propCondition;
 
-    /**
-     * Info tab property: Input points count.
-     */
-    WPropInt m_nbPoints;
-    /**
-     * Info tab property: Minimal x value of output x coordunates.
-     */
-    WPropDouble m_xMin;
-    /**
-     * Info tab property: Maximal x value of output x coordunates.
-     */
-    WPropDouble m_xMax;
-    /**
-     * Info tab property: Minimal y value of output x coordunates.
-     */
-    WPropDouble m_yMin;
-    /**
-     * Info tab property: Maximal y value of output x coordunates.
-     */
-    WPropDouble m_yMax;
-    /**
-     * Info tab property: Minimal z value of output x coordunates.
-     */
-    WPropDouble m_zMin;
-    /**
-     * Info tab property: Maximal z value of output x coordunates.
-     */
-    WPropDouble m_zMax;
 
-    /**
-     * Determines the resolution of the smallest octree node's radius in 2^n meters
-     */
-    WPropInt m_detailDepth;
-    /**
-     * Determines the resolution of the smallest octree nodes in meters
-     */
-    WPropDouble m_detailDepthLabel;
-    /**
-     * Depicting the input data set points showing the point outline instead of regions
-     * depicted as cubes that cover existing points.
-     */
-    WPropBool m_highlightUsingColors;
-    /**
-     * Switch to remove color information:
-     */
-    WPropBool m_clearInputColor;
-
-    /**
-     * Property to choose an output building of a voxel group number. Currently 0 is 
-     * cutting nothing and 1 is is showing all buildings altogether.
-     */
-    WPropInt m_selectedShowableBuilding;
 
     /**
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+
+    /**
+     * Settings group that deals with coordinate accuracy of points to be evaluated.
+     */
+    WPropGroup m_accuracyGroup;
+    /**
+     * Regarded euclidean deviance between reference points and points to be evaluated.
+     */
+    WPropDouble m_coordinateAccuracy;
+
+    /**
+     * Settings that deal with point group evaluation itself.
+     */
+    WPropGroup m_evaluationGroup;
+    /**
+     * Setting that delas with finding not segmented area points. These points are found 
+     * by taking points of a corresponding reference group that can not be reached by 
+     * correctly segmented points regarding this euclideanradius around them.
+     */
+    WPropDouble m_areaTestingPointRadius;
+    /**
+     * Cumulate groups with similar reference group point counts.
+     */
+    WPropBool m_cumulateGroups;
+    /**
+     * Result comma separated values table output file path.
+     */
+    WPropFilename m_outputFileCSV;
+    /**
+     * Result comma separated values table export launcher.
+     */
+    WPropTrigger m_saveCSVTrigger;
+
+    /**
+     * Group validator instance
+     */
+    WGroupValidator m_groupValidator;
+    /**
+     * Instance that exports results to a comma separated values table output file.
+     */
+    WExportCSV m_exportCSV;
 };
 
-#endif  // WMPOINTSGROUPSELECTOR_H
+#endif  // WMPOINTGROUPSVALIDATOR_H

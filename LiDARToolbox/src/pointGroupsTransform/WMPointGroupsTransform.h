@@ -22,8 +22,8 @@
 //
 //---------------------------------------------------------------------------
 
-#ifndef WMPOINTSTRANSFORM_H
-#define WMPOINTSTRANSFORM_H
+#ifndef WMPOINTGROUPSTRANSFORM_H
+#define WMPOINTGROUPSTRANSFORM_H
 
 
 #include <liblas/liblas.hpp>
@@ -34,6 +34,7 @@
 #include <iostream> // std::cout
 
 #include "core/kernel/WModule.h"
+#include "../common/algorithms/groupEdit/WGroupEdit.h"
 
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/graphicsEngine/shaders/WGEShader.h"
@@ -43,6 +44,8 @@
 #include <osg/Geode>
 #include "core/dataHandler/WDataSetPoints.h"
 #include "../common/datastructures/octree/WOctree.h"
+#include "../common/datastructures/WDataSetPointsGrouped.h"
+#include "WVoxelOutliner.h"
 
 
 #include "../common/algorithms/pointSaver/WPointSaver.h"
@@ -76,22 +79,23 @@ class WDataSetScalar;
 class WGEManagedGroupNode;
 
 /**
- * Transforms a point set: Available options: Cropping, stretching, translation and 
- * rotation.
+ * Class for latering WDataSetPointsGrouped point set. Contains method to put out in 
+ * WDataSetPoints in order to watch it using e. g. Point Renderer. It has options like 
+ * merging WDataSetPointsGrouped points, subtracting point sets and some other.
  * \ingroup modules
  */
-class WMPointsTransform: public WModule
+class WMPointGroupsTransform: public WModule
 {
 public:
     /**
      * Creates the module for drawing contour lines.
      */
-    WMPointsTransform();
+    WMPointGroupsTransform();
 
     /**
      * Destroys this module.
      */
-    virtual ~WMPointsTransform();
+    virtual ~WMPointGroupsTransform();
 
     /**
      * Gives back the name of this module.
@@ -151,19 +155,6 @@ private:
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
     /**
-     * Calculates the bounding box of the input point data set. Minimals and
-     * maximals of X/Y/Z are set.
-     * \param isFirstPointSet Tells whether the point set is the first one. So the first 
-     *                        coordinate will be overridden as min/max value for each 
-     *                        coordinate in the first check.
-     */
-    void initBoundingBox( bool isFirstPointSet );
-    /**
-     * Assigns the bounding box value to the minimal and maximal values of the cropping 
-     * settings.
-     */
-    void setMinMax();
-    /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
      * a selection or to cut away a cube area.
@@ -175,28 +166,32 @@ private:
      * path is correct.
      * \return Returns true if at least one point could be loaded.
      */
-    bool onFileLoad();
+    void onFileLoad();
     /**
      * Method that is executed to save a file if the save button is pressed.
      */
     void onFileSave();
 
     /**
-     * WDataSetPoints data input (proposed for LiDAR data).
+     * WDataSetPointsGrouped data input (WDataSetPoints with group parameter).
      */
-    vector<boost::shared_ptr< WModuleInputData< WDataSetPoints > > > m_input;
+    vector<boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > > m_input;
     /**
-     * WDataSetPoints data that is subtracted from the input points.
+     * WDataSetPointsGrouped data that is subtracted from the input points.
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_inputSubtraction;
     /**
-     * Processed point data with cut off points after cropping and subtracting points.
+     * Processed point data with cut off subtracted points.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputGroups;
     /**
-     * Processed point data with cut off points after cropping and subtracting points.
+     * Data output connector for data set points output.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputPointsGrouped;
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
+    /**
+     * Output for outlining using voxels. Their width can be specified in settings.
+     */
+    boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputVoxels;
 
     /**
      * Needed for recreating the geometry, incase when resolution changes.
@@ -209,25 +204,27 @@ private:
     boost::shared_ptr< WProgress > m_progressStatus;
 
     /**
-     * Input point coordinates to crop.
-     */
-    WDataSetPoints::VertexArray m_inVerts;
-    /**
-     * Colors of the input point data set that are also passed through.
-     */
-    WDataSetPoints::ColorArray m_inColors;
-    /**
      * Vertices of the output point data set.
      */
-    WDataSetPoints::VertexArray m_outVerts;
+    WDataSetPointsGrouped::VertexArray m_outVerts;
     /**
      * Colors of the output point data set.
      */
-    WDataSetPoints::ColorArray m_outColors;
+    WDataSetPointsGrouped::ColorArray m_outColors;
     /**
-     * Groups of the output second point data set.
+     * Colors of the output point data set in order to outline point groups.
+     * Parameter field for output without group ID.
+     */
+    WDataSetPointsGrouped::ColorArray m_outGroupColors;
+    /**
+     * Group of the output point data set.
      */
     WDataSetPointsGrouped::GroupArray m_outGroups;
+    /**
+     * Instance to edit group IDs. It can identify groups with point count below a 
+     * desireable threshold in order to remove corresponding points.
+     */
+    WGroupEdit m_groupEditor;
 
 
     /**
@@ -235,13 +232,13 @@ private:
      */
     WPropDouble m_infoRenderTimeSeconds;
     /**
-     * Point count before transforming:
+     * Input point count.
      */
     WPropInt m_infoInputPointCount;
     /**
-     * Point count after transforming:
+     * Information about the point group count. It is the last group ID.
      */
-    WPropInt m_infoOutputPointCount;
+    WPropInt m_infoLastGroupID;
     /**
      * Information about minimal X/Y/Z values.
      */
@@ -252,214 +249,124 @@ private:
     vector<WPropInt> m_infoBoundingBoxMax;
 
     /**
-     * Options for surface features.
+     * Options that are relevant for point removal
      */
     WPropGroup m_pointsCropGroup;
-    /**
-     * Minimal X value of the selection.
-     */
-    WPropDouble m_fromX;
-    /**
-     * Maximal X value of the selection.
-     */
-    WPropDouble m_toX;
-    /**
-     * Maximal Y value of the selection.
-     */
-    WPropDouble m_fromY;
-    /**
-     * Minimal Y value of the selection.
-     */
-    WPropDouble m_toY;
-    /**
-     * Minimal Z value of the selection.
-     */
-    WPropDouble m_fromZ;
-    /**
-     * Maximal Z value of the selection.
-     */
-    WPropDouble m_toZ;
-    /**
-     * Switch to cut away the selection instead of to crop the area.
-     */
-    WPropBool m_cutInsteadOfCrop;
-    /**
-     * Switch to temporarily turn of point set cropping.
-     */
-    WPropBool m_disablePointCrop;
     /**
      * Radius of points that are subtracted from the point set. The subtracted points 
      * are connected by the most right input.
      */
     WPropDouble m_pointSubtractionRadius;
 
+
+
+    /**
+     * Options for point group outlining using group parameter less output.
+     * It can e. g. apply color etc.
+     */
+    WPropGroup m_outlinerGroup;
+    /**
+     * Determines the resolution of the smallest octree node's radius in 2^n meters
+     */
+    WPropInt m_detailDepth;
+    /**
+     * Determines the resolution of the smallest octree nodes in meters
+     */
+    WPropDouble m_detailDepthLabel;
+    /**
+     * Depicting the input data set points showing the point outline instead of regions
+     * depicted as cubes that cover existing points.
+     */
+    WPropBool m_highlightUsingColors;
+    /**
+     * Switch to remove color information:
+     */
+    WPropBool m_clearInputColor;
+    /**
+     * Put all point groups or a particular group to the output.
+     */
+    WPropBool m_loadAllGroups;
+    /**
+     * If the switch is put to show a single groupe, then a group will be put out by 
+     * means of this group ID.
+     */
+    WPropInt m_selectedShowableGroup;
+    /**
+     * Group transformation settings have group processing options. This field displays 
+     * the original ID though. The ID is changed if more than one input is connected.
+     */
+    WPropInt m_groupIDInOriginalPointSet;
+
+
+
+    /**
+     * Point group processing options
+     */
+    WPropGroup m_pointIDProcessingGroup;
+    /**
+     * Group ID treatment option using more than one input.
+     * It is either not changed before appling the group size threshold or group ID 
+     * continue the last group ID of the previous input dataset.
+     */
+    WPropBool m_mergeGroupIDsAllInputs;
+    /**
+     * Point count threshold for groups. Groups below that point count are removed. 
+     * Afterwards IDs are changed that way so no ID stays without points.
+     */
+    WPropInt m_groupSizeThreshold;
+
+
+
     /**
      * Options for point coordinate translation using an offset vector.
      */
     WPropGroup m_translatePointsGroup;
     /**
-     * X coordinate translation offset.
+     * Coordinate translation offset applied on input points.
      */
-    WPropDouble m_translateX;
-    /**
-     * Y coordinate translation offset.
-     */
-    WPropDouble m_translateY;
-    /**
-     * Z coordinate translation offset.
-     */
-    WPropDouble m_translateZ;
+    vector<WPropDouble> m_offsetVector;
 
     /**
-     * Group that multiplies each coordinate by a factor.
-     */
-    WPropGroup m_groupMultiplyPoints;
-    /**
-     * Each X coordinate is multiplied by this value
-     */
-    WPropDouble m_factorX;
-    /**
-     * Each Y coordinate is multiplied by this value
-     */
-    WPropDouble m_factorY;
-    /**
-     * Each Z coordinate is multiplied by this value
-     */
-    WPropDouble m_factorZ;
-
-    /**
-     * Rotation options.
-     */
-    WPropGroup m_groupRotation;
-    /**
-     * 1st applied rotation: Along the plane XY
-     */
-    WPropDouble m_rotation1AngleXY;
-    /**
-     * 2nd applied rotation: Along the plane XY
-     */
-    WPropDouble m_rotation2AngleYZ;
-    /**
-     * 3rd applied rotation: Along the plane XY
-     */
-    WPropDouble m_rotation3AngleXZ;
-    /**
-     * Rotation anchor on the X coordinate.
-     */
-    WPropDouble m_rotationAnchorX;
-    /**
-     * Rotation anchor on the Y coordinate.
-     */
-    WPropDouble m_rotationAnchorY;
-    /**
-     * Rotation anchor on the Z coordinate.
-     */
-    WPropDouble m_rotationAnchorZ;
-
-    /**
-     * Color equalizer settings group.
-     */
-    WPropGroup m_groupColorEqualizer;
-    /**
-     * Red contrast - Factor that is applied before adding the red offset.
-     */
-    WPropDouble m_contrastRed;
-    /**
-     * Green contrast - Factor that is applied before adding the green offset.
-     */
-    WPropDouble m_contrastGreen;
-    /**
-     * Blue contrast - Factor that is applied before adding the blue offset.
-     */
-    WPropDouble m_contrastBlue;
-    /**
-     * Red offset.- Offset that is added after applying the red factor.
-     */
-    WPropDouble m_offsetRed;
-    /**
-     * Green offset.- Offset that is added after applying the green factor.
-     */
-    WPropDouble m_OffsetGreen;
-    /**
-     * Blue offset.- Offset that is added after applying the blue factor.
-     */
-    WPropDouble m_offsetBlue;
-
-    /**
-     * Color equalizer settings group.
+     * File processing options.
      */
     WPropGroup m_groupFileOperations;
     /**
-     * Output file path where processed points are exported.
+     * Output file path for saving.
      */
     WPropFilename m_outputFile;
     /**
-     * Button that triggers the point saving process.
+     * Saves grouped points to a file.
      */
     WPropTrigger m_savePointsTrigger;
     /**
-     * Input file path where processed points are loaded from.
+     * Input file path for loading points.
      */
     WPropFilename m_inputFile;
     /**
-     * Button that triggers the point reload process.
+     * Reloads points from the input file.
      */
     WPropTrigger m_reloadPointsTrigger;
 
 
-    /**
-     * Operation for WDataSetPointsGrouped points for conversion of input data to a 
-     * point set with a group ID.
-     */
-    WPropGroup m_pointGroupOptionsGroup;
-    /**
-     * Minimal X value of the selection.
-     */
-    WPropInt m_assignedGroupID;
+
 
     /**
-     * Point data set that is subtracted from input points. There is a radius araund 
-     * points are removed from coordinates of this dataset.
+     * Instance for subtracting a point dataset from input files.
      */
     WPointSubtactionHelper m_pointSubtraction;
 
     /**
-     * Minimal X coordinate of input points.
-     */
-    double m_minX;
-    /**
-     * Maximal X coordinate of input points.
-     */
-    double m_maxX;
-    /**
-     * Minimal Y coordinate of input points.
-     */
-    double m_minY;
-    /**
-     * Maximal Y coordinate of input points.
-     */
-    double m_maxY;
-    /**
-     * Minimal Z coordinate of input points.
-     */
-    double m_minZ;
-    /**
-     * Maximal Z coordinate of input points.
-     */
-    double m_maxZ;
-    /**
-     * Sets how many points should be skipped after adding a single point to the output.
-     */
-    WPropInt m_skipRatio;
-
-    /**
-     * Input file points that are merged into the input point sets.
+     * Input file processing instance.
      */
     WPointSaver m_pointInputFile;
     /**
-     * File that can be saved after altering points.
+     * Output file processing instance.
      */
     WPointSaver m_pointOutputFile;
+    /**
+     * Insance to outline points voxel wise.
+     */
+    WVoxelOutliner m_voxelOutliner;
 };
 
-#endif  // WMPOINTSTRANSFORM_H
+#endif  // WMPOINTGROUPSTRANSFORM_H
