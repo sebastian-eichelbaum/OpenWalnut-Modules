@@ -43,10 +43,12 @@ public:
      * Constructor of the building detector instance.
      */
     explicit WBuildingDetector();
+
     /**
      * Destructor of the building detector instance.
      */
     virtual ~WBuildingDetector();
+
     /**
      * Starts the routine detecting buildings using the point data.
      * After executing you can extract the building number from each node 
@@ -54,6 +56,7 @@ public:
      * \param points Point data to extract buildings from
      */
     void detectBuildings( boost::shared_ptr< WDataSetPoints > points );
+
     /**
      * Sets setting params for building recognition
      * \param m_detailDepth Data grid resolution of cube group data. The number must
@@ -68,6 +71,7 @@ public:
      */
     void setDetectionParams( int m_detailDepth, int minSearchDetailDepth,
             double minSearchCutUntilAbove );
+
     /**
      * Returns the 3D node tree. Each leaf node has a group ID number. Many nodes can pe 
      * pointed by an equal parameter to a single building area.
@@ -87,6 +91,7 @@ private:
      *                   compare whether points are above threshold.
      */
     void initMinimalMaxima( WQuadNode* sourceNode, WQuadTree* targetTree );
+
     /**
      * Calculates 2D-areas which cover buildings. Building areas will be outlined in targetTree.
      * \param sourceImage Input image. Maximal point values are taken.
@@ -96,6 +101,7 @@ private:
      */
     void projectDrawableAreas( WQuadNode* sourceImage, WQuadTree* minimalMaxima,
             WQuadTree* targetTree );
+
     /**
      * It generates a voxel structure. Leaf nodes should appear where building points exist.
      * \param sourceNode Source octree contatining data that represents any 
@@ -107,26 +113,31 @@ private:
     void fetchBuildingVoxels( WOctNode* sourceNode, WQuadTree* buildingPixels,
         WOctree* targetTree );
 
+
     /**
      * Resolution of input/output data in meters. Use only numbers depictable by 2^n 
      * where n can also be 0 or below.
      */
     double m_detailDepth;
+
     /**
      * Resolution of the relative minimum search image. Use only numbers depictable by 2^n 
      * where n can also be 0 or below. The bigger the pixels the greater are the areas 
      * searched from an examined X/Y area. Their radius equals that parameter.
      */
     double m_minSearchDetailDepth;
+
     /**
      * Height that must exceed above an relative minimum to recognize it as a building pixel.
      */
     double m_minSearchCutUntilAbove;
+
     /**
      * The same as m_minSearchDetailDepth. But it's used to still be able tu use smaller
      * m_minSearchDetailDepth values not having big proglems with larger buildings.
      */
     double m_detailDepthBigHeights;
+
     /**
      * The corresponding threshold height setting for m_detailDepthBigHeights.
      */

@@ -67,6 +67,7 @@ const char** WMTreeDetectionByPCA::getXPMIcon() const
 {
     return WMTreeDetectionByPCA_xpm;
 }
+
 const std::string WMTreeDetectionByPCA::getName() const
 {
     return "Tree Detection by PCA";
@@ -203,6 +204,7 @@ void WMTreeDetectionByPCA::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMTreeDetectionByPCA::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

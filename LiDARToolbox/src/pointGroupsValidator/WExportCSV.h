@@ -46,25 +46,30 @@ public:
      * Creates a segmentation result export instance.
      */
     explicit WExportCSV();
+
     /**
      * Destroys a segmentation result export instance.
      */
     virtual ~WExportCSV();
+
     /**
      * Assigns the validated groups to be exported.
      * \param groupInfo Group information to be exported.
      */
     void setGroupInfo( vector<WGroupInfo*>* groupInfo );
+
     /**
      * Sets the output path of the exported comma separated values table file.
      * \param path Output path of the exported comma separated values table file.
      */
     void setExportFilePath( const char* path );
+
     /**
      * Sets whether group evaluation results should be cumulated or not.
      * \param cumulate Cumulate or not.
      */
     void setCumulateResultGroups( bool cumulate );
+
     /**
      * Export group evaluation results to a comma separated values table file.
      * \return Saved successfully or not.
@@ -77,31 +82,38 @@ private:
      * \return Cumulated group evaluation information..
      */
     vector<WCumulatedGroupInfo*>* generateCumulatedGroups();
+
     /**
      * Writes cumulated evaluated group information to the table file.
      */
     void writeCumulatedGroupInfoToFile();
+
     /**
      * Writes evaluated group information to the table file.
      */
     void writeInfoToFileForAllGroups();
+
     /**
      * Puts the extension to the output file if not existing.
      * \return Returns "false" if file path is empty.
      */
     bool correctFilePathByExtension();
+
     /**
      * Comma separated values table output file path.
      */
     stringstream* m_filePath;
+
     /**
      * Evaluated groups information.
      */
     vector<WGroupInfo*>* m_groupInfo;
+
     /**
      * Cumulate evaluated groups or not.
      */
     bool m_cumulateResultGroups;
+
     /**
      * File output stream
      */
@@ -111,6 +123,7 @@ private:
      * Output file extension.
      */
     static const char* CSV_TABLE_EXTENSION;
+
     /**
      * Separation sign between table cells.
      */

@@ -68,6 +68,7 @@ const char** WMPointsTransform::getXPMIcon() const
 {
     return WMPointsTransform_xpm;
 }
+
 const std::string WMPointsTransform::getName() const
 {
     return "Points - Transform";
@@ -309,6 +310,7 @@ void WMPointsTransform::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMPointsTransform::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
@@ -316,6 +318,7 @@ void WMPointsTransform::setProgressSettings( size_t steps )
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
+
 void WMPointsTransform::initBoundingBox( bool isFirstPointSet )
 {
     size_t count = m_inVerts->size() / 3;
@@ -347,6 +350,7 @@ void WMPointsTransform::initBoundingBox( bool isFirstPointSet )
         m_progressStatus->increment( 1 );
     }
 }
+
 void WMPointsTransform::setMinMax()
 {
     m_fromX->setMin( m_minX );
@@ -371,6 +375,7 @@ void WMPointsTransform::setMinMax()
     m_infoBoundingBoxMin[2]->set( m_minZ );
     m_infoBoundingBoxMax[2]->set( m_maxZ );
 }
+
 void WMPointsTransform::addTransformedPoints()
 {
     double angleXY = m_rotation1AngleXY->get();
@@ -421,6 +426,7 @@ void WMPointsTransform::addTransformedPoints()
     }
     delete rotationAnchorInverted;
 }
+
 bool WMPointsTransform::onFileLoad()
 {
     bool addedPoints = false;
@@ -442,6 +448,7 @@ bool WMPointsTransform::onFileLoad()
     m_reloadPointsTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, true );
     return addedPoints;
 }
+
 void WMPointsTransform::onFileSave()
 {
     if( m_savePointsTrigger->get(true) )

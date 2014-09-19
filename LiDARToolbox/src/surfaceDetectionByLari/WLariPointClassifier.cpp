@@ -65,10 +65,12 @@ void WLariPointClassifier::analyzeData( vector<WSpatialDomainKdPoint*>* inputPoi
     cout << "Adding " << parameterPoints->size() << " parameter points" << endl;
     m_parameterDomain->add( reinterpret_cast<vector<WKdPointND*>*>( parameterPoints ) );
 }
+
 WKdTreeND* WLariPointClassifier::getParameterDomain()
 {
     return m_parameterDomain;
 }
+
 WKdTreeND* WLariPointClassifier::getSpatialDomain()
 {
     return m_spatialDomain;
@@ -96,6 +98,7 @@ void WLariPointClassifier::classifyPoints( vector<WSpatialDomainKdPoint*>* spati
         spatialPoint->setIndexInInputArray( index );
     }
 }
+
 void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*>* spatialPoints, size_t threadIndex )
 {
     WPointSearcher spatialSearcher( m_spatialDomain );
@@ -125,6 +128,7 @@ void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*
         delete points;
     }
 }
+
 bool WLariPointClassifier::calculateIsPlanarPoint( const vector<double>& eigenValues )
 {
     double sum = getVectorSum( eigenValues );
@@ -137,6 +141,7 @@ bool WLariPointClassifier::calculateIsPlanarPoint( const vector<double>& eigenVa
     }
     return true;
 }
+
 bool WLariPointClassifier::calculateIsCylindricalPoint( const vector<double>& eigenValues )
 {
     double sum = getVectorSum( eigenValues );
@@ -149,6 +154,7 @@ bool WLariPointClassifier::calculateIsCylindricalPoint( const vector<double>& ei
     }
     return true;
 }
+
 double WLariPointClassifier::getVectorSum( const vector<double>& allNumbers )
 {
     double value = 0;
@@ -156,25 +162,30 @@ double WLariPointClassifier::getVectorSum( const vector<double>& allNumbers )
         value += allNumbers[index];
     return value;
 }
+
 void WLariPointClassifier::setNumberPointsK( size_t pointsCount )
 {
     m_numberPointsK = pointsCount;
 }
+
 void WLariPointClassifier::setMaxPointDistanceR( double maxPointDistance )
 {
     m_maxPointDistanceR = maxPointDistance;
 }
+
 void WLariPointClassifier::setCpuThreadCount( size_t cpuThreadCount )
 {
     m_cpuThreadCount = cpuThreadCount;
     m_cpuThreads.reserve( m_cpuThreadCount );
     m_cpuThreads.resize( m_cpuThreadCount );
 }
+
 void WLariPointClassifier::setPlanarNLambdaRange( size_t lambdaIndex, double min, double max )
 {
     m_planarNLambdaMin[lambdaIndex] = min;
     m_planarNLambdaMax[lambdaIndex] = max;
 }
+
 void WLariPointClassifier::setCylindricalNLambdaRange( size_t lambdaIndex, double min, double max )
 {
     m_cylindricalNLambdaMin[lambdaIndex] = min;

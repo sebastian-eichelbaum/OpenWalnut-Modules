@@ -148,6 +148,7 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+
     /**
      * Processed point data with cut off outliers.
      */
@@ -167,6 +168,7 @@ private:
      * Determines the resolution of the smallest octree node radius in 2^n meters.
      */
     WPropInt m_detailDepth;
+
     /**
      * Determines the resolution of the smallest octree node radius in meters.
      */
@@ -176,6 +178,7 @@ private:
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+
     /**
      * Octree node used for the data set points analysis.
      */

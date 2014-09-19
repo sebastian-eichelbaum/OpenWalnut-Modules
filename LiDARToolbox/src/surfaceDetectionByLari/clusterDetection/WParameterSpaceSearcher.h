@@ -44,6 +44,7 @@ class WParameterSpaceSearcher : public WPointSearcher
 {
 public:
     explicit WParameterSpaceSearcher();
+
     /**
      * Destroys the points searcher
      */
@@ -53,6 +54,7 @@ public:
      * Tags kd tree points within the extent with searched point as peak center to be refreshed.
      */
     void tagExtentToRefresh();
+
     /**
      * Sets the main segmentation settings of the segmentation algorithm. They regard 
      * the planar formula of each spatial point in relation to its 
@@ -63,6 +65,7 @@ public:
      *                      to the origin.
      */
     void setSegmentationSettings( double maxAngleDegrees, double planeDistance );
+
     /**
      * Sets the peak center. It determines the region of searched coplanar parameters.
      * \param peakCenter Peak center to search coplana parameters which belong to it.
@@ -78,6 +81,7 @@ protected:
      * \param point Peak centre whose extent points should be tagged to be refreshed.
      */
     virtual void onPointFound( WKdPointND* point );
+
     /**
      * Tells whether a point can belong to the extent of the searched coordinate as peak 
      * centre. This method overwrites the search method of the inherited class.
@@ -99,6 +103,7 @@ private:
      *         belonging parameter to the plane within the parameter domain.
      */
     double getMaxParameterDistance( const vector<double>& parametersXYZ0 );
+
     /**
      * Tells wehther two parameters can belong to the same extent or can belong to the 
      * same plane.
@@ -107,18 +112,21 @@ private:
      * \return parameters can belont to the same extent or not.
      */
     bool isParameterOfSameExtent( const vector<double>& parameters1, const vector<double>& parameters2 );
+
     /**
      * Setting that regards the planar formula of each spatial point in relation to its 
      * neighborship. This variable is the maximal angular deviation of plane formulas 
      * between two points.
      */
     double m_segmentationMaxAngleDegrees;
+
     /**
      * Setting that regards the planar formula of each spatial point in relation to its 
      * neighborship. This variable is the maximal difference between two plane normal 
      * distance to the origin.
      */
     double m_segmentationMaxPlaneDistance;
+
     /**
      * Tag points to be refreshed instead of searching them
      */

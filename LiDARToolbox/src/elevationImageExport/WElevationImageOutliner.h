@@ -84,26 +84,31 @@ public:
      * The elevation image to triangle mesh outliner constructor.
      */
     WElevationImageOutliner();
+
     /**
      * The elevation image to triangle mesh outliner destructor.
      */
     virtual ~WElevationImageOutliner();
+
     /**
      * Sets the elevation image export settings.
      * \param minElevImageZ The elevation height that is mapped to the black color.
      * \param intensityIncreasesPerMeter Intensity increase count per meter.
      */
     void setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter );
+
     /**
      * Sets whether the elevation will be displayed in the triangle mesh color.
      * \param showElevationInMeshColor Show elevation in triangle mesh color.
      */
     void setShowElevationInMeshColor( bool showElevationInMeshColor );
+
     /**
      * Sets whether the elevation will be displayed in the triangle mesh height offset.
      * \param showElevationInMeshOffset Show elevation in triangle mesh offset.
      */
     void setShowElevationInMeshOffset( bool showElevationInMeshOffset );
+
     /**
      * Draws an elevation image to the m_outputMesh triangle mesh.
      * \param quadTree Input quadtree depicting an elevation image.
@@ -113,11 +118,13 @@ public:
      *                      2: Corresponding to the Point count each X/Y bin coordinate.
      */
     void importElevationImage( WQuadTree* quadTree, size_t elevImageMode );
+
     /**
      * Highlights point groups within the elevation image (m_outputMesh) using a set of color.
      * \param groupedPoints The point data set with an additional group parameter.
      */
     void highlightBuildingGroups( boost::shared_ptr< WDataSetPointsGrouped >  groupedPoints );
+
     /**
      * Returns the triangle mesh depicting the elevation image calculated by importElevationImage().
      * \return Triangle mesh depicting the elevation image.
@@ -139,6 +146,7 @@ private:
      *                      2: Depicts point counts within elevation image areas
      */
     void drawNode( WQuadNode* node, WQuadTree* quadTree, size_t elevImageMode );
+
     /**
      * Returns the vertex ID corresponding to a quadtree leaf node X/Y coordinate.
      * The corresponding output triangle mesh vertex will be added if it doesn't exist 
@@ -154,32 +162,39 @@ private:
      * \return The m_outputMesh vertex ID to the corresponding elevation image value node.
      */
     size_t getVertexID( WQuadNode* node, size_t elevImageMode );
+
     /**
      * Triangle mesh where the elevation image can be generated using importElevationImage().
      */
     boost::shared_ptr< WTriangleMesh > m_outputMesh;
+
     /**
      * This field is a map to real m_outputMesh vertex indices. Leaf node m_id params map to them.
      */
     WQuadTree* m_vertices;
+
     /**
      * The elevation image is a grid of vertices which are organized by quadrats.
      * during drawing triangles importElevationImage() needs to know on which quadrat 
      * areas triangle pairs have already been drawn in order to avoid duplicate triangles.
      */
     WQuadTree* m_printedQuadrats;
+
     /**
      * Elevation reference height which will be taken as the black color;
      */
     double m_minElevImageZ;
+
     /**
      * Intensity increases (of 8 bit) that are calculated each meter of the elevation image.
      */
     double m_intensityIncreasesPerMeter;
+
     /**
      * The elevation will be displayed in the triangle mesh color if the value is true.
      */
     bool m_showElevationInMeshColor;
+
     /**
      * The elevation will be displayed in the triangle mesh height offset if the value is true.
      */

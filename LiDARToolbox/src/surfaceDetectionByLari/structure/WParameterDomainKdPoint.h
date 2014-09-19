@@ -45,6 +45,7 @@ public:
      *                   approach.
      */
     explicit WParameterDomainKdPoint( vector<double> coordinate );
+
     /**
      * Instantiates a parameter domain point in an three dimensional space. A parameter 
      * coordinate used here is calculated using the Hessian normal form as follows: 
@@ -54,10 +55,12 @@ public:
      * \param z0 Z_0 coordinate of the parameter space-
      */
     explicit WParameterDomainKdPoint( double x0, double y0, double z0 );
+
     /**
      * Destroys a parameter space point object.
      */
     virtual ~WParameterDomainKdPoint();
+
     /**
      * Assigns a spatial domain point to a corresponding parameter domain point so that 
      * the parameter domain point can access its spatial point meta data.
@@ -65,6 +68,7 @@ public:
      *                     corresponding parameter domain point.
      */
     void setSpatialPoint( WSpatialDomainKdPoint* spatialPoint );
+
     /**
      * returns the point count of an extent which would have its peak center 
      * within that parameter domain coordinate.
@@ -72,17 +76,20 @@ public:
      *         this object's parameter coordinate as peak center
      */
     int getExtentPointCount();
+
     /**
      * Returns the parameter spatial domain point object that is assigned to this 
      * parameter domain point.
      * \return The spatial domain point that is assigned to this parameter domain point.
      */
     WSpatialDomainKdPoint* getSpatialPoint();
+
     /**
      * Says whether the parameter domain point is already added to a plane point cluster.
      * \return Parameter domain point is added to a plane or not.
      */
     bool isAddedToPlane();
+
     /**
      * During the brute force extent estimation extent sizes change after removing 
      * parameters from the list that wait for assignment and lie in an extent that can 
@@ -91,6 +98,7 @@ public:
      * \return Point is tagged to refresh or not.
      */
     bool isTaggedToRefresh();
+
     /**
      * During the brute force peak center estimation each parameter domain point is 
      * considered as a peak center. So for each one the extent point count is calculated 
@@ -100,12 +108,14 @@ public:
      *                         this parameter domain point as peak center.
      */
     void setExtentPointCount( int extentPointCount );
+
     /**
      * Sets whether a parameter that is added to plane or not. Assigned points to a 
      * plane cluster aren't treated further.
      * \param isAddedToPlane The parameter domain point is added to a plane or not.
      */
     void setIsAddedToPlane( bool isAddedToPlane );
+
     /**
      * During the brute force plane point cluster extent estimation points are removed 
      * from the list of parameter points which wait for assignment to a plane cluster to 
@@ -123,18 +133,21 @@ private:
      * Link to the corresponding spatial domain point.
      */
     WSpatialDomainKdPoint* m_assignedSpatialNode;
+
     /**
      * The parameter domain point count within an extent with the coordinate of this 
      * object as peak center. After each brute force plane point cluster detection 
      * estimation the biggest extent is picket out.
      */
     int m_extentPointCount;
+
     /**
      * Temporary tag which tells whether a parameter domain point is added to a plane or 
      * not. Each brute force extent estimation round already added parameters aren't 
      * treated further.
      */
     bool m_isAddedToPlane;
+
     /**
      * After removing parameters from the waiting list points neighbor still remain. 
      * After removing parameters the extent point count has to be tagged to be 

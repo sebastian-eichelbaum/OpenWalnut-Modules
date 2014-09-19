@@ -52,6 +52,7 @@ WElevationImageOutliner::WElevationImageOutliner()
 WElevationImageOutliner::~WElevationImageOutliner()
 {
 }
+
 void WElevationImageOutliner::importElevationImage( WQuadTree* quadTree, size_t elevImageMode )
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
@@ -60,6 +61,7 @@ void WElevationImageOutliner::importElevationImage( WQuadTree* quadTree, size_t 
     m_printedQuadrats = new WQuadTree( quadTree->getDetailLevel() );
     drawNode( quadTree->getRootNode(), quadTree, elevImageMode );
 }
+
 void WElevationImageOutliner::drawNode(
         WQuadNode* node, WQuadTree* quadTree, size_t elevImageMode )
 {
@@ -110,6 +112,7 @@ void WElevationImageOutliner::drawNode(
                 drawNode( node->getChild( child ), quadTree, elevImageMode );
     }
 }
+
 size_t WElevationImageOutliner::getVertexID(
         WQuadNode* node, size_t elevImageMode )
 {
@@ -133,23 +136,28 @@ size_t WElevationImageOutliner::getVertexID(
     m_outputMesh->setVertexColor( currentVertex, color );
     return existingNode->getID();
 }
+
 void WElevationImageOutliner::setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter )
 {
     m_minElevImageZ = minElevImageZ;
     m_intensityIncreasesPerMeter = intensityIncreasesPerMeter;
 }
+
 void WElevationImageOutliner::setShowElevationInMeshColor( bool showElevationInMeshColor )
 {
     m_showElevationInMeshColor = showElevationInMeshColor;
 }
+
 void WElevationImageOutliner::setShowElevationInMeshOffset( bool showElevationInMeshOffset )
 {
     m_showElevationInMeshOffset = showElevationInMeshOffset;
 }
+
 boost::shared_ptr< WTriangleMesh > WElevationImageOutliner::getOutputMesh()
 {
     return m_outputMesh;
 }
+
 void WElevationImageOutliner::highlightBuildingGroups( boost::shared_ptr< WDataSetPointsGrouped >  groupedPoints )
 {
     if( !groupedPoints ) return;

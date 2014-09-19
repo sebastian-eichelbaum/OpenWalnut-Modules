@@ -55,6 +55,7 @@ void WLariBoundaryDetector::detectBoundaries( WKdTreeND* parameterDomain )
         detectInputCluster( m_spatialInputClusters->at( cluster ) );
     }
 }
+
 void WLariBoundaryDetector::setMaxPointDistanceR( double maxPointDistanceR )
 {
     m_maxPointDistanceR = maxPointDistanceR;
@@ -87,6 +88,7 @@ void WLariBoundaryDetector::groupPointsByGroupID( WKdTreeND* parameterDomain )
         }
     }
 }
+
 void WLariBoundaryDetector::transformPoint( vector<double>* transformable )
 {
     WVectorMaths::rotateVector( transformable, 2, 0, m_transformAngle1zx );
@@ -177,6 +179,7 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
         //TODO(aschwarzkopf): Merge invalid points group by distance.
     }
 }
+
 void WLariBoundaryDetector::initTransformationCoordinateSystem( vector<WSpatialDomainKdPoint*>* extentPointCluster )
 {
     //TODO(aschwarzkopf): Still not the very original peak center but the mean of peak center of each parameter.
@@ -196,6 +199,7 @@ void WLariBoundaryDetector::initTransformationCoordinateSystem( vector<WSpatialD
     m_transformAngle2zy = - WVectorMaths::getAngleToAxis( meanNormalVector->at( 2 ), meanNormalVector->at( 1 ) );
     delete meanNormalVector;
 }
+
 WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
 {
     WBoundaryDetectPoint* previousPoint = m_currentBoundary->size() >= 2
@@ -227,6 +231,7 @@ WBoundaryDetectPoint* WLariBoundaryDetector::getNextBoundPoint()
         delete previousPoint;
     return nextPoint;
 }
+
 bool WLariBoundaryDetector::lastBoundaryPointCanReachPoint( WPointDistance nextPointDistance )
 {
     double distance = nextPointDistance.getDistance();
@@ -239,6 +244,7 @@ bool WLariBoundaryDetector::lastBoundaryPointCanReachPoint( WPointDistance nextP
     double maxDistanceFromNext = nextPointSpatial->getDistanceToNthNearestNeighbor();
     return distance <= maxDistanceFromCurrent || distance <= maxDistanceFromNext;
 }
+
 double WLariBoundaryDetector::getAngleToNextPoint( WBoundaryDetectPoint* previousPoint,
         WBoundaryDetectPoint* currentPoint, WBoundaryDetectPoint* nextPoint )
 {
@@ -258,6 +264,7 @@ double WLariBoundaryDetector::getAngleToNextPoint( WBoundaryDetectPoint* previou
         angleToPrevious += 360.0;
     return angleToPrevious - angleToNext;
 }
+
 bool WLariBoundaryDetector::isResultingBoundIntersection( WBoundaryDetectPoint* nextPoint )
 {
     WBoundaryDetectPoint* currentPoint = m_currentBoundary->at( m_currentBoundary->size() - 1 );
@@ -278,6 +285,7 @@ bool WLariBoundaryDetector::isResultingBoundIntersection( WBoundaryDetectPoint* 
     }
     return false;
 }
+
 void WLariBoundaryDetector::initAABoundingBoxFromBoundary()
 {
     if( m_currentBoundary->size() == 0 )
@@ -297,6 +305,7 @@ void WLariBoundaryDetector::initAABoundingBoxFromBoundary()
         }
     }
 }
+
 void WLariBoundaryDetector::initOneOutsidePoint()
 {
     m_oneOutsidePoint.reserve( 2 );
@@ -304,6 +313,7 @@ void WLariBoundaryDetector::initOneOutsidePoint()
     m_oneOutsidePoint[0] = 1.5 * m_boundaryAABoundingBoxMin[0] - 0.5 * m_boundaryAABoundingBoxMax[0];
     m_oneOutsidePoint[1] = 0.5 * m_boundaryAABoundingBoxMin[1] - 0.5 * m_boundaryAABoundingBoxMax[1];
 }
+
 bool WLariBoundaryDetector::pointBelongsToBoundingBox( const vector<double>& point )
 {
     for( size_t dimension = 0; dimension < m_boundaryAABoundingBoxMin.size(); dimension++ )
@@ -312,6 +322,7 @@ bool WLariBoundaryDetector::pointBelongsToBoundingBox( const vector<double>& poi
             return false;
     return true;
 }
+
 bool WLariBoundaryDetector::pointIsInBounds( const vector<double>& point )
 {
     bool isInBounds = false;
@@ -327,6 +338,7 @@ bool WLariBoundaryDetector::pointIsInBounds( const vector<double>& point )
     }
     return isInBounds;
 }
+
 bool WLariBoundaryDetector::pointLiesOnBound( const vector<double>& point, size_t boundNr )
 {
     const vector<double> boundPoint1 = m_currentBoundary->at( boundNr )->getCoordinate();
@@ -338,6 +350,7 @@ bool WLariBoundaryDetector::pointLiesOnBound( const vector<double>& point, size_
         return false;
     return WVectorMaths::isPointOnLine2d( point, boundPoint1, boundPoint2 );
 }
+
 bool WLariBoundaryDetector::pointHitsBound( const vector<double>& point, size_t boundNr )
 {
     const vector<double> boundPoint1 = m_currentBoundary->at( boundNr )->getCoordinate();
@@ -347,6 +360,7 @@ bool WLariBoundaryDetector::pointHitsBound( const vector<double>& point, size_t 
     const vector<double> boundPoint2 = m_currentBoundary->at( secondIndex )->getCoordinate();
     return WVectorMaths::linesCanIntersectBounded( boundPoint1, boundPoint2, point, m_oneOutsidePoint );
 }
+
 bool WLariBoundaryDetector::boundChainStillValid()
 {
     if( m_currentBoundary->size() < 10 )

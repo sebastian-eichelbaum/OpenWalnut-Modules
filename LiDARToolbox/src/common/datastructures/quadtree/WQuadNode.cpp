@@ -107,10 +107,12 @@ double WQuadNode::getRadius()
 {
     return m_radius;
 }
+
 double WQuadNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
+
 void WQuadNode::updateMinMax( double x, double y, double value )
 {
     if( !m_pointCount > 0 )
@@ -140,26 +142,32 @@ size_t WQuadNode::getPointCount()
 {
     return m_pointCount;
 }
+
 double WQuadNode::getXMin()
 {
     return m_xMin;
 }
+
 double WQuadNode::getXMax()
 {
     return m_xMax;
 }
+
 double WQuadNode::getYMin()
 {
     return m_yMin;
 }
+
 double WQuadNode::getYMax()
 {
     return m_yMax;
 }
+
 double WQuadNode::getValueMin()
 {
     return m_valueMin;
 }
+
 double WQuadNode::getValueMax()
 {
     return m_valueMax;
@@ -169,6 +177,7 @@ size_t WQuadNode::getID()
 {
     return m_id;
 }
+
 void WQuadNode::setID( size_t id )
 {
     m_id = id;

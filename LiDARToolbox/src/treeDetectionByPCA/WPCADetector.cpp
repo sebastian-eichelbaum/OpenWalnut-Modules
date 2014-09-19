@@ -35,23 +35,28 @@ WPCADetector::WPCADetector( WOctree* analyzableOctree, boost::shared_ptr< WProgr
 WPCADetector::~WPCADetector()
 {
 }
+
 void WPCADetector::setDisplayedVarianceQuotientRange( double showedIsotropicThresholdMin, double showedIsotropicThresholdMax )
 {
     m_showedisotropicThresholdMin = showedIsotropicThresholdMin;
     m_showedisotropicThresholdMax = showedIsotropicThresholdMax;
 }
+
 void WPCADetector::setMaximalEigenValueQuotientToDraw( double maximalEigenValueQuotientToDraw )
 {
     m_maximalEigenValueQuotientToDraw = maximalEigenValueQuotientToDraw;
 }
+
 void WPCADetector::setMinPointsPerVoxelToDraw( size_t minPointsPerVoxelToDraw )
 {
     m_minPointsPerVoxelToDraw = minPointsPerVoxelToDraw;
 }
+
 void WPCADetector::analyze()
 {
     analyzeNode( static_cast<WPcaDetectOctNode*>( m_analyzableOctree->getRootNode() ) );
 }
+
 void WPCADetector::analyzeNode( WPcaDetectOctNode* node )
 {
     m_progressStatus->increment( 1 );
@@ -99,6 +104,7 @@ void WPCADetector::drawNode( WPcaDetectOctNode* node, boost::shared_ptr< WTriang
                 drawNode( static_cast<WPcaDetectOctNode*>( node->getChild( child ) ), outputMesh );
     }
 }
+
 void WPCADetector::drawLeafNode( WPcaDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
     size_t index = outputMesh->vertSize();
@@ -132,6 +138,7 @@ void WPCADetector::drawLeafNode( WPcaDetectOctNode* node, boost::shared_ptr< WTr
     outputMesh->addTriangle( index + 2, index + 6, index + 3 );
     outputMesh->addTriangle( index + 6, index + 7, index + 3 );
 }
+
 osg::Vec4 WPCADetector::calculateColorForNode( WPcaDetectOctNode* node )
 {
     if( node->hasEigenValueQuotient() )

@@ -30,10 +30,12 @@ WParameterDomainKdPoint::WParameterDomainKdPoint( vector<double> coordinate ) : 
 {
     m_markedToRefresh = true;
 }
+
 WParameterDomainKdPoint::WParameterDomainKdPoint( double x0, double y0, double z0 ) : WKdPointND( x0, y0, z0 )
 {
     m_markedToRefresh = true;
 }
+
 WParameterDomainKdPoint::~WParameterDomainKdPoint()
 {
 }
@@ -42,30 +44,37 @@ void WParameterDomainKdPoint::setSpatialPoint( WSpatialDomainKdPoint* spatialPoi
 {
     m_assignedSpatialNode = spatialPoint;
 }
+
 int WParameterDomainKdPoint::getExtentPointCount()
 {
     return m_extentPointCount;
 }
+
 WSpatialDomainKdPoint* WParameterDomainKdPoint::getSpatialPoint()
 {
     return m_assignedSpatialNode;
 }
+
 bool WParameterDomainKdPoint::isAddedToPlane()
 {
     return m_isAddedToPlane;
 }
+
 bool WParameterDomainKdPoint::isTaggedToRefresh()
 {
     return m_markedToRefresh;
 }
+
 void WParameterDomainKdPoint::setExtentPointCount( int extentPointCount )
 {
     m_extentPointCount = extentPointCount;
 }
+
 void WParameterDomainKdPoint::setIsAddedToPlane( bool isAddedToPlane )
 {
     m_isAddedToPlane = isAddedToPlane;
 }
+
 void WParameterDomainKdPoint::tagToRefresh( bool setToRefreshe )
 {
     m_markedToRefresh = setToRefreshe;

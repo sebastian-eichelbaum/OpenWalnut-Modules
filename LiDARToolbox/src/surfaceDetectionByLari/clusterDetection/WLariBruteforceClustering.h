@@ -68,6 +68,7 @@ public:
      * \param classifier Point classification instance.
      */
     explicit WLariBruteforceClustering( WLariPointClassifier* classifier );
+
     /**
      * Destroys the surface detection instance
      */
@@ -80,6 +81,7 @@ public:
      * no parameter point remains
      */
     void detectClustersByBruteForce();
+
     /**
      * Sets the main segmentation settings of the segmentation algorithm. They regard 
      * the planar formula of each spatial point in relation to its 
@@ -90,6 +92,7 @@ public:
      *                      to the origin.
      */
     void setSegmentationSettings( double maxAngleDegrees, double planeDistance );
+
     /**
      * Multithreading setter.
      * \param cpuThreadCount CPU threads to apply.
@@ -105,6 +108,7 @@ private:
      * \param pointsToProcess Parameter domain points that should be processed.
      */
     void initExtentSizes( vector<WKdPointND*>* pointsToProcess );
+
     /**
      * Initializes the extent sizes of each parameter for those parameter domain points 
      * that are tagged to be refreshed. launches for one single thread. Execute it 
@@ -113,6 +117,7 @@ private:
      * \param threadIndex Thread index.
      */
     void initExtentSizesAtThread( vector<WKdPointND*>* pointsToProcess, size_t threadIndex );
+
     /**
      * Assignes parameter domain points to a single planar patch. These points are then 
      * removed from waiting list and its remaining neighbors are tagged to be refreshed 
@@ -121,6 +126,7 @@ private:
      * \param clusterID Current cluster ID that is assigned.
      */
     void addExtentCluster( WParameterDomainKdPoint* peakCenterPoint, size_t clusterID );
+
     /**
      * Assignes parameter domain points to a single planar patch. These points are then 
      * removed from waiting list and its remaining neighbors are tagged to be refreshed 
@@ -131,6 +137,7 @@ private:
      * \param threadIndex Thread index of multithreading.
      */
     void addExtentClusterAtThread( vector<WParameterDomainKdPoint*>* extentPoints, size_t clusterID, size_t threadIndex );
+
     /**
      * Returns the points within the parameter domain which belong to an extent of a 
      * plane.
@@ -145,22 +152,26 @@ private:
      * speed. Assign a copy to that field.
      */
     WKdTreeND* m_parameterDomain;
+
     /**
      * Setting that regards the planar formula of each spatial point in relation to its 
      * neighborship. This variable is the maximal angular deviation of plane formulas 
      * between two points.
      */
     double m_segmentationMaxAngleDegrees;
+
     /**
      * Setting that regards the planar formula of each spatial point in relation to its 
      * neighborship. This variable is the maximal difference between two plane normal 
      * distance to the origin.
      */
     double m_segmentationMaxPlaneDistance;
+
     /**
      * CPU threads count for multithreading support.
      */
     size_t m_cpuThreadCount;
+
     /**
      * CPU threads object for multithreading support.
      */

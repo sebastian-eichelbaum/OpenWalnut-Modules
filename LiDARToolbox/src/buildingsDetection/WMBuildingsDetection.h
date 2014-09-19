@@ -169,26 +169,32 @@ private:
      * Info tab property: Input points count.
      */
     WPropInt m_nbPoints;
+
     /**
      * Info tab property: Minimal x value of input x coordunates.
      */
     WPropDouble m_xMin;
+
     /**
      * Info tab property: Maximal x value of input x coordunates.
      */
     WPropDouble m_xMax;
+
     /**
      * Info tab property: Minimal y value of input x coordunates.
      */
     WPropDouble m_yMin;
+
     /**
      * Info tab property: Maximal y value of input x coordunates.
      */
     WPropDouble m_yMax;
+
     /**
      * Info tab property: Minimal z value of input x coordunates.
      */
     WPropDouble m_zMin;
+
     /**
      * Info tab property: Maximal z value of input x coordunates.
      */
@@ -199,10 +205,12 @@ private:
      * radius equals to its result.
      */
     WPropInt m_detailDepth;
+
     /**
      * Determines the resolution of smallest octree nodes. Their radius equal that value.
      */
     WPropDouble m_detailDepthLabel;
+
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
 
@@ -216,6 +224,7 @@ private:
      * four is below of the height threshold of the examinable point.
      */
     WPropInt m_minSearchDetailDepth;
+
     /**
      * Main building detection setting.
      * Height that must exceed above an relative minimum to recognize it as a building pixel.

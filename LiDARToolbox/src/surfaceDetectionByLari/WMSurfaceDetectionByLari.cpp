@@ -117,8 +117,8 @@ void WMSurfaceDetectionByLari::properties()
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
     double minRange = 0.01;
-    m_segmentationPlaneDistance = m_properties->addProperty( "Plane distance", "", .7, m_propCondition );
-    m_segmentationMaxAngleDegrees = m_properties->addProperty( "Plane angle", "", 7.0, m_propCondition );
+    m_segmentationPlaneDistance = m_properties->addProperty( "Plane distance", "", 0.7, m_propCondition );
+    m_segmentationMaxAngleDegrees = m_properties->addProperty( "Plane angle", "", 15.0, m_propCondition );
     m_numberPointsK = m_properties->addProperty( "Number points K=", "", 40, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
 
@@ -302,6 +302,7 @@ void WMSurfaceDetectionByLari::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMSurfaceDetectionByLari::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

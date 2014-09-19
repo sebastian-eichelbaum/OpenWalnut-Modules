@@ -45,6 +45,7 @@ public:
     explicit WSurfaceDetectorPCL();
 
     virtual ~WSurfaceDetectorPCL();
+
     /**
      * Detects surfaces within the point cloud usint the Region Growing Segmentation 
      * algorithm of the Point Cloud Library
@@ -52,22 +53,26 @@ public:
      * \return The processed point cloud with the appended surface group ID.
      */
     boost::shared_ptr< WDataSetPointsGrouped > detectSurfaces( boost::shared_ptr< WDataSetPoints > inputPoints );
+
     /**
      * Sets the cluster size of detected surfaces.
      * \param sizeMin Minimal cluster point count of detected surfaces.
      * \param sizeMax Maximal cluster point count of detected surfaces.
      */
     void setClusterSizeRange( size_t sizeMin, size_t sizeMax );
+
     /**
      * Sets the count of considered neighbors during considering the analysis point wise.
      * \param count The count of considered neighbor points during the analysis.
      */
     void setNumberOfNeighbors( size_t count );
+
     /**
      * Allows to set smoothness threshold used for testing the points.
      * \param degrees New threshold value for the angle between normals.
      */
     void setSmoothnessThreshold( double degrees );
+
     /**
      * Allows to set curvature threshold used for testing the points.
      * \param threshold New threshold value for curvature testing.
@@ -79,19 +84,23 @@ private:
      * Minimal cluster point count of detected surfaces.
      */
     size_t m_clusterSizeMin;
+
     /**
      * Maximal cluster point count of detected surfaces.
      */
     size_t m_clusterSizeMax;
+
     /**
      * The count of considered neighbors during considering the analysis point wise.
      */
     size_t m_numberOfNeighbours;
+
     /**
      * Smoothness threshold used for testing the points. The angle is 
      * scaled by degrees and it is a threshold value for the angle between normals.
      */
     double m_smoothnessThresholdDegrees;
+
     /**
      * Curvature threshold used for testing the points. It is a threshold value for 
      * curvature testing.

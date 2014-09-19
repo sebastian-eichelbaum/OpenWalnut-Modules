@@ -29,9 +29,11 @@
 WSpatialDomainKdPoint::WSpatialDomainKdPoint( vector<double> coordinate ) : WKdPointND( coordinate )
 {
 }
+
 WSpatialDomainKdPoint::WSpatialDomainKdPoint( double x, double y, double z ) : WKdPointND( x, y, z )
 {
 }
+
 WSpatialDomainKdPoint::~WSpatialDomainKdPoint()
 {
 }
@@ -41,6 +43,7 @@ size_t WSpatialDomainKdPoint::getClusterID()
 {
     return m_clusterID;
 }
+
 vector<double> WSpatialDomainKdPoint::getEigenValues()
 {
     return m_eigenValues;
@@ -50,6 +53,7 @@ vector<double> WSpatialDomainKdPoint::getHessianNormalForm()
 {
     return m_hessianNormalForm;
 }
+
 vector<double> WSpatialDomainKdPoint::getParametersXYZ0()
 {
     return WLeastSquares::getParametersXYZ0( m_hessianNormalForm );
@@ -59,14 +63,17 @@ double WSpatialDomainKdPoint::getDistanceToNthNearestNeighbor()
 {
     return m_distanceToNthNearestNeighbor;
 }
+
 size_t WSpatialDomainKdPoint::getIndexInInputArray()
 {
     return m_indexInInputArray;
 }
+
 double WSpatialDomainKdPoint::getLocalPointDensity()
 {
     return m_kNearestPoints / ( M_PI * pow( m_distanceToNthNearestNeighbor, 2.0 ) );
 }
+
 bool WSpatialDomainKdPoint::hasValidParameters()
 {
     double infinityPositive = 1.0 / 0.0;
@@ -77,14 +84,17 @@ bool WSpatialDomainKdPoint::hasValidParameters()
             return false;
     return true;
 }
+
 void WSpatialDomainKdPoint::setClusterID( size_t clusterID )
 {
     m_clusterID = clusterID;
 }
+
 void WSpatialDomainKdPoint::setDistanceToNthNearestNeighbor( double distanceToNthNearestNeighbor )
 {
     m_distanceToNthNearestNeighbor = distanceToNthNearestNeighbor;
 }
+
 void WSpatialDomainKdPoint::setEigenValues( vector<double> eigenValues )
 {
     m_eigenValues = eigenValues;
@@ -92,18 +102,22 @@ void WSpatialDomainKdPoint::setEigenValues( vector<double> eigenValues )
         if( m_eigenValues[index] < 0.0 )
             m_eigenValues[index] = 0.0;
 }
+
 void WSpatialDomainKdPoint::setEigenVectors( vector<WVector3d> eigenVectors )
 {
     m_eigenVectors = eigenVectors;
 }
+
 void WSpatialDomainKdPoint::setHessianNormalForm( vector<double> hessianNormalForm )
 {
     m_hessianNormalForm = hessianNormalForm;
 }
+
 void WSpatialDomainKdPoint::setKNearestPoints( size_t kNearestPoints )
 {
     m_kNearestPoints = kNearestPoints;
 }
+
 void WSpatialDomainKdPoint::setIndexInInputArray( size_t indexInInputArray )
 {
     m_indexInInputArray = indexInInputArray;

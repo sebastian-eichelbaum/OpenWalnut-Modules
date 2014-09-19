@@ -47,14 +47,17 @@ WOctNode* WPcaDetectOctNode::newInstance( double centerX, double centerY, double
 {
     return new WPcaDetectOctNode( centerX, centerY, centerZ, radius );
 }
+
 void WPcaDetectOctNode::onTouchPosition( double x, double y, double z )
 {
     m_inputPoints->push_back( WPosition( x, y, z ) );
 }
+
 vector<WPosition>* WPcaDetectOctNode::getInputPoints()
 {
     return m_inputPoints;
 }
+
 void WPcaDetectOctNode::setEigenValueQuotient( double eigenValueQuotient )
 {
     m_eigenValueQuotient = eigenValueQuotient;
@@ -65,10 +68,12 @@ double WPcaDetectOctNode::getEigenValueQuotient()
 {
     return m_eigenValueQuotient;
 }
+
 bool WPcaDetectOctNode::hasEigenValueQuotient()
 {
     return m_hasEigenValueQuotient;
 }
+
 void WPcaDetectOctNode::clearInputData()
 {
     m_inputPoints->resize( 0 );

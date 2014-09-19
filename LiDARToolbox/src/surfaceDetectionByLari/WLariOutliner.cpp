@@ -35,6 +35,7 @@ WLariOutliner::WLariOutliner( WLariPointClassifier* pointClassifier )
 WLariOutliner::~WLariOutliner()
 {
 }
+
 boost::shared_ptr< WDataSetPointsGrouped > WLariOutliner::outlineParameterDomain()
 {
     WDataSetPointsGrouped::VertexArray outVertices(
@@ -61,6 +62,7 @@ boost::shared_ptr< WDataSetPointsGrouped > WLariOutliner::outlineParameterDomain
             new WDataSetPointsGrouped( outVertices, outColors, outGroups ) );
     return outputPoints;
 }
+
 boost::shared_ptr< WDataSetPointsGrouped > WLariOutliner::outlineSpatialDomainGroups()
 {
     WDataSetPointsGrouped::VertexArray outVertices(
@@ -87,6 +89,7 @@ boost::shared_ptr< WDataSetPointsGrouped > WLariOutliner::outlineSpatialDomainGr
             new WDataSetPointsGrouped( outVertices, outColors, outGroups ) );
     return outputPoints;
 }
+
 boost::shared_ptr< WDataSetPoints > WLariOutliner::outlineSpatialDomainCategories()
 {
     WDataSetPoints::VertexArray outVertices( new WDataSetPoints::VertexArray::element_type() );
@@ -118,6 +121,7 @@ boost::shared_ptr< WDataSetPoints > WLariOutliner::outlineSpatialDomainCategorie
             new WDataSetPoints( outVertices, outColors ) );
     return outputPoints;
 }
+
 boost::shared_ptr< WTriangleMesh > WLariOutliner::outlineLeastSquaresPlanes( double squaresWidth )
 {
     boost::shared_ptr< WTriangleMesh > outputMesh( new WTriangleMesh( 0, 0 ) );

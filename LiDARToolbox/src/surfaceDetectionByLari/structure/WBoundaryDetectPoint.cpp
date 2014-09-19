@@ -31,10 +31,12 @@ WBoundaryDetectPoint::WBoundaryDetectPoint( vector<double> coordinate ) : WKdPoi
     if( coordinate.size() >= 3 )
         m_zCoordinate = coordinate[2];
 }
+
 WBoundaryDetectPoint::WBoundaryDetectPoint( double x, double y, double z ) : WKdPointND( x, y )
 {
     m_zCoordinate = z;
 }
+
 WBoundaryDetectPoint::~WBoundaryDetectPoint()
 {
 }
@@ -44,14 +46,17 @@ WSpatialDomainKdPoint* WBoundaryDetectPoint::getSpatialPoint()
 {
     return m_assignedSpatialPoint;
 }
+
 bool WBoundaryDetectPoint::isAddedToPlane()
 {
     return m_isAddedToPlane;
 }
+
 void WBoundaryDetectPoint::setIsAddedToPlane( bool isAddedToPlane )
 {
     m_isAddedToPlane = isAddedToPlane;
 }
+
 void WBoundaryDetectPoint::setSpatialPoint( WSpatialDomainKdPoint* assignedSpatialPoint )
 {
     m_assignedSpatialPoint = assignedSpatialPoint;

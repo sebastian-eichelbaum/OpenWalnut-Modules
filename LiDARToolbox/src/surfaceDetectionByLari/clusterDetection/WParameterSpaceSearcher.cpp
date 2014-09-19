@@ -36,6 +36,7 @@ WParameterSpaceSearcher::WParameterSpaceSearcher()
     m_segmentationMaxAngleDegrees = 15;
     m_segmentationMaxPlaneDistance = 0.7;
 }
+
 WParameterSpaceSearcher::~WParameterSpaceSearcher()
 {
 }
@@ -45,6 +46,7 @@ void WParameterSpaceSearcher::setSegmentationSettings( double maxAngleDegrees, d
     m_segmentationMaxAngleDegrees = maxAngleDegrees;
     m_segmentationMaxPlaneDistance = planeDistance;
 }
+
 void WParameterSpaceSearcher::setSearchedPeakCenter( const vector<double>& peakCenter )
 {
     setSearchedPoint( peakCenter );
@@ -53,6 +55,7 @@ void WParameterSpaceSearcher::setSearchedPeakCenter( const vector<double>& peakC
     m_distanceSteps = 4;
     m_tagToRefresh = false;
 }
+
 void WParameterSpaceSearcher::tagExtentToRefresh()
 {
     m_tagToRefresh = true;
@@ -71,6 +74,7 @@ void WParameterSpaceSearcher::onPointFound( WKdPointND* point )
         static_cast<WParameterDomainKdPoint*>( point )->tagToRefresh( true );
     }
 }
+
 bool WParameterSpaceSearcher::pointCanBelongToPointSet( const vector<double>& point, double maxDistance )
 {
     if( WVectorMaths::getEuclidianDistance( m_searchedCoordinate, point ) > maxDistance )
@@ -98,6 +102,7 @@ double WParameterSpaceSearcher::getMaxParameterDistance( const vector<double>& p
     distanceFar = WVectorMaths::getEuclidianDistance( extent, parameterFar );
     return distanceNear > distanceFar ?distanceNear :distanceFar;
 }
+
 bool WParameterSpaceSearcher::isParameterOfSameExtent( const vector<double>& parameters1, const vector<double>& parameters2 )
 {
     vector<double> origin( 3, 0 );

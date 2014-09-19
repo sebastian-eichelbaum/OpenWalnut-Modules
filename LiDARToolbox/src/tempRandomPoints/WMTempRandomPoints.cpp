@@ -67,6 +67,7 @@ const char** WMTempRandomPoints::getXPMIcon() const
 {
     return WMTempRandomPoints_xpm;
 }
+
 const std::string WMTempRandomPoints::getName() const
 {
     return "Random Points";
@@ -136,6 +137,7 @@ void WMTempRandomPoints::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMTempRandomPoints::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
@@ -143,6 +145,7 @@ void WMTempRandomPoints::setProgressSettings( size_t steps )
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
+
 boost::shared_ptr< WDataSetPoints > WMTempRandomPoints::getRandomPoints()
 {
     setProgressSettings( m_pointCount->get() );
@@ -182,6 +185,7 @@ boost::shared_ptr< WDataSetPoints > WMTempRandomPoints::getRandomPoints()
     m_progressStatus->finish();
     return outputPoints;
 }
+
 double WMTempRandomPoints::getNextRandomNumber()
 {
     if( m_currentRandomNumber == 0.0 )

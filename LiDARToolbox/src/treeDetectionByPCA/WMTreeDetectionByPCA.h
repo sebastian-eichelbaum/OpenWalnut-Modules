@@ -156,6 +156,7 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+
     /**
      * Target triangle mesh to display isotropic threshold in voxels.
      */
@@ -184,17 +185,20 @@ private:
      * blue color.
      */
     WPropDouble m_showedIsotropicThresholdMin;
+
     /**
      * Maximal isotropic range for the display. This threshold is displayed using the 
      * red color.
      */
     WPropDouble m_showedIsotropicThresholdMax;
+
     /**
      * Maximal isotropic level for drawing voxels. More exactly said: Smallest point 
      * distribution direction strength divided by the biggest one (Smallest Eigen Value 
      * divided by the biggest one).
      */
     WPropDouble m_maximalEigenValueQuotientToDraw;
+
     /**
      * Minimal point amount per voxel to draw. Voxels below that amount aren't drawn.
      */

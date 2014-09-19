@@ -44,10 +44,12 @@ public:
      * Creates the subtractor instance
      */
     WPointSubtactionHelper();
+
     /**
      * Destroys the subtractor instance
      */
     virtual ~WPointSubtactionHelper();
+
     /**
      * Initializes the instance.
      * \param pointsToSubtract Point set to be tested whether its points are near a 
@@ -55,6 +57,7 @@ public:
      * \param subtractionRadius Search radius for point existance.
      */
     void initSubtraction( boost::shared_ptr< WDataSetPoints > pointsToSubtract, double subtractionRadius );
+
     /**
      * Returns whether points exist near a coordinate by means of a radius.
      * \param coordinate Coordinate to be tested.
@@ -67,6 +70,7 @@ private:
      * Point search tree.
      */
     WKdTreeND* m_searchTree;
+
     /**
      * Point search instance.
      */

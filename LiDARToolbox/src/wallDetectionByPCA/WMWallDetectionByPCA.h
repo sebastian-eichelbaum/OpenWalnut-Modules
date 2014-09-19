@@ -151,14 +151,17 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+
     /**
      * The output triangle mesh that is proposed to show surface node groups.
      */
     boost::shared_ptr< WModuleOutputData< WTriangleMesh > > m_outputTrimesh;
+
     /**
      * The input point data that is given the information of colored data according to a wall voxel group
      */
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
+
     /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached 
      * on this single node.
@@ -182,16 +185,19 @@ private:
      * that angle difference aren't grouped.
      */
     WPropDouble m_wallMaxAngleToNeighborVoxel;
+
     /**
      * The quotient of the second Eigen Value over the biggest. Nodes with a value
      * below that are treated as linear.
      */
     WPropDouble m_eigenValueQuotientLinear;
+
     /**
      * The biggest allowed value consisting of that: Weakest point distribution vector 
      * strength divided by the strongest. Nodes above that quotient aren't grouped.
      */
     WPropDouble m_eigenValueQuotientIsotropic;
+
     /**
      * Neighborship detection mode. It's simply the allowed count of dimensions where 
      * planes stand next to instead overlap. Having a regular grid these settings mean 
@@ -201,22 +207,26 @@ private:
      *  3: Neighborship of 27
      */
     WPropInt m_cornerNeighborClass;
+
     /**
      * The minimal group size of nodes or its surface parts that makes voxels be
      * drawn. Especially parts of buildings have bigger connected parts than e. g. 
      * trees.
      */
     WPropInt m_minimalGroupSize;
+
     /**
      * Maximal node count of groups to display. Groups above that voxel count aren't 
      * put out.
      */
     WPropInt m_maximalGroupSize;
+
     /**
      * Minimal allowed point count per voxel. Very small pixel counts don't make sense
      * for the Principal Component Analysis.
      */
     WPropInt m_minimalPointsPerVoxel;
+
     /**
      * The mode how the output triangle mesh is organized.
      * 0: Voxels with a group color

@@ -41,28 +41,34 @@ WPointSaver::WPointSaver()
 WPointSaver::~WPointSaver()
 {
 }
+
 WDataSetPointsGrouped::VertexArray WPointSaver::getVertices()
 {
     return m_verts;
 }
+
 WDataSetPointsGrouped::VertexArray WPointSaver::getColors()
 {
     return m_colors;
 }
+
 WDataSetPointsGrouped::GroupArray WPointSaver::getGroups()
 {
     return m_groups;
 }
+
 bool WPointSaver::loadWDataSetPoints()
 {
     m_hasGroupInfo = false;
     return load();
 }
+
 bool WPointSaver::loadWDataSetPointsGrouped()
 {
     m_hasGroupInfo = true;
     return load();
 }
+
 void WPointSaver::saveWDataSetPoints( WDataSetPointsGrouped::VertexArray vertices, WDataSetPointsGrouped::ColorArray colors )
 {
     m_verts = vertices;
@@ -72,6 +78,7 @@ void WPointSaver::saveWDataSetPoints( WDataSetPointsGrouped::VertexArray vertice
 
     save();
 }
+
 void WPointSaver::saveWDataSetPointsGrouped( WDataSetPointsGrouped::VertexArray vertices,
         WDataSetPointsGrouped::ColorArray colors,  WDataSetPointsGrouped::GroupArray groups )
 {
@@ -83,6 +90,7 @@ void WPointSaver::saveWDataSetPointsGrouped( WDataSetPointsGrouped::VertexArray 
 
     save();
 }
+
 void WPointSaver::setFilePath( const char* path )
 {
     delete m_filePath;
@@ -97,10 +105,12 @@ double WPointSaver::parseDouble( vector<char> charVector )
         numberStream << charVector[index];
     const string numberString = numberStream.str();
     istringstream stream( numberString );
+    stream.precision( 16 );
     double number;
     stream >> number;
     return number;
 }
+
 size_t WPointSaver::parseSizeT( vector<char> charVector )
 {
     stringstream numberStream;
@@ -112,6 +122,7 @@ size_t WPointSaver::parseSizeT( vector<char> charVector )
     stream >> number;
     return number;
 }
+
 bool WPointSaver::containsData()
 {
     return m_containsData;
@@ -132,6 +143,7 @@ bool WPointSaver::correctFilePathByExtension()
 
     return true;
 }
+
 bool WPointSaver::pathEndsWith( const char* nameTail, stringstream* filePath )
 {
     const string tmp = filePath->str();
@@ -148,6 +160,7 @@ bool WPointSaver::pathEndsWith( const char* nameTail, stringstream* filePath )
             return false;
     return true;
 }
+
 bool WPointSaver::load()
 {
     cout << "WPointSaver::load() - Start" << endl;
@@ -198,6 +211,7 @@ bool WPointSaver::load()
     cout << "Groups: " << m_groups->size() << endl;
     return m_verts->size() > 0;
 }
+
 void WPointSaver::save()
 {
     cout << "Attempting to save pointfile" << endl;
@@ -209,6 +223,7 @@ void WPointSaver::save()
     const char* path = tmp.c_str();
     remove( path );
     stream.open( path );
+    stream.precision( 16 );
 
     size_t pointCount = m_verts->size() / 3;
     for( size_t index = 0; index < pointCount; index++ )
@@ -231,6 +246,7 @@ void WPointSaver::save()
     stream.close();
     cout << "Saved point file: " << m_filePath->str() << endl;
 }
+
 bool WPointSaver::isNumberChar( const char sign )
 {
     for( char index = '0'; index <= '9'; index++)
@@ -238,6 +254,7 @@ bool WPointSaver::isNumberChar( const char sign )
             return true;
     return sign == '.' || sign == '-' || sign == 'e' || sign == 'E';
 }
+
 vector<vector<char> > WPointSaver::fetchNumberCharsFromLine( string line )
 {
     vector<vector<char> > output;
@@ -265,5 +282,7 @@ vector<vector<char> > WPointSaver::fetchNumberCharsFromLine( string line )
     }
     return output;
 }
+
 const char* WPointSaver::EXTENSION_WDATASETPOINTS = ".points";
+
 const char* WPointSaver::EXTENSION_WDATASETPOINTSGROUPED = ".groups";

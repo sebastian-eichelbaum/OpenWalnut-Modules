@@ -42,18 +42,22 @@ public:
      * Instantiates an instance for general vector calculation.
      */
     WVectorMaths();
+
     /**
      * Destroys an instance for general vector calculation.
      */
     virtual ~WVectorMaths();
+
     /**
      * Radial amount of 90 degrees.
      */
     static const double ANGLE_90_DEGREES;
+
     /**
      * Negative infinite value.
      */
     static const double INFINITY_NEGATIVE;
+
     /**
      * Positive infinite value.
      */
@@ -65,18 +69,21 @@ public:
      * \param summand Second summand.
      */
     static void addVector( vector<double>* changedVector, const vector<double>& summand );
+
     /**
      * Copies a vector
      * \param copiedVector Vector that should be copied.
      * \return The copied vector.
      */
     static vector<double> copyVector( const vector<double>& copiedVector );
+
     /**
      * Copies a vector returning a pointer of the new vector.
      * \param copiedVector Vector that should be copied.
      * \return The copied vector.
      */
     static vector<double>* copyVectorForPointer( const vector<double>& copiedVector );
+
     /**
      * Calculates angle between two vectors
      * \param vector1 First vector.
@@ -84,6 +91,7 @@ public:
      * \return Angle of the two vectors using the decree scale.
      */
     static double getAngleOfVectors( const vector<double>& vector1, const vector<double>& vector2 );
+
     /**
      * Calculates the angle of two planes. It has the range of 180°. Vectors showing 
      * exactly the same direction have 0°. Lying in the same line but
@@ -93,6 +101,7 @@ public:
      * \return The angle between the two planes.
      */
     static double getAngleOfPlanes( const vector<double>& vector1, const vector<double>& vector2 );
+
     /**
      * Returns the angle between two planes.
      * \param vector1 Normal vector of the first plane.
@@ -100,6 +109,7 @@ public:
      * \return Angle between two planes.
      */
     static double getAngleOfPlanes( WVector3d vector1, WVector3d vector2 );
+
     /**
      * Returns a points angle from the coordinate system in relation to the coordinate 
      * system. The range is 180 degrees because it takes the same angle if the the angle 
@@ -111,6 +121,7 @@ public:
      *         system origin.
      */
     static double getAngleToAxis( double x, double y );
+
     /**
      * Calculates the angle of a point in relation to the coordinate system origin. It 
      * has the whole range of 360 degrees. It shows a different angle if a point would 
@@ -121,6 +132,7 @@ public:
      *         system origin.
      */
     static double getAngleToAxisComplete( double x, double y );
+
     /**
      * Returns the euclidian distance (shortest distance throgh the space) across a 
      * vector.
@@ -128,6 +140,7 @@ public:
      * \return The euclidian length of a vector.
      */
     static double getEuclidianDistance( const vector<double>& distanceVector );
+
     /**
      * Returns the euclidian distance (shortest distance throgh the space) between two 
      * points.
@@ -136,6 +149,7 @@ public:
      * \return The shortest connection length between two points.
      */
     static double getEuclidianDistance( const vector<double>& point1, const vector<double>& point2 );
+
     /**
      * Returns the intersection point between two lines, each is described by two 
      * points. The method works only for two dimensional coordinate systems.
@@ -147,6 +161,7 @@ public:
      */
     static vector<double> getIntersectionPoint( const vector<double>& line1P1,
             const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 );
+
     /**
      * Law Of Cosines that returns an edge angle of a triangle knowing all point 
      * coordinates.
@@ -157,6 +172,7 @@ public:
      */
     static double getLawOfCosinesAlphaByPoints( const vector<double>& pointA,
             const vector<double>& pointB, const vector<double>& pointC );
+
     /**
      * Law Of Cosines that returns an edge angle of a triangle knowing all line lengths.
      * \param lengthA Triangle line length A.
@@ -165,6 +181,7 @@ public:
      * \return Angle of the edge at the opposite of the triangle line A.
      */
     static double getLawOfCosinesAlphaByLineLengths( double lengthA, double lengthB, double lengthC );
+
     /**
      * Tells whether a point lies within the rectangular quader described by two other 
      * points.
@@ -175,6 +192,7 @@ public:
      */
     static bool isPointInRange( const vector<double>& point,
             const vector<double>& rangeFrom, const vector<double>& rangeTo );
+
     /**
      * Tells whether a point is hit by a line exactly or not. The line is described by 
      * two two dimensional points. The line has no bounds.
@@ -185,17 +203,20 @@ public:
      */
     static bool isPointOnLine2d( const vector<double>& point,
             const vector<double>& lineP1, const vector<double>& lineP2 );
+
     /**
      * Inverts coordinates of a point of vector.
      * \param invertedVector Vector to be inverted.
      */
     static void invertVector( vector<double>* invertedVector );
+
     /**
      * Tells whether a vector is valid. No value of X/Y/Z etc. may be infinite or nan.
      * \param vector Vector to be checked whether valid or not.
      * \return The vector is valid or not.
      */
     static bool isValidVector( const vector<double>& vector );
+
     /**
      * Returns whether two lines without bounds can intersect within a two dimensional 
      * coordinate system or not.
@@ -207,6 +228,7 @@ public:
      */
     static bool linesCanIntersect( const vector<double>& line1P1,
             const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 );
+
     /**
      * Tells whether lines, each described by two points (also limited by them in 
      * length) can intersect or not.
@@ -218,12 +240,14 @@ public:
      */
     static bool linesCanIntersectBounded( const vector<double>& line1P1,
             const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 );
+
     /**
      * Multiplies a vector by another one.
      * \param changedVector First factor. The result is exported directly in that value.
      * \param factor Second factor.
      */
     static void multiplyVector( vector<double>* changedVector, const vector<double>& factor );
+
     /**
      * Creates a two dimensional vector using arbitrary values.
      * \param x X axis value;
@@ -231,6 +255,7 @@ public:
      * \return The new vector.
      */
     static vector<double> new2dVector( double x, double y );
+
     /**
      * Returns a pointer of a new two dimensional vector using arbitrary values.
      * \param x X axis value;
@@ -238,6 +263,7 @@ public:
      * \return Pointer of the new vector.
      */
     static vector<double>* new2dVectorPointer( double x, double y );
+
     /**
      * Creates a three dimensional vector using arbitrary values.
      * \param x X axis value;
@@ -246,12 +272,14 @@ public:
      * \return The new vector.
      */
     static vector<double> new3dVector( double x, double y, double z );
+
     /**
      * Normalizes a vector. The euclidian distance from the coordinate system origin 
      * to this vector becomes 1.0 keeping the same direction.
      * \param normalizableVector Vector to be normalized.
      */
     static void normalizeVector( vector<double>* normalizableVector );
+
     /**
      * Rotates two dimensions of a vector. To rotate a vector with many directions the 
      * method has to be applied using many combinations pair wise.
@@ -280,6 +308,7 @@ private:
     static vector<double> getIntersectionPointAtY(
             const double& line1P1x, const double& line1P1y, const double& line1P2x, const double& line1P2y,
             const double& line2P1x, const double& line2P1y, const double& line2P2x, const double& line2P2y );
+
     /**
      * Tells whether a point hits a line without bounds exactly or not. The line must 
      * not be perpendicular to the x axis.
@@ -293,6 +322,7 @@ private:
      */
     static bool isPointOnLineAtY( const double& pointX, const double& pointY,
             const double& lineP1x, const double& lineP1y, const double& lineP2x, const double& lineP2y );
+
     /**
      * Tells whether two lines without bounds can intersect within one single point or 
      * not. The first line must not be perpendicular to the x axis.

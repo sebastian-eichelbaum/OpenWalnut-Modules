@@ -119,6 +119,7 @@ public:
      * \return The icon.
      */
     virtual const char** getXPMIcon() const;
+
     /**
      * Outlines a best fitted plane of an input point.
      * \param planeHessianNormalForm The Hessian normal formula of the point's 
@@ -130,6 +131,7 @@ public:
      */
     static void outlineNormalPlane( vector<double> planeHessianNormalForm, WPosition nearestPoint,
             double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh );
+
     /**
      * Transforms a vector so that its euclidian distance becomes 1.0. The directions 
      * remains the same.
@@ -170,6 +172,7 @@ private:
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+
     /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
@@ -177,6 +180,7 @@ private:
      * \return The cropped or cut point data set.
      */
     boost::shared_ptr< WDataSetPoints > getRandomPoints();
+
     /**
      * Sets the best fitted plane to the input points to the triangle mesh output.
      */
@@ -205,6 +209,7 @@ private:
      * Input point coordinates to crop.
      */
     WDataSetPoints::VertexArray m_verts;
+
     /**
      * Colors of the input point data set that are also passed through.
      */

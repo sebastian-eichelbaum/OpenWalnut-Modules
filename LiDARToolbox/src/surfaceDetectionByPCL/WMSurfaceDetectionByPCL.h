@@ -170,10 +170,12 @@ private:
      * Info tab property: Input points count.
      */
     WPropInt m_infoNbPoints;
+
     /**
      * Info field - Wall time for the whole surface detection process.
      */
     WPropDouble m_infoRenderTimeSeconds;
+
     /**
      * Info field - The points per second detection rate of the segmentation process.
      */
@@ -183,22 +185,27 @@ private:
      * Info tab property: Minimal x value of input x coordunates.
      */
     WPropDouble m_infoXMin;
+
     /**
      * Info tab property: Maximal x value of input x coordunates.
      */
     WPropDouble m_infoXMax;
+
     /**
      * Info tab property: Minimal y value of input x coordunates.
      */
     WPropDouble m_infoYMin;
+
     /**
      * Info tab property: Maximal y value of input x coordunates.
      */
     WPropDouble m_infoYMax;
+
     /**
      * Info tab property: Minimal z value of input x coordunates.
      */
     WPropDouble m_infoZMin;
+
     /**
      * Info tab property: Maximal z value of input x coordunates.
      */
@@ -210,19 +217,23 @@ private:
      * Minimal cluster point count of detected surfaces.
      */
     WPropInt m_clusterSizeMin;
+
     /**
      * Maximal cluster point count of detected surfaces.
      */
     WPropInt m_clusterSizeMax;
+
     /**
      * The count of considered neighbors during considering the analysis point wise.
      */
     WPropInt m_numberOfNeighbours;
+
     /**
      * Allows to set smoothness threshold used for testing the points. The angle is 
      * scaled by degrees and it is a new threshold value for the angle between normals.
      */
     WPropDouble m_smoothnessThresholdDegrees;
+
     /**
      * Curvature threshold used for testing the points. It is a threshold value for 
      * curvature testing.

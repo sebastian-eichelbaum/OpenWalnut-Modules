@@ -139,6 +139,7 @@ void WMTempLeastSquaresTest::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMTempLeastSquaresTest::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
@@ -146,6 +147,7 @@ void WMTempLeastSquaresTest::setProgressSettings( size_t steps )
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
+
 void WMTempLeastSquaresTest::analyzeBestFittedPlane()
 {
     boost::shared_ptr< WDataSetPoints > points = m_input->getData();
@@ -200,6 +202,7 @@ void WMTempLeastSquaresTest::analyzeBestFittedPlane()
         std::cout << endl << endl;
     }
 }
+
 void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessianNormalForm,
         WPosition nearestPoint, double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh )
 {
@@ -241,6 +244,7 @@ void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessianNorm
     targetTriangleMesh->addTriangle( 2 + count, 0 + count, 1 + count );
     targetTriangleMesh->addTriangle( 3 + count, 2 + count, 1 + count );
 }
+
 WPosition WMTempLeastSquaresTest::getNormalizedVector( WVector3d vector )
 {
     double sumSquared = 0;

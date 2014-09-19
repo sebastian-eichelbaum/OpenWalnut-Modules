@@ -32,21 +32,6 @@ using std::endl;
 WKdTreeND::WKdTreeND()
 {
     m_dimensions = 3;
-//    areaMin.reserve( 3 );
-//    areaMin.resize( 3 );
-//    areaMax.reserve( 3 );
-//    areaMax.resize( 3 );
-//    hasBoundMin.reserve( 3 );
-//    hasBoundMin.resize( 3 );
-//    hasBoundMax.reserve( 3 );
-//    hasBoundMax.resize( 3 );
-//    for( size_t index = 0; index < 3; index++ )
-//    {
-//        areaMin[index] = 0;
-//        areaMax[index] = 0;
-//        hasBoundMin[index] = false;
-//        hasBoundMax[index] = false;
-//    }
     m_splittingDimension = 0;
     m_splittingPosition = 0.0;
     m_allowDoubles = true;
@@ -55,24 +40,10 @@ WKdTreeND::WKdTreeND()
     m_higherChild = 0;
     m_lowerChild = 0;
 }
+
 WKdTreeND::WKdTreeND( size_t dimensions )
 {
     m_dimensions = dimensions;
-//    areaMin.reserve( dimensions );
-//    areaMin.resize( dimensions );
-//    areaMax.reserve( dimensions );
-//    areaMax.resize( dimensions );
-//    hasBoundMin.reserve( dimensions );
-//    hasBoundMin.resize( dimensions );
-//    hasBoundMax.reserve( dimensions );
-//    hasBoundMax.resize( dimensions );
-//    for( size_t index = 0; index < dimensions; index++ )
-//    {
-//        areaMin[index] = 0;
-//        areaMax[index] = 0;
-//        hasBoundMin[index] = false;
-//        hasBoundMax[index] = false;
-//    }
     m_splittingDimension = 0;
     m_splittingPosition = 0.0;
     m_allowDoubles = true;
@@ -81,6 +52,7 @@ WKdTreeND::WKdTreeND( size_t dimensions )
     m_higherChild = 0;
     m_lowerChild = 0;
 }
+
 WKdTreeND::~WKdTreeND()
 {
     delete m_points;
@@ -93,17 +65,9 @@ WKdTreeND::~WKdTreeND()
         delete m_higherChild;
     }
 }
+
 void WKdTreeND::add( vector<WKdPointND*>* addables )
 {
-    /*cout << "Adding points to kd-tree:" << endl;
-    for( size_t index = 0; index < addables->size(); index++ )
-    {
-        for( size_t dimension = 0; dimension < 3; dimension++ )
-            cout << "\t" << addables->at( index )->getCoordinate()[dimension];
-        cout << endl;
-    }
-    cout << endl;*/
-
     if( addables->size() == 0 )
         return;
     for( size_t index = 0; index < addables->size(); index++ )
@@ -150,10 +114,12 @@ void WKdTreeND::add( vector<WKdPointND*>* addables )
         }
     }
 }
+
 bool WKdTreeND::canSplit()
 {
     return m_splittingDimension < m_dimensions;
 }
+
 void WKdTreeND::assignZeroToPointers()
 {
     m_lowerChild = 0;
@@ -161,6 +127,7 @@ void WKdTreeND::assignZeroToPointers()
     m_points->resize( 0 );
     m_points->reserve( 0 );
 }
+
 void WKdTreeND::copyPointersFrom( WKdTreeND* copiedNode )
 {
     m_parentSplittingDimension = copiedNode->m_parentSplittingDimension;
@@ -175,6 +142,7 @@ void WKdTreeND::copyPointersFrom( WKdTreeND* copiedNode )
     for( size_t index = 0; index < copiedNode->m_points->size(); index++ )
         m_points->push_back( copiedNode->m_points->at( index ) );
 }
+
 void WKdTreeND::fetchPoints( vector<WKdPointND* >* targetPointSet )
 {
     if( m_points->size() > 0 && m_lowerChild == 0 && m_lowerChild == 0 )
@@ -196,6 +164,7 @@ void WKdTreeND::fetchPoints( vector<WKdPointND* >* targetPointSet )
         }
     }
 }
+
 vector<WKdPointND*>* WKdTreeND::getAllPoints()
 {
     vector<WKdPointND*>* outputPoints = new vector<WKdPointND*>();
@@ -207,56 +176,49 @@ vector<WKdPointND*>* WKdTreeND::getAllPoints()
     kdNodes->reserve( 0 );
     return outputPoints;
 }
+
 vector<WKdTreeND*>* WKdTreeND::getAllLeafNodes()
 {
     vector<WKdTreeND*>* outputLeafNodes = new vector<WKdTreeND*>();
     fetchAllLeafNodes( outputLeafNodes );
     return outputLeafNodes;
 }
-//double WKdTreeND::getAreaMin(size_t dimension)
-//{
-//    return areaMin[dimension];
-//}
-//double WKdTreeND::getAreaMax(size_t dimension)
-//{
-//    return areaMax[dimension];
-//}
+
 size_t WKdTreeND::getDimensions()
 {
     return m_dimensions;
 }
-//bool WKdTreeND::getHasBoundMin(size_t dimension)
-//{
-//    return hasBoundMin[dimension];
-//}
-//bool WKdTreeND::getHasBoundMax(size_t dimension)
-//{
-//    return hasBoundMax[dimension];
-//}
+
 WKdTreeND* WKdTreeND::getHigherChild()
 {
     return m_higherChild;
 }
+
 WKdTreeND* WKdTreeND::getLowerChild()
 {
     return m_lowerChild;
 }
+
 vector<WKdPointND*>* WKdTreeND::getNodePoints()
 {
     return m_points;
 }
+
 size_t WKdTreeND::getSplittingDimension()
 {
     return m_splittingDimension;
 }
+
 bool WKdTreeND::isEmpty()
 {
     return m_points->size() == 0 && m_lowerChild == 0 && m_lowerChild == 0;
 }
+
 bool WKdTreeND::isLowerKdNodeCase( double position )
 {
     return position < m_splittingPosition;
 }
+
 bool WKdTreeND::removePoint( WKdPointND* removablePoint )
 {
     if( m_points->size() > 0 && m_lowerChild == 0 && m_lowerChild == 0 )
@@ -302,10 +264,12 @@ bool WKdTreeND::removePoint( WKdPointND* removablePoint )
     }
     return false;
 }
+
 WKdTreeND* WKdTreeND::getNewInstance( size_t dimensions )
 {
     return new WKdTreeND( dimensions );
 }
+
 void WKdTreeND::addPointsToChildren( vector<WKdPointND* >* newPoints )
 {
     vector<WKdPointND* >* lowerPoints = new vector<WKdPointND* >();
@@ -328,6 +292,7 @@ void WKdTreeND::addPointsToChildren( vector<WKdPointND* >* newPoints )
     delete lowerPoints;
     delete higherPoints;
 }
+
 void WKdTreeND::calculateSplittingPosition( vector<WKdPointND* >* inputPoints )
 {
     if( !canSplit() )
@@ -407,6 +372,7 @@ void WKdTreeND::calculateSplittingPosition( vector<WKdPointND* >* inputPoints )
     line->reserve( 0 );
     delete line;
 }
+
 bool WKdTreeND::determineNewSplittingDimension( vector<WKdPointND* >* inputPoints )
 {
     m_splittingDimension = m_dimensions;
@@ -449,6 +415,7 @@ bool WKdTreeND::determineNewSplittingDimension( vector<WKdPointND* >* inputPoint
     delete boundingBoxMax;
     return m_splittingDimension < m_dimensions;
 }
+
 void WKdTreeND::fetchAllLeafNodes( vector<WKdTreeND*>* targetNodeList )
 {
     if( m_points->size() > 0 && m_lowerChild == 0 && m_higherChild == 0 )
@@ -468,26 +435,14 @@ void WKdTreeND::fetchAllLeafNodes( vector<WKdTreeND*>* targetNodeList )
         }
     }
 }
+
 bool WKdTreeND::hasParent()
 {
     return m_parentSplittingDimension < m_dimensions;
 }
+
 void WKdTreeND::initSubNodes()
 {
     m_lowerChild->m_parentSplittingDimension = m_splittingDimension;
     m_higherChild->m_parentSplittingDimension = m_splittingDimension;
-//    for(size_t dimension = 0; dimension < getDimensions(); dimension++){
-//        lowerChild->hasBoundMin[dimension] = hasBoundMin[dimension];
-//        lowerChild->hasBoundMax[dimension] = hasBoundMax[dimension];
-//        lowerChild->areaMin[dimension] = areaMin[dimension];
-//        lowerChild->areaMax[dimension] = areaMax[dimension];
-//        higherChild->hasBoundMin[dimension] = hasBoundMin[dimension];
-//        higherChild->hasBoundMax[dimension] = hasBoundMax[dimension];
-//        higherChild->areaMin[dimension] = areaMin[dimension];
-//        higherChild->areaMax[dimension] = areaMax[dimension];
-//    }
-//    lowerChild->hasBoundMax[splittingDimension] = true;
-//    lowerChild->areaMax[splittingDimension] = splittingPosition;
-//    higherChild->hasBoundMin[splittingDimension] = true;
-//    higherChild->areaMin[splittingDimension] = splittingPosition;
 }

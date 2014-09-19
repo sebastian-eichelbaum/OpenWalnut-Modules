@@ -67,6 +67,7 @@ const char** WMReadLAS::getXPMIcon() const
 {
     return WMReadLAS_xpm;
 }
+
 const std::string WMReadLAS::getName() const
 {
     return "Read LAS";
@@ -192,6 +193,7 @@ void WMReadLAS::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMReadLAS::refreshScrollBars()
 {
     size_t dataWidth = ( m_outputDataWidth->get() + 1 ) / 2;

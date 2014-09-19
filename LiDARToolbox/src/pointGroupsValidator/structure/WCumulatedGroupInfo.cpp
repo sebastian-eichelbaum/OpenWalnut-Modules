@@ -35,6 +35,7 @@ WCumulatedGroupInfo::WCumulatedGroupInfo()
     m_groupsRangeMinPointCount = 1;
     m_groupsRangeMaxPointCount = 0;
 }
+
 WCumulatedGroupInfo::~WCumulatedGroupInfo()
 {
 }
@@ -45,6 +46,7 @@ bool WCumulatedGroupInfo::canBeCumulated( WGroupInfo* group )
     return group->getReferenceGroupPointCount() >= m_groupsRangeMinPointCount &&
             group->getReferenceGroupPointCount() <= m_groupsRangeMaxPointCount;
 }
+
 bool WCumulatedGroupInfo::cumulateGroup( WGroupInfo* group )
 {
     if( !canBeCumulated( group ) )
@@ -56,34 +58,42 @@ bool WCumulatedGroupInfo::cumulateGroup( WGroupInfo* group )
     m_areaPointCompletenessCumulated += group->getAreaCompleteness();
     return true;
 }
+
 size_t WCumulatedGroupInfo::getGroupCount()
 {
     return m_cumulatedGroupCount;
 }
+
 double WCumulatedGroupInfo::getPointCorrectness()
 {
     return m_pointCorrectnessCumulated / static_cast<double>( getGroupCount() );
 }
+
 double WCumulatedGroupInfo::getPointCompleteness()
 {
     return m_pointCompletenessCumulated / static_cast<double>( getGroupCount() );
 }
+
 double WCumulatedGroupInfo::getAreaPointCorrectness()
 {
     return m_areaPointCompletenessCumulated / static_cast<double>( getGroupCount() );
 }
+
 size_t WCumulatedGroupInfo::getRangeMinPointCount()
 {
     return m_groupsRangeMinPointCount;
 }
+
 size_t WCumulatedGroupInfo::getRangeMaxPointCount()
 {
     return m_groupsRangeMaxPointCount;
 }
+
 bool WCumulatedGroupInfo::hasGroups()
 {
     return m_cumulatedGroupCount > 0;
 }
+
 void WCumulatedGroupInfo::setPointCountRange( size_t minPointCount, size_t maxPointCount )
 {
     m_groupsRangeMinPointCount = minPointCount;

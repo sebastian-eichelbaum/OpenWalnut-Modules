@@ -44,6 +44,7 @@ public:
      * accessed statically.
      */
     explicit WVoxelOutliner();
+
     /**
      * Destructor of the voxel outliner.
      */
@@ -54,6 +55,7 @@ public:
      * \param voxelWidth Width of outlining voxels.
      */
     void setVoxelWidth( double voxelWidth );
+
     /**
      * Registers a point to be outlined as a voxel in a regular grid.
      * \param x X point coordinate.
@@ -61,6 +63,7 @@ public:
      * \param z Z point coordinate.
      */
     void registerPoint( const double x, const double y, const double z );
+
     /**
      * returns an octree leaf node voxel of a corresponding coordinate.
      * This makes possible to further assign parameters as a group ID to outline colors.
@@ -70,6 +73,7 @@ public:
      * \return The desired voxel covered by a coordinate.
      */
     WOctNode* getOctreeLeafNode( double x, double y, double z );
+
     /**
      * Converts an octree to a triangle mesh. Only smallest possible octree nodes will be drawn.
      * \param highlightUsingColors Add color to voxels corresponding to their group IDs.

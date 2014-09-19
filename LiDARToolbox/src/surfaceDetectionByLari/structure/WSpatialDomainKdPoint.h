@@ -41,6 +41,7 @@ public:
      * \param coordinate An n dimensional coordinate.
      */
     explicit WSpatialDomainKdPoint( vector<double> coordinate );
+
     /**
      * Instantiates the point using a three dimensional coordinate.
      * \param x X coordinate.
@@ -48,20 +49,24 @@ public:
      * \param z Z coordinate.
      */
     explicit WSpatialDomainKdPoint( double x, double y, double z );
+
     /**
      * Destroys the point meta data set.
      */
     virtual ~WSpatialDomainKdPoint();
+
     /**
      * Returns the eigen value of the point in relation to its neighbor points.
      * \return Point's Eigen Values in relation to its neighbor points.
      */
     vector<double> getEigenValues();
+
     /**
      * Returns the plane cluster ID of the point.
      * \return Plane cluster ID of the point.
      */
     size_t getClusterID();
+
     /**
      * Returns the plane formula for the best fitted plane.
      * \return The hessian Normal Form of the best fitted plane. First n numbers (by 
@@ -70,16 +75,19 @@ public:
      *         coordinate system orign.
      */
     vector<double> getHessianNormalForm();
+
     /**
      * Returns the distance to the n-th nearest neighbor.
      * \return The distance to the n-th nearest neighbor.
      */
     double getDistanceToNthNearestNeighbor();
+
     /**
      * Gets the input point array index of this point's coordinate.
      * \return Index within the input point array of this point.
      */
     size_t getIndexInInputArray();
+
     /**
      * Returns the local point density index. It corresponds to the point count per 
      * square meter. It is calculated the k nearest point count and the n-th nearest 
@@ -87,26 +95,31 @@ public:
      * \return Local point density index.
      */
     double getLocalPointDensity();
+
     /**
      * Returns the parameter domain coordinates of the point.
      * \return The parameter domain coordinates of the point.
      */
     vector<double> getParametersXYZ0();
+
     /**
      * Tells whether planar parameters are valid.
      * \return Has valid parameters or not.
      */
     bool hasValidParameters();
+
     /**
      * Sets the eigens values of the point in relation to its neighbors.
      * \param eigenValues The eigen values of a poinnt in relation to its neighbors.
      */
     void setEigenValues( vector<double> eigenValues );
+
     /**
      * Sets the eigens vectors of the point in relation to its neighbors.
      * \param eigenVectors The eigen vectors of a poinnt in relation to its neighbors.
      */
     void setEigenVectors( vector<WVector3d> eigenVectors );
+
     /**
      * Sets the Hessian normal form of the point's best fitted plane in relation to its 
      * neighbors.
@@ -114,21 +127,25 @@ public:
      *                            fitted plane.
      */
     void setHessianNormalForm( vector<double> hessianNormalForm );
+
     /**
      * Sets the plane cluster ID to the point.
      * \param clusterID Plane cluster ID of the point.
      */
     void setClusterID( size_t clusterID );
+
     /**
      * Sets the count of k nearest point count.
      * \param kNearestPoints K nearest points.
      */
     void setKNearestPoints( size_t kNearestPoints );
+
     /**
      * Sets the distance to the n-th nearest point.
      * \param distanceToNthNearestNeighbor Distance to n-th nearest neighbor.
      */
     void setDistanceToNthNearestNeighbor( double distanceToNthNearestNeighbor );
+
     /**
      * Sets the input point array index of this point's coordinate.
      * \param indexInInputArray Index within the input point array of this point.
@@ -140,26 +157,32 @@ private:
      * The eigen values of a poinnt in relation to its neighbors.
      */
     vector<double> m_eigenValues;
+
     /**
      * The eigen vectors of a poinnt in relation to its neighbors.
      */
     vector<WVector3d> m_eigenVectors;
+
     /**
      * Space for the calculated Hessian Normal Form.
      */
     vector<double> m_hessianNormalForm;
+
     /**
      * Plane cluster ID of the point.
      */
     size_t m_clusterID;
+
     /**
      * Count of k nearest neighbors.
      */
     size_t m_kNearestPoints;
+
     /**
      * Distance to the n-th nearest neighbor.
      */
     double m_distanceToNthNearestNeighbor;
+
     /**
      * Index within the input point array of this point.
      */

@@ -46,6 +46,7 @@ public:
      *                   isn't considered during the analysis.
      */
     explicit WBoundaryDetectPoint( vector<double> coordinate );
+
     /**
      * Creates an instance for boundary detection and points inside.
      * \param x X coordinate of the instantiated point.
@@ -53,6 +54,7 @@ public:
      * \param z Z coordinate of the instantiated point that isn't used for analysis.
      */
     explicit WBoundaryDetectPoint( double x, double y, double z );
+
     /**
      * Destroys the point meta data set.
      */
@@ -63,6 +65,7 @@ public:
      * \return Corresponding spatial domain point.
      */
     WSpatialDomainKdPoint* getSpatialPoint();
+
     /**
      * Rells that a point is already finally assigned to a cluster during separating 
      * points that belong to the same planar formula potentially being spatially 
@@ -70,6 +73,7 @@ public:
      * \return Point is added to a plane finally or not.
      */
     bool isAddedToPlane();
+
     /**
      * Sets whether a point is already finally assigned to a cluster during separating 
      * points that belong to the same planar formula potentially being spatially 
@@ -77,6 +81,7 @@ public:
      * \param isAddedToPlane Point is added to a cluster finally or not.
      */
     void setIsAddedToPlane( bool isAddedToPlane );
+
     /**
      * Sets the assigned spatial domain point (coordinate equal to input points).
      * \param assignedSpatialPoint Assitned spatial domain point.
@@ -88,11 +93,13 @@ private:
      * Z coordinate that isn't used for further analysis.
      */
     double m_zCoordinate;
+
     /**
      * Spatial domain that is assigned to that data set. Its coordinate corresponds to 
      * an input point.
      */
     WSpatialDomainKdPoint* m_assignedSpatialPoint;
+
     /**
      * Point is added to a cluster finally or not during the modified convex hull 
      * clustering.

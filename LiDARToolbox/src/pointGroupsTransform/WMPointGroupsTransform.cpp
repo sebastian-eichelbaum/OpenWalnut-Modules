@@ -71,6 +71,7 @@ const char** WMPointGroupsTransform::getXPMIcon() const
 {
     return WMPointGroupsTransform_xpm;
 }
+
 const std::string WMPointGroupsTransform::getName() const
 {
     return "Point Groups - Transform";
@@ -78,7 +79,7 @@ const std::string WMPointGroupsTransform::getName() const
 
 const std::string WMPointGroupsTransform::getDescription() const
 {
-    return "Crops point data to a selection.";
+    return "Allows to edit and outline point group data.";
 }
 
 void WMPointGroupsTransform::connectors()
@@ -111,7 +112,7 @@ void WMPointGroupsTransform::connectors()
     addConnector( m_outputPoints );
     m_outputVoxels = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
                 new WModuleOutputData< WTriangleMesh >( shared_from_this(),
-                "Voxel outline.", "Voxel bases point group outline." ) );
+                "Voxel based outline.", "Voxel bases point group outline." ) );
     addConnector( m_outputVoxels );
 
     WModule::connectors();
@@ -139,13 +140,13 @@ void WMPointGroupsTransform::properties()
 
     m_outlinerGroup = m_properties->addPropertyGroup( "Group outlining",
                                             "Options of outlining point groups using group ID less output" );
-    m_detailDepth = m_outlinerGroup->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
+    m_voxelOutlineDetailDepth = m_outlinerGroup->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
                             "depth for the octree search tree.", 0, m_propCondition );
-    m_detailDepth->setMin( -3 );
-    m_detailDepth->setMax( 4 );
-    m_detailDepthLabel = m_outlinerGroup->addProperty( "Voxel width meters: ", "Resulting detail depth "
-                            "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
-    m_detailDepthLabel->setPurpose( PV_PURPOSE_INFORMATION );
+    m_voxelOutlineDetailDepth->setMin( -3 );
+    m_voxelOutlineDetailDepth->setMax( 4 );
+    m_outlineVoxelWidthLabel = m_outlinerGroup->addProperty( "Voxel width meters: ", "Resulting detail depth "
+                            "in meters for the octree search tree.", pow( 2.0, m_voxelOutlineDetailDepth->get() ) * 2.0 );
+    m_outlineVoxelWidthLabel->setPurpose( PV_PURPOSE_INFORMATION );
     m_highlightUsingColors = m_outlinerGroup->addProperty( "Hilight using colors: ",
                             "Hilights output ddata groups using colors.", true, m_propCondition );
     m_clearInputColor = m_outlinerGroup->addProperty( "Clear input color: ",
@@ -226,7 +227,8 @@ void WMPointGroupsTransform::moduleMain()
                 new WDataSetPointsGrouped::GroupArray::element_type() );
         m_outGroups = newGroups;
 
-        m_voxelOutliner.setVoxelWidth( m_detailDepthLabel->get() );
+        m_outlineVoxelWidthLabel->set( pow( 2.0, static_cast<double>( m_voxelOutlineDetailDepth->get() ) ) * 2.0 );
+        m_voxelOutliner.setVoxelWidth( m_outlineVoxelWidthLabel->get() );
         m_groupEditor.initProocessBegin();
         m_groupEditor.setGroupSizeThreshold( m_groupSizeThreshold->get() );
         m_groupEditor.setMergeGroups( m_mergeGroupIDsAllInputs->get() );
@@ -283,6 +285,7 @@ void WMPointGroupsTransform::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMPointGroupsTransform::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
@@ -290,6 +293,7 @@ void WMPointGroupsTransform::setProgressSettings( size_t steps )
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
+
 void WMPointGroupsTransform::addTransformedPoints()
 {
     vector<double>* point = new vector<double>( 3, 0.0 );
@@ -347,6 +351,7 @@ void WMPointGroupsTransform::addTransformedPoints()
     for( size_t dimension = 0; dimension < 3; dimension++ )
         m_infoBoundingBoxMax[dimension]->set( coordsMax[dimension] );
 }
+
 void WMPointGroupsTransform::onFileLoad()
 {
     cout << endl << endl << "WMGroupsTransform::onFileLoad() - Start" << endl;
@@ -363,6 +368,7 @@ void WMPointGroupsTransform::onFileLoad()
     }
     m_reloadPointsTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, true );
 }
+
 void WMPointGroupsTransform::onFileSave()
 {
     if( m_savePointsTrigger->get(true) )

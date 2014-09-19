@@ -28,6 +28,7 @@
 WVectorMaths::WVectorMaths()
 {
 }
+
 WVectorMaths::~WVectorMaths()
 {
 }
@@ -41,6 +42,7 @@ void WVectorMaths::addVector( vector<double>* changedVector, const vector<double
     for( size_t dimension = 0; dimension < size; dimension++ )
         changedVector->at( dimension ) += summand[dimension];
 }
+
 vector<double> WVectorMaths::copyVector( const vector<double>& copiedVector )
 {
     vector<double> newVector( copiedVector.size(), 0 );
@@ -48,6 +50,7 @@ vector<double> WVectorMaths::copyVector( const vector<double>& copiedVector )
         newVector[dimension] = copiedVector[dimension];
     return newVector;
 }
+
 vector<double>* WVectorMaths::copyVectorForPointer( const vector<double>& copiedVector )
 {
     vector<double>* newVector = new vector<double>( copiedVector.size(), 0 );
@@ -55,6 +58,7 @@ vector<double>* WVectorMaths::copyVectorForPointer( const vector<double>& copied
         newVector->at( dimension ) = copiedVector[dimension];
     return newVector;
 }
+
 double WVectorMaths::getAngleOfVectors( const vector<double>& vector1, const vector<double>& vector2 )
 {
     double sum = 0;
@@ -72,11 +76,13 @@ double WVectorMaths::getAngleOfVectors( const vector<double>& vector1, const vec
             :90.0 - 90.0 * ( sum / abs( sum ) );
     return angle;
 }
+
 double WVectorMaths::getAngleOfPlanes( const vector<double>& vector1, const vector<double>& vector2 )
 {
     double angle = getAngleOfVectors( vector1, vector2 );
     return angle > 90.0 ?180.0 - angle :angle;
 }
+
 double WVectorMaths::getAngleOfPlanes( WVector3d vector1, WVector3d vector2 )
 {
     vector<double> unidimensionalVector1( vector1.size(), 0.0 );
@@ -88,6 +94,7 @@ double WVectorMaths::getAngleOfPlanes( WVector3d vector1, WVector3d vector2 )
     }
     return getAngleOfPlanes( unidimensionalVector1, unidimensionalVector2 );
 }
+
 double WVectorMaths::getAngleToAxis( double x, double y )
 {
     if( x == 0.0 && y != 0.0 )
@@ -97,6 +104,7 @@ double WVectorMaths::getAngleToAxis( double x, double y )
     double angle = atan( y / x ) / ANGLE_90_DEGREES * 90.0;
     return angle;
 }
+
 double WVectorMaths::getAngleToAxisComplete( double x, double y )
 {
     if( x == 0.0 && y == 0.0 )
@@ -113,6 +121,7 @@ double WVectorMaths::getAngleToAxisComplete( double x, double y )
     delete orig;
     return angle;
 }
+
 double WVectorMaths::getEuclidianDistance( const vector<double>& distanceVector )
 {
     double sum = 0.0;
@@ -121,6 +130,7 @@ double WVectorMaths::getEuclidianDistance( const vector<double>& distanceVector 
     sum = pow( sum, 0.5 );
     return sum;
 }
+
 double WVectorMaths::getEuclidianDistance( const vector<double>& point1, const vector<double>& point2 )
 {
     double sum = 0.0;
@@ -129,6 +139,7 @@ double WVectorMaths::getEuclidianDistance( const vector<double>& point1, const v
     sum = pow( sum, 0.5 );
     return sum;
 }
+
 vector<double> WVectorMaths::getIntersectionPoint( const vector<double>& line1P1,
         const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 )
 {
@@ -147,6 +158,7 @@ vector<double> WVectorMaths::getIntersectionPoint( const vector<double>& line1P1
     }
     return result;
 }
+
 double WVectorMaths::getLawOfCosinesAlphaByPoints( const vector<double>& pointA,
         const vector<double>& pointB, const vector<double>& pointC )
 {
@@ -155,16 +167,19 @@ double WVectorMaths::getLawOfCosinesAlphaByPoints( const vector<double>& pointA,
     double lengthC = getEuclidianDistance( pointA, pointB );
     return getLawOfCosinesAlphaByLineLengths( lengthA, lengthB, lengthC );
 }
+
 double WVectorMaths::getLawOfCosinesAlphaByLineLengths( double lengthA, double lengthB, double lengthC )
 {
     double quotient = ( lengthA*lengthA - lengthB*lengthB - lengthC*lengthC ) / ( - 2 * lengthB * lengthC );
     return acos( quotient ) / ANGLE_90_DEGREES * 90.0;
 }
+
 void WVectorMaths::invertVector( vector<double>* invertedVector )
 {
     for( size_t dimension = 0; dimension < invertedVector->size(); dimension++ )
         invertedVector->at( dimension ) = - invertedVector->at( dimension );
 }
+
 bool WVectorMaths::isPointInRange( const vector<double>& point, const vector<double>& rangeFrom, const vector<double>& rangeTo )
 {
     for( size_t index = 0; index < point.size(); index++ )
@@ -173,6 +188,7 @@ bool WVectorMaths::isPointInRange( const vector<double>& point, const vector<dou
             return false;
     return true;
 }
+
 bool WVectorMaths::isPointOnLine2d( const vector<double>& point,
         const vector<double>& lineP1, const vector<double>& lineP2  )
 {
@@ -184,6 +200,7 @@ bool WVectorMaths::isPointOnLine2d( const vector<double>& point,
             :isPointOnLineAtY( point[1], point[0],
                     lineP1[1], lineP1[0], lineP2[1], lineP2[0] );
 }
+
 bool WVectorMaths::isValidVector( const vector<double>& vector )
 {
     for( size_t index = 0; index < vector.size(); index++ )
@@ -191,6 +208,7 @@ bool WVectorMaths::isValidVector( const vector<double>& vector )
             return false;
     return true;
 }
+
 bool WVectorMaths::linesCanIntersectBounded( const vector<double>& line1P1,
     const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 )
 {
@@ -200,6 +218,7 @@ bool WVectorMaths::linesCanIntersectBounded( const vector<double>& line1P1,
     return WVectorMaths::isPointInRange( intersection, line1P1, line1P2 ) &&
             WVectorMaths::isPointInRange( intersection, line2P1, line2P2 );
 }
+
 bool WVectorMaths::linesCanIntersect( const vector<double>& line1P1,
     const vector<double>& line1P2, const vector<double>& line2P1, const vector<double>& line2P2 )
 {
@@ -211,12 +230,14 @@ bool WVectorMaths::linesCanIntersect( const vector<double>& line1P1,
             :linesCanIntersectAtY( line1P1[1], line1P1[0], line1P2[1], line1P2[0],
                     line2P1[1], line2P1[0], line2P2[1], line2P2[0] );
 }
+
 void WVectorMaths::multiplyVector( vector<double>* changedVector, const vector<double>& factor )
 {
     size_t size = changedVector->size();
     for( size_t dimension = 0; dimension < size; dimension++ )
         changedVector->at( dimension ) *= factor[dimension];
 }
+
 vector<double> WVectorMaths::new2dVector( double x, double y )
 {
     vector<double> newVector( 2, 0 );
@@ -224,6 +245,7 @@ vector<double> WVectorMaths::new2dVector( double x, double y )
     newVector[1] = y;
     return newVector;
 }
+
 vector<double>* WVectorMaths::new2dVectorPointer( double x, double y )
 {
     vector<double>* newVector = new vector<double>( 2, 0 );
@@ -231,6 +253,7 @@ vector<double>* WVectorMaths::new2dVectorPointer( double x, double y )
     newVector->at( 1 ) = y;
     return newVector;
 }
+
 vector<double> WVectorMaths::new3dVector( double x, double y, double z )
 {
     vector<double> newVector( 3, 0 );
@@ -239,6 +262,7 @@ vector<double> WVectorMaths::new3dVector( double x, double y, double z )
     newVector[2] = z;
     return newVector;
 }
+
 void WVectorMaths::normalizeVector( vector<double>* normalizableVector )
 {
     double sum = getEuclidianDistance( *normalizableVector );
@@ -247,6 +271,7 @@ void WVectorMaths::normalizeVector( vector<double>* normalizableVector )
     for( size_t dimension = 0; dimension < normalizableVector->size(); dimension++ )
         normalizableVector->at( dimension ) /= sum;
 }
+
 void WVectorMaths::rotateVector( vector<double>* rotatedVector, size_t firstAxis, size_t secondAxis, double angleDegrees )
 {
     double firstValue = rotatedVector->at( firstAxis );
@@ -283,6 +308,7 @@ vector<double> WVectorMaths::getIntersectionPointAtY(
     vector<double> result = new2dVector( finalX, a1 * finalX + t1 );
     return result;
 }
+
 bool WVectorMaths::isPointOnLineAtY( const double& pointX, const double& pointY,
         const double& lineP1x, const double& lineP1y, const double& lineP2x, const double& lineP2y )
 {
@@ -290,6 +316,7 @@ bool WVectorMaths::isPointOnLineAtY( const double& pointX, const double& pointY,
     double t = lineP1y - a * lineP1x;
     return pointY == a * pointX + t;
 }
+
 bool WVectorMaths::linesCanIntersectAtY(
         const double& line1P1x, const double& line1P1y, const double& line1P2x, const double& line1P2y,
         const double& line2P1x, const double& line2P1y, const double& line2P2x, const double& line2P2y )

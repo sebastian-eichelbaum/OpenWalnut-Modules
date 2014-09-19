@@ -59,6 +59,7 @@ public:
      * Creates the group edit instance
      */
     explicit WGroupEdit();
+
     /**
      * Destroys the group edit instance
      */
@@ -68,6 +69,7 @@ public:
      * Initializes the group edit process.
      */
     void initProocessBegin();
+
     /**
      * Sets whether group IDs should be kept or continuously counted up when a new 
      * grouped point set is added.
@@ -76,6 +78,7 @@ public:
      *                    same if the group size threshold is 0.
      */
     void setMergeGroups( bool mergeGroups );
+
     /**
      * Sets the minimal group size. Groups below that point count are signaled not to be 
      * added. Further group IDs are changed changed that way so that no group until the 
@@ -84,6 +87,7 @@ public:
      *                           final dataset.
      */
     void setGroupSizeThreshold( size_t groupSizeThreshold );
+
     /**
      * Merges points to previously added points. This method is also used tu add grouped 
      * points for the first time.
@@ -99,6 +103,7 @@ public:
      * \return Last group ID of the new merged point dataset.
      */
     size_t getLastGroupID();
+
     /**
      * Returns the point count of a group.
      * \param origGroupID Point group ID of the original dataset to get the point count 
@@ -107,6 +112,7 @@ public:
      * \return Point count of a group.
      */
     size_t getGroupSize( size_t origGroupID );
+
     /**
      * Returns a vertex of a corresponding point within the merged dataset.
      * Points with a group sizw below a threshold still remain using that function. Use 
@@ -116,6 +122,7 @@ public:
      * \return Value that belongs to a coordinate value X, Y or Z of a point.
      */
     double getVertex( size_t pointIndex, size_t dimension );
+
     /**
      * Returns a color of a corresponding point within the merged dataset.
      * Points with a group sizw below a threshold still remain using that function. Use 
@@ -126,6 +133,7 @@ public:
      * \return Value that belongs to color channel of a point.
      */
     double getColor( size_t pointIndex, size_t colorChannel );
+
     /**
      * Returns an original group ID of a point. Group IDs are changed after the first 
      * merged dataset if setMergeGroups( false ) was applied.
@@ -135,6 +143,7 @@ public:
      * \return Group ID of the original dataset.
      */
     size_t getOldGroupID( size_t pointIndex );
+
     /**
      * Returns a new group ID. It is further changed if the group size threshold is 
      * above 0. Further no ID remains without points.
@@ -144,6 +153,7 @@ public:
      * \return New group ID.
      */
     size_t getNewGroupID( size_t pointIndex );
+
     /**
      * Tells whether a point is collected by means if the point group size threshold.
      * \param pointIndex Point index of the merged dataset.
@@ -158,6 +168,7 @@ public:
      * \return Point count without means of group point count threshold.
      */
     size_t getInputPointCount();
+
     /**
      * Creates an array which shows a map from old to new group IDs. Array index is the 
      * old group ID. The map has finally no groups without point using a group size 
@@ -183,6 +194,7 @@ private:
      *                       too many unused IDs.
      */
     vector<size_t> m_groupSizes;
+
     /**
      * Map that links an old group ID with a new one. Old group ID is the array index. 
      * The new group ID is its value.
@@ -190,6 +202,7 @@ private:
      *                       too many unused IDs.
      */
     vector<size_t> m_groupIDMap;
+
     /**
      * Last new group ID.
      */
@@ -199,20 +212,24 @@ private:
      * Input point coordinates.
      */
     WDataSetPointsGrouped::VertexArray m_vertices;
+
     /**
      * Colors of the input point data set that are also passed through.
      */
     WDataSetPointsGrouped::ColorArray m_colors;
+
     /**
      * Input point groups.
      */
     WDataSetPointsGrouped::GroupArray m_groups;
+
 
     /**
      * Determines whether group IDs should be bigger than those of previous datasets or 
      * remain. before applying the group size threshold.
      */
     bool m_mergeGroups;
+
     /**
      * Group point count threshold that is applied. Groups with a point count below that 
      * value are proposed to be removed. Having a threshold above 0 group IDs are 

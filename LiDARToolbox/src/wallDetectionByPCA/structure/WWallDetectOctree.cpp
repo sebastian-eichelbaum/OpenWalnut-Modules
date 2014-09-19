@@ -35,6 +35,7 @@ WWallDetectOctree::~WWallDetectOctree()
 {
     m_wallMaxAngleToNeighborVoxel = 20.0;
 }
+
 bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
 {
     WWallDetectOctNode* node1 = static_cast<WWallDetectOctNode*>( octNode1 );
@@ -58,28 +59,34 @@ bool WWallDetectOctree::canGroupNodes( WOctNode* octNode1, WOctNode* octNode2 )
     return WVectorMaths::getAngleOfPlanes( node1->getNormalVector(), node2->getNormalVector() )
             <= m_wallMaxAngleToNeighborVoxel;
 }
+
 void WWallDetectOctree::setWallMaxAngleToNeighborVoxel( double angleDegrees )
 {
     m_wallMaxAngleToNeighborVoxel = angleDegrees;
 }
+
 void WWallDetectOctree::setMinimalPointsPerVoxel( size_t minimalPointsPerVoxel )
 {
     m_minimalPointsPerVoxel = minimalPointsPerVoxel;
 }
+
 void WWallDetectOctree::setEigenValueQuotientLinear( double linearThreshold )
 {
     m_eigenValueQuotientLinear = linearThreshold;
 }
+
 void WWallDetectOctree::setMaxIsotropicThresholdForVoxelMerge( double isotropicThreshold )
 {
     m_maxIsotropicThresholdForVoxelMerge = isotropicThreshold;
 }
+
 bool WWallDetectOctree::isLinearNode( WWallDetectOctNode* node )
 {
     if( isIsotropicNode( node ) )
         return false;
     return node->getLinearLevel() <= m_eigenValueQuotientLinear;
 }
+
 bool WWallDetectOctree::isIsotropicNode( WWallDetectOctNode* node )
 {
     return node->getIsotropicLevel() > m_maxIsotropicThresholdForVoxelMerge;
@@ -91,12 +98,14 @@ size_t WWallDetectOctree::getNodeCountOfGroup( size_t groupNr )
         return 0;
     return m_nodeCountsOfGroups[groupNr];
 }
+
 void WWallDetectOctree::generateNodeCountsOfGroups()
 {
     m_nodeCountsOfGroups.reserve( 0 );
     m_nodeCountsOfGroups.resize( 0 );
     addGroupCountsFromNode( static_cast<WWallDetectOctNode*>( getRootNode() ) );
 }
+
 void WWallDetectOctree::addGroupCountsFromNode( WWallDetectOctNode* node )
 {
     if  ( node->getRadius() <= getDetailLevel() )

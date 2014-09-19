@@ -54,10 +54,12 @@ void WQuadTree::registerPoint( double x, double y, double value )
         node->updateMinMax( x, y, value );
     }
 }
+
 WQuadNode* WQuadTree::getLeafNode( double x, double y )
 {
     return getLeafNode( x, y, m_detailLevel);
 }
+
 WQuadNode* WQuadTree::getLeafNode( double x, double y, double detailLevel )
 {
     if( !m_root->fitsIn( x, y ) )
@@ -73,6 +75,7 @@ WQuadNode* WQuadTree::getLeafNode( double x, double y, double detailLevel )
     }
     return node;
 }
+
 WQuadNode* WQuadTree::getRootNode()
 {
     return m_root;
@@ -87,6 +90,7 @@ size_t WQuadTree::getBin( double x )
     double goback = static_cast<int>( value - 1.0 );
     return static_cast<int>(value - goback) + goback;
 }
+
 double WQuadTree::getDetailLevel()
 {
     return m_detailLevel;

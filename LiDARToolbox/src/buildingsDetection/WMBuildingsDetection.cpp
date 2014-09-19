@@ -67,6 +67,7 @@ const char** WMBuildingsDetection::getXPMIcon() const
 {
     return WMBuildingsDetection_xpm;
 }
+
 const std::string WMBuildingsDetection::getName() const
 {
     return "Buildings Detection";
@@ -238,6 +239,7 @@ void WMBuildingsDetection::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMBuildingsDetection::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

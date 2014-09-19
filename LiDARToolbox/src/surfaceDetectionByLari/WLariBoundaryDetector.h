@@ -75,10 +75,12 @@ public:
      * assigned to the same planar formula group.
      */
     explicit WLariBoundaryDetector();
+
     /**
      * Destroys the instance.
      */
     virtual ~WLariBoundaryDetector();
+
     /**
      * Rotates a point so that the normal vector if itsleast squares adjustment point 
      * group is approximately perpendicular to the z axis. It makes the boundary 
@@ -86,6 +88,7 @@ public:
      * \param transformable Point to be transformed.
      */
     void transformPoint( vector<double>* transformable );
+
     /**
      * Applies the algorithm on the input point data set where points have been 
      * clustered to groups that have a similar planar furmula. The algorithm splits 
@@ -93,6 +96,7 @@ public:
      * \param parameterDomain Parameter domain containing planar input points.
      */
     void detectBoundaries( WKdTreeND* parameterDomain );
+
     /**
      * Sets the neighbor point search distance limit:
      * \param maxPointDistanceR Neighbor search distance limit.
@@ -107,11 +111,13 @@ private:
      * \param parameterDomain Parameter domain to fetch planar points.
      */
     void groupPointsByGroupID( WKdTreeND* parameterDomain );
+
     /**
      * Splits a single point group that can be spatially disconnected.
      * \param inputPointCluster Input point group to be further splitted.
      */
     void detectInputCluster( vector<WSpatialDomainKdPoint*>* inputPointCluster );
+
     /**
      * Inits the points rotation angles to use boundary detection on two dimensional 
      * basis. The averate normal vector of point's planar formulas in relation to its 
@@ -120,6 +126,7 @@ private:
      *                           to its neighbors are similar.
      */
     void initTransformationCoordinateSystem( vector<WSpatialDomainKdPoint*>* extentPointCluster );
+
     /**
      * Tells whether a point can reach the last added boundary point. Usually every
      * point has information about the distance to the n nearest neighbour. If one side
@@ -130,11 +137,13 @@ private:
      * \return last b oundary point can reach the point or not.
      */
     bool lastBoundaryPointCanReachPoint( WPointDistance nextPoint );
+
     /**
      * Calculates and returns the next point that belongs to the current bound point chain.
      * \return The next bound chain point.
      */
     WBoundaryDetectPoint* getNextBoundPoint();
+
     /**
      * Returns the outer counterclockwise angle of a line of three points.
      * \param previousPoint First point of the counterclockwise chain;
@@ -144,6 +153,7 @@ private:
      *         counterclockwise running bound.
      */
     double getAngleToNextPoint( WBoundaryDetectPoint* previousPoint, WBoundaryDetectPoint* currentPoint, WBoundaryDetectPoint* nextPoint );
+
     /**
      * The algorithm follows the bound counterclockwise. There may be some difficult 
      * cases. Usually the next boundary point is taken one resulting the smallest angle 
@@ -157,17 +167,20 @@ private:
      *         intersection or not.
      */
     bool isResultingBoundIntersection( WBoundaryDetectPoint* nextPoint );
+
     /**
      * Calculates a bounding box out of the calculated bound chain points into member 
      * field variables.
      */
     void initAABoundingBoxFromBoundary();
+
     /**
      * Initializes an outer point that is a help to detect whether some points are 
      * within a bounded area or not. The principle is based on the theory that every 
      * bound hit changes the state whether a point is inside or outside the area.
      */
     void initOneOutsidePoint();
+
     /**
      * Calculates whether a point belongs to the bounding box of the lastly calculated 
      * cluster's bound chain. It simply speeds up when skipping the slower algorithm 
@@ -176,6 +189,7 @@ private:
      * \return The point is in the bounding box or not.
      */
     bool pointBelongsToBoundingBox( const vector<double>& point );
+
     /**
      * Method that accurately but more slowly determines whether a point is spatially inside the bounds 
      * of the current cluster.
@@ -183,6 +197,7 @@ private:
      * \return The point is in the cluster's bounds or not.
      */
     bool pointIsInBounds( const vector<double>& point );
+
     /**
      * Tells whether a point lies exactly on a bound or not.
      * \param point Point to be examined.
@@ -190,6 +205,7 @@ private:
      * \return point lies exactly on a bound line of an index or not.
      */
     bool pointLiesOnBound( const vector<double>& point, size_t boundNr );
+
     /**
      * Tells whether a point hits a bound of an index.
      * \param point Point to be examined.
@@ -197,6 +213,7 @@ private:
      * \return an arbitrary point hits a bound of an index or not.
      */
     bool pointHitsBound( const vector<double>& point, size_t boundNr );
+
     /**
      * Tells whether a bound is still valid. The validation begins after the point count 
      * of 10. It works by the principle that exact sequence of same two consecutive 
@@ -211,6 +228,7 @@ private:
      * Spatial domain point set kd tree to be analyzed and its point group IDs modified.
      */
     WKdTreeND* m_spatialDomain;
+
     /**
      * Spatial domain points grouped by their group ID. Previously points are detected 
      * using the peak detection approach oof Lari/Habib. So previously points were 
@@ -218,45 +236,54 @@ private:
      * neighbors. And that routine was executed until segmenting every last point.
      */
     vector<vector<WSpatialDomainKdPoint*>*>* m_spatialInputClusters;
+
     /**
      * Cluster ID counter. This field is incremented every time after detecting a new 
      * spatially connected cluster.
      */
     size_t m_currentClusterID;
+
     /**
      * First transformation rotation that is done so that points lie in the most optimal 
      * way to analyze them using a two dimensional coordinate system. This first 
      * rotation rotates between Z and X axis.
      */
     double m_transformAngle1zx;
+
     /**
      * First transformation rotation that is done so that points lie in the most optimal 
      * way to analyze them using a two dimensional coordinate system. This first 
      * rotation rotates between Z and Y axis.
      */
     double m_transformAngle2zy;
+
     /**
      * Boundary point chain of the current spatially connected cluster.
      */
     vector<WBoundaryDetectPoint*>* m_currentBoundary;
+
     /**
      * Point search instance to find points near an arbitrary coordinate.
      */
     WPointSearcher m_clusterSearcher;
+
     /**
      * Points above that distance aren't searched.
      */
     double m_maxPointDistanceR;
+
     /**
      * Lower axis aligned bounding box border of the current spatially connected bound 
      * point chain. So the border bounding box is defined by two coordinates.
      */
     vector<double> m_boundaryAABoundingBoxMin;
+
     /**
      * Upper axis aligned bounding box border of the current spatially connected bound 
      * point chain. So the border bounding box is defined by two coordinates.
      */
     vector<double> m_boundaryAABoundingBoxMax;
+
     /**
      * One outer point that helps to detect whether a point is inside a bound or not. 
      * The detection follows the theory that goint across the line the condition changes 

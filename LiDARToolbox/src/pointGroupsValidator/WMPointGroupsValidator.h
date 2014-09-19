@@ -154,21 +154,25 @@ private:
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+
     /**
      * Groups that depict an ideal segmentation result. This point set comes ofteh from 
      * manual editing or assigning.
      */
     boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_inputReferenceGroupPoints;
+
     /**
      * Groups that should be validated. Usually this point sets arases from a 
      * segmentation process that comes from a module that should be validated.
      */
     boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_inputValidatedGroupPoints;
+
     /**
      * Points from reference groups that are not segmented in a point set to be 
      * validated.
      */
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputNotSegmented;
+
     /**
      * Usually not segmented points maybe tell nothing about the area coverage itself. 
      * Points wihtin that are also points that were not detected in the group. But they 
@@ -176,6 +180,7 @@ private:
      * validated (using a distance threshold).
      */
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPointsOfMissingAreas;
+
     /**
      * Points of reference groups that have a wrong group in the point group dataset to 
      * be validated.
@@ -199,6 +204,7 @@ private:
      * Settings group that deals with coordinate accuracy of points to be evaluated.
      */
     WPropGroup m_accuracyGroup;
+
     /**
      * Regarded euclidean deviance between reference points and points to be evaluated.
      */
@@ -208,20 +214,24 @@ private:
      * Settings that deal with point group evaluation itself.
      */
     WPropGroup m_evaluationGroup;
+
     /**
      * Setting that delas with finding not segmented area points. These points are found 
      * by taking points of a corresponding reference group that can not be reached by 
      * correctly segmented points regarding this euclideanradius around them.
      */
     WPropDouble m_areaTestingPointRadius;
+
     /**
      * Cumulate groups with similar reference group point counts.
      */
     WPropBool m_cumulateGroups;
+
     /**
      * Result comma separated values table output file path.
      */
     WPropFilename m_outputFileCSV;
+
     /**
      * Result comma separated values table export launcher.
      */
@@ -231,6 +241,7 @@ private:
      * Group validator instance
      */
     WGroupValidator m_groupValidator;
+
     /**
      * Instance that exports results to a comma separated values table output file.
      */

@@ -63,6 +63,7 @@ public:
      * Creates the point file processing instance.
      */
     WPointSaver();
+
     /**
      * Destroys the point file processing instance.
      */
@@ -79,32 +80,38 @@ public:
      * \return Loaded vertex data.
      */
     WDataSetPointsGrouped::VertexArray getVertices();
+
     /**
      * Returns colors of loaded data.
      * \return Loaded color data.
      */
     WDataSetPointsGrouped::ColorArray getColors();
+
     /**
      * Returns group IDs of loaded data. Use it only after loadWDataSetPointsGrouped().
      * \return Loaded group ID data.
      */
     WDataSetPointsGrouped::GroupArray getGroups();
+
     /**
      * Loads point data with color attributes from a file.
      * \return File was successfully loaded or not.
      */
     bool loadWDataSetPoints();
+
     /**
      * Loads point data with color attributes and group IDs from a file.
      * \return File was successfully loaded or not.
      */
     bool loadWDataSetPointsGrouped();
+
     /**
      * Saves a point data set with colors to a file.
      * \param vertices Vertex array to save.
      * \param colors Color array to save.
      */
     void saveWDataSetPoints( WDataSetPointsGrouped::VertexArray vertices, WDataSetPointsGrouped::ColorArray colors );
+
     /**
      * Saves grouped point data set with colors and group IDs to a file.
      * \param vertices Vertex array to save.
@@ -113,6 +120,7 @@ public:
      */
     void saveWDataSetPointsGrouped( WDataSetPointsGrouped::VertexArray vertices,
             WDataSetPointsGrouped::ColorArray colors,  WDataSetPointsGrouped::GroupArray groups );
+
     /**
      * Sets a file path for loading and saving point datasets.
      * \param path File of a source or target point data file.
@@ -125,18 +133,21 @@ public:
      * \return Sign belongs to a number or not.
      */
     static bool isNumberChar( const char sign );
+
     /**
      * Parses a double number from a characer sequence.
      * \param charVector Character sequence to be parsed.
      * \return parsed double number.
      */
     static double parseDouble( vector<char> charVector );
+
     /**
      * Parses a size_t number from a characer sequence.
      * \param charVector Character sequence to be parsed.
      * \return parsed size_t number.
      */
     static size_t parseSizeT( vector<char> charVector );
+
     /**
      * Tests whether a path ends with a character sequence. Useful to test whether file 
      * names correspond to an extension.
@@ -153,15 +164,18 @@ private:
      *         processed by returning "false".
      */
     bool correctFilePathByExtension();
+
     /**
      * Loads point dataset from a file.
      * \return File was successfully loaded or not.
      */
     bool load();
+
     /**
      * Writes point data to a file.
      */
     void save();
+
     /**
      * Separates a single string representing numbers to several character sets. Their 
      * count corresponds to the count of numbers. 
@@ -175,10 +189,12 @@ private:
      * Vwertices that are loaded or saved.
      */
     WDataSetPointsGrouped::VertexArray m_verts;
+
     /**
      * Colors that are loaded or saved.
      */
     WDataSetPointsGrouped::ColorArray m_colors;
+
     /**
      * Point group IDs that are loaded or saved.
      */
@@ -188,10 +204,12 @@ private:
      * Indicator whether points have a group ID or not.
      */
     bool m_hasGroupInfo;
+
     /**
      * File processing instance contains point data or not.
      */
     bool m_containsData;
+
     /**
      * Source or target point data file path.
      */
@@ -201,6 +219,7 @@ private:
      * Extension for WDataSetPoints point data files.
      */
     static const char* EXTENSION_WDATASETPOINTS;
+
     /**
      * Extension for WDataSetPointsGrouped point data files.
      */

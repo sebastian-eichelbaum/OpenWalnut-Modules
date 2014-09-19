@@ -78,11 +78,13 @@ void WLariBruteforceClustering::detectClustersByBruteForce()
             cout << "Current parameter space Size: " << m_parameterDomain->getAllPoints()->size() << "    ";
     }
 }
+
 void WLariBruteforceClustering::setSegmentationSettings( double maxAngleDegrees, double planeDistance )
 {
     m_segmentationMaxAngleDegrees = maxAngleDegrees;
     m_segmentationMaxPlaneDistance = planeDistance;
 }
+
 void WLariBruteforceClustering::setCpuThreadCount( size_t cpuThreadCount )
 {
     m_cpuThreadCount = cpuThreadCount;
@@ -100,6 +102,7 @@ void WLariBruteforceClustering::initExtentSizes( vector<WKdPointND*>* pointsToPr
     for( size_t thread = 0; thread < threads; thread++ )
         m_cpuThreads[thread]->join();
 }
+
 void WLariBruteforceClustering::initExtentSizesAtThread( vector<WKdPointND*>* pointsToProcess, size_t threadIndex )
 {
     for( size_t index = threadIndex; index < pointsToProcess->size(); index += m_cpuThreadCount )
@@ -120,6 +123,7 @@ void WLariBruteforceClustering::initExtentSizesAtThread( vector<WKdPointND*>* po
         }
     }
 }
+
 void WLariBruteforceClustering::addExtentCluster( WParameterDomainKdPoint* peakCenterPoint, size_t clusterID )
 {
     vector<WParameterDomainKdPoint*>* extentPoints =
@@ -132,6 +136,7 @@ void WLariBruteforceClustering::addExtentCluster( WParameterDomainKdPoint* peakC
     for( size_t thread = 0; thread < threads; thread++ )
         m_cpuThreads[thread]->join();
 }
+
 void WLariBruteforceClustering::addExtentClusterAtThread( vector<WParameterDomainKdPoint*>* extentPoints, size_t clusterID, size_t threadIndex )
 {
     WParameterSpaceSearcher taggerToRefresh;
@@ -152,6 +157,7 @@ void WLariBruteforceClustering::addExtentClusterAtThread( vector<WParameterDomai
         }
     }
 }
+
 vector<WParameterDomainKdPoint*>* WLariBruteforceClustering::getParametersOfExtent( const vector<double>& parametersXYZ0 )
 {
     WParameterSpaceSearcher parameterSearcher;

@@ -198,6 +198,7 @@ void WMSurfaceDetectionByPCL::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMSurfaceDetectionByPCL::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

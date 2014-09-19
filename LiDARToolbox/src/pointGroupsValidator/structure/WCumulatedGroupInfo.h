@@ -50,10 +50,12 @@ public:
      * Creates an instance of a cumulated point dataset.
      */
     explicit WCumulatedGroupInfo();
+
     /**
      * Destroys an instance of a cumulated point dataset.
      */
     virtual ~WCumulatedGroupInfo();
+
     /**
      * Point group can be within ghe point group or not.
      * The cumulated group has the info about minimal and maximal point count. Groups 
@@ -63,29 +65,34 @@ public:
      * \return Group can be cumulated or not
      */
     bool canBeCumulated( WGroupInfo* group );
+
     /**
      * Cumulates a point group to this instance.
      * \param group Group results that should be cumulated.
      * \return Group could be cumulated or not.
      */
     bool cumulateGroup( WGroupInfo* group );
+
     /**
      * Returns the count of groups that were cumulated inside that instance.
      * \return Cumulated group count.
      */
     size_t getGroupCount();
+
     /**
      * Returns the point segmentation correctness by means of Lari/Habib 2014:
      *     Correctness = true positives / ( true positives + false positives ).
      * \return Average point segmentation correctness ( 0.0 ~ 1.0 ).
      */
     double getPointCorrectness();
+
     /**
      * Returns the point segmentation completeness by means of Lari/Habib 2014:
      *     Completeness = true positives / ( true positives + false negatives )
      * \return Average point segmentation completeness ( 0.0 ~ 1.0 ).
      */
     double getPointCompleteness();
+
     /**
      * Returns the point area segmentation completeness by means of Lari/Habib 2014:
      *     Completeness = true positives / ( true positives + false negatives )
@@ -96,21 +103,25 @@ public:
      * \return Average point area segmentation completeness ( 0.0 ~ 1.0 ).
      */
     double getAreaPointCorrectness();
+
     /**
      * Returns the minimal reference group point count to cumulate groups here.
      * \return Minimal reference group point count to cumulate groups here.
      */
     size_t getRangeMinPointCount();
+
     /**
      * Returns the maximal reference group point count to cumulate groups here.
      * \return Maximal reference group point count to cumulate groups here.
      */
     size_t getRangeMaxPointCount();
+
     /**
      * Tells whether groups were cumulated inside that instance or not.
      * \return Groups were cumulated inside that instance or not.
      */
     bool hasGroups();
+
     /**
      * Sets the minimal and maximal reference group point count. Groups wiith a 
      * reference group point count are not cumulated inside the instance.
@@ -124,6 +135,7 @@ private:
      * Count of groups that were cumulated inside that instance.
      */
     size_t m_cumulatedGroupCount;
+
     /**
      * Point segmentation correctness by means of Lari/Habib 2014:
      *     Correctness = true positives / ( true positives + false positives ).
@@ -131,6 +143,7 @@ private:
      * Divide that value by the group count to get the result.
      */
     double m_pointCorrectnessCumulated;
+
     /**
      * Point segmentation completeness by means of Lari/Habib 2014:
      *     Completeness = true positives / ( true positives + false negatives )
@@ -138,16 +151,19 @@ private:
      * Divide that value by the group count to get the result.
      */
     double m_pointCompletenessCumulated;
+
     /**
      * Area of a reference group that was segmented by a group to be validated. Area 
      * completeness is calculated just like completeness. But as difference a radius is 
      * applied that is applied on correctly segmented points.
      */
     double m_areaPointCompletenessCumulated;
+
     /**
      * Minimal reference group point count to cumulate groups here.
      */
     size_t m_groupsRangeMinPointCount;
+
     /**
      * Maximal reference group point count to cumulate groups here.
      */

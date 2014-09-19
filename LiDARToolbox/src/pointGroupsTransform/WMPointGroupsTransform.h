@@ -154,6 +154,7 @@ private:
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+
     /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
@@ -161,12 +162,14 @@ private:
      * \return The cropped or cut point data set.
      */
     void addTransformedPoints();
+
     /**
      * Method that is executing for loading files. File is loaded every time when the 
      * path is correct.
      * \return Returns true if at least one point could be loaded.
      */
     void onFileLoad();
+
     /**
      * Method that is executed to save a file if the save button is pressed.
      */
@@ -176,18 +179,22 @@ private:
      * WDataSetPointsGrouped data input (WDataSetPoints with group parameter).
      */
     vector<boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > > m_input;
+
     /**
      * WDataSetPointsGrouped data that is subtracted from the input points.
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_inputSubtraction;
+
     /**
      * Processed point data with cut off subtracted points.
      */
     boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputGroups;
+
     /**
      * Data output connector for data set points output.
      */
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputPoints;
+
     /**
      * Output for outlining using voxels. Their width can be specified in settings.
      */
@@ -207,19 +214,23 @@ private:
      * Vertices of the output point data set.
      */
     WDataSetPointsGrouped::VertexArray m_outVerts;
+
     /**
      * Colors of the output point data set.
      */
     WDataSetPointsGrouped::ColorArray m_outColors;
+
     /**
      * Colors of the output point data set in order to outline point groups.
      * Parameter field for output without group ID.
      */
     WDataSetPointsGrouped::ColorArray m_outGroupColors;
+
     /**
      * Group of the output point data set.
      */
     WDataSetPointsGrouped::GroupArray m_outGroups;
+
     /**
      * Instance to edit group IDs. It can identify groups with point count below a 
      * desireable threshold in order to remove corresponding points.
@@ -231,18 +242,22 @@ private:
      * Wall time of the point transformation routine.
      */
     WPropDouble m_infoRenderTimeSeconds;
+
     /**
      * Input point count.
      */
     WPropInt m_infoInputPointCount;
+
     /**
      * Information about the point group count. It is the last group ID.
      */
     WPropInt m_infoLastGroupID;
+
     /**
      * Information about minimal X/Y/Z values.
      */
     vector<WPropInt> m_infoBoundingBoxMin;
+
     /**
      * Information about minimal X/Y/Z values.
      */
@@ -252,6 +267,7 @@ private:
      * Options that are relevant for point removal
      */
     WPropGroup m_pointsCropGroup;
+
     /**
      * Radius of points that are subtracted from the point set. The subtracted points 
      * are connected by the most right input.
@@ -265,32 +281,39 @@ private:
      * It can e. g. apply color etc.
      */
     WPropGroup m_outlinerGroup;
+
     /**
      * Determines the resolution of the smallest octree node's radius in 2^n meters
      */
-    WPropInt m_detailDepth;
+    WPropInt m_voxelOutlineDetailDepth;
+
     /**
      * Determines the resolution of the smallest octree nodes in meters
      */
-    WPropDouble m_detailDepthLabel;
+    WPropDouble m_outlineVoxelWidthLabel;
+
     /**
      * Depicting the input data set points showing the point outline instead of regions
      * depicted as cubes that cover existing points.
      */
     WPropBool m_highlightUsingColors;
+
     /**
      * Switch to remove color information:
      */
     WPropBool m_clearInputColor;
+
     /**
      * Put all point groups or a particular group to the output.
      */
     WPropBool m_loadAllGroups;
+
     /**
      * If the switch is put to show a single groupe, then a group will be put out by 
      * means of this group ID.
      */
     WPropInt m_selectedShowableGroup;
+
     /**
      * Group transformation settings have group processing options. This field displays 
      * the original ID though. The ID is changed if more than one input is connected.
@@ -303,12 +326,14 @@ private:
      * Point group processing options
      */
     WPropGroup m_pointIDProcessingGroup;
+
     /**
      * Group ID treatment option using more than one input.
      * It is either not changed before appling the group size threshold or group ID 
      * continue the last group ID of the previous input dataset.
      */
     WPropBool m_mergeGroupIDsAllInputs;
+
     /**
      * Point count threshold for groups. Groups below that point count are removed. 
      * Afterwards IDs are changed that way so no ID stays without points.
@@ -321,6 +346,7 @@ private:
      * Options for point coordinate translation using an offset vector.
      */
     WPropGroup m_translatePointsGroup;
+
     /**
      * Coordinate translation offset applied on input points.
      */
@@ -330,18 +356,22 @@ private:
      * File processing options.
      */
     WPropGroup m_groupFileOperations;
+
     /**
      * Output file path for saving.
      */
     WPropFilename m_outputFile;
+
     /**
      * Saves grouped points to a file.
      */
     WPropTrigger m_savePointsTrigger;
+
     /**
      * Input file path for loading points.
      */
     WPropFilename m_inputFile;
+
     /**
      * Reloads points from the input file.
      */
@@ -359,10 +389,12 @@ private:
      * Input file processing instance.
      */
     WPointSaver m_pointInputFile;
+
     /**
      * Output file processing instance.
      */
     WPointSaver m_pointOutputFile;
+
     /**
      * Insance to outline points voxel wise.
      */

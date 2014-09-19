@@ -46,15 +46,18 @@ class WPointSearcher
 {
 public:
     explicit WPointSearcher();
+
     /**
      * Instantiates the points searcher.
      * \param kdTree Assigned source kd tree to search points.
      */
     explicit WPointSearcher( WKdTreeND* kdTree );
+
     /**
      * Destroys the points searcher
      */
     virtual ~WPointSearcher();
+
     /**
      * Returns nearest points of a particular coordinate. Execute methods for setting 
      * examined coordinate, maximal neighbor count and radius first. Consider that the 
@@ -64,6 +67,7 @@ public:
      *         distance.
      */
     vector<WPointDistance>* getNearestPoints();
+
     /**
      * Counts points within the region during regarding the maximal point count. Setting 
      * an infinite count speeds the process up. Points do would neither to be sorted nor 
@@ -71,27 +75,32 @@ public:
      * \return Point count within the region.
      */
     size_t getNearestNeighborCount();
+
     /**
      * Links a kd tree to the search engine in order to find nearest points of a 
      * coordinate.
      * \param kdTree The kd tree where to look for neighbors.
      */
     void setExaminedKdTree( WKdTreeND* kdTree );
+
     /**
      * Sets the coordinate of the point to get its neighbors afterwarts.
      * \param searchedPoint Coordinate to search for neighbors.
      */
     void setSearchedPoint( const vector<double>& searchedPoint );
+
     /**
      * Sets the maximal distance of neighbors.
      * \param distance The maximal distance of neighbors.
      */
     void setMaxSearchDistance( double distance );
+
     /**
      * Sets the maximal point count.
      * \param maxPointCount The maximal neighbor count that is found for a coordinate.
      */
     void setMaxResultPointCount( size_t maxPointCount );
+
     /**
      * Sets the maximal point count to infinite. Especially the point count within a 
      * fixed radius has a performance benefit. Points would have neither to be sorted 
@@ -107,6 +116,7 @@ protected:
      * \param maxDistance Maximal euclidian distance to a output point.
      */
     void traverseNodePoints( WKdTreeND* currentNode, double maxDistance );
+
     /**
      * Action which is executed when a point is found. This method adds points to the 
      * found points list. Overwrite this method in the inheriting class to define own 
@@ -114,6 +124,7 @@ protected:
      * \param point Point that can be further processed during execution.
      */
     virtual void onPointFound( WKdPointND* point );
+
     /**
      * Determines whether a searched point can belong to the group of the coordinate to 
      * find neighbors of.
@@ -123,22 +134,27 @@ protected:
      */
     virtual bool pointCanBelongToPointSet( const vector<double>& point, double maxDistance );
 
+
     /**
      * Kd tree where nearest points are searched.
      */
     WKdTreeND* m_examinedKdTree;
+
     /**
      * maximal euclidian distance within which neighbors are searched.
      */
     double m_maxSearchDistance;
+
     /**
      * Maximal output neighbor count.
      */
     size_t m_maxResultPointCount;
+
     /**
      * The coordinate of which nearest points will be returned.
      */
     vector<double> m_searchedCoordinate;
+
     /**
      * A performance setting that has no effect on the result. Often the limited point
      * count is covered by a significantly smaller radius than the limit.
@@ -146,6 +162,7 @@ protected:
      * first radius is searched radius divided by pow(2, steps).
      */
     size_t m_distanceSteps;
+
     /**
      * Points that were found during the search.
      */

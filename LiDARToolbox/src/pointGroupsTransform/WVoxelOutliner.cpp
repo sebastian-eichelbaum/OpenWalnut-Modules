@@ -43,10 +43,12 @@ void WVoxelOutliner::setVoxelWidth( double voxelWidth )
     delete m_tree;
     m_tree = new WOctree( voxelWidth / 2.0 );
 }
+
 void WVoxelOutliner::registerPoint( double x, double y, double z )
 {
     m_tree->registerPoint( x, y, z );
 }
+
 WOctNode* WVoxelOutliner::getOctreeLeafNode( double x, double y, double z )
 {
     return m_tree->getLeafNode( x, y, z );

@@ -53,15 +53,18 @@ public:
      * \param dimensions Dimension definition of the space for the calculation.
      */
     explicit WLeastSquares( size_t dimensions );
+
     /**
      * Destroys the least squares adjustment instance.
      */
     virtual ~WLeastSquares();
+
     /**
      * Launchs the least squares adjustment.
      * \param data Point data to analyze the best fitted plane for.
      */
     void analyzeData( vector<WPosition>* data );
+
     /**
      * Returns the plane formula for the best fitted plane.
      * \return The Hessian normal form of the best fitted plane. First n numbers (by the 
@@ -70,11 +73,13 @@ public:
      *         coordinate system orign.
      */
     vector<double> getHessianNormalForm();
+
     /**
      * Returns a not normalized normal vector of the least squares adjustment result.
      * \return A not normalized normal vector of the least squares adjustment result.
      */
     vector<double> getNormalVectorNotNormalized();
+
     /**
      * Returns the parameters X_0, Y_0 and Z_0 etc. of the best fitted plane in an n 
      * dimensional space.
@@ -90,6 +95,7 @@ public:
      *         Lari/Habib.
      */
     static vector<double> getParametersXYZ0( const vector<double>& hessianNormalForm );    //TODO(aschwarzkopf): Consider removal
+
     /**
      * Returns a point distance to the currently calculated plane.
      * analyzeData() must have been executes.
@@ -98,6 +104,7 @@ public:
      *         squares algorithm.
      */
     double getDistanceToPlane( WPosition point );
+
     /**
      * Returns a nearest point to the input point's coordinate that lies on the 
      * calculated plane.
@@ -105,6 +112,7 @@ public:
      * \return The nearest coordinate on the calculates plane of an arbitrary point.
      */
     WPosition getNearestPointTo( WPosition point );
+
     /**
      * Returns a nearest point to the input point's coordinate that lies on the 
      * calculated plane.
@@ -121,36 +129,44 @@ private:
      *         Value.
      */
     void calculatePerpendicularDimension();
+
     /**
      * The algorithm solves the matrix formula A*x=B. This method calculates A and B.
      */
     void calculateMatrices();
+
     /**
      * The algorithm solves the matrix formula A*x=B. This method at first calculates 
      * the matrix x and then the Hessian Normal Form of the best fitted plane.
      */
     void calculateHessianNormalForm();
 
+
     /**
      * Dimension definition of the coordinate system.
      */
     size_t m_dimensions;
+
     /**
      * Points to calculate the best fitted plane for.
      */
     vector<WPosition>* m_positions;
+
     /**
      * Space for the calculated hessian normal form.
      */
     vector<double> m_hessianNormalForm;
+
     /**
      * Dimension with the biggest eigen vector coordonate extent of the smallest Eigen Value.
      */
     size_t m_verticalDimension;
+
     /**
      * Independent variable: Values of dimensions.
      */
     MatrixXd m_matrixX;
+
     /**
      * Values of the dependent variable.
      */

@@ -162,22 +162,27 @@ private:
     WPropFilename m_lasFile; //!< The mesh will be read from this file.
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
+
     /**
      * The maximal width of the output data.
      */
     WPropInt m_outputDataWidth;
+
     /**
      * Scrollbar that changes the minimal output X value
      */
     WPropInt m_sliderX;
+
     /**
      * Scrollbar that changes the minimal output Y value
      */
     WPropInt m_sliderY;
+
     /**
      * Enables to put the output data to the coordinate system center
      */
     WPropBool m_translateDataToCenter;
+
     /**
      * Multiplier that is applied on the input data set color intensity.
      */
@@ -188,30 +193,37 @@ private:
      * Info tab property: Minimal x value of input x coordunates.
      */
     WPropDouble m_xMin;
+
     /**
      * Info tab property: Maximal x value of input x coordunates.
      */
     WPropDouble m_xMax;
+
     /**
      * Info tab property: Minimal y value of input x coordunates.
      */
     WPropDouble m_yMin;
+
     /**
      * Info tab property: Maximal y value of input x coordunates.
      */
     WPropDouble m_yMax;
+
     /**
      * Info tab property: Minimal z value of input x coordunates.
      */
     WPropDouble m_zMin;
+
     /**
      * Info tab property: Maximal z value of input x coordunates.
      */
     WPropDouble m_zMax;
+
     /**
     * Info tab property: Minimal color intensity in LAS file.
     */
     WPropDouble m_intensityMin;
+
     /**
     * Info tab property: Maximal color intensity in LAS file.
     */

@@ -32,6 +32,7 @@ WPointDistance::WPointDistance()
     m_pointDistance = 0;
     m_comparedPoint = 0;
 }
+
 WPointDistance::WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint )
 {
     m_comparedPoint = comparedPoint;
@@ -41,18 +42,22 @@ WPointDistance::WPointDistance( vector<double> sourcePoint, WKdPointND* compared
 WPointDistance::~WPointDistance()
 {
 }
+
 vector<double> WPointDistance::getComparedCoordinate()
 {
     return m_comparedPoint->getCoordinate();
 }
+
 WKdPointND* WPointDistance::getComparedPoint()
 {
     return m_comparedPoint;
 }
+
 double WPointDistance::getDistance()
 {
     return m_pointDistance;
 }
+
 vector<WPosition>* WPointDistance::convertToPointSet( vector<WPointDistance>* pointDistances )
 {
     vector<WPosition>* pointSet = new vector<WPosition>();
@@ -64,6 +69,7 @@ vector<WPosition>* WPointDistance::convertToPointSet( vector<WPointDistance>* po
     }
     return pointSet;
 }
+
 bool WPointDistance::operator<( WPointDistance const& right ) const
 {
     return m_pointDistance < right.m_pointDistance;

@@ -33,6 +33,7 @@ WExportCSV::WExportCSV()
     m_fileOutputStream = new ofstream();
     m_filePath = new stringstream();
 }
+
 WExportCSV::~WExportCSV()
 {
 }
@@ -42,16 +43,19 @@ void WExportCSV::setGroupInfo( vector<WGroupInfo*>* groupInfo )
 {
     m_groupInfo = groupInfo;
 }
+
 void WExportCSV::setExportFilePath( const char* path )
 {
     delete m_filePath;
     m_filePath = new stringstream();
     *m_filePath << path;
 }
+
 void WExportCSV::setCumulateResultGroups( bool cumulate )
 {
     m_cumulateResultGroups = cumulate;
 }
+
 bool WExportCSV::exportCSV()
 {
     if( !correctFilePathByExtension() )
@@ -142,6 +146,7 @@ void WExportCSV::writeCumulatedGroupInfoToFile()
     }
     delete cumulatedGroups;
 }
+
 void WExportCSV::writeInfoToFileForAllGroups()
 {
     *m_fileOutputStream <<
@@ -189,4 +194,5 @@ bool WExportCSV::correctFilePathByExtension()
 }
 
 const char* WExportCSV::CSV_TABLE_EXTENSION = ".csv";
+
 const char* WExportCSV::TAB = "\t";

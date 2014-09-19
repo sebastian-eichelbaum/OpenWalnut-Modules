@@ -33,12 +33,14 @@ WKdPointND::WKdPointND( vector<double> coordinate )
 {
     m_coordinate = coordinate;
 }
+
 WKdPointND::WKdPointND( double x, double y )
 {
     m_coordinate = vector<double>( 2, 0 );
     m_coordinate[0] = x;
     m_coordinate[1] = y;
 }
+
 WKdPointND::WKdPointND( double x, double y, double z )
 {
     m_coordinate = vector<double>( 3, 0 );
@@ -46,6 +48,7 @@ WKdPointND::WKdPointND( double x, double y, double z )
     m_coordinate[1] = y;
     m_coordinate[2] = z;
 }
+
 WKdPointND::~WKdPointND()
 {
 }
@@ -54,10 +57,12 @@ size_t WKdPointND::getDimensionCount()
 {
     return m_coordinate.size();
 }
+
 vector<double> WKdPointND::getCoordinate()
 {
     return m_coordinate;
 }
+
 void WKdPointND::setCoordinate( vector<double> coordinate )
 {
     m_coordinate = coordinate;

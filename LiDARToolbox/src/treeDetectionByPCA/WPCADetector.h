@@ -50,25 +50,30 @@ public:
      * \param progressStatus The associated progress status.
      */
     explicit WPCADetector( WOctree* octree, boost::shared_ptr< WProgress > progressStatus );
+
     /**
      * Destroys the isotropic analysis instance.
      */
     virtual ~WPCADetector();
+
     /**
      * Starts the isotropic analysis for all point data voxels.
      */
     void analyze();
+
     /**
      * Starts the isotropic analysis for all children pf a node.
      * \param node Node and all its subchildren to to analyze.
      */
     void analyzeNode( WPcaDetectOctNode* node );
+
     /**
      * Sets the displayed isotropic threshold range.
      * \param showedIsotropicThresholdMin Minimal showed threshold.
      * \param showedIsotropicThresholdMax Maximal showed threshold.
      */
     void setDisplayedVarianceQuotientRange( double showedIsotropicThresholdMin, double showedIsotropicThresholdMax );
+
     /**
      * Sets the maximal isotropic level for drawing voxels. More exactly said: Smallest 
      * point distribution direction strength divided by the biggest one (Smallest Eigen 
@@ -76,11 +81,13 @@ public:
      * \param maximalEigenValueQuotientToDraw Maximal isotropicity level to draw voxels.
      */
     void setMaximalEigenValueQuotientToDraw( double maximalEigenValueQuotientToDraw );
+
     /**
      * Minimal point amount per voxel to draw. Voxels below that amount aren't drawn.
      * \param minPointsPerVoxelToDraw Minimap point count to draw voxels.
      */
     void setMinPointsPerVoxelToDraw( size_t minPointsPerVoxelToDraw );
+
     /**
      * Puts the voxel's isotropic threshold display in a triangle mesh.
      * \return The ouput triangle mesh that depicts the data.
@@ -96,6 +103,7 @@ private:
      * depicted.
      */
     void drawNode( WPcaDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+
     /**
      * Draws a colored voxel into the output triangle mesh. It draws only leaf nodes.
      * \param node Node to export to the triangle mesh.
@@ -103,6 +111,7 @@ private:
      * depicted.
      */
     void drawLeafNode( WPcaDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh );
+
     /**
      * Calculates a color for a drawable leaf node. The color depends on the quotient of
      * the smallest Eigen Value over the biggest. That's how the isotropic level is 
@@ -111,28 +120,34 @@ private:
      * \return The color calculated for the node.
      */
     osg::Vec4 calculateColorForNode( WPcaDetectOctNode* node );
+
     /**
      * The point data set grouped by voxels to be analyzed.
      */
     WOctree* m_analyzableOctree;
+
     /**
      * Progress status.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+
     /**
      * Minimal showed isotropic threshold.
      */
     double m_showedisotropicThresholdMin;
+
     /**
      * maximal showed isotropic threshold.
      */
     double m_showedisotropicThresholdMax;
+
     /**
      * Maximal isotropic level for drawing voxels. More exactly said: Smallest point 
      * distribution direction strength divided by the biggest one (Smallest Eigen Value 
      * divided by the biggest one). Voxels above that level aren't drawn.
      */
     double m_maximalEigenValueQuotientToDraw;
+
     /**
      * Minimal point amount per voxel to draw. Voxels below that amount aren't drawn.
      */

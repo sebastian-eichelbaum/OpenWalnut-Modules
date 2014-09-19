@@ -150,6 +150,7 @@ private:
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+
     /**
      * Calculates the bounding box of the input point data set. Minimals and
      * maximals of X/Y/Z are set.
@@ -158,11 +159,13 @@ private:
      *                        coordinate in the first check.
      */
     void initBoundingBox( bool isFirstPointSet );
+
     /**
      * Assigns the bounding box value to the minimal and maximal values of the cropping 
      * settings.
      */
     void setMinMax();
+
     /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
@@ -170,12 +173,14 @@ private:
      * \return The cropped or cut point data set.
      */
     void addTransformedPoints();
+
     /**
      * Method that is executing for loading files. File is loaded every time when the 
      * path is correct.
      * \return Returns true if at least one point could be loaded.
      */
     bool onFileLoad();
+
     /**
      * Method that is executed to save a file if the save button is pressed.
      */
@@ -185,14 +190,17 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     vector<boost::shared_ptr< WModuleInputData< WDataSetPoints > > > m_input;
+
     /**
      * WDataSetPoints data that is subtracted from the input points.
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_inputSubtraction;
+
     /**
      * Processed point data with cut off points after cropping and subtracting points.
      */
     boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_output;
+
     /**
      * Processed point data with cut off points after cropping and subtracting points.
      */
@@ -212,18 +220,22 @@ private:
      * Input point coordinates to crop.
      */
     WDataSetPoints::VertexArray m_inVerts;
+
     /**
      * Colors of the input point data set that are also passed through.
      */
     WDataSetPoints::ColorArray m_inColors;
+
     /**
      * Vertices of the output point data set.
      */
     WDataSetPoints::VertexArray m_outVerts;
+
     /**
      * Colors of the output point data set.
      */
     WDataSetPoints::ColorArray m_outColors;
+
     /**
      * Groups of the output second point data set.
      */
@@ -234,18 +246,22 @@ private:
      * Wall time of the point transformation routine.
      */
     WPropDouble m_infoRenderTimeSeconds;
+
     /**
      * Point count before transforming:
      */
     WPropInt m_infoInputPointCount;
+
     /**
      * Point count after transforming:
      */
     WPropInt m_infoOutputPointCount;
+
     /**
      * Information about minimal X/Y/Z values.
      */
     vector<WPropInt> m_infoBoundingBoxMin;
+
     /**
      * Information about minimal X/Y/Z values.
      */
@@ -255,38 +271,47 @@ private:
      * Options for surface features.
      */
     WPropGroup m_pointsCropGroup;
+
     /**
      * Minimal X value of the selection.
      */
     WPropDouble m_fromX;
+
     /**
      * Maximal X value of the selection.
      */
     WPropDouble m_toX;
+
     /**
      * Maximal Y value of the selection.
      */
     WPropDouble m_fromY;
+
     /**
      * Minimal Y value of the selection.
      */
     WPropDouble m_toY;
+
     /**
      * Minimal Z value of the selection.
      */
     WPropDouble m_fromZ;
+
     /**
      * Maximal Z value of the selection.
      */
     WPropDouble m_toZ;
+
     /**
      * Switch to cut away the selection instead of to crop the area.
      */
     WPropBool m_cutInsteadOfCrop;
+
     /**
      * Switch to temporarily turn of point set cropping.
      */
     WPropBool m_disablePointCrop;
+
     /**
      * Radius of points that are subtracted from the point set. The subtracted points 
      * are connected by the most right input.
@@ -297,14 +322,17 @@ private:
      * Options for point coordinate translation using an offset vector.
      */
     WPropGroup m_translatePointsGroup;
+
     /**
      * X coordinate translation offset.
      */
     WPropDouble m_translateX;
+
     /**
      * Y coordinate translation offset.
      */
     WPropDouble m_translateY;
+
     /**
      * Z coordinate translation offset.
      */
@@ -314,14 +342,17 @@ private:
      * Group that multiplies each coordinate by a factor.
      */
     WPropGroup m_groupMultiplyPoints;
+
     /**
      * Each X coordinate is multiplied by this value
      */
     WPropDouble m_factorX;
+
     /**
      * Each Y coordinate is multiplied by this value
      */
     WPropDouble m_factorY;
+
     /**
      * Each Z coordinate is multiplied by this value
      */
@@ -331,26 +362,32 @@ private:
      * Rotation options.
      */
     WPropGroup m_groupRotation;
+
     /**
      * 1st applied rotation: Along the plane XY
      */
     WPropDouble m_rotation1AngleXY;
+
     /**
      * 2nd applied rotation: Along the plane XY
      */
     WPropDouble m_rotation2AngleYZ;
+
     /**
      * 3rd applied rotation: Along the plane XY
      */
     WPropDouble m_rotation3AngleXZ;
+
     /**
      * Rotation anchor on the X coordinate.
      */
     WPropDouble m_rotationAnchorX;
+
     /**
      * Rotation anchor on the Y coordinate.
      */
     WPropDouble m_rotationAnchorY;
+
     /**
      * Rotation anchor on the Z coordinate.
      */
@@ -360,26 +397,32 @@ private:
      * Color equalizer settings group.
      */
     WPropGroup m_groupColorEqualizer;
+
     /**
      * Red contrast - Factor that is applied before adding the red offset.
      */
     WPropDouble m_contrastRed;
+
     /**
      * Green contrast - Factor that is applied before adding the green offset.
      */
     WPropDouble m_contrastGreen;
+
     /**
      * Blue contrast - Factor that is applied before adding the blue offset.
      */
     WPropDouble m_contrastBlue;
+
     /**
      * Red offset.- Offset that is added after applying the red factor.
      */
     WPropDouble m_offsetRed;
+
     /**
      * Green offset.- Offset that is added after applying the green factor.
      */
     WPropDouble m_OffsetGreen;
+
     /**
      * Blue offset.- Offset that is added after applying the blue factor.
      */
@@ -389,18 +432,22 @@ private:
      * Color equalizer settings group.
      */
     WPropGroup m_groupFileOperations;
+
     /**
      * Output file path where processed points are exported.
      */
     WPropFilename m_outputFile;
+
     /**
      * Button that triggers the point saving process.
      */
     WPropTrigger m_savePointsTrigger;
+
     /**
      * Input file path where processed points are loaded from.
      */
     WPropFilename m_inputFile;
+
     /**
      * Button that triggers the point reload process.
      */
@@ -412,6 +459,7 @@ private:
      * point set with a group ID.
      */
     WPropGroup m_pointGroupOptionsGroup;
+
     /**
      * Minimal X value of the selection.
      */
@@ -427,26 +475,32 @@ private:
      * Minimal X coordinate of input points.
      */
     double m_minX;
+
     /**
      * Maximal X coordinate of input points.
      */
     double m_maxX;
+
     /**
      * Minimal Y coordinate of input points.
      */
     double m_minY;
+
     /**
      * Maximal Y coordinate of input points.
      */
     double m_maxY;
+
     /**
      * Minimal Z coordinate of input points.
      */
     double m_minZ;
+
     /**
      * Maximal Z coordinate of input points.
      */
     double m_maxZ;
+
     /**
      * Sets how many points should be skipped after adding a single point to the output.
      */
@@ -456,6 +510,7 @@ private:
      * Input file points that are merged into the input point sets.
      */
     WPointSaver m_pointInputFile;
+
     /**
      * File that can be saved after altering points.
      */

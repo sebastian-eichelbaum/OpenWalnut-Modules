@@ -56,26 +56,31 @@ class WLariPointClassifier
 {
 public:
     explicit WLariPointClassifier();
+
     /**
      * Destroys the surface detection instance
      */
     virtual ~WLariPointClassifier();
+
     /**
      * Analyzes input point data.
      * \param inputPoints Input point data to analyze.
      */
     void analyzeData( vector<WSpatialDomainKdPoint*>* inputPoints );
+
     /**
      * Returns the parameter domain points. Each parameter point depicts a best fitted 
      * plane formula of each corresponding input point of the spatial domain.
      * \return The whole set of points of the parameter domain.
      */
     WKdTreeND* getParameterDomain();
+
     /**
      * Returns the input points that belong to the spatial domain.
      * \return The whole point set of the spatial domain.
      */
     WKdTreeND* getSpatialDomain();
+
     /**
      * Calculates whether a point's eigen values in relation to its neighbors have 
      * planar features.
@@ -83,6 +88,7 @@ public:
      * \return The point has planar featues or not.
      */
     bool calculateIsPlanarPoint( const vector<double>& eigenValues );
+
     /**
      * Calculates whether a point's eigen values in relation to its neighbors have 
      * linear/cylindrical features.
@@ -90,6 +96,7 @@ public:
      * \return The point has linear/cylindrical featues or not.
      */
     bool calculateIsCylindricalPoint( const vector<double>& eigenValues );
+
     /**
      * Setup method for the process - The maximal count of analyzed neighbors of an 
      * examined input point.
@@ -97,22 +104,26 @@ public:
      *                    its nearest neighbors).
      */
     void setNumberPointsK( size_t pointsCount );
+
     /**
      * Sets the maximal radius within which the nearest neighbors are examined.
      * \param maxPointDistance The maximal distance to examined neighbors.
      */
     void setMaxPointDistanceR( double maxPointDistance );
+
     /**
      * Sets the applied CPU thread count.
      * \param cpuThreadCount Applied CPU thread count.
      */
     void setCpuThreadCount( size_t cpuThreadCount );
+
     /**
      * Returns the numbers sum of an array.
      * \param allNumbers The numbers to sum.
      * \return Result = number 1 + number 2 + number 3 + . . . ).
      */
     static double getVectorSum( const vector<double>& allNumbers );
+
     /**
      * Sets the normalized lambda range condition. All of them must be met in order to 
      * detect a point as planar.
@@ -122,6 +133,7 @@ public:
      * \param max The higher limit of the lamba of that index.
      */
     void setPlanarNLambdaRange( size_t lambdaIndex, double min, double max );
+
     /**
      * Sets the normalized lambda range condition. All of them must be met in order to 
      * detect a point as linear/cylindrical.
@@ -141,6 +153,7 @@ private:
      *                        initialized in this method.
      */
     void classifyPoints( vector<WSpatialDomainKdPoint*>* spatialPoints, vector<WParameterDomainKdPoint*>* parameterPoints );
+
     /**
      * Classifies points using Eigen Value analyses (Eigen Values and Eigen Vectors) and 
      * least squares adjustment. The method Apply this method for every thread index.
@@ -153,35 +166,42 @@ private:
      * The maximal count of analyzed neighbors of an examined input point.
      */
     size_t m_numberPointsK;
+
     /**
      * Maximal radius within which the nearest neighbors are examined.
      */
     double m_maxPointDistanceR;
+
     /**
      * The lower normalized lambda (eigen value) limit to detect point's feature as 
      * planar. The eigen values are sorted descending.
      */
     vector<double> m_planarNLambdaMin;
+
     /**
      * The higher normalized lambda (eigen value) limit to detect point's feature as 
      * planar. The eigen values are sorted descending.
      */
     vector<double> m_planarNLambdaMax;
+
     /**
      * The lower normalized lambda (eigen value) limit to detect point's feature as 
      * linear/cylindrical. The eigen values are sorted descending.
      */
     vector<double> m_cylindricalNLambdaMin;
+
     /**
      * The higher normalized lambda (eigen value) limit to detect point's feature as 
      * linear/cylindrical. The eigen values are sorted descending.
      */
     vector<double> m_cylindricalNLambdaMax;
+
     /**
      * the parameter domain points. Each parameter point depicts a best fitted plane 
      * formula of each corresponding input point of the spatial domain.
      */
     WKdTreeND* m_spatialDomain;
+
     /**
      * The input points that belong to the spatial domain.
      */
@@ -191,6 +211,7 @@ private:
      * CPU threads count for multithreading support.
      */
     size_t m_cpuThreadCount;
+
     /**
      * CPU threads object for multithreading support.
      */

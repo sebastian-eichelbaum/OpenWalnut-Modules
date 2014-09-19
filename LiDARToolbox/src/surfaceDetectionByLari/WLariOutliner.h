@@ -57,22 +57,26 @@ public:
      *                        parameter domain.
      */
     explicit WLariOutliner( WLariPointClassifier* pointClassifier );
+
     /**
      * Destroys the result outlining instance.
      */
     virtual ~WLariOutliner();
+
     /**
      * Outlines the point plane segmentation result using the context of the parameter 
      * domain.
      * \return Point plane segmentation result using the context of the parameter domain.
      */
     boost::shared_ptr< WDataSetPointsGrouped > outlineParameterDomain();
+
     /**
      * Outlines the point plane segmentation result using the context of the spatial 
      * domain.
      * \return Point plane segmentation result that depicts segmented plane groups.
      */
     boost::shared_ptr< WDataSetPointsGrouped > outlineSpatialDomainGroups();
+
     /**
      * Gives the classification result of each spatial point. Red points are detected as 
      * planar, blue as linear/cylindrical, magenta points belong to both and grey to 
@@ -80,6 +84,7 @@ public:
      * \return Outline of the parameter domain points.
      */
     boost::shared_ptr< WDataSetPoints > outlineSpatialDomainCategories();
+
     /**
      * Outlines each point's best fitted plane.
      * \param squaresWidth Square width of the outlined best fitted planes of input 

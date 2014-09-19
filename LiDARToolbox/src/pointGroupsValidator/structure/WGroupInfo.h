@@ -47,15 +47,18 @@ public:
      * Creates a point group quality info instance.
      */
     explicit WGroupInfo();
+
     /**
      * Destroys the group meta data set.
      */
     virtual ~WGroupInfo();
+
     /**
      * Returns the point count of not segmented point areas.
      * \return Point count of not segmented area points.
      */
     size_t getAreaMissingPointCount();
+
     /**
      * Returns the amount of correctly segmented point areas.
      * Completeness is calculated by means of Lari/Habib 2014 as folowing: 
@@ -63,6 +66,7 @@ public:
      * \return The amount of correctly segmented point areas ( 0.0 ~ 1.0 ).
      */
     double getAreaCompleteness();
+
     /**
      * Returns the amount of correctly segmented points regarding the reference group 
      * points. Completeness is calculated by means of Lari/Habib 2014 as folowing: 
@@ -70,12 +74,14 @@ public:
      * \return The amount of correctly segmented points ( 0.0 ~ 1.0 ).
      */
     double getCompletess();
+
     /**
      * Returns the point count of the group to be validated that was correctly segmented 
      * regarding a reference group.
      * \return Count of correctly segmented points.
      */
     size_t getCorrectlyDetectedPointCount();
+
     /**
      * Returns the correctness amount of group points to be validated.
      * Correctness is calculated by means of Lari/Habib 2014 as folowing: 
@@ -83,11 +89,13 @@ public:
      * \return Correctness of the point group to be validated.
      */
     double getCorrectness();
+
     /**
      * Returns the reference group ID.
      * \return ID of the reference group.
      */
     size_t getReferenceGroupID();
+
     /**
      * Returns the group within the validated point group set that matches at most to a 
      * reference group.
@@ -95,11 +103,13 @@ public:
      *         reference group.
      */
     size_t getValidatedGroupID();
+
     /**
      * Returns the point count of the reference group.
      * \return Point count of the reference group.
      */
     size_t getReferenceGroupPointCount();
+
     /**
      * Returns the point count of a group to be validated that does not belong to the 
      * reference group.
@@ -113,6 +123,7 @@ public:
      * \param groupID ID of the reference group.
      */
     void setReferenceGroupID( size_t groupID );
+
     /**
      * Sets the group within the validated point group set that matches at most to a 
      * reference group.
@@ -120,23 +131,27 @@ public:
      *                reference group.
      */
     void setValidatedGroupID( size_t groupID );
+
     /**
      * Sets the point count of the reference group.
      * \param referenceGroupPointCount Point count of the reference group.
      */
     void setReferenceGroupPointCount( size_t referenceGroupPointCount );
+
     /**
      * Sets the point count of the group to be validated that was correctly segmented 
      * regarding a reference group.
      * \param correctlyDetectedPointCount Count of correctly segmented points.
      */
     void setCorrectlyDetectedPointCount( size_t correctlyDetectedPointCount );
+
     /**
      * Sets the point count of a group to be validated that does not belong to the 
      * reference group.
      * \param uncorrectlyDetectedPointCount Not correctly segmented point count.
      */
     void setUncorrectlyDetectedPointCount( size_t uncorrectlyDetectedPointCount );
+
     /**
      * Returns the point count of not segmented point areas. Missing area points are 
      * marked by choosing reference points that can not be reached regarding a radius 
@@ -150,25 +165,30 @@ private:
      * Reference point group ID.
      */
     size_t m_referenceGroupID;
+
     /**
      * ID of a group within the point dataset to be validated. It is usually the group 
      * with the best matches corresponding to the reference group.
      */
     size_t m_validatedGroupID;
+
     /**
      * Plane cluster ID of the point.
      */
     size_t m_referenceGroupPointCount;
+
     /**
      * Point count within the group to be validated that is covered by the reference 
      * group.
      */
     size_t m_correctlyDetectedPointCount;
+
     /**
      * Point count within the group to be validated that does not belong to the 
      * reference group.
      */
     size_t m_uncorrectlyDetectedPointCount;
+
     /**
      * Area of a reference group that was not segmented by a group to be validated. Area 
      * completeness is calculated just like completeness. But as difference a radius is 

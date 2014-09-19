@@ -45,6 +45,7 @@ boost::shared_ptr< WDataSetPoints > WGroupValidator::getOutlineNotSegmentedPoint
             m_notSegmentedPointsVertices, m_notSegmentedPointsColors ) );
     return notDetectedPointset;
 }
+
 boost::shared_ptr< WDataSetPoints > WGroupValidator::getOutlinePointsBelongingForeignGroups()
 {
     if( m_falseSegmentedVertices->size() == 0 )
@@ -54,6 +55,7 @@ boost::shared_ptr< WDataSetPoints > WGroupValidator::getOutlinePointsBelongingFo
             new WDataSetPoints( m_falseSegmentedVertices, m_falseSegmentedColors ) );
     return wronglyDetectedPointset;
 }
+
 boost::shared_ptr< WDataSetPoints > WGroupValidator::getOutlineNotSegmentedGroupAreas()
 {
     if( m_pointsOfNotSegmentedAreasVertices->size() == 0 )
@@ -73,6 +75,7 @@ void WGroupValidator::setCoordinateAccuracy( double maxEuclideanDeviance )
 {
     m_coordinateAccuracy = maxEuclideanDeviance;
 }
+
 void WGroupValidator::setAreaTestingPointRadius( double areaTestingPointRadius )
 {
     m_areaTestingPointRadius = areaTestingPointRadius;
@@ -209,6 +212,7 @@ void WGroupValidator::validateGroup( size_t referenceGroupID, size_t validatedGr
     m_groupInfo->at( referenceGroupID )->setUncorrectlyDetectedPointCount( uncorrectPoints );
     m_groupInfo->at( referenceGroupID )->setPointCountOfMissingAreas( pointCountOfMissingAreas );
 }
+
 void WGroupValidator::identifyNotSegmentedGroupPoints()
 {
     WPointSubtactionHelper correctlyDetected;
@@ -251,6 +255,7 @@ void WGroupValidator::identifyNotSegmentedGroupPoints()
         }
     }
 }
+
 size_t WGroupValidator::getBestMatchingGroupID( boost::shared_ptr< WDataSetPoints > referenceGroup )
 {
     WDataSetPointsGrouped::VertexArray validatedVerts(
@@ -300,6 +305,7 @@ size_t WGroupValidator::getBestMatchingGroupID( boost::shared_ptr< WDataSetPoint
     }
     return 0;
 }
+
 boost::shared_ptr< WDataSetPoints > WGroupValidator::getPointsOfGroup(
         boost::shared_ptr< WDataSetPointsGrouped > groupedPoints, size_t groupID )
 {
@@ -336,6 +342,7 @@ boost::shared_ptr< WDataSetPoints > WGroupValidator::getPointsOfGroup(
         return outputPoints;
     }
 }
+
 boost::shared_ptr< WDataSetPoints > WGroupValidator::getEmptyShowablePointSet()
 {
     WDataSetPoints::VertexArray newVertices(

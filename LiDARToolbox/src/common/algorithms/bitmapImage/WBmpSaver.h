@@ -42,10 +42,12 @@ public:
      * Bmp image saver constructor
      */
     WBmpSaver();
+
     /**
      * Bmp image saver destructor
      */
     virtual ~WBmpSaver();
+
     /**
      * Static method to save an image as a bmp file.
      * \param image The image to store.

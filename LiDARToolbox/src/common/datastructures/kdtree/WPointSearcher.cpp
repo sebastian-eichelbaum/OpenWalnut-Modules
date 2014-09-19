@@ -37,6 +37,7 @@ WPointSearcher::WPointSearcher()
     m_maxSearchDistance = 0.5;
     m_foundPoints = 0;
 }
+
 WPointSearcher::WPointSearcher( WKdTreeND* kdTree )
 {
     m_distanceSteps = 4;
@@ -46,11 +47,13 @@ WPointSearcher::WPointSearcher( WKdTreeND* kdTree )
     m_examinedKdTree = kdTree;
     m_foundPoints = 0;
 }
+
 WPointSearcher::~WPointSearcher()
 {
     m_searchedCoordinate.resize( 0 );
     m_searchedCoordinate.reserve( 0 );
 }
+
 vector<WPointDistance>* WPointSearcher::getNearestPoints()
 {
     m_foundPoints = new vector<WPointDistance>(); //TODO(aschwarzkopf): Only debugging step over crashes on that line.
@@ -75,6 +78,7 @@ vector<WPointDistance>* WPointSearcher::getNearestPoints()
     }
     return m_foundPoints;
 }
+
 size_t WPointSearcher::getNearestNeighborCount()
 {
     if( m_maxResultPointCount == numeric_limits< size_t >::max() )
@@ -89,6 +93,7 @@ size_t WPointSearcher::getNearestNeighborCount()
         return neighbourCount;
     }
 }
+
 size_t WPointSearcher::getNearestNeighborCountInfiniteMaxCount( WKdTreeND* currentNode )
 {
     size_t pointCount = 0;
@@ -122,26 +127,32 @@ size_t WPointSearcher::getNearestNeighborCountInfiniteMaxCount( WKdTreeND* curre
     }
     return pointCount;
 }
+
 void WPointSearcher::setExaminedKdTree( WKdTreeND* kdTree )
 {
     m_examinedKdTree = kdTree;
 }
+
 void WPointSearcher::setSearchedPoint( const vector<double>& searchedPoint )
 {
     m_searchedCoordinate = searchedPoint;
 }
+
 void WPointSearcher::setMaxSearchDistance( double distance )
 {
     m_maxSearchDistance = distance;
 }
+
 void WPointSearcher::setMaxResultPointCount( size_t maxPointCount )
 {
     m_maxResultPointCount = maxPointCount;
 }
+
 void WPointSearcher::setMaxResultPointCountInfinite()
 {
     m_maxResultPointCount = numeric_limits< size_t >::max();
 }
+
 void WPointSearcher::traverseNodePoints( WKdTreeND* currentNode, double maxDistance )
 {
     vector<WKdPointND* >* nodePoints = currentNode->getNodePoints();
@@ -173,10 +184,12 @@ void WPointSearcher::traverseNodePoints( WKdTreeND* currentNode, double maxDista
         }
     }
 }
+
 void WPointSearcher::onPointFound( WKdPointND* point )
 {
     m_foundPoints->push_back( WPointDistance( m_searchedCoordinate, point ) );
 }
+
 bool WPointSearcher::pointCanBelongToPointSet( const vector<double>& point, double maxDistance )
 {
     return WVectorMaths::getEuclidianDistance( m_searchedCoordinate, point ) <= maxDistance;

@@ -67,6 +67,7 @@ const char** WMWallDetectionByPCA::getXPMIcon() const
 {
     return WMWallDetectionByPCA_xpm;
 }
+
 const std::string WMWallDetectionByPCA::getName() const
 {
     return "Wall Detection by PCA";
@@ -220,6 +221,7 @@ void WMWallDetectionByPCA::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMWallDetectionByPCA::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

@@ -46,6 +46,7 @@ public:
      * Initialiizes the wall detection voxel.
      */
     WWallDetectOctNode();
+
     /**
      * Initializes the wall detection voxel also filling its space coverage 
      * parameters.
@@ -56,10 +57,12 @@ public:
      *               direction.
      */
     WWallDetectOctNode( double centerX, double centerY, double centerZ, double radius );
+
     /**
      * Destroys the wall detection voxel.
      */
     virtual ~WWallDetectOctNode();
+
     /**
      * The octree instance uses this method to instantiate a new node of the same 
      * class.
@@ -71,6 +74,7 @@ public:
      * \return New node instance of the same class.
      */
     virtual WOctNode* newInstance( double centerX, double centerY, double centerZ, double radius );
+
     /**
      * Adds a coordinate to the node for the PCA analysis.
      * That method is executed when touchuing a coordinate.
@@ -79,33 +83,39 @@ public:
      * \param z Z coordinate of the new point.
      */
     virtual void onTouchPosition( double x, double y, double z );
+
     /**
      * Returns the mean coordinate of all input points.
      * \return The mean coordinate of all input points.
      */
     WPosition getMean();
+
     /**
      * Sets the mean coordinate of all input points.
      * \param mean The mean coordinate of all input points.
      */
     void setMean( WPosition mean );
+
     /**
      * Returns the input points covered by the node.
      * \return Input point data covered by the node.
      */
     vector<WPosition>* getInputPoints();
+
     /**
      * Returns the normal vector of the node. It points to the least point 
      * distributed direction.
      * \return The surface normal vector of the node.
      */
     WVector3d getNormalVector();
+
     /**
      * Returns the Eigen Vector of the biggest Eigen Value. It's usually the most 
      * spread direction of input points.
      * \return The Eigen Vector of the biggest Eigen Value.
      */
     WVector3d getStrongestEigenVector();
+
     /**
      * Returns a particular Eigen Vector. Its index corresponts to getEigenValues().
      * The items are sorted descending by the Eigen Value.
@@ -113,12 +123,14 @@ public:
      * \return Eigen Vector of an index.
      */
     WVector3d getEigenVector( size_t index );
+
     /**
      * Sets the Eigen Vectors for the node. The index of the vectors must correspond
      * to setEigenValues().
      * \param eigenVectors Eigen Vectors to set.
      */
     void setEigenVectors( vector<WVector3d> eigenVectors );
+
     /**
      * Returns the linear level of an octree voxel. It's an quotient of the second 
      * Eigen Value over the biggest one. More linear point sets have a smaller 
@@ -126,12 +138,14 @@ public:
      * \return The linear level of this node.
      */
     double getLinearLevel();
+
     /**
      * Returns the smallest point distribution direction strength divided by the 
      * strongest. Very small values indicate a surface.
      * \return The isotropic threshold of the node.
      */
     double getIsotropicLevel();
+
     /**
      * Returns the Eigen Values of the input point set. They are sorting descending. 
      * Their index corresponds to getEigenVector(size_t index). The Eigen Value is 
@@ -140,12 +154,14 @@ public:
      * \return Eigen Values of the node.
      */
     vector<double> getEigenValues();
+
     /**
      * Sets the eigen values for the node. The Index of that values must correspond
      * to setEigenVectors().
      * \param eigenValues Eigen Values to set.
      */
     void setEigenValues( vector<double> eigenValues );
+
     /**
      * Tells whether a node has statistical information as Eigen Vectors and Eigen
      * Values Usually the Principal Component Analysis fails on point sets below a 
@@ -153,6 +169,7 @@ public:
      * \return The node has Eigen Values and Eigen Vectors or not.
      */
     bool hasEigenValuesAndVectors();
+
     /**
      * Clears the input point data. It mainly frees space after the Principal
      * Component Analysis.
@@ -164,15 +181,18 @@ private:
      * Input points covered by the space of the node.
      */
     vector<WPosition>* m_inputPoints;
+
     /**
      * The mean coordinate of all input points.
      */
     WPosition m_mean;
+
     /**
      * The smallest point distribution direction strength divided by the most 
      * strongest. Very small values indicate a surface.
      */
     vector<double> m_eigenValues;
+
     /**
      * The weakest point distribution direction. It's meant to show a surface normal 
      * vector.

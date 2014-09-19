@@ -32,15 +32,18 @@ WLeastSquares::WLeastSquares()
     m_dimensions = 3;
     m_verticalDimension = 2;
 }
+
 WLeastSquares::WLeastSquares( size_t dimensions )
 {
     m_positions = 0;
     m_dimensions = dimensions;
     m_verticalDimension = 2;
 }
+
 WLeastSquares::~WLeastSquares()
 {
 }
+
 void WLeastSquares::analyzeData( vector<WPosition>* data )
 {
     m_positions = data;
@@ -48,10 +51,12 @@ void WLeastSquares::analyzeData( vector<WPosition>* data )
     calculateMatrices();
     calculateHessianNormalForm();
 }
+
 vector<double> WLeastSquares::getHessianNormalForm()
 {
     return m_hessianNormalForm;
 }
+
 vector<double> WLeastSquares::getNormalVectorNotNormalized()
 {
     vector<double> normalVector;
@@ -59,6 +64,7 @@ vector<double> WLeastSquares::getNormalVectorNotNormalized()
         normalVector.push_back( m_hessianNormalForm[dimension] );
     return normalVector;
 }
+
 void WLeastSquares::calculatePerpendicularDimension()
 {
     WPrincipalComponentAnalysis pca;
@@ -84,6 +90,7 @@ void WLeastSquares::calculatePerpendicularDimension()
             m_verticalDimension = index;
         }
 }
+
 void WLeastSquares::calculateMatrices()
 {
     if( m_positions->size() > 0 )
@@ -103,6 +110,7 @@ void WLeastSquares::calculateMatrices()
         }
     }
 }
+
 void WLeastSquares::calculateHessianNormalForm()
 {
     MatrixXd matrixXTranspose = m_matrixX.transpose();
@@ -115,10 +123,12 @@ void WLeastSquares::calculateHessianNormalForm()
         m_hessianNormalForm[index <= m_verticalDimension ?index - 1 :index] =
                 -result( index, 0 );
 }
+
 vector<double> WLeastSquares::getParametersXYZ0_()
 {
     return getParametersXYZ0( m_hessianNormalForm );
 }
+
 vector<double> WLeastSquares::getParametersXYZ0( const vector<double>& hessianNormalForm )
 {
     vector<double> parameters;
@@ -136,6 +146,7 @@ vector<double> WLeastSquares::getParametersXYZ0( const vector<double>& hessianNo
     parameters.push_back( -c * d / sum );
     return parameters;
 }
+
 double WLeastSquares::getDistanceToPlane( WPosition point )
 {
     double normalAbsolute = 0;
@@ -148,10 +159,12 @@ double WLeastSquares::getDistanceToPlane( WPosition point )
         distance += point[dimension] * m_hessianNormalForm[dimension];
     return ( distance + m_hessianNormalForm[m_dimensions] ) / normalAbsolute;
 }
+
 WPosition WLeastSquares::getNearestPointTo( WPosition point )
 {
     return getNearestPointTo( m_hessianNormalForm, point );
 }
+
 WPosition WLeastSquares::getNearestPointTo( const vector<double>& planeHessianNormalForm, WPosition point )
 {
     double dimensions = planeHessianNormalForm.size() - 1;

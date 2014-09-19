@@ -236,6 +236,7 @@ void WMElevationImageExport::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMElevationImageExport::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

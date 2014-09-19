@@ -34,6 +34,7 @@ WGroupEdit::WGroupEdit()
 WGroupEdit::~WGroupEdit()
 {
 }
+
 void WGroupEdit::initProocessBegin()
 {
     m_groupSizes.resize( 0 );
@@ -50,14 +51,17 @@ void WGroupEdit::initProocessBegin()
             new WDataSetPointsGrouped::GroupArray::element_type() );
     m_groups = newGroups;
 }
+
 void WGroupEdit::setMergeGroups( bool mergeGroups )
 {
     m_mergeGroups = mergeGroups;
 }
+
 void WGroupEdit::setGroupSizeThreshold( size_t groupSizeThreshold )
 {
     m_groupSizeThreshold = groupSizeThreshold;
 }
+
 void WGroupEdit::mergeGroupSet( boost::shared_ptr< WDataSetPointsGrouped > points )
 {
     size_t groupIDOffset = m_lastGroupID == 0 ?0 :m_lastGroupID + 1;
@@ -94,18 +98,22 @@ void WGroupEdit::mergeGroupSet( boost::shared_ptr< WDataSetPointsGrouped > point
         }
     }
 }
+
 double WGroupEdit::getVertex( size_t pointIndex, size_t dimension )
 {
     return m_vertices->at( pointIndex * 3 + dimension );
 }
+
 double WGroupEdit::getColor( size_t pointIndex, size_t colorChannel )
 {
     return m_colors->at( pointIndex * 3 + colorChannel );
 }
+
 size_t WGroupEdit::getOldGroupID( size_t pointIndex )
 {
     return m_groups->at( pointIndex );
 }
+
 size_t WGroupEdit::getNewGroupID( size_t pointIndex )
 {
     size_t originalGroupID = getOldGroupID( pointIndex );
@@ -113,6 +121,7 @@ size_t WGroupEdit::getNewGroupID( size_t pointIndex )
         return originalGroupID;
     return m_groupIDMap[originalGroupID];
 }
+
 bool WGroupEdit::isPointCollected( size_t pointIndex )
 {
     size_t originalGroupID = getOldGroupID( pointIndex );
@@ -120,6 +129,7 @@ bool WGroupEdit::isPointCollected( size_t pointIndex )
         return false;
     return m_groupSizes[originalGroupID] >= m_groupSizeThreshold;
 }
+
 size_t WGroupEdit::getInputPointCount()
 {
     return m_vertices->size() / 3;
@@ -131,6 +141,7 @@ size_t WGroupEdit::getLastGroupID()
 {
     return m_lastGroupID;
 }
+
 size_t WGroupEdit::getGroupSize( size_t origGroupID )
 {
     return m_groupSizes[origGroupID];
@@ -147,6 +158,7 @@ void WGroupEdit::modifyGroupIDs()
             m_groupIDMap[index] = currentID++;
     m_lastGroupID = currentID - 1;
 }
+
 bool WGroupEdit::isValidGroupID( size_t groupID )
 {
     return groupID < 1000 * 1000 * 100;

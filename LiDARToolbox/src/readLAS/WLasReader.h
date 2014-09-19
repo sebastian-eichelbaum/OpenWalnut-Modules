@@ -76,6 +76,7 @@ namespace laslibb
          * \return LiDAR data set points containing intensities or colors.
          */
         boost::shared_ptr< WDataSetPoints > getPoints();
+
         /**
          * Sets from which data set region the point data should be loaded.
          * \param fromX The minimal read X coordinate.
@@ -84,11 +85,13 @@ namespace laslibb
          *         No cropping is applied using the value 0.
          */
         void setDataSetRegion( size_t fromX, size_t fromY, size_t dataSetWidth );
+
         /**
          * Sets whether to move the input data to the coordinate system center.
          * \param translateToCenter Move the data to the center of the coordinate system.
          */
         void setTranslateToCenter( bool translateToCenter );
+
         /**
          * Sets the value that multiplies the intensity of the color output.
          * \param contrast The value that multiplies the intensity of the color output.
@@ -100,36 +103,43 @@ namespace laslibb
          * \return The minimal X coordinate.
          */
         float getXMin();
+
         /**
          * Returns the maximal X coordinate.
          * \return The maximal X coordinate.
          */
         float getXMax();
+
         /**
          * Returns the minimal Y coordinate.
          * \return The minimal Y coordinate.
          */
         float getYMin();
+
         /**
          * Returns the maximal Y coordinate.
          * \return The maximal Y coordinate.
          */
         float getYMax();
+
         /**
          * Returns the minimal Z coordinate.
          * \return The minimal Z coordinate.
          */
         float getZMin();
+
         /**
          * Returns the maximal Z coordinate.
          * \return The maximal Z coordinate.
          */
         float getZMax();
+
         /**
          * Returns the minimal color intensity in LAS file.
          * \return Minimal color intensity in LAS file.
          */
         float getIntensityMin();
+
         /**
          * Returns the maximal color intensity in LAS file.
          * \return Maximal color intensity in LAS file.
@@ -148,10 +158,12 @@ namespace laslibb
          * Field to output the WDataSetPoints points data.
          */
         boost::shared_ptr< WDataSetPoints > m_outputPoints;
+
         /**
          * Linkd module progress bar.
          */
         boost::shared_ptr< WProgressCombiner > m_associatedProgressCombiner;
+
         /**
          * Progress bar status.
          */
@@ -161,22 +173,27 @@ namespace laslibb
          * Input LAS file path.
          */
         const char* filePath;
+
         /**
          * The minimal read X coordinate.
          */
         double m_fromX;
+
         /**
          * The minimal read Y coordinate.
          */
         double m_fromY;
+
         /**
          * The width of the read data set. No cropping is applied using the value 0.
          */
         double m_dataSetWidth;
+
         /**
          * Setting whether to move the data to the center of the coordinate system.
          */
         bool m_translateToCenter;
+
         /**
          * The value that multiplies the intensity of the color output.
          */
@@ -186,30 +203,37 @@ namespace laslibb
          * Minimal X coordinate in LAS file.
          */
         float m_xMin;
+
         /**
          * Maximal X coordinate in LAS file.
          */
         float m_xMax;
+
         /**
          * Minimal Y coordinate in LAS file.
          */
         float m_yMin;
+
         /**
          * Maximal Y coordinate in LAS file.
          */
         float m_yMax;
+
         /**
          * Minimal Z coordinate in LAS file.
          */
         float m_zMin;
+
         /**
          * Maximal Z coordinate in LAS file.
          */
         float m_zMax;
+
         /**
          * Minimal color intensity in LAS file.
          */
         float m_intensityMin;
+
         /**
          * Maximal color intensity in LAS file.
          */

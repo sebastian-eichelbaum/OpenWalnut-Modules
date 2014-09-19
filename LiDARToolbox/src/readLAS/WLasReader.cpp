@@ -44,12 +44,14 @@ namespace laslibb
         m_translateToCenter = true;
         m_contrast = 0.005;
     }
+
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
         m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 1;
         filePath = 0;
     }
+
     WLasReader::~WLasReader()
     {
     }
@@ -153,48 +155,59 @@ namespace laslibb
 
         return m_outputPoints;
     }
+
     void WLasReader::setDataSetRegion( size_t fromX, size_t fromY, size_t dataSetWidth )
     {
         m_fromX = fromX;
         m_fromY = fromY;
         m_dataSetWidth = dataSetWidth;
     }
+
     void WLasReader::setTranslateToCenter( bool translateToCenter )
     {
         m_translateToCenter = translateToCenter;
     }
+
     void WLasReader::setContrast( double contrast )
     {
         m_contrast = contrast;
     }
+
     float WLasReader::getXMin()
     {
         return m_xMin;
     }
+
     float WLasReader::getXMax()
     {
         return m_xMax;
     }
+
     float WLasReader::getYMin()
     {
         return m_yMin;
     }
+
     float WLasReader::getYMax()
     {
         return m_yMax;
     }
+
     float WLasReader::getZMin()
     {
         return m_zMin;
     }
+
     float WLasReader::getZMax()
     {
         return m_zMax;
     }
+
     float WLasReader::getIntensityMin()
     {
         return m_intensityMin;
     }
+
     float WLasReader::getIntensityMax()
     {
         return m_intensityMax;

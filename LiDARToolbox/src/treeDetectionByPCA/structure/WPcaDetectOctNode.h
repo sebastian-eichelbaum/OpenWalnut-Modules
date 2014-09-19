@@ -42,6 +42,7 @@ public:
      * Creates a new node
      */
     WPcaDetectOctNode();
+
     /**
      * Octree node constructor.
      * \param centerX X coordinate of the octree node center.
@@ -51,10 +52,12 @@ public:
      * direction.
      */
     WPcaDetectOctNode( double centerX, double centerY, double centerZ, double radius );
+
     /**
      * Destructor of the octree node
      */
     virtual ~WPcaDetectOctNode();
+
     /**
      * The octree instance uses this method to instantiate a new node of the same type.
      * \param centerX X coordinate of the octree node center.
@@ -65,6 +68,7 @@ public:
      * \return New node instance of the same type.
      */
     virtual WOctNode* newInstance( double centerX, double centerY, double centerZ, double radius );
+
     /**
      * Adds a point to the inpuz data set.
      * This method is executed every time when this node is touched.
@@ -73,21 +77,25 @@ public:
      * \param z Z coordinate of the new point.
      */
     virtual void onTouchPosition( double x, double y, double z );
+
     /**
      * Returns input data points. covered by the node's area.
      * \return Input point data set.
      */
     vector<WPosition>* getInputPoints();
+
     /**
      * Sets the node color.
      * \param color Node color to assign.
      */
     void setColor( osg::Vec4 color );
+
     /**
      * returns the node color.
      * \return the color of the node.
      */
     osg::Vec4 getColor();
+
     /**
      * Sets the isotropic level of the node. More exactly said: Smallest point 
      * distribution direction strength divided by the biggest one (Smalles igen Value 
@@ -95,6 +103,7 @@ public:
      * \param eigenValueQuotient The value that describes the isotropic level.
      */
     void setEigenValueQuotient( double eigenValueQuotient );
+
     /**
      * Returns the isotropic level of the node. More exactly said: Smallest point 
      * distribution direction strength divided by the biggest one (Smalles igen Value 
@@ -102,12 +111,14 @@ public:
      * \return The value that describes the isotropic level.
      */
     double getEigenValueQuotient();
+
     /**
      * Says whether the node has got the information about the point's isotropic
      * level.
      * \return Point has got information about the istropic level or not.
      */
     bool hasEigenValueQuotient();
+
     /**
      * Clears the input point data. It mainly frees space after the Principal
      * Component Analysis.
@@ -119,10 +130,12 @@ private:
      * Input data set points covered by that node.
      */
     vector<WPosition>* m_inputPoints;
+
     /**
      * Quotient of the smallest Eigen Value over the biggest.
      */
     double m_eigenValueQuotient;
+
     /**
      * Marker that says whether the node has the information about its point's
      * isotropic level.

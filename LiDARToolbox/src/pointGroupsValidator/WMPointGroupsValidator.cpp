@@ -194,12 +194,6 @@ void WMPointGroupsValidator::moduleMain()
 
 
 
-
-
-
-
-
-
 void WMPointGroupsValidator::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

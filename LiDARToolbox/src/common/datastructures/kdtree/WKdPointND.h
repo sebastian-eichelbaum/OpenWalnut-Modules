@@ -44,12 +44,14 @@ public:
      * \param coordinate N dimensional coordinate of the new kd tree point.
      */
     explicit WKdPointND( vector<double> coordinate );
+
     /**
      * Instance to create a two dimensional kd tree point instance.
      * \param x Three dimensional X coordinate of the new kd tree point.
      * \param y Three dimensional Y coordinate of the new kd tree point.
      */
     WKdPointND( double x, double y );
+
     /**
      * Instance to create a three dimensional kd tree point instance.
      * \param x X coordinate of the new kd tree point.
@@ -57,6 +59,7 @@ public:
      * \param z Z coordinate of the new kd tree point.
      */
     WKdPointND( double x, double y, double z );
+
     /**
      * Destroys a kd tree point instance.
      */
@@ -67,11 +70,13 @@ public:
      * \return Dimension count of a kd tree point.
      */
     size_t getDimensionCount();
+
     /**
      * Returns the coordinate of a kd tree point.
      * \return Coordinate of a kd tree point.
      */
     vector<double> getCoordinate();
+
     /**
      * Sets coordinate of the point.
      * \param coordinate Point's coordinate.

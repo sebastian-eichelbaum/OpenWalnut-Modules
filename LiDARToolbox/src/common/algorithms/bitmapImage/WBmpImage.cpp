@@ -38,14 +38,17 @@ WBmpImage::~WBmpImage()
 {
     resizeImage( 0, 0 );
 }
+
 size_t WBmpImage::getSizeX()
 {
     return m_sizeX;
 }
+
 size_t WBmpImage::getSizeY()
 {
     return m_sizeY;
 }
+
 void WBmpImage::resizeImage( size_t sizeX, size_t sizeY )
 {
     m_sizeX = sizeX;
@@ -64,30 +67,36 @@ void WBmpImage::resizeImage( size_t sizeX, size_t sizeY )
         m_dataB[index] = 0;
     }
 }
+
 size_t WBmpImage::getR( size_t x, size_t y )
 {
     if( x >= m_sizeX || y >= m_sizeY ) return 0;
     return m_dataR[getIndex( x, y )];
 }
+
 size_t WBmpImage::getG( size_t x, size_t y )
 {
     if( x >= m_sizeX || y >= m_sizeY ) return 0;
     return m_dataG[getIndex( x, y )];
 }
+
 size_t WBmpImage::getB( size_t x, size_t y )
 {
     if( x >= m_sizeX || y >= m_sizeY ) return 0;
     return m_dataB[getIndex( x, y )];
 }
+
 size_t WBmpImage::getA( size_t x, size_t y )
 {
     if( x >= m_sizeX || y >= m_sizeY ) return 0;
     return 255;
 }
+
 void WBmpImage::setPixel( size_t x, size_t y, size_t intensity )
 {
     setPixel( x, y, intensity, intensity, intensity );
 }
+
 void WBmpImage::setPixel( size_t x, size_t y, size_t r, size_t g, size_t b )
 {
     if( x >= m_sizeX || y >= m_sizeY ) return;
@@ -96,6 +105,7 @@ void WBmpImage::setPixel( size_t x, size_t y, size_t r, size_t g, size_t b )
     m_dataG[index] = g < 256 ?g :255;
     m_dataB[index] = b < 256 ?b :255;
 }
+
 size_t WBmpImage::getIndex( size_t x, size_t y )
 {
     return x + m_sizeX * y;
@@ -137,6 +147,7 @@ void WBmpImage::importElevationImageDrawNode( WQuadNode* node, WQuadTree* quadTr
                 importElevationImageDrawNode( node->getChild( child ), quadTree, elevImageMode );
     }
 }
+
 void WBmpImage::setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter )
 {
     m_minElevImageZ = minElevImageZ;

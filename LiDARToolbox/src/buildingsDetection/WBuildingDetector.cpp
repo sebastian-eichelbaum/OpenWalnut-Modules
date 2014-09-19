@@ -66,6 +66,7 @@ void WBuildingDetector::detectBuildings( boost::shared_ptr< WDataSetPoints > poi
     //targetShowables->setExportElevationImageSettings( -16.0, 8.0 );
     //targetShowables->exportElevationImage( "/home/renegade/Dokumente/Projekte/OpenWalnut@Eclipse/elevation images/targetShowables.bmp", 1 );
 }
+
 void WBuildingDetector::setDetectionParams( int detailDepth, int minSearchDetailDepth,
         double minSearchCutUntilAbove )
 {
@@ -73,10 +74,12 @@ void WBuildingDetector::setDetectionParams( int detailDepth, int minSearchDetail
     m_minSearchDetailDepth = pow( 2.0, minSearchDetailDepth );
     m_minSearchCutUntilAbove = minSearchCutUntilAbove;
 }
+
 WOctree* WBuildingDetector::getBuildingGroups()
 {
     return m_targetGrouped3d;
 }
+
 void WBuildingDetector::initMinimalMaxima( WQuadNode* sourceNode, WQuadTree* targetTree )
 {
     if  ( sourceNode->getRadius() <= m_detailDepth )
@@ -97,6 +100,7 @@ void WBuildingDetector::initMinimalMaxima( WQuadNode* sourceNode, WQuadTree* tar
                 initMinimalMaxima( sourceNode->getChild( child ), targetTree );
     }
 }
+
 void WBuildingDetector::projectDrawableAreas( WQuadNode* sourceNode,
         WQuadTree* minimalMaxima, WQuadTree* targetTree )
 {

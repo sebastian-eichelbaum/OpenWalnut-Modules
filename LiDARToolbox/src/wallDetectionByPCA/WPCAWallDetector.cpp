@@ -38,10 +38,12 @@ WPCAWallDetector::~WPCAWallDetector()
     m_maximalGroupSize = 100000000;
     m_minimalPointsPerVoxel = 1;
 }
+
 void WPCAWallDetector::analyze()
 {
     analyzeNode( static_cast<WWallDetectOctNode*>( m_analyzableOctree->getRootNode() ) );
 }
+
 void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
 {
     m_progressStatus->increment( 1 );
@@ -64,6 +66,7 @@ void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
                 analyzeNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ) );
     }
 }
+
 boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSetPoints::VertexArray inputVertices )
 {
     WDataSetPoints::VertexArray outVertices(
@@ -108,6 +111,7 @@ boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSet
             new WDataSetPoints( outVertices, outColors ) );
     return outputPoints;
 }
+
 boost::shared_ptr< WTriangleMesh > WPCAWallDetector::getOutline()
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
@@ -137,6 +141,7 @@ void WPCAWallDetector::drawNode( WWallDetectOctNode* node, boost::shared_ptr< WT
                 drawNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ), outputMesh );
     }
 }
+
 void WPCAWallDetector::drawLeafNodeCube( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
     size_t index = outputMesh->vertSize();
@@ -174,6 +179,7 @@ void WPCAWallDetector::drawLeafNodeCube( WWallDetectOctNode* node, boost::shared
     outputMesh->addTriangle( index + 2, index + 6, index + 3 );
     outputMesh->addTriangle( index + 6, index + 7, index + 3 );
 }
+
 void WPCAWallDetector::drawLeafNodeNormalVector( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
     if( !node->hasEigenValuesAndVectors() )
@@ -223,18 +229,22 @@ void WPCAWallDetector::drawLeafNodeNormalVector( WWallDetectOctNode* node, boost
     outputMesh->addTriangle( index + 4, index + 5, index + 6 );
     outputMesh->addTriangle( index + 4, index + 6, index + 7 );
 }
+
 void WPCAWallDetector::setMinimalGroupSize( double minimalGroupSize )
 {
     m_minimalGroupSize = minimalGroupSize;
 }
+
 void WPCAWallDetector::setMaximalGroupSize( double maximalGroupSize )
 {
     m_maximalGroupSize = maximalGroupSize;
 }
+
 void WPCAWallDetector::setMinimalPointsPerVoxel( double minimalPointsPerVoxel )
 {
     m_minimalPointsPerVoxel = minimalPointsPerVoxel;
 }
+
 void WPCAWallDetector::setVoxelOutlineMode( size_t voxelOutlineMode )
 {
     m_voxelOutlineMode = voxelOutlineMode;

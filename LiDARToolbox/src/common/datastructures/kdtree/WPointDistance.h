@@ -47,6 +47,7 @@ public:
      * Sets up the object without filling parameters.
      */
     WPointDistance();
+
     /**
      * Instantiates the coordinate distance pair filling all necessary parameters.
      * \param sourcePoint Reference point used to calculate the distance. Its 
@@ -55,26 +56,31 @@ public:
      *                      between. The object stores its coordinates by that.
      */
     WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint );
+
     /**
      * Object destructor
      */
     virtual ~WPointDistance();
+
     /**
      * Returns the coordinate of the point compared to the reference.
      * \return The compared point coordinate.
      */
     vector<double> getComparedCoordinate();
+
     /**
      * Returns the point that is considered within the current distance calculation 
      * instance.
      * \return Point that is considered within the current distance calculation instance.
      */
     WKdPointND* getComparedPoint();
+
     /**
      * Returns the distance between the reference point and the compared one.
      * \return The distance between the two instantiated points using the constructor.
      */
     double getDistance();
+
     /**
      * Static method that fetches coordinates of WPointDistance sets into a three 
      * dimensional WPosition point list.
@@ -82,6 +88,7 @@ public:
      * \return A WPosition list. That type is very commonly used in OpenWalnut.
      */
     static vector<WPosition>* convertToPointSet( vector<WPointDistance>* pointDistances );
+
     /**
      * Operator for sorting a vector<WPointDistance> using std::sort.
      * \param right The right compared object to this one.
@@ -94,6 +101,7 @@ private:
      * The euclidian distance between the two points instantiated using the constructor.
      */
     double m_pointDistance;
+
     /**
      * The unidimensional coordinate of the compared point instantiated using the 
      * constructor.
