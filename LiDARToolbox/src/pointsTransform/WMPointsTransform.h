@@ -260,12 +260,12 @@ private:
     /**
      * Information about minimal X/Y/Z values.
      */
-    vector<WPropInt> m_infoBoundingBoxMin;
+    vector<WPropDouble> m_infoBoundingBoxMin;
 
     /**
      * Information about minimal X/Y/Z values.
      */
-    vector<WPropInt> m_infoBoundingBoxMax;
+    vector<WPropDouble> m_infoBoundingBoxMax;
 
     /**
      * Options for surface features.
@@ -305,7 +305,14 @@ private:
     /**
      * Switch to cut away the selection instead of to crop the area.
      */
-    WPropBool m_cutInsteadOfCrop;
+    WPropBool m_invertCropping;
+
+    /**
+     * The most right input connector is a point set which represents coordinates which 
+     * are subtracted from all input points. This switch inverts the selection that is 
+     * done by the subtraction.
+     */
+    WPropBool m_invertSubtraction;
 
     /**
      * Switch to temporarily turn of point set cropping.

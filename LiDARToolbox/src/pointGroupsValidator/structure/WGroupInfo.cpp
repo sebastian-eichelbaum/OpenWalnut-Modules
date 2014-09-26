@@ -90,6 +90,30 @@ size_t WGroupInfo::getUncorrectlyDetectedPointCount()
     return m_uncorrectlyDetectedPointCount;
 }
 
+bool WGroupInfo::isCertainlyDetected()
+{
+    return isCertainlyDetectedByCompleteness() && isCertainlyDetectedByPointAreaCompleteness()
+            && isCertainlyDetectedByCorectness();
+}
+
+bool WGroupInfo::isCertainlyDetectedByCompleteness()
+{
+    return getCompletess() >= m_minimalPointCompleteness;
+}
+
+bool WGroupInfo::isCertainlyDetectedByPointAreaCompleteness()
+{
+    return getAreaCompleteness() >= m_minimalpointAreaCompleteness;
+}
+
+bool WGroupInfo::isCertainlyDetectedByCorectness()
+{
+    return getCorrectness() >= m_minimalPointCorrectness;
+}
+
+
+
+
 
 
 void WGroupInfo::setReferenceGroupID( size_t groupID )
@@ -120,4 +144,19 @@ void WGroupInfo::setUncorrectlyDetectedPointCount( size_t uncorrectlyDetectedPoi
 void WGroupInfo::setPointCountOfMissingAreas( size_t pointCountOfMissingAreas )
 {
     m_pointCountOfMissingAreas = pointCountOfMissingAreas;
+}
+
+void WGroupInfo::setMinimalPointCompleteness( double minPointCompleteness )
+{
+    m_minimalPointCompleteness = minPointCompleteness;
+}
+
+void WGroupInfo::setMinimalPointAreaCompleteness( double minPointAreaCompleteness )
+{
+    m_minimalpointAreaCompleteness = minPointAreaCompleteness;
+}
+
+void WGroupInfo::setMinimalPointCorrectness( double minPointCorrectness )
+{
+    m_minimalPointCorrectness = minPointCorrectness;
 }

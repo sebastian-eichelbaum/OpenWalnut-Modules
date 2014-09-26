@@ -223,14 +223,15 @@ void WPointSaver::save()
     const char* path = tmp.c_str();
     remove( path );
     stream.open( path );
-    stream.precision( 16 );
 
     size_t pointCount = m_verts->size() / 3;
     for( size_t index = 0; index < pointCount; index++ )
     {
         //TODO(aschwarzkopf): This saving method is unprecise because saved points have not the full resolution of double values.
+        stream.precision( 16 );
         stream << m_verts->at( index * 3 + 0 ) << "\t";
         stream << m_verts->at( index * 3 + 1 ) << "\t";
+        stream.precision( 6 );
         stream << m_verts->at( index * 3 + 2 ) << "\t";
         stream << m_colors->at( index * 3 + 0 ) << "\t";
         stream << m_colors->at( index * 3 + 1 ) << "\t";

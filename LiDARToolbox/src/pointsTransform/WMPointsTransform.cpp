@@ -116,12 +116,12 @@ void WMPointsTransform::properties()
                                             "whole render process took.", 0.0 );
     m_infoInputPointCount = m_infoProperties->addProperty( "Input points: ", "", 0 );
     m_infoOutputPointCount = m_infoProperties->addProperty( "Output points: ", "", 0 );
-    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "X min: ", "", 0 ) );
-    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "X max: ", "", 0 ) );
-    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Y min: ", "", 0 ) );
-    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Y max: ", "", 0 ) );
-    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Z min: ", "", 0 ) );
-    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Z max: ", "", 0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "X min: ", "", 0.0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "X max: ", "", 0.0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Y min: ", "", 0.0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Y max: ", "", 0.0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Z min: ", "", 0.0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Z max: ", "", 0.0 ) );
 
 
     double number_range = 1000000000.0;
@@ -133,10 +133,11 @@ void WMPointsTransform::properties()
     m_toY = m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition );
     m_fromZ = m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition );
     m_toZ = m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition );
-    m_cutInsteadOfCrop = m_pointsCropGroup->addProperty( "Invert: ", "Cut instead of crop.", false, m_propCondition );
+    m_invertCropping = m_pointsCropGroup->addProperty( "Invert crop: ", "Cut instead of crop.", false, m_propCondition );
     m_disablePointCrop = m_pointsCropGroup->addProperty( "Disable cuts: ", "", false, m_propCondition );
     m_pointSubtractionRadius = m_pointsCropGroup->addProperty( "Subtr. r.: ", "Radius of subtracted coordinates "
                                                         "(most right input connector)", 0.0, m_propCondition );
+    m_invertSubtraction = m_pointsCropGroup->addProperty( "Invert subtr.: ", "Inverts point subtraction.", false, m_propCondition );
 
     m_translatePointsGroup = m_properties->addPropertyGroup( "Point translation",
                                             "Translates the points by the following amount of XYZ offset after cropping." );
@@ -401,8 +402,9 @@ void WMPointsTransform::addTransformedPoints()
                 &&  point->at( 2 ) >= m_fromZ->get() && point->at( 2 ) <= m_toZ->get();
         size_t modulo = m_skipRatio->get() + 1;
         bool isPointSkipped = index % ( modulo ) != 0;
-        bool remainsAfterCropping = isInsideSelection != m_cutInsteadOfCrop->get() || m_disablePointCrop->get();
-        if( remainsAfterCropping && !isPointSkipped && !m_pointSubtraction.pointsExistNearCoordinate( *point ) )
+        bool remainsAfterCropping = isInsideSelection != m_invertCropping->get() || m_disablePointCrop->get();
+        bool remainsAafterSubtraction = m_pointSubtraction.pointsExistNearCoordinate( *point ) == m_invertSubtraction->get();
+        if( remainsAfterCropping && !isPointSkipped && remainsAafterSubtraction )
         {
             WVectorMaths::addVector( point, offset );
             WVectorMaths::multiplyVector( point, factor );

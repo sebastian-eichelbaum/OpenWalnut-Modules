@@ -231,6 +231,8 @@ void WMSurfaceDetectionByLari::moduleMain()
             }
 
             WLariPointClassifier* classifier = new WLariPointClassifier();
+            WLariOutliner* outliner = new WLariOutliner( classifier );
+
             classifier->setNumberPointsK( m_numberPointsK->get() );
             classifier->setMaxPointDistanceR( m_maxPointDistanceR->get() );
             classifier->setCpuThreadCount( m_cpuThreadCount->get() );
@@ -241,6 +243,11 @@ void WMSurfaceDetectionByLari::moduleMain()
             classifier->setCylindricalNLambdaRange( 1, m_cylNLambda2Min->get(), m_cylNLambda2Max->get() );
             classifier->setCylindricalNLambdaRange( 2, m_cylNLambda3Min->get(), m_cylNLambda3Max->get() );
             classifier->analyzeData( inputPoints );
+
+            cout << "Outlining parameter domain" << endl;
+            m_outputSpatialDomainCategories->updateData( outliner->outlineSpatialDomainCategories() );
+            cout << "Outlining point planes" << endl;
+            m_outputLeastSquaresPlanes->updateData( outliner->outlineLeastSquaresPlanes( m_squareWidth->get() ) );
 
             WLariBruteforceClustering* clustering = new WLariBruteforceClustering( classifier );
             clustering->setSegmentationSettings( m_segmentationMaxAngleDegrees->get(), m_segmentationPlaneDistance->get() );
@@ -254,15 +261,10 @@ void WMSurfaceDetectionByLari::moduleMain()
                 boundaryDetector->detectBoundaries( classifier->getParameterDomain() );
             }
 
-            WLariOutliner* outliner = new WLariOutliner( classifier );
             cout << "Outlining spatial domain" << endl;
             m_outputSpatialDomainGroups->updateData( outliner->outlineSpatialDomainGroups() );
             cout << "Outlining parameter domain" << endl;
-            m_outputSpatialDomainCategories->updateData( outliner->outlineSpatialDomainCategories() );
-            cout << "Outlining parameter domain" << endl;
             m_outputParameterDomain->updateData( outliner->outlineParameterDomain() );
-            cout << "Outlining point planes" << endl;
-            m_outputLeastSquaresPlanes->updateData( outliner->outlineLeastSquaresPlanes( m_squareWidth->get() ) );
             cout << "Outlining done" << endl;
 
             delete classifier;

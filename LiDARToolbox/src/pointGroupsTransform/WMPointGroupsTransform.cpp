@@ -124,18 +124,19 @@ void WMPointGroupsTransform::properties()
                                             "whole render process took.", 0.0 );
     m_infoInputPointCount = m_infoProperties->addProperty( "Input points: ", "", 0 );
     m_infoLastGroupID = m_infoProperties->addProperty( "Last group ID: ", "", 0 );
-    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "X min: ", "", 0 ) );
-    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "X max: ", "", 0 ) );
-    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Y min: ", "", 0 ) );
-    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Y max: ", "", 0 ) );
-    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Z min: ", "", 0 ) );
-    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Z max: ", "", 0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "X min: ", "", 0.0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "X max: ", "", 0.0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Y min: ", "", 0.0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Y max: ", "", 0.0 ) );
+    m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Z min: ", "", 0.0 ) );
+    m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Z max: ", "", 0.0 ) );
 
 
     m_pointsCropGroup = m_properties->addPropertyGroup( "Point set cropping",
                                             "Options to crop the point set" );
     m_pointSubtractionRadius = m_pointsCropGroup->addProperty( "Subtr. r.: ", "Radius of subtracted coordinates "
                                                         "(most right input connector)", 0.0, m_propCondition );
+    m_invertSubtraction = m_pointsCropGroup->addProperty( "Invert: ", "Inverts point subtraction.", false, m_propCondition );
 
 
     m_outlinerGroup = m_properties->addPropertyGroup( "Group outlining",
@@ -322,8 +323,8 @@ void WMPointGroupsTransform::addTransformedPoints()
             isGroupSelected = true;
             m_groupIDInOriginalPointSet->set( m_groupEditor.getOldGroupID( index ) );
         }
-        if( isGroupSelected && m_groupEditor.isPointCollected( index )
-                && !m_pointSubtraction.pointsExistNearCoordinate( *point ) )
+        bool remainsAfterSubtraction = m_pointSubtraction.pointsExistNearCoordinate( *point ) == m_invertSubtraction->get();
+        if( isGroupSelected && m_groupEditor.isPointCollected( index ) && remainsAfterSubtraction )
         {
             for( size_t item = 0; item < 3; item++ )
             {
@@ -354,13 +355,11 @@ void WMPointGroupsTransform::addTransformedPoints()
 
 void WMPointGroupsTransform::onFileLoad()
 {
-    cout << endl << endl << "WMGroupsTransform::onFileLoad() - Start" << endl;
     m_pointInputFile.setFilePath( m_inputFile->get().c_str() );
     if( m_reloadPointsTrigger->get( true ) )
         m_pointInputFile.loadWDataSetPointsGrouped();
     if( m_pointInputFile.containsData() )
     {
-        cout << "WMGroupsTransform::onFileLoad() - File detected" << endl;
         boost::shared_ptr< WDataSetPointsGrouped > outputGroups(
                 new WDataSetPointsGrouped( m_pointInputFile.getVertices(),
                 m_pointInputFile.getColors(), m_pointInputFile.getGroups() ) );

@@ -86,14 +86,10 @@ void WGroupEdit::mergeGroupSet( boost::shared_ptr< WDataSetPointsGrouped > point
 
         if( isValidGroupID( groupID ) )
         {
-            double currentSize = m_groupSizes.size();
+            size_t currentSize = m_groupSizes.size();
             if( groupID >= currentSize )
-            {
-                m_groupSizes.reserve( groupID + 1 );
-                m_groupSizes.resize( groupID + 1 );
                 for( size_t newGroup = currentSize; newGroup <= groupID; newGroup++ )
-                    m_groupSizes[newGroup] = 0;
-            }
+                    m_groupSizes.push_back( 0 );
             m_groupSizes[groupID] = m_groupSizes[groupID] + 1;
         }
     }

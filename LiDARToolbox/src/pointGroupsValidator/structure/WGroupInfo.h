@@ -117,6 +117,40 @@ public:
      */
     size_t getUncorrectlyDetectedPointCount();
 
+    /**
+     * Returns whether the group of this meta has been certainly detected corresponding 
+     * to criterion thresholds as completeness, area completeness and correctness.
+     * \return The group of the meta info has been certainly detected or not.
+     */
+    bool isCertainlyDetected();
+
+    /**
+     * The group has been certainly detected by the completeness of detected points or 
+     * not. It is certainly detected if a sufficient amount of a reference group is 
+     * covered by bhe group to be validated.
+     * \return The group is certainly detected by the point completeness criterion or 
+     *         not.
+     */
+    bool isCertainlyDetectedByCompleteness();
+
+    /**
+     * The group has been certainly detected by the point area completeness of detected 
+     * points or not. It is certainly detected if not too many points of a reference 
+     * group are farer apart from corectly detected points to be validated than by a 
+     * threshold distance.
+     * \return The group is certainly detected by the point area completeness criterion 
+     *         or not.
+     */
+    bool isCertainlyDetectedByPointAreaCompleteness();
+
+    /**
+     * The group has been certainly detected by the correctness of detected points 
+     * criterion or not. It is certainly detected if not too many points of a group to 
+     * be validated exist which do not cover its reference group.
+     * \return The group is certainly detected by the point correctness criterion or not.
+     */
+    bool isCertainlyDetectedByCorectness();
+
 
     /**
      * Sets the reference group ID.
@@ -153,12 +187,43 @@ public:
     void setUncorrectlyDetectedPointCount( size_t uncorrectlyDetectedPointCount );
 
     /**
-     * Returns the point count of not segmented point areas. Missing area points are 
+     * Sets the point count of not segmented point area points. Missing area points are 
      * marked by choosing reference points that can not be reached regarding a radius 
      * around all correctly segmented points of a validated group.
      * \param pointCountOfMissingAreas Point count of not segmented area points.
      */
     void setPointCountOfMissingAreas( size_t pointCountOfMissingAreas );
+
+    /**
+     * This setting is a threshold and not a property of the group.
+     * It sets what is the minimal amount of reference group points that must be covered 
+     * by points of the corresponding group to be validated.
+     * \param minAmount 
+     */
+    void setMinimalPointCompleteness( double minAmount );
+
+    /**
+     * This setting is a threshold and not a property of the group.
+     * Sets the minimal point area completeness threshold. It tells how big the amount 
+     * of not caught reference group points (which are farer away from correctly 
+     * detected points to be validated are farer away than by a threshold) may be in 
+     * comparison to the count of points to be validated that match to reference group 
+     * points. 0.0 = no match. 1.0 = all points should covered by the area.
+     * \param minPoinrtAreaCompleteness Minimal amount of reference group points that 
+     *                                  should be covered of correct points of the group 
+     *                                  to be validated.
+     */
+    void setMinimalPointAreaCompleteness( double minPoinrtAreaCompleteness );
+
+    /**
+     * This setting is a threshold and not a property of the group.
+     * Sets the amount how many points of the group to be validated do not need to match 
+     * to their reference group. 0.0 = threshold is disabled. 1.0 = every existing point 
+     * to be validated must be covered by a reference group point.
+     * \param maxAmount Maximal amount of points that do not belong to the reference 
+     *                  group.
+     */
+    void setMinimalPointCorrectness( double maxAmount );
 
 private:
     /**
@@ -195,6 +260,40 @@ private:
      * applied that is applied on correctly segmented points.
      */
     size_t m_pointCountOfMissingAreas;
+
+    /**
+     * This setting is a threshold and not a property of the group.
+     * It tells what is the minimal amount of reference group points that must be 
+     * covered by points of the corresponding group to be validated.
+     * 
+     * According to Lari/Habib 2014:
+     * Completeness = true positives / ( true positives + false negatives )
+     */
+    double m_minimalPointCompleteness;
+
+    /**
+     * This setting is a threshold and not a property of the group.
+     * Minimal point area completeness threshold. It tells how big the amount of not 
+     * caught reference group points (which are farer away from correctly detected 
+     * points to be validated are farer away than by a threshold) may be in comparison 
+     * to the count of points to be validated that match to reference group points. 
+     * 0.0 = no match. 1.0 = all points should covered by the area.
+     * 
+     * According to Lari/Habib 2014:
+     * Completeness = true positives / ( true positives + false negatives )
+     */
+    double m_minimalpointAreaCompleteness;
+
+    /**
+     * This setting is a threshold and not a property of the group.
+     * Sets the amount how many points of the group to be validated do not need to match 
+     * to their reference group. 0.0 = threshold is disabled. 1.0 = every existing point 
+     * to be validated must be covered by a reference group point.
+     * 
+     * According to Lari/Habib 2014:
+     * Completeness = true positives / ( true positives + false positives )
+     */
+    double m_minimalPointCorrectness;
 };
 
 #endif  // WGROUPINFO_H

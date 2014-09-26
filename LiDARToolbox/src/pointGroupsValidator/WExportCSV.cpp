@@ -120,12 +120,18 @@ void WExportCSV::writeCumulatedGroupInfoToFile()
 {
     cout << "WExportCSV::writeCumulatedGroupInfoToFile() - Start" << endl;
     *m_fileOutputStream <<
-            "Assigned groups" << TAB <<
-            "Range from" << TAB <<
-            "Range to" << TAB <<
+            "Reference groups" << TAB <<
+            "Point count from" << TAB <<
+            //"Range to" << TAB <<
+
+            "Certainly detected %" << TAB <<
+            "Certain groups by completeness %" << TAB <<
+            "Certain groups by area completeness %" << TAB <<
+            "Certain groups by correctness %" << TAB <<
+
             "Point completeness %" << TAB <<
-            "Point correctness %" << TAB <<
-            "Area point completeness %" << endl;
+            "Area point completeness %" << TAB <<
+            "Point correctness %" << endl;
     vector<WCumulatedGroupInfo*>* cumulatedGroups = generateCumulatedGroups();
 
     cout << "WExportCSV::writeCumulatedGroupInfoToFile() - Cumulated groups generated" << endl;
@@ -138,10 +144,16 @@ void WExportCSV::writeCumulatedGroupInfoToFile()
             *m_fileOutputStream <<
                     group->getGroupCount() << TAB <<
                     group->getRangeMinPointCount() << TAB <<
-                    group->getRangeMaxPointCount() << TAB <<
-                    group->getPointCompleteness() << TAB <<
-                    group->getPointCorrectness() << TAB <<
-                    group->getAreaPointCorrectness() << endl;
+                    //group->getRangeMaxPointCount() * 100.0 << TAB <<
+
+                    group->getCertainlyDetectedGroupsAmount() * 100.0 << TAB <<
+                    group->getCertainGroupsAmountByCompleteness() * 100.0 << TAB <<
+                    group->getCertainGroupsAmountByAreaCompleteness() * 100.0 << TAB <<
+                    group->getCertainGroupsAmountByCorrectness() * 100.0 << TAB <<
+
+                    group->getPointCompleteness() * 100.0 << TAB <<
+                    group->getAreaPointCorrectness() * 100.0 << TAB <<
+                    group->getPointCorrectness() * 100.0 << endl;
         }
     }
     delete cumulatedGroups;
@@ -154,29 +166,34 @@ void WExportCSV::writeInfoToFileForAllGroups()
             "Validated group" << TAB <<
             "Ref. group points" << TAB <<
             "Val. group points" << TAB <<
+
             "Points correctly detected" << TAB <<
-            "In false group" << TAB <<
-            "Correctness %" << TAB <<
-            "Completeness %" << TAB <<
             "Points of missing areas" << TAB <<
-            "Areas completeness %" << endl;
+            "In false group" << TAB <<
+
+            "Completeness %" << TAB <<
+            "Areas completeness %" << TAB <<
+            "Correctness %" << endl;
 
     for( size_t index = 0; index < m_groupInfo->size(); index++ )
     {
         WGroupInfo* group = m_groupInfo->at( index );
         if( group->getReferenceGroupPointCount() > 0 )
         {
+            m_fileOutputStream->precision( 16 );
             *m_fileOutputStream <<
                     group->getReferenceGroupID() << TAB <<
                     group->getValidatedGroupID() << TAB <<
                     group->getReferenceGroupPointCount() << TAB <<
                     ( group->getCorrectlyDetectedPointCount() + group->getUncorrectlyDetectedPointCount() ) << TAB <<
+
                     group->getCorrectlyDetectedPointCount() << TAB <<
-                    group->getUncorrectlyDetectedPointCount() << TAB <<
-                    group->getCorrectness() * 100.0 << TAB <<
-                    group->getCompletess() * 100.0 << TAB <<
                     group->getAreaMissingPointCount() << TAB <<
-                    group->getAreaCompleteness() * 100.0 << endl;
+                    group->getUncorrectlyDetectedPointCount() << TAB <<
+
+                    group->getCompletess() * 100.0 << TAB <<
+                    group->getAreaCompleteness() * 100.0 << TAB <<
+                    group->getCorrectness() * 100.0 << endl;
         }
     }
 }

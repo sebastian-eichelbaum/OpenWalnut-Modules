@@ -76,10 +76,26 @@ void WGroupValidator::setCoordinateAccuracy( double maxEuclideanDeviance )
     m_coordinateAccuracy = maxEuclideanDeviance;
 }
 
-void WGroupValidator::setAreaTestingPointRadius( double areaTestingPointRadius )
+void WGroupValidator::setPointAreaRadius( double pointAreaRadius )
 {
-    m_areaTestingPointRadius = areaTestingPointRadius;
+    m_pointAreaRadius = pointAreaRadius;
 }
+
+void WGroupValidator::setMinimalPointCompleteness( double minPointCompleteness )
+{
+    m_minimalPointCompleteness = minPointCompleteness;
+}
+
+void WGroupValidator::setMinimalpointAreaCompleteness( double minPointAreaCompleteness )
+{
+    m_minimalPointAreaCompleteness = minPointAreaCompleteness;
+}
+
+void WGroupValidator::setMinimalPointCorrectness( double minPointCorrectness )
+{
+    m_minimalPointCorrectness = minPointCorrectness;
+}
+
 
 void WGroupValidator::validateGroups(
     boost::shared_ptr< WDataSetPointsGrouped > referenceGroups, boost::shared_ptr< WDataSetPointsGrouped > validatedGroups )
@@ -154,7 +170,7 @@ void WGroupValidator::validateGroup( size_t referenceGroupID, size_t validatedGr
     WPointSubtactionHelper validatedSearcher;
     validatedSearcher.initSubtraction( validatedGroup, m_coordinateAccuracy );
     WPointSubtactionHelper validatedAreaSearcher;
-    validatedAreaSearcher.initSubtraction( validatedGroup, m_areaTestingPointRadius );
+    validatedAreaSearcher.initSubtraction( validatedGroup, m_pointAreaRadius * 2.0 );
 
     cout << "WGroupValidator::validateGroup() - Calculating completeness";
     size_t completenessPointCount = 0;
@@ -169,7 +185,7 @@ void WGroupValidator::validateGroup( size_t referenceGroupID, size_t validatedGr
             pointCountOfMissingAreas++;
             for( size_t dimension = 0; dimension < 3; dimension++ )
                 m_pointsOfNotSegmentedAreasVertices->push_back( referenceVertices->at( index * 3 + dimension ) );
-            m_pointsOfNotSegmentedAreasColors->push_back( 0.55 );
+            m_pointsOfNotSegmentedAreasColors->push_back( 0.65 );
             m_pointsOfNotSegmentedAreasColors->push_back( 0.0 );
             m_pointsOfNotSegmentedAreasColors->push_back( 1.0 );
         }
@@ -192,25 +208,37 @@ void WGroupValidator::validateGroup( size_t referenceGroupID, size_t validatedGr
         vector<double> validatedCoord = WVectorMaths::new3dVector( validatedVertices->at( index * 3 + 0 ),
                 validatedVertices->at( index * 3 + 1 ), validatedVertices->at( index * 3 + 2 ) );
         if( !referenceSearcher.pointsExistNearCoordinate( validatedCoord ) )
-        {
             uncorrectPoints++;
-
-            for( size_t dimension = 0; dimension < 3; dimension++ )
-                m_falseSegmentedVertices->push_back( validatedVertices->at( index * 3 + dimension ) );
-            m_falseSegmentedColors->push_back( 1.0 );
-            m_falseSegmentedColors->push_back( 0.0 );
-            m_falseSegmentedColors->push_back( 0.0 );
-        }
     }
 
     while( m_groupInfo->size() <= referenceGroupID )
         m_groupInfo->push_back( new WGroupInfo() );
-    m_groupInfo->at( referenceGroupID )->setReferenceGroupID( referenceGroupID );
-    m_groupInfo->at( referenceGroupID )->setValidatedGroupID( validatedGroupID );
-    m_groupInfo->at( referenceGroupID )->setReferenceGroupPointCount( referenceVertices->size() / 3 );
-    m_groupInfo->at( referenceGroupID )->setCorrectlyDetectedPointCount( completenessPointCount );
-    m_groupInfo->at( referenceGroupID )->setUncorrectlyDetectedPointCount( uncorrectPoints );
-    m_groupInfo->at( referenceGroupID )->setPointCountOfMissingAreas( pointCountOfMissingAreas );
+    WGroupInfo* newGroup = m_groupInfo->at( referenceGroupID );
+    newGroup->setReferenceGroupID( referenceGroupID );
+    newGroup->setValidatedGroupID( validatedGroupID );
+    newGroup->setReferenceGroupPointCount( referenceVertices->size() / 3 );
+    newGroup->setCorrectlyDetectedPointCount( completenessPointCount );
+    newGroup->setUncorrectlyDetectedPointCount( uncorrectPoints );
+    newGroup->setPointCountOfMissingAreas( pointCountOfMissingAreas );
+
+    newGroup->setMinimalPointCompleteness( m_minimalPointCompleteness );
+    newGroup->setMinimalPointAreaCompleteness( m_minimalPointAreaCompleteness );
+    newGroup->setMinimalPointCorrectness( m_minimalPointCorrectness );
+
+    if( newGroup->isCertainlyDetected() )
+        for( size_t index = 0; index < validatedVertices->size() / 3; index++ )
+        {
+            vector<double> validatedCoord = WVectorMaths::new3dVector( validatedVertices->at( index * 3 + 0 ),
+                    validatedVertices->at( index * 3 + 1 ), validatedVertices->at( index * 3 + 2 ) );
+            if( !referenceSearcher.pointsExistNearCoordinate( validatedCoord ) )
+            {
+                for( size_t dimension = 0; dimension < 3; dimension++ )
+                    m_falseSegmentedVertices->push_back( validatedVertices->at( index * 3 + dimension ) );
+                m_falseSegmentedColors->push_back( 1.0 );
+                m_falseSegmentedColors->push_back( 0.0 );
+                m_falseSegmentedColors->push_back( 0.0 );
+            }
+        }
 }
 
 void WGroupValidator::identifyNotSegmentedGroupPoints()

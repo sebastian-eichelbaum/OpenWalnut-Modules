@@ -105,6 +105,38 @@ public:
     double getAreaPointCorrectness();
 
     /**
+     * Get the amount of groups that have been correctly detected by the point detection 
+     * criterions of their assigned points. Detection fails if even one threshold fails. 
+     * \return Amount of detected groups using the detected points correctness 
+     *         criterion. Value is between 0.0 and 1.0.
+     */
+    double getCertainlyDetectedGroupsAmount();
+
+    /**
+     * Get the amount of groups that have been correctly detected by the point 
+     * completeness criterion of their assigned points.
+     * \return Amount of detected groups using the detected points correctness 
+     *         criterion. Value is between 0.0 and 1.0.
+     */
+    double getCertainGroupsAmountByCompleteness();
+
+    /**
+     * Get the amount of groups that have been correctly detected by the point area 
+     * completeness criterion of their assigned points.
+     * \return Amount of detected groups using the detected points correctness 
+     *         criterion. Value is between 0.0 and 1.0.
+     */
+    double getCertainGroupsAmountByAreaCompleteness();
+
+    /**
+     * Get the amount of groups that have been correctly detected by the point 
+     * correctness criterion of their assigned points.
+     * \return Amount of detected groups using the detected points correctness 
+     *         criterion. Value is between 0.0 and 1.0.
+     */
+    double getCertainGroupsAmountByCorrectness();
+
+    /**
      * Returns the minimal reference group point count to cumulate groups here.
      * \return Minimal reference group point count to cumulate groups here.
      */
@@ -132,9 +164,14 @@ public:
 
 private:
     /**
-     * Count of groups that were cumulated inside that instance.
+     * Count of certainly detected groups that were cumulated inside that instance.
      */
-    size_t m_cumulatedGroupCount;
+    size_t m_certainlyDetectedGroupCount;
+
+    /**
+     * Count of certainly not detected groups that were cumulated inside that instance.
+     */
+    size_t m_notDetectedGroupCount;
 
     /**
      * Point segmentation correctness by means of Lari/Habib 2014:
@@ -168,6 +205,28 @@ private:
      * Maximal reference group point count to cumulate groups here.
      */
     size_t m_groupsRangeMaxPointCount;
+
+    /**
+     * Count of groups that have been correctly detected by the point completeness 
+     * criterion. This value is count up if a group to be validated has emough points 
+     * that are shared with its reference group.
+     */
+    size_t m_countCertainCompleteness;
+
+    /**
+     * Count of groups that have been correctly detected by the point area completeness 
+     * criterion. This value is count up if not too many points of a reference group 
+     * are farer away from the group to be validated regarding a distance threshold.
+     */
+    size_t m_countCertainAreaCompleteness;
+
+    /**
+     * Count of groups that have been correctly detected by the point area correctness 
+     * criterion. This value is count up if the point count of a group to be validated 
+     * that are not shared with the reference group, do not exceed an amount 
+     * corresponding to a threshold.
+     */
+    size_t m_countCertainCorrectness;
 };
 
 #endif  // WCUMULATEDGROUPINFO_H

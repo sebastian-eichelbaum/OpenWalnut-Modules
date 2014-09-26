@@ -108,15 +108,29 @@ void WMPointGroupsValidator::properties()
     m_coordinateAccuracy = m_accuracyGroup->addProperty( "Point accuracy: ",
             "Distanse on which validated points may vary from reference points by coordinate.", 0.0, m_propCondition );
     m_coordinateAccuracy->setMin( 0.0 );
-    m_coordinateAccuracy->setMax( 1.0 );
+    m_coordinateAccuracy->setMax( 0.1 );
+
+
+    m_detectionCertaintyGroup = m_properties->addPropertyGroup( "Properties of certainly detected surfaces",
+            "Settings relevant to decide whether a point group was detected certainly." );
+    m_pointAreaRadius = m_detectionCertaintyGroup->addProperty( "Point area radius: ",
+            "Minimal distance from all detected points to be detected as not detected area.", 0.0, m_propCondition );
+    m_pointAreaRadius->setMin( 0.0 );
+    m_pointAreaRadius->setMax( 0.75 );
+    m_minimalPointCompleteness = m_detectionCertaintyGroup->addProperty( "Min. completeness: ", "", 0.3, m_propCondition );
+    m_minimalPointCompleteness->setMin( 0.0 );
+    m_minimalPointCompleteness->setMax( 1.0 );
+    m_minimalAreaPointCompleteness = m_detectionCertaintyGroup->addProperty( "Min. area compl.: ", "Matching type that is "
+            "applied to figure out the amount of minimal positives.", 0.0, m_propCondition );
+    m_minimalAreaPointCompleteness->setMin( 0.0 );
+    m_minimalAreaPointCompleteness->setMax( 1.0 );
+    m_minimalPointCorectness = m_detectionCertaintyGroup->addProperty( "Min. correctness: ", "", 0.0, m_propCondition );
+    m_minimalPointCorectness->setMin( 0.0 );
+    m_minimalPointCorectness->setMax( 1.0 );
 
 
     m_evaluationGroup = m_properties->addPropertyGroup( "Group evaluation settings",
             "Main evaluation settings." );
-    m_areaTestingPointRadius = m_evaluationGroup->addProperty( "Area testing: ",
-            "Minimal distance from all detected points to be detected as not detected area.", 0.0, m_propCondition );
-    m_areaTestingPointRadius->setMin( 0.0 );
-    m_areaTestingPointRadius->setMax( 1.0 );
     m_cumulateGroups = m_evaluationGroup->addProperty( "Cumulate groups: ",
             "Merge group results with a simular group size.", true );
     m_outputFileCSV = m_evaluationGroup->addProperty( "CSV table: ", "", WPathHelper::getAppPath() );
@@ -155,7 +169,10 @@ void WMPointGroupsValidator::moduleMain()
             setProgressSettings( 10 );
 
             m_groupValidator.setCoordinateAccuracy( m_coordinateAccuracy->get() );
-            m_groupValidator.setAreaTestingPointRadius( m_areaTestingPointRadius->get() );
+            m_groupValidator.setPointAreaRadius( m_pointAreaRadius->get() );
+            m_groupValidator.setMinimalPointCompleteness( m_minimalPointCompleteness->get() );
+            m_groupValidator.setMinimalpointAreaCompleteness( m_minimalAreaPointCompleteness->get() );
+            m_groupValidator.setMinimalPointCorrectness( m_minimalPointCorectness->get() );
             m_groupValidator.validateGroups( referenceGroups, validatedPoints );
 
             m_outputNotSegmented->updateData( m_groupValidator.getOutlineNotSegmentedPoints() );

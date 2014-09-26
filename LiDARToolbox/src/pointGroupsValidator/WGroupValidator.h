@@ -93,14 +93,13 @@ public:
     void setCoordinateAccuracy( double maxEuclideanDeviance );
 
     /**
-     * Radius contraint for point area testing. E. g. correctly segmented area reference 
-     * points are segmented by searching them using validated group point coordinates by 
-     * the set radius. So it can be distinguished between sporadeously not segmented 
-     * points and missing areas.
-     * \param areaTestingPointRadius Area point search radius along from group points to 
+     * Radius contraint for point area testing. Points with the distance of a double 
+     * radius share their area. So it can be distinguished between sporadeously not 
+     * segmented points and missing areas.
+     * \param pointAreaRadius Area point search radius along from group points to 
      *                               be validated.
      */
-    void setAreaTestingPointRadius( double areaTestingPointRadius );
+    void setPointAreaRadius( double pointAreaRadius );
 
     /**
      * Starts to validate groups using a reference point group set.
@@ -110,6 +109,54 @@ public:
     void validateGroups( boost::shared_ptr< WDataSetPointsGrouped > referenceGroups,
             boost::shared_ptr< WDataSetPointsGrouped > validatedGroups );
 
+    /**
+     * Point completeness threshold that is related to detect whether a point group is 
+     * certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False negatives: Point count of the reference group that are not covered by the 
+     *                  group to be validated.
+     * \param minPointCompleteness Minimal point completeness of a group to be 
+     *                             validated (0.0 - 1.0).
+     */
+    void setMinimalPointCompleteness( double minPointCompleteness );
+
+    /**
+     * Point area completeness threshold that is related to detect whether a point group 
+     * is certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False negatives: Count of points of the reference group that is farer away from 
+     *                  all points of the group to be validated than by a threshold 
+     *                  distance.
+     * \param minPointAreaCompleteness Minimal point area completeness of a group to be 
+     *                                 validated (0.0 - 1.0).
+     */
+    void setMinimalpointAreaCompleteness( double minPointAreaCompleteness );
+
+    /**
+     * Point segmentation correctness threshold that is related to detect whether a 
+     * point group is certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False positives: Count of points of the group to be validated that arer not 
+     *                  covered by the reference group..
+     * \param minPointCorrectness Minimal point correctness of the group to be validated 
+     *                            (0.0 - 1.0).
+     */
+    void setMinimalPointCorrectness( double minPointCorrectness );
 
 
 
@@ -166,12 +213,11 @@ private:
     double m_coordinateAccuracy;
 
     /**
-     * Radius contraint for point area testing. E. g. correctly segmented area reference 
-     * points are segmented by searching them using validated group point coordinates by 
-     * the set radius. So it can be distinguished between sporadeously not segmented 
-     * points and missing areas.
+     * Radius contraint for point area testing. Points with the distance of a double 
+     * radius share their area. So it can be distinguished between sporadeously not 
+     * segmented points and missing areas.
      */
-    double m_areaTestingPointRadius;
+    double m_pointAreaRadius;
 
     /**
      * Information about groups to be evaluated that is generated in that class.
@@ -276,6 +322,49 @@ private:
      * correctly segmented points.
      */
     WDataSetPoints::ColorArray m_pointsOfNotSegmentedAreasColors;
+
+    /**
+     * Point completeness threshold that is related to detect whether a point group is 
+     * certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False negatives: Point count of the reference group that are not covered by the 
+     *                  group to be validated.
+     */
+    double m_minimalPointCompleteness;
+
+    /**
+     * Point area completeness threshold that is related to detect whether a point group 
+     * is certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False negatives: Count of points of the reference group that is farer away from 
+     *                  all points of the group to be validated than by a threshold 
+     *                  distance.
+     */
+    double m_minimalPointAreaCompleteness;
+
+    /**
+     * Point segmentation correctness threshold that is related to detect whether a 
+     * point group is certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False positives: Count of points of the group to be validated that arer not 
+     *                  covered by the reference group..
+     */
+    double m_minimalPointCorrectness;
 };
 
 #endif  // WGROUPVALIDATOR_H

@@ -104,13 +104,13 @@ void WMSurfaceDetectionByPCL::properties()
 
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
     m_clusterSizeMin = m_properties->addProperty( "Cluster size min.: ",
-            "Minimal size of a surface point set.", 15 );
+            "Minimal size of a surface point set.", 50 );
     m_clusterSizeMax = m_properties->addProperty( "Cluster size max.: ",
                 "Maximal size of a surface point set.", 1000 * 1000 );
     m_numberOfNeighbours = m_properties->addProperty( "Number of neighbors: ", "Resulting detail depth "
                             "in meters for the octree search tree.", 30 );
 
-    m_smoothnessThresholdDegrees = m_properties->addProperty( "Smoothness threshold: ", "", 5.0 );
+    m_smoothnessThresholdDegrees = m_properties->addProperty( "Smoothness threshold: ", "", 3.0 );
     m_smoothnessThresholdDegrees->setMin( 0.0 );
     m_smoothnessThresholdDegrees->setMax( 30 );
     m_curvatureThreshold = m_properties->addProperty( "Curvature Threshold: ", "", 1.0 );

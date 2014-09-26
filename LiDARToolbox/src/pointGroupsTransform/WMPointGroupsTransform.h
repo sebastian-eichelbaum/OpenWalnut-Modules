@@ -256,12 +256,12 @@ private:
     /**
      * Information about minimal X/Y/Z values.
      */
-    vector<WPropInt> m_infoBoundingBoxMin;
+    vector<WPropDouble> m_infoBoundingBoxMin;
 
     /**
      * Information about minimal X/Y/Z values.
      */
-    vector<WPropInt> m_infoBoundingBoxMax;
+    vector<WPropDouble> m_infoBoundingBoxMax;
 
     /**
      * Options that are relevant for point removal
@@ -273,6 +273,11 @@ private:
      * are connected by the most right input.
      */
     WPropDouble m_pointSubtractionRadius;
+
+    /**
+     * Inverts the selection based on cropping and point subtraction.
+     */
+    WPropBool m_invertSubtraction;
 
 
 

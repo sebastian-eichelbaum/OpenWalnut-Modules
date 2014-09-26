@@ -211,16 +211,68 @@ private:
     WPropDouble m_coordinateAccuracy;
 
     /**
-     * Settings that deal with point group evaluation itself.
+     * Setting parameter group that is relevant to thresholds which determine which 
+     * minimal point completeness, point area completeness and point correctness is 
+     * necessary to classify a group as certainly detected.
      */
-    WPropGroup m_evaluationGroup;
+    WPropGroup m_detectionCertaintyGroup;
 
     /**
      * Setting that delas with finding not segmented area points. These points are found 
      * by taking points of a corresponding reference group that can not be reached by 
      * correctly segmented points regarding this euclideanradius around them.
      */
-    WPropDouble m_areaTestingPointRadius;
+    WPropDouble m_pointAreaRadius;
+
+    /**
+     * Point completeness threshold that is related to detect whether a point group is 
+     * certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False negatives: Point count of the reference group that are not covered by the 
+     *                  group to be validated.
+     */
+    WPropDouble m_minimalPointCompleteness;
+
+    /**
+     * Point area completeness threshold that is related to detect whether a point group 
+     * is certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False negatives: Count of points of the reference group that is farer away from 
+     *                  all points of the group to be validated than by a threshold 
+     *                  distance.
+     */
+    WPropDouble m_minimalAreaPointCompleteness;
+
+    /**
+     * Point segmentation correctness threshold that is related to detect whether a 
+     * point group is certainly detected or not.
+     * It relies on the following formula of Lari/Habib 2014.
+     * Completeness = true positives / ( true positives + false negatives )
+     * 
+     * In the implementation:
+     * True positives: Reference group count that matches to points of the group to ge 
+     *                 validated.
+     * False positives: Count of points of the group to be validated that arer not 
+     *                  covered by the reference group..
+     */
+    WPropDouble m_minimalPointCorectness;
+
+
+    /**
+     * Settings that deal with point group evaluation itself.
+     */
+    WPropGroup m_evaluationGroup;
+
 
     /**
      * Cumulate groups with similar reference group point counts.
