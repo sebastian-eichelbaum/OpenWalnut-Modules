@@ -257,7 +257,7 @@ private:
      * neighborship. This variable is the maximal difference between two plane normal 
      * distance to the origin.
      */
-    WPropDouble m_segmentationPlaneDistance;
+    WPropDouble m_segmentationMaxPlaneDistance;
 
     /**
      * The maximal count of analyzed neighbors of an 
@@ -370,10 +370,6 @@ private:
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
 
-    /**
-     * Plugin progress status.
-     */
-    boost::shared_ptr< WProgress > m_progressStatus;
 
     /**
      * Applied CPU thread count.

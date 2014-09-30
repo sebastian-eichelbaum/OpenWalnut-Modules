@@ -117,8 +117,8 @@ void WMSurfaceDetectionByLari::properties()
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
     double minRange = 0.01;
-    m_segmentationPlaneDistance = m_properties->addProperty( "Plane distance", "", 0.7, m_propCondition );
-    m_segmentationMaxAngleDegrees = m_properties->addProperty( "Plane angle", "", 15.0, m_propCondition );
+    m_segmentationMaxPlaneDistance = m_properties->addProperty( "Delta d", "", 0.7, m_propCondition );
+    m_segmentationMaxAngleDegrees = m_properties->addProperty( "Delta alpha", "", 15.0, m_propCondition );
     m_numberPointsK = m_properties->addProperty( "Number points K=", "", 40, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
 
@@ -215,7 +215,6 @@ void WMSurfaceDetectionByLari::moduleMain()
             timer.reset();
             WDataSetPoints::VertexArray inputVerts = points->getVertices();
             size_t count = inputVerts->size()/3;
-            setProgressSettings( count );
 
             WQuadTree* boundingBox = new WQuadTree( pow( 2.0, 3 ) );
 
@@ -227,12 +226,12 @@ void WMSurfaceDetectionByLari::moduleMain()
                 float z = inputVerts->at( vertex*3+2 );
                 inputPoints->push_back( new WSpatialDomainKdPoint( x, y, z ) );
                 boundingBox->registerPoint( x, y, z );
-                m_progressStatus->increment( 1 );
             }
 
             WLariPointClassifier* classifier = new WLariPointClassifier();
             WLariOutliner* outliner = new WLariOutliner( classifier );
 
+            classifier->assignProgressCombiner( m_progress );
             classifier->setNumberPointsK( m_numberPointsK->get() );
             classifier->setMaxPointDistanceR( m_maxPointDistanceR->get() );
             classifier->setCpuThreadCount( m_cpuThreadCount->get() );
@@ -250,7 +249,7 @@ void WMSurfaceDetectionByLari::moduleMain()
             m_outputLeastSquaresPlanes->updateData( outliner->outlineLeastSquaresPlanes( m_squareWidth->get() ) );
 
             WLariBruteforceClustering* clustering = new WLariBruteforceClustering( classifier );
-            clustering->setSegmentationSettings( m_segmentationMaxAngleDegrees->get(), m_segmentationPlaneDistance->get() );
+            clustering->setSegmentationSettings( m_segmentationMaxAngleDegrees->get(), m_segmentationMaxPlaneDistance->get() );
             clustering->setCpuThreadCount( m_cpuThreadCount->get() );
             clustering->detectClustersByBruteForce();
 
@@ -258,7 +257,7 @@ void WMSurfaceDetectionByLari::moduleMain()
             if( m_applyBoundaryDetection->get() )
             {
                 boundaryDetector->setMaxPointDistanceR( m_maxPointDistanceR->get() );
-                boundaryDetector->detectBoundaries( classifier->getParameterDomain() );
+                boundaryDetector->detectBoundaries( classifier );
             }
 
             cout << "Outlining spatial domain" << endl;
@@ -284,7 +283,7 @@ void WMSurfaceDetectionByLari::moduleMain()
             m_zMax->set( boundingBox->getRootNode()->getValueMax() );
             delete boundingBox;
             m_infoRenderTimeSeconds->set( timer.elapsed() / 60.0 );
-            m_progressStatus->finish();
+            classifier->finishProgress();
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );
         m_reloadData->get( true );
@@ -303,12 +302,4 @@ void WMSurfaceDetectionByLari::moduleMain()
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
-}
-
-void WMSurfaceDetectionByLari::setProgressSettings( size_t steps )
-{
-    m_progress->removeSubProgress( m_progressStatus );
-    std::string headerText = "Loading data";
-    m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
-    m_progress->addSubProgress( m_progressStatus );
 }

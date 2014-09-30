@@ -51,7 +51,8 @@ public:
     virtual ~WParameterSpaceSearcher();
 
     /**
-     * Tags kd tree points within the extent with searched point as peak center to be refreshed.
+     * Tags kd tree points within the extent with searched point as peak center to be 
+     * refreshed.
      */
     void tagExtentToRefresh();
 
@@ -95,8 +96,8 @@ protected:
 
 private:
     /**
-     * Returns the masimal euclidian distance within an extent from the peak center in 
-     * the parameter domain kd tree. It is a spherical bounding box concept.
+     * Returns the masimal euclidian distance within an extent from the peak center to 
+     * any parameter of the extent. It is a spherical bounding box concept.
      * \param parametersXYZ0 Parameter domain coordinate from which the maximal 
      *                       euclidian distance to the farest extent point is determined.
      * \return The maximal euclidian distance from the peak center to the farest 

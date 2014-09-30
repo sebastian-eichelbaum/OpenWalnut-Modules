@@ -36,6 +36,7 @@
 #include "../common/datastructures/kdtree/WKdPointND.h"
 #include "../common/datastructures/kdtree/WPointSearcher.h"
 #include "../common/math/vectors/WVectorMaths.h"
+#include "WLariPointClassifier.h"
 
 
 using std::cout;
@@ -93,9 +94,10 @@ public:
      * Applies the algorithm on the input point data set where points have been 
      * clustered to groups that have a similar planar furmula. The algorithm splits 
      * grops that are spatially disconnected.
-     * \param parameterDomain Parameter domain containing planar input points.
+     * \param classifier Point classifier instance to fetch points of the spatial and 
+     *                   parameter domain.
      */
-    void detectBoundaries( WKdTreeND* parameterDomain );
+    void detectBoundaries( WLariPointClassifier* classifier );
 
     /**
      * Sets the neighbor point search distance limit:
@@ -223,6 +225,10 @@ private:
      */
     bool boundChainStillValid();
 
+    /**
+     * Point classifier to access the spatial and parameter domain.
+     */
+    WLariPointClassifier* m_classifier;
 
     /**
      * Spatial domain point set kd tree to be analyzed and its point group IDs modified.

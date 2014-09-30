@@ -75,7 +75,7 @@ public:
      * \return Parameter domain point count within the extent with the coordinate of 
      *         this object's parameter coordinate as peak center
      */
-    int getExtentPointCount();
+    size_t getExtentPointCount();
 
     /**
      * Returns the parameter spatial domain point object that is assigned to this 
@@ -107,7 +107,7 @@ public:
      * \param extentPointCount Extent point count of an extent with the coordinate of 
      *                         this parameter domain point as peak center.
      */
-    void setExtentPointCount( int extentPointCount );
+    void setExtentPointCount( size_t extentPointCount );
 
     /**
      * Sets whether a parameter that is added to plane or not. Assigned points to a 
@@ -139,7 +139,7 @@ private:
      * object as peak center. After each brute force plane point cluster detection 
      * estimation the biggest extent is picket out.
      */
-    int m_extentPointCount;
+    size_t m_extentPointCount;
 
     /**
      * Temporary tag which tells whether a parameter domain point is added to a plane or 

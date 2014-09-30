@@ -141,14 +141,18 @@ void WGroupValidator::validateGroups(
     m_validatedGroups = m_validatedPoints->getGroups();
 
 
+    setProgressSettings( m_referenceGroupEditor.getLastGroupID() );
     for( size_t refGroup = 0; refGroup <= m_referenceGroupEditor.getLastGroupID(); refGroup++ )
     {
         boost::shared_ptr< WDataSetPoints > referenceGroup = getPointsOfGroup( m_referencePoints, refGroup );
         size_t bestGroupIDInValidated = getBestMatchingGroupID( referenceGroup );
         validateGroup( refGroup, bestGroupIDInValidated );
+
+        m_progressStatus->increment( 1 );
     }
 
     identifyNotSegmentedGroupPoints();
+    m_progressStatus->finish();
 }
 
 
@@ -386,4 +390,19 @@ boost::shared_ptr< WDataSetPoints > WGroupValidator::getEmptyShowablePointSet()
     boost::shared_ptr< WDataSetPoints > outputPoints(
             new WDataSetPoints( newVertices, newColors ) );
     return outputPoints;
+}
+
+
+void WGroupValidator::assignProgressCombiner( boost::shared_ptr< WProgressCombiner > progress )
+{
+    m_associatedProgressCombiner = progress;
+}
+
+void WGroupValidator::setProgressSettings( size_t referenceGroupCount )
+{
+    m_associatedProgressCombiner->removeSubProgress( m_progressStatus );
+    std::ostringstream headerLabel;
+    headerLabel << "Validating groups: " << referenceGroupCount;
+    m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerLabel.str(), referenceGroupCount ) );
+    m_associatedProgressCombiner->addSubProgress( m_progressStatus );
 }

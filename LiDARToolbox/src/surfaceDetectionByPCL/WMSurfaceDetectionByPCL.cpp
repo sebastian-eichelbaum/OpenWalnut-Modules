@@ -90,7 +90,7 @@ void WMSurfaceDetectionByPCL::connectors()
 void WMSurfaceDetectionByPCL::properties()
 {
     m_infoNbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
-    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
+    m_infoRenderTimeMinutes = m_infoProperties->addProperty( "Wall time (min): ", "Time in seconds that the "
                                                             "whole render process took.", 0.0 );
     m_infoPointsPerSecond = m_infoProperties->addProperty( "Points per second: ",
                                                             "The current speed in points per second.", 0.0 );
@@ -168,9 +168,9 @@ void WMSurfaceDetectionByPCL::moduleMain()
             boost::shared_ptr< WDataSetPointsGrouped > outputPcl = detector.detectSurfaces( points );
             m_outputPointsGrouped->updateData( outputPcl );
             m_infoNbPoints->set( count );
-            m_infoRenderTimeSeconds->set( timer.elapsed() );
-            m_infoPointsPerSecond->set( m_infoRenderTimeSeconds->get() == 0.0 ?m_infoNbPoints->get()
-                    :m_infoNbPoints->get() / m_infoRenderTimeSeconds->get() );
+            m_infoRenderTimeMinutes->set( timer.elapsed() / 60.0 );
+            m_infoPointsPerSecond->set( m_infoRenderTimeMinutes->get() == 0.0 ?m_infoNbPoints->get()
+                    :m_infoNbPoints->get() / ( m_infoRenderTimeMinutes->get() * 60.0 ) );
             m_infoXMin->set( boundingBox->getRootNode()->getXMin() );
             m_infoXMax->set( boundingBox->getRootNode()->getXMax() );
             m_infoYMin->set( boundingBox->getRootNode()->getYMin() );

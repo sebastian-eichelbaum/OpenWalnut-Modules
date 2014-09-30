@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <vector>
+#include <string>
 #include <boost/thread.hpp>
 
 #include "core/dataHandler/WDataSetPoints.h"
@@ -144,6 +145,31 @@ public:
      */
     void setCylindricalNLambdaRange( size_t lambdaIndex, double min, double max );
 
+
+    /**
+     * Assigns the progress combiner to depict the status during classifying.
+     * \param progress Progress combiner to assign.
+     */
+    void assignProgressCombiner( boost::shared_ptr< WProgressCombiner > progress );
+
+    /**
+     * Initializes the current progress status.
+     * \param iteration Current iteration number. Mostly cluster ID.
+     * \param steps Step count of the process. Mostly it is the point count within a cluster.
+     * \param headerText Gives information about the task
+     */
+    void setProgressSettings( size_t iteration, size_t steps, std::string headerText );
+
+    /**
+     * Increments the progress status by one unit.
+     */
+    void incrementProgress();
+
+    /**
+     * Finishes the progress.
+     */
+    void finishProgress();
+
 private:
     /**
      * Classifies points using Eigen Value analyses (Eigen Values and Eigen Vectors) and 
@@ -162,13 +188,20 @@ private:
      */
     void classifyPointsAtThread( vector<WSpatialDomainKdPoint*>* spatialPoints, size_t threadIndex );
 
+
+
     /**
-     * The maximal count of analyzed neighbors of an examined input point.
+     * Sets the progress status.
+     */
+
+    /**
+     * The maximal count of analyzed neighbors of an examined input point. It is the 
+     * number of points that is required for a plane definition.
      */
     size_t m_numberPointsK;
 
     /**
-     * Maximal radius within which the nearest neighbors are examined.
+     * Maximal radius, within which the nearest neighbors are examined.
      */
     double m_maxPointDistanceR;
 
@@ -216,6 +249,17 @@ private:
      * CPU threads object for multithreading support.
      */
     vector<boost::thread*> m_cpuThreads;
+
+
+    /**
+    * Progress combiner for changing the plugin status in the modules overview.
+    */
+    boost::shared_ptr< WProgressCombiner > m_associatedProgressCombiner;
+
+    /**
+    * Current progress status.
+    */
+    boost::shared_ptr< WProgress > m_progressStatus;
 };
 
 #endif  // WLARIPOINTCLASSIFIER_H

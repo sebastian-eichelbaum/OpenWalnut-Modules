@@ -32,6 +32,8 @@
 #include "../common/datastructures/WDataSetPointsGrouped.h"
 #include "../common/algorithms/pointSubtractionHelper/WPointSubtactionHelper.h"
 
+#include "core/common/WProgressCombiner.h"
+
 
 using std::vector;
 
@@ -158,6 +160,20 @@ public:
      */
     void setMinimalPointCorrectness( double minPointCorrectness );
 
+
+
+
+    /**
+     * Assigns the progress combiner to depict the status during classifying.
+     * \param progress Progress combiner to assign.
+     */
+    void assignProgressCombiner( boost::shared_ptr< WProgressCombiner > progress );
+
+    /**
+     * Initializes the current progress status.
+     * \param referenceGroupCount Count of referrence groups to process.
+     */
+    void setProgressSettings( size_t referenceGroupCount );
 
 
 private:
@@ -365,6 +381,18 @@ private:
      *                  covered by the reference group..
      */
     double m_minimalPointCorrectness;
+
+
+
+    /**
+    * Progress combiner for changing the plugin status in the modules overview.
+    */
+    boost::shared_ptr< WProgressCombiner > m_associatedProgressCombiner;
+
+    /**
+    * Current progress status.
+    */
+    boost::shared_ptr< WProgress > m_progressStatus;
 };
 
 #endif  // WGROUPVALIDATOR_H

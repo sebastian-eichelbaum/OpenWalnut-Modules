@@ -43,16 +43,19 @@ WLariBoundaryDetector::~WLariBoundaryDetector()
 {
 }
 
-void WLariBoundaryDetector::detectBoundaries( WKdTreeND* parameterDomain )
+void WLariBoundaryDetector::detectBoundaries( WLariPointClassifier* classifier )
 {
+    m_classifier = classifier;
     cout << "detectBoundaries()" << endl;
-    groupPointsByGroupID( parameterDomain );
+    groupPointsByGroupID( m_classifier->getParameterDomain() );
 
+    m_classifier->setProgressSettings( m_spatialInputClusters->size(), m_spatialInputClusters->size(), "Boundary detection - " );
     for( size_t cluster = 0; cluster < m_spatialInputClusters->size(); cluster++ )
     {
         cout << "Modified convex hull on cluster " << m_spatialInputClusters->at( cluster )->size()
                 << " points. [" << cluster << "]" << endl;
         detectInputCluster( m_spatialInputClusters->at( cluster ) );
+        m_classifier->incrementProgress();
     }
 }
 

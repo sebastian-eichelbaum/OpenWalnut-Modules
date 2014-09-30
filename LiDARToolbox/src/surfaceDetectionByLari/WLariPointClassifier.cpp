@@ -24,6 +24,7 @@
 
 #include <vector>
 #include <limits>
+#include <string>
 #include "WLariPointClassifier.h"
 #include "../common/math/leastSquares/WLeastSquares.h"
 
@@ -78,6 +79,8 @@ WKdTreeND* WLariPointClassifier::getSpatialDomain()
 
 void WLariPointClassifier::classifyPoints( vector<WSpatialDomainKdPoint*>* spatialPoints, vector<WParameterDomainKdPoint*>* parameterPoints )
 {
+    setProgressSettings( spatialPoints->size(), spatialPoints->size(), "Point classification - " );
+
     size_t threads = m_cpuThreadCount < spatialPoints->size() ?m_cpuThreadCount :spatialPoints->size();
     for( size_t thread = 0; thread < threads; thread++ )
         m_cpuThreads[thread] = new boost::thread( &WLariPointClassifier::
@@ -126,6 +129,8 @@ void WLariPointClassifier::classifyPointsAtThread( vector<WSpatialDomainKdPoint*
 
         delete nearestPoints;
         delete points;
+
+        incrementProgress();
     }
 }
 
@@ -190,4 +195,28 @@ void WLariPointClassifier::setCylindricalNLambdaRange( size_t lambdaIndex, doubl
 {
     m_cylindricalNLambdaMin[lambdaIndex] = min;
     m_cylindricalNLambdaMax[lambdaIndex] = max;
+}
+
+void WLariPointClassifier::assignProgressCombiner( boost::shared_ptr< WProgressCombiner > progress )
+{
+    m_associatedProgressCombiner = progress;
+}
+
+void WLariPointClassifier::setProgressSettings( size_t iteration, size_t steps, std::string headerText )
+{
+    m_associatedProgressCombiner->removeSubProgress( m_progressStatus );
+    std::ostringstream headerLabel;
+    headerLabel << headerText << iteration;
+    m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerLabel.str(), steps ) );
+    m_associatedProgressCombiner->addSubProgress( m_progressStatus );
+}
+
+void WLariPointClassifier::incrementProgress()
+{
+    m_progressStatus->increment( 1 );
+}
+
+void WLariPointClassifier::finishProgress()
+{
+    m_progressStatus->finish();
 }

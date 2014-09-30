@@ -32,6 +32,8 @@
 
 WLariBruteforceClustering::WLariBruteforceClustering( WLariPointClassifier* classifier )
 {
+    m_pointClassifier = classifier;
+
     m_parameterDomain = new WKdTreeND( 3 );
     m_parameterDomain->add( classifier->getParameterDomain()->getAllPoints() );
 
@@ -47,12 +49,12 @@ WLariBruteforceClustering::~WLariBruteforceClustering()
 void WLariBruteforceClustering::detectClustersByBruteForce()
 {
     vector<WKdPointND*>* parameterNodes = m_parameterDomain->getAllPoints();
-    size_t currentClusterID = 0;
+    m_currentClusterID = 0;
     while( parameterNodes->size() > 0 )
     {
         initExtentSizes( parameterNodes );
         WParameterDomainKdPoint* biggestExtentPoint = 0;
-        int mostNeighborsCount = 0;
+        size_t mostNeighborsCount = 0;
         for( size_t index = 0; index < parameterNodes->size(); index++ )
         {
             WParameterDomainKdPoint* parameterPoint = static_cast<WParameterDomainKdPoint*>( parameterNodes->at( index ) );
@@ -62,7 +64,7 @@ void WLariBruteforceClustering::detectClustersByBruteForce()
                 mostNeighborsCount = parameterPoint->getExtentPointCount();
             }
         }
-        addExtentCluster( biggestExtentPoint, currentClusterID++ );
+        addExtentCluster( biggestExtentPoint, m_currentClusterID++ );
 
         vector<WKdPointND*>* oldParameterNodes = parameterNodes;
         parameterNodes = new vector<WKdPointND*>();
@@ -95,6 +97,7 @@ void WLariBruteforceClustering::setCpuThreadCount( size_t cpuThreadCount )
 
 void WLariBruteforceClustering::initExtentSizes( vector<WKdPointND*>* pointsToProcess )
 {
+    m_pointClassifier->setProgressSettings( m_currentClusterID, pointsToProcess->size(), "Init. cluster " );
     size_t threads = m_cpuThreadCount < pointsToProcess->size() ?m_cpuThreadCount :pointsToProcess->size();
     for( size_t thread = 0; thread < threads; thread++ )
         m_cpuThreads[thread] = new boost::thread(
@@ -121,6 +124,7 @@ void WLariBruteforceClustering::initExtentSizesAtThread( vector<WKdPointND*>* po
             refreshable->setExtentPointCount( count );
             refreshable->tagToRefresh( false );
         }
+        m_pointClassifier->incrementProgress();
     }
 }
 
@@ -128,6 +132,7 @@ void WLariBruteforceClustering::addExtentCluster( WParameterDomainKdPoint* peakC
 {
     vector<WParameterDomainKdPoint*>* extentPoints =
             getParametersOfExtent( peakCenterPoint->getCoordinate() );
+    m_pointClassifier->setProgressSettings( m_currentClusterID, extentPoints->size(), "Adding cluster " );
     cout << "Updating Data for extent: " << extentPoints->size() << "/" << m_parameterDomain->getAllPoints()->size() << endl;
     size_t threads = m_cpuThreadCount < extentPoints->size() ?m_cpuThreadCount :extentPoints->size();
     for( size_t thread = 0; thread < threads; thread++ )
@@ -155,6 +160,7 @@ void WLariBruteforceClustering::addExtentClusterAtThread( vector<WParameterDomai
 
             extentPoint->setIsAddedToPlane( true );
         }
+        m_pointClassifier->incrementProgress();
     }
 }
 

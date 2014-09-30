@@ -143,14 +143,6 @@ protected:
 
 private:
     /**
-     * Initializes progress bar settings.
-     * \param steps Points count as reference to the progress bar.
-     */
-    void setProgressSettings( size_t steps );
-
-
-
-    /**
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
@@ -195,10 +187,6 @@ private:
 
 
 
-    /**
-     * Plugin progress status that is shared with the reader.
-     */
-    boost::shared_ptr< WProgress > m_progressStatus;
 
     /**
      * Settings group that deals with coordinate accuracy of points to be evaluated.

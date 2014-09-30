@@ -166,8 +166,7 @@ void WMPointGroupsValidator::moduleMain()
 //        std::cout << "Execute cycle\r\n";
         if  ( referenceGroups && validatedPoints )
         {
-            setProgressSettings( 10 );
-
+            m_groupValidator.assignProgressCombiner( m_progress );
             m_groupValidator.setCoordinateAccuracy( m_coordinateAccuracy->get() );
             m_groupValidator.setPointAreaRadius( m_pointAreaRadius->get() );
             m_groupValidator.setMinimalPointCompleteness( m_minimalPointCompleteness->get() );
@@ -185,8 +184,6 @@ void WMPointGroupsValidator::moduleMain()
             if( m_saveCSVTrigger->get(true) )
                 m_exportCSV.exportCSV();
             m_saveCSVTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, true );
-
-            m_progressStatus->finish();
         }
 
 
@@ -206,16 +203,3 @@ void WMPointGroupsValidator::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
-
-
-
-
-
-void WMPointGroupsValidator::setProgressSettings( size_t steps )
-{
-    m_progress->removeSubProgress( m_progressStatus );
-    std::string headerText = "Loading data";
-    m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
-    m_progress->addSubProgress( m_progressStatus );
-}
-

@@ -148,6 +148,16 @@ private:
     vector<WParameterDomainKdPoint*>* getParametersOfExtent( const vector<double>& parametersXYZ0 );
 
     /**
+     * Current cluster ID of the brute-force clustering process.
+     */
+    size_t m_currentClusterID;
+
+    /**
+     * Assigned point classifier instance to get parameter and spatial domain points;
+     */
+    WLariPointClassifier* m_pointClassifier;
+
+    /**
      * Parameter domain kd tree. This point set is emptied during operation for more 
      * speed. Assign a copy to that field.
      */

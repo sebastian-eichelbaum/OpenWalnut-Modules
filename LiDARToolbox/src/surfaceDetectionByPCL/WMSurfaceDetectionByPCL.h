@@ -174,7 +174,7 @@ private:
     /**
      * Info field - Wall time for the whole surface detection process.
      */
-    WPropDouble m_infoRenderTimeSeconds;
+    WPropDouble m_infoRenderTimeMinutes;
 
     /**
      * Info field - The points per second detection rate of the segmentation process.
