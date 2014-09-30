@@ -190,9 +190,6 @@ private:
 
 
 
-    /**
-     * Sets the progress status.
-     */
 
     /**
      * The maximal count of analyzed neighbors of an examined input point. It is the 
