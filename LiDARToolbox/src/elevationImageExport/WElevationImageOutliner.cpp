@@ -53,6 +53,27 @@ WElevationImageOutliner::~WElevationImageOutliner()
 {
 }
 
+double WElevationImageOutliner::getSurfaceArea2D( WQuadTree* quadTree )
+{
+    return calculateSurfaceForNode2D( quadTree->getRootNode(), quadTree );
+}
+
+double WElevationImageOutliner::calculateSurfaceForNode2D( WQuadNode* node, WQuadTree* quadTree )
+{
+    if( node->getRadius() <= quadTree->getDetailLevel() )
+    {
+        return node->getRadius() * node->getRadius() * 4;
+    }
+    else
+    {
+        double area = 0.0;
+        for  ( size_t child = 0; child < 4; child++ )
+            if  ( node->getChild( child ) != 0 )
+                area += calculateSurfaceForNode2D( node->getChild( child ), quadTree );
+        return area;
+    }
+}
+
 void WElevationImageOutliner::importElevationImage( WQuadTree* quadTree, size_t elevImageMode )
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );

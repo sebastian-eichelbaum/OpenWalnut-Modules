@@ -101,12 +101,13 @@ void WMElevationImageExport::properties()
     m_yMax = m_infoProperties->addProperty( "Y max.: ", "Maximal y coordinate of all input points.", 0.0 );
     m_zMin = m_infoProperties->addProperty( "Z min.: ", "Minimal z coordinate of all input points.", 0.0 );
     m_zMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
+    m_infoSurfaceArea2D = m_infoProperties->addProperty( "Area m²: ", "Surface area in m².", 0.0 );
 
 
     // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
     m_detailDepth = m_properties->addProperty( "Detail Depth 2^n m: ", "Resulting 2^n meters detail "
                             "depth for the octree search tree.", 0, m_propCondition );
-    m_detailDepth->setMin( -3 );
+    m_detailDepth->setMin( -4 );
     m_detailDepth->setMax( 4 );
     m_detailDepthLabel = m_properties->addProperty( "Voxel width meters: ", "Resulting detail depth "
                             "in meters for the octree search tree.", pow( 2.0, m_detailDepth->get() ) * 2.0 );
@@ -179,12 +180,11 @@ void WMElevationImageExport::moduleMain()
             m_detailDepthLabel->set( pow( 2.0, m_detailDepth->get() ) * 2.0 );
             m_elevationImage = new WQuadTree( pow( 2.0, m_detailDepth->get() ) );
 
-            boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
             for( size_t vertex = 0; vertex < count; vertex++)
             {
-                float x = verts->at( vertex*3 );
-                float y = verts->at( vertex*3+1 );
-                float z = verts->at( vertex*3+2 );
+                double x = verts->at( vertex*3 );
+                double y = verts->at( vertex*3+1 );
+                double z = verts->at( vertex*3+2 );
                 m_elevationImage->registerPoint( x, y, z );
                 m_progressStatus->increment( 1 );
             }
@@ -212,9 +212,13 @@ void WMElevationImageExport::moduleMain()
                 image->highlightBuildingGroups( m_pointGroups->getData(), m_elevationImage );
 
                 WBmpSaver::saveImage( image, m_elevationImageExportablePath->get().c_str() );
+                delete image;
             }
+            m_infoSurfaceArea2D->set( m_elevationImageOutliner->getSurfaceArea2D( m_elevationImage ) );
             m_elevationImageDisplay->updateData( m_elevationImageOutliner->getOutputMesh() );
             m_exportTriggerProp->set( WPVBaseTypes::PV_TRIGGER_READY, true );
+            delete m_elevationImage;
+            delete m_elevationImageOutliner;
             m_progressStatus->finish();
         }
 

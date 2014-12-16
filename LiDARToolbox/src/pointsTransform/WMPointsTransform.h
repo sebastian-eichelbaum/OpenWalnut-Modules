@@ -75,6 +75,9 @@ template< class T > class WModuleInputData;
 class WDataSetScalar;
 class WGEManagedGroupNode;
 
+
+using std::numeric_limits;
+
 /**
  * Transforms a point set: Available options: Cropping, stretching, translation and 
  * rotation.
@@ -117,6 +120,55 @@ public:
      * \return The icon.
      */
     virtual const char** getXPMIcon() const;
+
+    /**
+     * Color adjustment reference constant - Automatical color adjustment.
+     */
+    static const size_t M_COLOR_AUTO;
+
+    /**
+     * Color adjustment reference constant - Automatical color adjustment with the offset
+     * of 0.
+     */
+    static const size_t M_COLOR_AUTO_ONLY_CONTRAST;
+
+    /**
+     * Color adjustment reference constant - Manual color adjustment.
+     */
+    static const size_t M_COLOR_MANUAL;
+
+    /**
+     * Color adjustment reference constant - Editing colors manually with the same
+     * aspect ratio between all colors.
+     */
+    static const size_t M_COLOR_MANUAL_JOINED;
+
+    /**
+     * Color adjustment reference constant - manual color adjustment with all enterable
+     * numbers (without useing sliders).
+     */
+    static const size_t M_COLOR_MANUAL_UNBOUNDED;
+
+    /**
+     * Color adjustment reference constant - manual color adjustment with all enterable
+     * numbers (without useing sliders). Aspect ratio between colors is kept.
+     */
+    static const size_t M_COLOR_MANUAL_UNBOUNDED_JOINED;
+
+    /**
+     * Color display mode - Colored.
+     */
+    static const size_t M_COLOR_MODE_COLORED;
+
+    /**
+     * Color display mode - Perceptional proportions of Red=30%, Green=59% and Blue=11%.
+     */
+    static const size_t M_COLOR_MODE_GREYSCALE_PERCEPTIONAL;
+
+    /**
+     * Color display mode - Proportional proportions of Red=33%, Green=33% and Blue=33%.
+     */
+    static const size_t M_COLOR_MODE_GREYSCALE_PROPORTIONAL;
 
 protected:
     /**
@@ -185,6 +237,11 @@ private:
      * Method that is executed to save a file if the save button is pressed.
      */
     void onFileSave();
+
+    /**
+     * Method that handles color intensity correction.
+     */
+    void onColorIntensityCorrect();
 
     /**
      * WDataSetPoints data input (proposed for LiDAR data).
@@ -268,39 +325,29 @@ private:
     vector<WPropDouble> m_infoBoundingBoxMax;
 
     /**
+     * Information about minimal color channel intensity values.
+     */
+    vector<WPropDouble> m_infoColorMin;
+
+    /**
+     * Information about maximal color channel intensity values.
+     */
+    vector<WPropDouble> m_infoColorMax;
+
+    /**
      * Options for surface features.
      */
     WPropGroup m_pointsCropGroup;
 
     /**
-     * Minimal X value of the selection.
+     * Minimal Coordinate value of the selection.
      */
-    WPropDouble m_fromX;
+    vector<WPropDouble> m_fromCoord;
 
     /**
-     * Maximal X value of the selection.
+     * Maximal Coordinate value of the selection.
      */
-    WPropDouble m_toX;
-
-    /**
-     * Maximal Y value of the selection.
-     */
-    WPropDouble m_fromY;
-
-    /**
-     * Minimal Y value of the selection.
-     */
-    WPropDouble m_toY;
-
-    /**
-     * Minimal Z value of the selection.
-     */
-    WPropDouble m_fromZ;
-
-    /**
-     * Maximal Z value of the selection.
-     */
-    WPropDouble m_toZ;
+    vector<WPropDouble> m_toCoord;
 
     /**
      * Switch to cut away the selection instead of to crop the area.
@@ -331,19 +378,9 @@ private:
     WPropGroup m_translatePointsGroup;
 
     /**
-     * X coordinate translation offset.
+     * Coordinate translation offset.
      */
-    WPropDouble m_translateX;
-
-    /**
-     * Y coordinate translation offset.
-     */
-    WPropDouble m_translateY;
-
-    /**
-     * Z coordinate translation offset.
-     */
-    WPropDouble m_translateZ;
+    vector<WPropDouble> m_translationOffset;
 
     /**
      * Group that multiplies each coordinate by a factor.
@@ -351,19 +388,9 @@ private:
     WPropGroup m_groupMultiplyPoints;
 
     /**
-     * Each X coordinate is multiplied by this value
+     * Each coordinate is multiplied by this factor.
      */
-    WPropDouble m_factorX;
-
-    /**
-     * Each Y coordinate is multiplied by this value
-     */
-    WPropDouble m_factorY;
-
-    /**
-     * Each Z coordinate is multiplied by this value
-     */
-    WPropDouble m_factorZ;
+    vector<WPropDouble> m_coordFactor;
 
     /**
      * Rotation options.
@@ -386,19 +413,9 @@ private:
     WPropDouble m_rotation3AngleXZ;
 
     /**
-     * Rotation anchor on the X coordinate.
+     * Rotation anchor coordinate.
      */
-    WPropDouble m_rotationAnchorX;
-
-    /**
-     * Rotation anchor on the Y coordinate.
-     */
-    WPropDouble m_rotationAnchorY;
-
-    /**
-     * Rotation anchor on the Z coordinate.
-     */
-    WPropDouble m_rotationAnchorZ;
+    vector<WPropDouble> m_rotationAnchor;
 
     /**
      * Color equalizer settings group.
@@ -406,34 +423,35 @@ private:
     WPropGroup m_groupColorEqualizer;
 
     /**
-     * Red contrast - Factor that is applied before adding the red offset.
+     * Color contrast - Factor that is applied before adding the green offset.
+     * Colors are sorted in order: Red, green, blue
      */
-    WPropDouble m_contrastRed;
+    vector<WPropDouble> m_contrast;
 
     /**
-     * Green contrast - Factor that is applied before adding the green offset.
+     * Color offset.- Offset that is added after applying the red factor.
+     * Colors are sorted in order: Red, green, blue
      */
-    WPropDouble m_contrastGreen;
+    vector<WPropDouble> m_colorOffset;
 
     /**
-     * Blue contrast - Factor that is applied before adding the blue offset.
+     * Type of the color adjustment:
+     *     M_COLOR_AUTO = 0;
+     *     M_COLOR_AUTO_ONLY_CONTRAST = 1;
+     *     M_COLOR_MANUAL = 2;
+     *     M_COLOR_MANUAL_JOINED = 3;
+     *     M_COLOR_MANUAL_UNBOUNDED = 4;
+     *     M_COLOR_MANUAL_UNBOUNDED_JOINED = 5;
      */
-    WPropDouble m_contrastBlue;
+    WPropSelection m_colorAdjustmentType;
 
     /**
-     * Red offset.- Offset that is added after applying the red factor.
+     * Color modes:
+     *     M_COLOR_MODE_COLORED = 0 (Usual separated color channels).
+     *     M_COLOR_MODE_GREYSCALE_PERCEPTIONAL = 1 (Red=30%, Green=59% and Blue=11%).
+     *     M_COLOR_MODE_GREYSCALE_PROPORTIONAL = 2 (Red=33%, Green=33% and Blue=33%).
      */
-    WPropDouble m_offsetRed;
-
-    /**
-     * Green offset.- Offset that is added after applying the green factor.
-     */
-    WPropDouble m_OffsetGreen;
-
-    /**
-     * Blue offset.- Offset that is added after applying the blue factor.
-     */
-    WPropDouble m_offsetBlue;
+    WPropSelection m_colorModeType;
 
     /**
      * Color equalizer settings group.
@@ -479,34 +497,24 @@ private:
     WPointSubtactionHelper m_pointSubtraction;
 
     /**
-     * Minimal X coordinate of input points.
+     * Minimal coordinate of input points.
      */
-    double m_minX;
+    vector<double> m_minCoord;
 
     /**
-     * Maximal X coordinate of input points.
+     * Maximal coordinate of input points.
      */
-    double m_maxX;
+    vector<double> m_maxCoord;
 
     /**
-     * Minimal Y coordinate of input points.
+     * Minimal Color channel intensity.
      */
-    double m_minY;
+    vector<double> m_minColorIntensity;
 
     /**
-     * Maximal Y coordinate of input points.
+     * Maximal Color channel intensity.
      */
-    double m_maxY;
-
-    /**
-     * Minimal Z coordinate of input points.
-     */
-    double m_minZ;
-
-    /**
-     * Maximal Z coordinate of input points.
-     */
-    double m_maxZ;
+    vector<double> m_maxColorIntensity;
 
     /**
      * Sets how many points should be skipped after adding a single point to the output.

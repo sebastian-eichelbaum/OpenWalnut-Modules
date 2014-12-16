@@ -95,23 +95,26 @@ void WMReadLAS::properties()
 
     m_reloadData = m_properties->addProperty( "Reload data:",  "Refresh", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
-    m_outputDataWidth = m_properties->addProperty( "Data set width: ",
-                            "Outpt area size which is of the area input*input meters^2.",
-                            200, m_propCondition );
-    m_outputDataWidth->setMin( 0 );
+    m_selectionRadius = m_properties->addProperty( "Selection radius: ",
+                            "Outpt area size which is of the area radius*radius*4 meters^2.",
+                            100.0, m_propCondition );
+    m_selectionRadius->setMin( 0.0 );
 
     m_sliderX = m_properties->addProperty( "Scope selection X: ",
                             "X range will be drawn between input and input+'Data set "
-                            "width'.", 0, m_propCondition );
+                            "width'.", 0.0, m_propCondition );
 
     m_sliderY = m_properties->addProperty( "Scope selection Y: ",
                             "YY range will be drawn between input and input+'Data set "
-                            "width'.", 0, m_propCondition );
+                            "width'.", 0.0, m_propCondition );
 
     m_translateDataToCenter = m_properties->addProperty( "Translate to center: ",
                             "Translates X and Y coordinates to center. Minimal and maximal "
                             "possible coordinates are -/+'Data set width'/2."
                             ".", true, m_propCondition );
+
+    m_colorsEnabled = m_properties->addProperty( "Colors enabled", "", true, m_propCondition );
+
     m_contrast = m_properties->addProperty( "Contrast: ",
                             "This is the value that multiplies the input colors before assigning to the output. "
                             "Note that the output has the range between 0.0 and 1.0.\r\nHint: Look ath the intensity "
@@ -119,12 +122,18 @@ void WMReadLAS::properties()
 
     m_nbVertices = m_infoProperties->addProperty( "Points", "The number of vertices in the loaded scan.", 0 );
     m_nbVertices->setMax( std::numeric_limits< int >::max() );
-    m_xMin = m_infoProperties->addProperty( "X min.: ", "Minimal x coordinate of all input points.", 0.0 );
-    m_xMax = m_infoProperties->addProperty( "X max.: ", "Maximal x coordinate of all input points.", 0.0 );
-    m_yMin = m_infoProperties->addProperty( "Y min.: ", "Minimal y coordinate of all input points.", 0.0 );
-    m_yMax = m_infoProperties->addProperty( "Y max.: ", "Maximal y coordinate of all input points.", 0.0 );
-    m_zMin = m_infoProperties->addProperty( "Z min.: ", "Minimal z coordinate of all input points.", 0.0 );
-    m_zMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
+    m_minCoord.push_back( m_infoProperties->addProperty( "X min.: ", "Minimal x coordinate of all input points.", 0.0 ) );
+    m_maxCoord.push_back( m_infoProperties->addProperty( "X max.: ", "Maximal x coordinate of all input points.", 0.0 ) );
+    m_minCoord.push_back( m_infoProperties->addProperty( "Y min.: ", "Minimal y coordinate of all input points.", 0.0 ) );
+    m_maxCoord.push_back( m_infoProperties->addProperty( "Y max.: ", "Maximal y coordinate of all input points.", 0.0 ) );
+    m_minCoord.push_back( m_infoProperties->addProperty( "Z min.: ", "Minimal z coordinate of all input points.", 0.0 ) );
+    m_maxCoord.push_back( m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 ) );
+    m_colorMin.push_back( m_infoProperties->addProperty( "Red min.: ", "", 0.0 ) );
+    m_colorMax.push_back( m_infoProperties->addProperty( "Red max.: ", "", 0.0 ) );
+    m_colorMin.push_back( m_infoProperties->addProperty( "Green min.: ", "", 0.0 ) );
+    m_colorMax.push_back( m_infoProperties->addProperty( "Green max.: ", "", 0.0 ) );
+    m_colorMin.push_back( m_infoProperties->addProperty( "Blue min.: ", "", 0.0 ) );
+    m_colorMax.push_back( m_infoProperties->addProperty( "Blue max.: ", "", 0.0 ) );
     m_intensityMin = m_infoProperties->addProperty( "Intensity min.: ", "Minimal intensity of all input points.", 0.0 );
     m_intensityMax = m_infoProperties->addProperty( "Intensity max.: ", "Maximal intensity of all input points.", 0.0 );
 
@@ -159,19 +168,28 @@ void WMReadLAS::moduleMain()
         {
             reader.setDataSetRegion( m_sliderX->get( true ),
                                      m_sliderY->get( true ),
-                                     m_outputDataWidth->get( true ) );
+                                     m_selectionRadius->get( true ) );
+            reader.setColorsEnabled( m_colorsEnabled->get() );
             reader.setTranslateToCenter( m_translateDataToCenter->get( true ) );
             reader.setContrast( m_contrast->get() );
             boost::shared_ptr< WDataSetPoints > tmpPointSet = reader.getPoints();
             WDataSetPoints::VertexArray points = tmpPointSet->getVertices();
             WDataSetPoints::ColorArray colors = tmpPointSet->getColors();
             m_nbVertices->set( tmpPointSet->size() );
-            m_xMin->set( reader.getXMin() );
-            m_xMax->set( reader.getXMax() );
-            m_yMin->set( reader.getYMin() );
-            m_yMax->set( reader.getYMax() );
-            m_zMin->set( reader.getZMin() );
-            m_zMax->set( reader.getZMax() );
+            bool containsColors = false;
+            for(size_t dimension = 0; dimension < m_minCoord.size(); dimension++ )
+            {
+                m_minCoord[dimension]->set( reader.getMinCoord()[dimension] );
+                m_maxCoord[dimension]->set( reader.getMaxCoord()[dimension] );
+
+                m_colorMin[dimension]->set( reader.getColorMin()[dimension] );
+                m_colorMax[dimension]->set( reader.getColorMax()[dimension] );
+
+                if( reader.getColorMax()[dimension] - reader.getColorMin()[dimension] > 0.0 )
+                    containsColors = true;
+            }
+            if( !containsColors )
+                m_colorsEnabled->set( false );
             m_intensityMin->set( reader.getIntensityMin() );
             m_intensityMax->set( reader.getIntensityMax() );
 
@@ -196,20 +214,10 @@ void WMReadLAS::moduleMain()
 
 void WMReadLAS::refreshScrollBars()
 {
-    size_t dataWidth = ( m_outputDataWidth->get() + 1 ) / 2;
-    m_outputDataWidth->set( dataWidth = dataWidth * 2 );
-
-    if  ( m_outputDataWidth == 0 ) return;
-
-    size_t dividend = reader.getXMin() / dataWidth;
-    m_sliderX->setMin( dividend * dataWidth );
-    dividend = reader.getXMax() / dataWidth;
-    m_sliderX->setMax( dividend * dataWidth );
-
-    dividend = reader.getYMin() / dataWidth;
-    m_sliderY->setMin( dividend * dataWidth );
-    dividend = reader.getYMax() / dataWidth;
-    m_sliderY->setMax( dividend * dataWidth );
+    m_sliderX->setMin( reader.getMinCoord()[0] );
+    m_sliderX->setMax( reader.getMaxCoord()[0] );
+    m_sliderY->setMin( reader.getMinCoord()[1] );
+    m_sliderY->setMax( reader.getMaxCoord()[1] );
 
     m_sliderX->get( true );
     m_sliderY->get( true );

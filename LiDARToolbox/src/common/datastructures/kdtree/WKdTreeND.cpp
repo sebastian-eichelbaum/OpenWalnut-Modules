@@ -37,6 +37,7 @@ WKdTreeND::WKdTreeND()
     m_allowDoubles = true;
     m_points = new vector<WKdPointND* >();
     m_parentSplittingDimension = 3;
+    m_hierarchyLevel = 0;
     m_higherChild = 0;
     m_lowerChild = 0;
 }
@@ -49,6 +50,7 @@ WKdTreeND::WKdTreeND( size_t dimensions )
     m_allowDoubles = true;
     m_points = new vector<WKdPointND* >();
     m_parentSplittingDimension = dimensions;
+    m_hierarchyLevel = 0;
     m_higherChild = 0;
     m_lowerChild = 0;
 }
@@ -287,8 +289,21 @@ void WKdTreeND::addPointsToChildren( vector<WKdPointND* >* newPoints )
             higherPoints->push_back( newPoint );
         }
     }
-    m_lowerChild->add( lowerPoints );
-    m_higherChild->add( higherPoints );
+
+    size_t hierarchyLevel = m_hierarchyLevel;
+    if( hierarchyLevel > 2 )
+    {
+        m_lowerChild->add( lowerPoints );
+        m_higherChild->add( higherPoints );
+    }
+    else
+    {
+        boost::thread lowerChildThread( &WKdTreeND::add, m_lowerChild, lowerPoints );
+        boost::thread higherChildThread( &WKdTreeND::add, m_higherChild, higherPoints );
+        lowerChildThread.join();
+        higherChildThread.join();
+    }
+
     delete lowerPoints;
     delete higherPoints;
 }
@@ -445,4 +460,6 @@ void WKdTreeND::initSubNodes()
 {
     m_lowerChild->m_parentSplittingDimension = m_splittingDimension;
     m_higherChild->m_parentSplittingDimension = m_splittingDimension;
+    m_lowerChild->m_hierarchyLevel = m_hierarchyLevel + 1;
+    m_higherChild->m_hierarchyLevel = m_hierarchyLevel + 1;
 }

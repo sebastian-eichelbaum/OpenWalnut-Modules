@@ -91,6 +91,22 @@ public:
     virtual ~WElevationImageOutliner();
 
     /**
+     * Returns the 2D surface area in m^2. Area = [node count] * [node radius]^2 * 4.
+     * \param quadtree Quadtree to calculate the 2D m^2 area for.
+     * \return 2D surface area in m^2.
+     */
+    double getSurfaceArea2D( WQuadTree* quadtree );
+
+    /**
+     * Calculates quadtree node surface for a node of a quadtree.
+     * Area = [node count] * [node radius]^2 * 4.
+     * \param node Quadtree node to calculate childtens node area for.
+     * \param quadTree Quadtree where node area  in m^2should be calculated.
+     * \return 2D surface area in m^2.
+     */
+    double calculateSurfaceForNode2D( WQuadNode* node, WQuadTree* quadTree );
+
+    /**
      * Sets the elevation image export settings.
      * \param minElevImageZ The elevation height that is mapped to the black color.
      * \param intensityIncreasesPerMeter Intensity increase count per meter.

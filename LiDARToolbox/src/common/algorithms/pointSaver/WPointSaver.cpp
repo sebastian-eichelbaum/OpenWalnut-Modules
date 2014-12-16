@@ -36,6 +36,8 @@ WPointSaver::WPointSaver()
     m_hasGroupInfo = false;
     m_filePath = new stringstream();
     m_containsData = false;
+    m_currentInputNumberLine.reserve( 0 );
+    m_currentInputNumberLine.resize( 0 );
 }
 
 WPointSaver::~WPointSaver()
@@ -96,31 +98,6 @@ void WPointSaver::setFilePath( const char* path )
     delete m_filePath;
     m_filePath = new stringstream();
     *m_filePath << path;
-}
-
-double WPointSaver::parseDouble( vector<char> charVector )
-{
-    stringstream numberStream;
-    for( size_t index = 0; index < charVector.size(); index++ )
-        numberStream << charVector[index];
-    const string numberString = numberStream.str();
-    istringstream stream( numberString );
-    stream.precision( 16 );
-    double number;
-    stream >> number;
-    return number;
-}
-
-size_t WPointSaver::parseSizeT( vector<char> charVector )
-{
-    stringstream numberStream;
-    for( size_t index = 0; index < charVector.size(); index++ )
-        numberStream << charVector[index];
-    const string numberString = numberStream.str();
-    istringstream stream( numberString );
-    size_t number;
-    stream >> number;
-    return number;
 }
 
 bool WPointSaver::containsData()
@@ -186,21 +163,40 @@ bool WPointSaver::load()
     ifstream myfile( path );
     while( getline( myfile, line ) )
     {
-        if( ( m_verts->size() / 3 ) % 50000 == 0 )
+        if( ( m_verts->size() / 3 ) % 100000 == 0 )
             cout << "WPointSaver::load() - Current point count: " << m_verts->size() / 3 << endl;
-        vector<vector<char> > signs = fetchNumberCharsFromLine( line );
-        if( signs.size() == variablesPerLine )
+        fetchNumberCharsFromLine( line );
+        if( m_currentInputNumberLine.size() == variablesPerLine
+                || m_currentInputNumberLine.size() == variablesPerLine - 2 )
         {
             m_containsData = true;
             for( size_t dimension = 0; dimension < 3; dimension++ )
-                m_verts->push_back( parseDouble( signs[dimension] ) );
-            for( size_t color = 0; color < 3; color++ )
-                m_colors->push_back( parseDouble( signs[color + 3] ) );
-            if( m_hasGroupInfo )
-                m_groups->push_back( parseSizeT( signs[6] ) );
+            {
+                m_verts->push_back( 0.0 );
+                *m_currentInputNumberLine[dimension] >> m_verts->at( m_verts->size() - 1 );
 
-            if( m_verts->size() > 0 && m_verts->size() % 100000 == 0 )
-                cout << "Loading points. Current size: " << m_verts->size() << endl;
+                m_colors->push_back( 0.0 );
+            }
+
+            *m_currentInputNumberLine[3] >> m_colors->at( m_colors->size() - 3 );
+            for( size_t colorChannel = 1; colorChannel < 3; colorChannel++ )
+                if( m_currentInputNumberLine.size() == variablesPerLine )
+                {
+                    *m_currentInputNumberLine[3 + colorChannel]
+                            >> m_colors->at( m_colors->size() - 3 + colorChannel );
+                }
+                else
+                {
+                    m_colors->at( m_colors->size() - 3 + colorChannel )
+                            = m_colors->at( m_colors->size() - 3 );
+                }
+
+            if( m_hasGroupInfo )
+            {
+                m_groups->push_back( 0.0 );
+                *m_currentInputNumberLine[ m_currentInputNumberLine.size() - 1 ]
+                        >> m_groups->at( m_groups->size() - 1 );
+            }
         }
     }
     myfile.close();
@@ -256,9 +252,8 @@ bool WPointSaver::isNumberChar( const char sign )
     return sign == '.' || sign == '-' || sign == 'e' || sign == 'E';
 }
 
-vector<vector<char> > WPointSaver::fetchNumberCharsFromLine( string line )
+void WPointSaver::fetchNumberCharsFromLine( string line )
 {
-    vector<vector<char> > output;
     size_t vectorSize = 0;
     size_t length = line.length();
     const char* text = line.c_str();
@@ -269,19 +264,21 @@ vector<vector<char> > WPointSaver::fetchNumberCharsFromLine( string line )
         bool isNumberSign = WPointSaver::isNumberChar( text[index] );
         if( !wasNumberSign && isNumberSign )
         {
-            output.reserve( vectorSize + 1 );
-            output.resize( vectorSize + 1 );
-            vector<char> newVector;
-            output[vectorSize] = newVector;
             vectorSize++;
+            if( vectorSize > m_currentInputNumberLine.size() )
+                m_currentInputNumberLine.push_back( new stringstream() );
+            m_currentInputNumberLine[vectorSize - 1]->clear();
         }
         if( isNumberSign )
-        {
-            output[vectorSize - 1].push_back( text[index] );
-        }
+            *m_currentInputNumberLine[vectorSize - 1] << text[index];
+
         wasNumberSign = isNumberSign;
     }
-    return output;
+    if( vectorSize < m_currentInputNumberLine.size() )
+    {
+        m_currentInputNumberLine.reserve( vectorSize );
+        m_currentInputNumberLine.resize( vectorSize );
+    }
 }
 
 const char* WPointSaver::EXTENSION_WDATASETPOINTS = ".points";

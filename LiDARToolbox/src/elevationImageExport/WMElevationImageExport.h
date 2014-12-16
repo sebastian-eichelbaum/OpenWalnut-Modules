@@ -208,6 +208,12 @@ private:
     WPropDouble m_zMax;
 
     /**
+     * Info field for surface area in m^2 of the elevation image.
+     * Area = [node count] * [node radius]^2 * 4.
+     */
+    WPropDouble m_infoSurfaceArea2D;
+
+    /**
      * Determines the resolution of the smallest octree nodes in 2^n meters
      */
     WPropInt m_detailDepth;

@@ -38,6 +38,7 @@
 #include "core/common/datastructures/WColoredVertices.h"
 
 using osg::Vec3;
+using std::vector;
 
 namespace laslibb
 {
@@ -66,6 +67,13 @@ namespace laslibb
         virtual ~WLasReader();
 
         /**
+         * Sets whether the reader should take the colored or greyscale channel. Mostly
+         * only one data input is available.
+         * \param colorsEnabled Use the colored channel instead the greyscale one.
+         */
+        void setColorsEnabled( bool colorsEnabled );
+
+        /**
          * Sets the LAS input file path.
          * \param path Path of the read LAS file.
          */
@@ -79,12 +87,11 @@ namespace laslibb
 
         /**
          * Sets from which data set region the point data should be loaded.
-         * \param fromX The minimal read X coordinate.
-         * \param fromY The minimal read Y coordinate.
-         * \param dataSetWidth The width of the read data set.
-         *         No cropping is applied using the value 0.
+         * \param selectionX Selection centre X coordinate.
+         * \param selectionY Selection centre Y coordinate.
+         * \param selectionRadius Selection radius.
          */
-        void setDataSetRegion( size_t fromX, size_t fromY, size_t dataSetWidth );
+        void setDataSetRegion( double selectionX, double selectionY, double selectionRadius );
 
         /**
          * Sets whether to move the input data to the coordinate system center.
@@ -99,52 +106,40 @@ namespace laslibb
         void setContrast( double contrast );
 
         /**
-         * Returns the minimal X coordinate.
-         * \return The minimal X coordinate.
+         * Returns the minimal coordinate.
+         * \return The minimal coordinate.
          */
-        float getXMin();
+        vector<double> getMinCoord();
 
         /**
-         * Returns the maximal X coordinate.
-         * \return The maximal X coordinate.
+         * Returns the maximal coordinate.
+         * \return The maximal coordinate.
          */
-        float getXMax();
+        vector<double> getMaxCoord();
 
         /**
-         * Returns the minimal Y coordinate.
-         * \return The minimal Y coordinate.
+         * Returns the maximal color RGB values
+         * \return Maximal color RGB values.
          */
-        float getYMin();
+        vector<double> getColorMin();
 
         /**
-         * Returns the maximal Y coordinate.
-         * \return The maximal Y coordinate.
+         * Returns the minimal color RGB values
+         * \return Mimimal color RGB values.
          */
-        float getYMax();
-
-        /**
-         * Returns the minimal Z coordinate.
-         * \return The minimal Z coordinate.
-         */
-        float getZMin();
-
-        /**
-         * Returns the maximal Z coordinate.
-         * \return The maximal Z coordinate.
-         */
-        float getZMax();
+        vector<double> getColorMax();
 
         /**
          * Returns the minimal color intensity in LAS file.
          * \return Minimal color intensity in LAS file.
          */
-        float getIntensityMin();
+        double getIntensityMin();
 
         /**
          * Returns the maximal color intensity in LAS file.
          * \return Maximal color intensity in LAS file.
          */
-        float getIntensityMax();
+        double getIntensityMax();
 
 
     private:
@@ -170,24 +165,29 @@ namespace laslibb
         boost::shared_ptr< WProgress > m_progressStatus;
 
         /**
+         * Enables depicting colors instead of greyscale las file input.
+         */
+        bool m_colorsEnabled;
+
+        /**
          * Input LAS file path.
          */
-        const char* filePath;
+        const char* m_filePath;
 
         /**
-         * The minimal read X coordinate.
+         * Centre X coordinate of the input data selection.
          */
-        double m_fromX;
+        double m_selectionX;
 
         /**
-         * The minimal read Y coordinate.
+         * Centre Y coordinate of the input data selection.
          */
-        double m_fromY;
+        double m_selectionY;
 
         /**
-         * The width of the read data set. No cropping is applied using the value 0.
+         * Radius of the selected input dataset.
          */
-        double m_dataSetWidth;
+        double m_selectionRadius;
 
         /**
          * Setting whether to move the data to the center of the coordinate system.
@@ -200,44 +200,34 @@ namespace laslibb
         double m_contrast;
 
         /**
-         * Minimal X coordinate in LAS file.
+         * Minimal coordinate in LAS file.
          */
-        float m_xMin;
+        vector<double> m_minCoord;
 
         /**
-         * Maximal X coordinate in LAS file.
+         * Maximal coordinate in LAS file.
          */
-        float m_xMax;
+        vector<double> m_maxCoord;
 
         /**
-         * Minimal Y coordinate in LAS file.
+         * Minimal color RGB values;
          */
-        float m_yMin;
+        vector<double> m_minColor;
 
         /**
-         * Maximal Y coordinate in LAS file.
+         * Maximal color RGB values;
          */
-        float m_yMax;
-
-        /**
-         * Minimal Z coordinate in LAS file.
-         */
-        float m_zMin;
-
-        /**
-         * Maximal Z coordinate in LAS file.
-         */
-        float m_zMax;
+        vector<double> m_maxColor;
 
         /**
          * Minimal color intensity in LAS file.
          */
-        float m_intensityMin;
+        double m_intensityMin;
 
         /**
          * Maximal color intensity in LAS file.
          */
-        float m_intensityMax;
+        double m_intensityMax;
     };
 } /* namespace butterfly */
 #endif  // WLASREADER_H

@@ -135,20 +135,6 @@ public:
     static bool isNumberChar( const char sign );
 
     /**
-     * Parses a double number from a characer sequence.
-     * \param charVector Character sequence to be parsed.
-     * \return parsed double number.
-     */
-    static double parseDouble( vector<char> charVector );
-
-    /**
-     * Parses a size_t number from a characer sequence.
-     * \param charVector Character sequence to be parsed.
-     * \return parsed size_t number.
-     */
-    static size_t parseSizeT( vector<char> charVector );
-
-    /**
      * Tests whether a path ends with a character sequence. Useful to test whether file 
      * names correspond to an extension.
      * \param nameTail Character sequence to be tested.
@@ -182,7 +168,7 @@ private:
      * \param line Line to be separated
      * \return Set of several numbers that further have to be parsed.
      */
-    vector<vector<char> > fetchNumberCharsFromLine( string line );
+    void fetchNumberCharsFromLine( string line );
 
 
     /**
@@ -224,6 +210,11 @@ private:
      * Extension for WDataSetPointsGrouped point data files.
      */
     static const char* EXTENSION_WDATASETPOINTSGROUPED;
+
+    /**
+     * Current row of read in numbers from a file that has further to be parsed
+     */
+    vector<stringstream*> m_currentInputNumberLine;
 };
 
 #endif  // WPOINTSAVER_H

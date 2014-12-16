@@ -28,6 +28,7 @@
 #include <vector>
 #include <algorithm>
 #include "WKdPointND.h"
+#include <boost/thread.hpp>
 
 using std::vector;
 using std::size_t;
@@ -227,6 +228,11 @@ private:
      * the splitting dimension of the current kd tree node.
      */
     size_t m_parentSplittingDimension;    //TODO(aschwarzkopf): ggf. wegschmeißen
+
+    /**
+     * Herarchy level of the kd-tree node. It is used for multithreading regulation.
+     */
+    size_t m_hierarchyLevel;
 
     //TODO(aschwarzkopf): Ggf. Sinn: Nicht bis ins Letzte unterteilen, ggf. nur über einem Threshold
     /**

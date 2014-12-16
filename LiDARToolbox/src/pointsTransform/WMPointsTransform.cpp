@@ -27,6 +27,7 @@
 #include <fstream>  // std::ifstream
 #include <iostream> // std::cout
 #include <vector>
+#include <limits>
 
 #include <osg/Geometry>
 #include "core/kernel/WModule.h"
@@ -53,6 +54,15 @@ WMPointsTransform::WMPointsTransform():
 {
     m_input.reserve( 7 );
     m_input.resize( 7 );
+
+    m_minCoord.reserve( 3 );
+    m_minCoord.resize( 3 );
+    m_maxCoord.reserve( 3 );
+    m_maxCoord.resize( 3 );
+    m_minColorIntensity.reserve( 3 );
+    m_minColorIntensity.resize( 3 );
+    m_maxColorIntensity.reserve( 3 );
+    m_maxColorIntensity.resize( 3 );
 }
 
 WMPointsTransform::~WMPointsTransform()
@@ -122,17 +132,23 @@ void WMPointsTransform::properties()
     m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Y max: ", "", 0.0 ) );
     m_infoBoundingBoxMin.push_back( m_infoProperties->addProperty( "Z min: ", "", 0.0 ) );
     m_infoBoundingBoxMax.push_back( m_infoProperties->addProperty( "Z max: ", "", 0.0 ) );
+    m_infoColorMin.push_back( m_infoProperties->addProperty( "Red min:", "", 0.0 ) );
+    m_infoColorMax.push_back( m_infoProperties->addProperty( "Red max:", "", 0.0 ) );
+    m_infoColorMin.push_back( m_infoProperties->addProperty( "Green min:", "", 0.0 ) );
+    m_infoColorMax.push_back( m_infoProperties->addProperty( "Green max:", "", 0.0 ) );
+    m_infoColorMin.push_back( m_infoProperties->addProperty( "Blue min:", "", 0.0 ) );
+    m_infoColorMax.push_back( m_infoProperties->addProperty( "Blue max:", "", 0.0 ) );
 
 
     double number_range = 1000000000.0;
     m_pointsCropGroup = m_properties->addPropertyGroup( "Point set cropping",
                                             "Options to crop the point set" );
-    m_fromX = m_pointsCropGroup->addProperty( "X min.: ", "Cut boundary.", -number_range, m_propCondition );
-    m_toX = m_pointsCropGroup->addProperty( "X max.: ", "Cut boundary.", number_range, m_propCondition );
-    m_fromY = m_pointsCropGroup->addProperty( "Y min.: ", "Cut boundary.", -number_range, m_propCondition );
-    m_toY = m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition );
-    m_fromZ = m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition );
-    m_toZ = m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition );
+    m_fromCoord.push_back( m_pointsCropGroup->addProperty( "X min.: ", "Cut boundary.", -number_range, m_propCondition ) );
+    m_toCoord.push_back( m_pointsCropGroup->addProperty( "X max.: ", "Cut boundary.", number_range, m_propCondition ) );
+    m_fromCoord.push_back( m_pointsCropGroup->addProperty( "Y min.: ", "Cut boundary.", -number_range, m_propCondition ) );
+    m_toCoord.push_back( m_pointsCropGroup->addProperty( "Y max.: ", "Cut boundary.", number_range, m_propCondition ) );
+    m_fromCoord.push_back( m_pointsCropGroup->addProperty( "Z min.: ", "Cut boundary.", -number_range, m_propCondition ) );
+    m_toCoord.push_back( m_pointsCropGroup->addProperty( "Z max.: ", "Cut boundary.", number_range, m_propCondition ) );
     m_invertCropping = m_pointsCropGroup->addProperty( "Invert crop: ", "Cut instead of crop.", false, m_propCondition );
     m_disablePointCrop = m_pointsCropGroup->addProperty( "Disable cuts: ", "", false, m_propCondition );
     m_pointSubtractionRadius = m_pointsCropGroup->addProperty( "Subtr. r.: ", "Radius of subtracted coordinates "
@@ -141,24 +157,24 @@ void WMPointsTransform::properties()
 
     m_translatePointsGroup = m_properties->addPropertyGroup( "Point translation",
                                             "Translates the points by the following amount of XYZ offset after cropping." );
-    m_translateX = m_translatePointsGroup->addProperty( "X offset: ", "Translates the point set across the X axis by "
-                                                        "that offset.", 0.0, m_propCondition  );
-    m_translateY = m_translatePointsGroup->addProperty( "Y offset: ", "Translates the point set across the Y axis by "
-                                                        "that offset.", 0.0, m_propCondition  );
-    m_translateZ = m_translatePointsGroup->addProperty( "Z offset: ", "Translates the point set across the Z axis by "
-                                                        "that offset.", 0.0, m_propCondition  );
+    m_translationOffset.push_back( m_translatePointsGroup->addProperty( "X offset: ",
+            "Translates the point set across the X axis by that offset.", 0.0, m_propCondition  ) );
+    m_translationOffset.push_back( m_translatePointsGroup->addProperty( "Y offset: ",
+            "Translates the point set across the Y axis by that offset.", 0.0, m_propCondition  ) );
+    m_translationOffset.push_back( m_translatePointsGroup->addProperty( "Z offset: ",
+            "Translates the point set across the Z axis by that offset.", 0.0, m_propCondition  ) );
 
     m_groupMultiplyPoints = m_properties->addPropertyGroup( "Coordinate multiplication",
                                             "Multiplies each X, Y and Z value by a factor." );
-    m_factorX = m_groupMultiplyPoints->addProperty( "X factor: ", "Number which multiplies each X coordinate.",
-                                                    1.0, m_propCondition );
-    m_factorY = m_groupMultiplyPoints->addProperty( "Y factor: ", "Number which multiplies each X coordinate.",
-                                                    1.0, m_propCondition );
-    m_factorZ = m_groupMultiplyPoints->addProperty( "Z factor: ", "Number which multiplies each X coordinate.",
-                                                    1.0, m_propCondition );
+    m_coordFactor.push_back( m_groupMultiplyPoints->addProperty( "X factor: ",
+            "Number which multiplies each X coordinate.", 1.0, m_propCondition ) );
+    m_coordFactor.push_back( m_groupMultiplyPoints->addProperty( "Y factor: ",
+            "Number which multiplies each X coordinate.", 1.0, m_propCondition ) );
+    m_coordFactor.push_back( m_groupMultiplyPoints->addProperty( "Z factor: ",
+            "Number which multiplies each X coordinate.", 1.0, m_propCondition ) );
 
     m_groupRotation = m_properties->addPropertyGroup( "Rotation options",
-                                            "Applis rotation across three planes in sequence." );
+            "Applis rotation across three planes in sequence." );
     m_rotation1AngleXY = m_groupRotation->addProperty( "1st rot. (plane XY)", "First applied rotation: Along the plane "
                                             "on the coordinate axis X and Y.", 0.0, m_propCondition );
     m_rotation1AngleXY->setMin( -180.0 );
@@ -171,12 +187,12 @@ void WMPointsTransform::properties()
                                             "on the coordinate axis X and Z.", 0.0, m_propCondition );
     m_rotation3AngleXZ->setMin( -180.0 );
     m_rotation3AngleXZ->setMax( 180.0 );
-    m_rotationAnchorX = m_groupRotation->addProperty( "X anchor: ", "X coordinate of the rotation anchor.",
-                                                      0.0, m_propCondition );
-    m_rotationAnchorY = m_groupRotation->addProperty( "Y anchor: ", "Y coordinate of the rotation anchor.",
-                                                      0.0, m_propCondition );
-    m_rotationAnchorZ = m_groupRotation->addProperty( "Z anchor: ", "Z coordinate of the rotation anchor.",
-                                                      0.0, m_propCondition );
+    m_rotationAnchor.push_back( m_groupRotation->addProperty( "X anchor: ",
+            "X coordinate of the rotation anchor.", 0.0, m_propCondition ) );
+    m_rotationAnchor.push_back( m_groupRotation->addProperty( "Y anchor: ",
+            "Y coordinate of the rotation anchor.", 0.0, m_propCondition ) );
+    m_rotationAnchor.push_back( m_groupRotation->addProperty( "Z anchor: ",
+            "Z coordinate of the rotation anchor.", 0.0, m_propCondition ) );
 
     m_skipRatio = m_groupRotation->addProperty( "Point skip ratio: ", "Point count that is skipped after "
                                                 "adding one point.", 0, m_propCondition  );
@@ -186,27 +202,40 @@ void WMPointsTransform::properties()
 
 
     m_groupColorEqualizer = m_properties->addPropertyGroup( "Color equalizer", "" );
-    m_contrastRed = m_groupColorEqualizer->addProperty( "Contrast red: ", "", 1.0, m_propCondition );
-    m_contrastRed->setMin( 0.0 );
-    m_contrastRed->setMax( 3.0 );
-    m_offsetRed = m_groupColorEqualizer->addProperty( "Offset red: ", "", 0.0, m_propCondition );
-    m_offsetRed->setMin( -1.0 );
-    m_offsetRed->setMax( 1.0 );
-    m_contrastGreen = m_groupColorEqualizer->addProperty( "Contrast green: ", "", 1.0, m_propCondition );
-    m_contrastGreen->setMin( 0.0 );
-    m_contrastGreen->setMax( 3.0 );
-    m_OffsetGreen = m_groupColorEqualizer->addProperty( "Offset green: ", "", 0.0, m_propCondition );
-    m_OffsetGreen->setMin( -1.0 );
-    m_OffsetGreen->setMax( 1.0 );
-    m_contrastBlue = m_groupColorEqualizer->addProperty( "Contrast blue: ", "", 1.0, m_propCondition );
-    m_contrastBlue->setMin( 0.0 );
-    m_contrastBlue->setMax( 3.0 );
-    m_offsetBlue = m_groupColorEqualizer->addProperty( "Offset blue: ", "", 0.0, m_propCondition );
-    m_offsetBlue->setMin( -1.0 );
-    m_offsetBlue->setMax( 1.0 );
+    m_contrast.push_back( m_groupColorEqualizer->addProperty( "Contrast red: ", "", 1.0, m_propCondition ) );
+    m_colorOffset.push_back( m_groupColorEqualizer->addProperty( "Offset red: ", "", 0.0, m_propCondition ) );
+    m_contrast.push_back( m_groupColorEqualizer->addProperty( "Contrast green: ", "", 1.0, m_propCondition ) );
+    m_colorOffset.push_back( m_groupColorEqualizer->addProperty( "Offset green: ", "", 0.0, m_propCondition ) );
+    m_contrast.push_back( m_groupColorEqualizer->addProperty( "Contrast blue: ", "", 1.0, m_propCondition ) );
+    m_colorOffset.push_back( m_groupColorEqualizer->addProperty( "Offset blue: ", "", 0.0, m_propCondition ) );
+    for( size_t color = 0; color < m_contrast.size(); color++ )
+    {
+        m_contrast[color]->setMin( 0.0 );
+        m_contrast[color]->setMax( 3.0 );
+        m_colorOffset[color]->setMin( -1.0 );
+        m_colorOffset[color]->setMax( 1.0 );
+    }
+    boost::shared_ptr< WItemSelection > statisticalTypes( boost::shared_ptr< WItemSelection >( new WItemSelection() ) );
+    statisticalTypes->addItem( "Automatical", "" );
+    statisticalTypes->addItem( "Automatical, only contrast", "" );
+    statisticalTypes->addItem( "Manual", "" );
+    statisticalTypes->addItem( "Manual, joined", "" );
+    statisticalTypes->addItem( "Manual, unbounded", "" );
+    statisticalTypes->addItem( "Manual, unbounded, joined", "" );
+    m_colorAdjustmentType = m_properties->addProperty( "Adjustment", "",
+                                                 statisticalTypes->getSelector( M_COLOR_MANUAL_JOINED ), m_propCondition );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_colorAdjustmentType );
+
+    boost::shared_ptr< WItemSelection > colorTypes( boost::shared_ptr< WItemSelection >( new WItemSelection() ) );
+    colorTypes->addItem( "Colored", "" );
+    colorTypes->addItem( "Greyscale - Perceptional", "" );
+    colorTypes->addItem( "Greyscale - Proportional", "" );
+    m_colorModeType = m_properties->addProperty( "Color mode", "",
+            colorTypes->getSelector( M_COLOR_MODE_COLORED ), m_propCondition );
+    WPropertyHelper::PC_SELECTONLYONE::addTo( m_colorModeType );
 
 
-    m_groupFileOperations = m_properties->addPropertyGroup( "File equalizer", "" );
+    m_groupFileOperations = m_properties->addPropertyGroup( "File proocessor", "" );
     m_inputFile = m_groupFileOperations->addProperty( "Input path: ", "", WPathHelper::getAppPath() );
     WPropertyHelper::PC_PATHEXISTS::addTo( m_inputFile );
     m_reloadPointsTrigger = m_groupFileOperations->addProperty( "Load points:",  "Load from file", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
@@ -220,6 +249,17 @@ void WMPointsTransform::properties()
 
     WModule::properties();
 }
+const size_t WMPointsTransform::M_COLOR_AUTO = 0;
+const size_t WMPointsTransform::M_COLOR_AUTO_ONLY_CONTRAST = M_COLOR_AUTO + 1;
+const size_t WMPointsTransform::M_COLOR_MANUAL = M_COLOR_AUTO_ONLY_CONTRAST + 1;
+const size_t WMPointsTransform::M_COLOR_MANUAL_JOINED = M_COLOR_MANUAL + 1;
+const size_t WMPointsTransform::M_COLOR_MANUAL_UNBOUNDED = M_COLOR_MANUAL_JOINED + 1;
+const size_t WMPointsTransform::M_COLOR_MANUAL_UNBOUNDED_JOINED = M_COLOR_MANUAL_UNBOUNDED + 1;
+
+const size_t WMPointsTransform::M_COLOR_MODE_COLORED = 0;
+const size_t WMPointsTransform::M_COLOR_MODE_GREYSCALE_PERCEPTIONAL = M_COLOR_MODE_COLORED + 1;
+const size_t WMPointsTransform::M_COLOR_MODE_GREYSCALE_PROPORTIONAL =
+        M_COLOR_MODE_GREYSCALE_PERCEPTIONAL + 1;
 
 void WMPointsTransform::requirements()
 {
@@ -248,6 +288,7 @@ void WMPointsTransform::moduleMain()
         WRealtimeTimer timer;
         setProgressSettings( 10 );
         timer.reset();
+        onColorIntensityCorrect();
         WDataSetPoints::VertexArray newVertices(
                 new WDataSetPoints::VertexArray::element_type() );
         m_outVerts = newVertices;
@@ -327,54 +368,40 @@ void WMPointsTransform::initBoundingBox( bool isFirstPointSet )
         return;
     for( size_t index = 0; index < count; index++ )
     {
-        double x = m_inVerts->at( index * 3 );
-        double y = m_inVerts->at( index * 3 + 1 );
-        double z = m_inVerts->at( index * 3 + 2 );
-        if( index == 0 && isFirstPointSet )
+        bool isFirstItem = index == 0 && isFirstPointSet;
+        for( size_t dimension = 0; dimension < 3; dimension++ )
         {
-            m_minX = m_maxX = x;
-            m_minY = m_maxY = y;
-            m_minZ = m_maxZ = z;
+            double coordinate = m_inVerts->at( index * 3 + dimension );
+            if( coordinate < m_minCoord[dimension] || isFirstItem )
+                m_minCoord[dimension] = coordinate;
+            if( coordinate > m_maxCoord[dimension] || isFirstItem )
+                m_maxCoord[dimension] = coordinate;
+
+            double intensity = m_inColors->at( index * 3 + dimension );
+            if( intensity < m_minColorIntensity[dimension] || isFirstItem )
+                m_minColorIntensity[dimension] = intensity;
+            if( intensity > m_maxColorIntensity[dimension] || isFirstItem )
+                m_maxColorIntensity[dimension] = intensity;
         }
-        if( x < m_minX )
-            m_minX = x;
-        if( x > m_maxX )
-            m_maxX = x;
-        if( y < m_minY )
-            m_minY = y;
-        if( y > m_maxY )
-            m_maxY = y;
-        if( z < m_minZ )
-            m_minZ = z;
-        if( z > m_maxZ )
-            m_maxZ = z;
         m_progressStatus->increment( 1 );
     }
 }
 
 void WMPointsTransform::setMinMax()
 {
-    m_fromX->setMin( m_minX );
-    m_fromX->setMax( m_maxX );
-    m_toX->setMin( m_fromX->get() );
-    m_toX->setMax( m_maxX );
+    for( size_t dimension = 0; dimension < m_minCoord.size(); dimension++ )
+    {
+        m_fromCoord[dimension]->setMin( m_minCoord[dimension] );
+        m_fromCoord[dimension]->setMax( m_maxCoord[dimension] );
+        m_toCoord[dimension]->setMin( m_fromCoord[dimension]->get() );
+        m_toCoord[dimension]->setMax( m_maxCoord[dimension] );
 
-    m_fromY->setMin( m_minY );
-    m_fromY->setMax( m_maxY );
-    m_toY->setMin( m_fromY->get() );
-    m_toY->setMax( m_maxY );
+        m_infoBoundingBoxMin[dimension]->set( m_minCoord[dimension] );
+        m_infoBoundingBoxMax[dimension]->set( m_maxCoord[dimension] );
 
-    m_fromZ->setMin( m_minZ );
-    m_fromZ->setMax( m_maxZ );
-    m_toZ->setMin( m_fromZ->get() );
-    m_toZ->setMax( m_maxZ );
-
-    m_infoBoundingBoxMin[0]->set( m_minX );
-    m_infoBoundingBoxMax[0]->set( m_maxX );
-    m_infoBoundingBoxMin[1]->set( m_minY );
-    m_infoBoundingBoxMax[1]->set( m_maxY );
-    m_infoBoundingBoxMin[2]->set( m_minZ );
-    m_infoBoundingBoxMax[2]->set( m_maxZ );
+        m_infoColorMin[dimension]->set( m_minColorIntensity[dimension] );
+        m_infoColorMax[dimension]->set( m_maxColorIntensity[dimension] );
+    }
 }
 
 void WMPointsTransform::addTransformedPoints()
@@ -383,23 +410,30 @@ void WMPointsTransform::addTransformedPoints()
     double angleYZ = m_rotation2AngleYZ->get();
     double angleXZ = m_rotation3AngleXZ->get();
     vector<double>* point = new vector<double>( 3, 0.0 );
+    vector<double> color( 3, 0.0 );
     size_t count = m_inVerts->size() / 3;
-    vector<double> offset = WVectorMaths::new3dVector( m_translateX->get(), m_translateY->get(), m_translateZ->get() );
-    vector<double> factor = WVectorMaths::new3dVector( m_factorX->get(), m_factorY->get(), m_factorZ->get() );
-    vector<double> rotationAnchor = WVectorMaths::new3dVector(
-            m_rotationAnchorX->get(), m_rotationAnchorY->get(), m_rotationAnchorZ->get() );
+    vector<double> offset = WVectorMaths::new3dVector( m_translationOffset[0]->get(),
+            m_translationOffset[1]->get(), m_translationOffset[2]->get() );
+    vector<double> factor = WVectorMaths::new3dVector( m_coordFactor[0]->get(),
+            m_coordFactor[1]->get(), m_coordFactor[2]->get() );
+    vector<double> rotationAnchor = WVectorMaths::new3dVector( m_rotationAnchor[0]->get(),
+            m_rotationAnchor[1]->get(), m_rotationAnchor[2]->get() );
     vector<double>* rotationAnchorInverted = WVectorMaths::copyVectorForPointer( rotationAnchor );
     WVectorMaths::invertVector( rotationAnchorInverted );
-    vector<double> contrast = WVectorMaths::new3dVector( m_contrastRed->get(), m_contrastGreen->get(), m_contrastBlue->get() );
-    vector<double> colorOffset = WVectorMaths::new3dVector( m_offsetRed->get(), m_OffsetGreen->get(), m_offsetBlue->get() );
+    vector<double> contrast = WVectorMaths::new3dVector( m_contrast[0]->get(),
+            m_contrast[1]->get(), m_contrast[2]->get() );
+    vector<double> colorOffset = WVectorMaths::new3dVector( m_colorOffset[0]->get(),
+            m_colorOffset[1]->get(), m_colorOffset[2]->get() );
+    size_t colorMode = m_colorModeType->get().getItemIndexOfSelected( 0 );
     for( size_t index = 0; index < count; index++)
     {
         point->at( 0 ) = m_inVerts->at( index * 3 );
         point->at( 1 ) = m_inVerts->at( index * 3 + 1 );
         point->at( 2 ) = m_inVerts->at( index * 3 + 2 );
-        bool isInsideSelection = point->at( 0 ) >= m_fromX->get() && point->at( 0 ) <= m_toX->get()
-                &&  point->at( 1 ) >= m_fromY->get() && point->at( 1 ) <= m_toY->get()
-                &&  point->at( 2 ) >= m_fromZ->get() && point->at( 2 ) <= m_toZ->get();
+        bool isInsideSelection = true;
+        for( size_t dimension = 0; dimension < 3 && isInsideSelection; dimension++ )
+            isInsideSelection = point->at( dimension ) >= m_fromCoord[dimension]->get()
+                    && point->at( dimension ) <= m_toCoord[dimension]->get();
         size_t modulo = m_skipRatio->get() + 1;
         bool isPointSkipped = index % ( modulo ) != 0;
         bool remainsAfterCropping = isInsideSelection != m_invertCropping->get() || m_disablePointCrop->get();
@@ -418,10 +452,13 @@ void WMPointsTransform::addTransformedPoints()
             for( size_t item = 0; item < 3; item++ )
             {
                 m_outVerts->push_back( point->at( item ) );
-
-                double color = m_inColors->at( index * 3 + item ) * contrast[item] + colorOffset[item];
-                m_outColors->push_back( color < 0.0 ?0.0 :( color > 1.0?1.0 :color ) );
+                color[item] = m_inColors->at( index * 3 + item ) * contrast[item] + colorOffset[item];
             }
+            double intensity = colorMode == M_COLOR_MODE_GREYSCALE_PERCEPTIONAL
+                    ?( color[0]*0.3 + color[1]*0.59 + color[2]*0.11 )
+                    :( ( color[0] + color[1] + color[2] ) / 3.0 );
+            for( size_t item = 0; item < 3; item++ )
+                m_outColors->push_back( colorMode == M_COLOR_MODE_COLORED ?color[item] :intensity );
             m_outGroups->push_back( m_assignedGroupID->get() );
         }
         m_progressStatus->increment( 1 );
@@ -459,4 +496,60 @@ void WMPointsTransform::onFileSave()
         m_pointOutputFile.saveWDataSetPoints( m_outVerts, m_outColors );
     }
     m_savePointsTrigger->set( WPVBaseTypes::PV_TRIGGER_READY, true );
+}
+void WMPointsTransform::onColorIntensityCorrect()
+{
+    double intensityMin = m_infoColorMin[0]->get(), intensityMax = m_infoColorMax[0]->get();
+    for( size_t dimension = 1; dimension < m_infoColorMin.size(); dimension++ )
+    {
+        if( m_infoColorMin[dimension]->get() < intensityMin )
+            intensityMin = m_infoColorMin[dimension]->get();
+        if( m_infoColorMax[dimension]->get() > intensityMax )
+            intensityMax = m_infoColorMax[dimension]->get();
+    }
+    size_t type = m_colorAdjustmentType->get().getItemIndexOfSelected( 0 );
+    bool isBounded = type == M_COLOR_MANUAL || type == M_COLOR_MANUAL_JOINED;
+    bool isJoined = type == M_COLOR_MANUAL_JOINED || type == M_COLOR_MANUAL_UNBOUNDED_JOINED;
+    bool isAutomatical = type == M_COLOR_AUTO || M_COLOR_AUTO_ONLY_CONTRAST;
+
+    double contrast = m_contrast[0]->get();
+    double offset = m_colorOffset[0]->get();
+    size_t adjustedRow = 10000;
+    for( size_t color = 0; color < m_infoColorMin.size(); color++ )
+    {
+        if( m_contrast[color]->changed( true ) )
+            contrast = m_contrast[adjustedRow = color]->get();
+        if( m_colorOffset[color]->changed( true ) )
+            offset = m_colorOffset[adjustedRow = color]->get();
+    }
+
+    for( size_t color = 0; color < m_infoColorMin.size(); color++)
+    {
+        m_contrast[color]->setMin( isBounded ?0.0 :-numeric_limits<double>::max() );
+        m_contrast[color]->setMax( isBounded ?3.0 :numeric_limits<double>::max() );
+        m_colorOffset[color]->setMin( isBounded ?-1.0 :-numeric_limits<double>::max() );
+        m_colorOffset[color]->setMax( isBounded ?1.0 :numeric_limits<double>::max() );
+
+        if( type == M_COLOR_AUTO )
+        {
+            double slope = intensityMax - intensityMin;
+            contrast = slope > 0.0 ?( 1.0 / slope ) :0.5;
+            offset = slope > 0.0 ?( - contrast * intensityMin ) :0.5;
+        }
+
+        if( type == M_COLOR_AUTO_ONLY_CONTRAST )
+        {
+            double slope = intensityMax > 0.0 ?intensityMax :0.0;
+            contrast = slope > 0.0 ?( 1.0 / slope ) :0.5;
+            offset = slope > 0.0 ?0.0 :0.5;
+        }
+
+        if( ( isJoined && color != adjustedRow ) || isAutomatical )
+        {
+            m_contrast[color]->set( contrast );
+            m_colorOffset[color]->set( offset );
+            m_contrast[color]->changed( isJoined );
+            m_colorOffset[color]->changed( isJoined );
+        }
+    }
 }
