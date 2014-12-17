@@ -57,6 +57,8 @@ WKdTreeND::WKdTreeND( size_t dimensions )
 
 WKdTreeND::~WKdTreeND()
 {
+    for( size_t index = 0; index < m_points->size(); index++ )
+        delete m_points->at( index );
     delete m_points;
     if( m_lowerChild != 0 )
     {
@@ -94,8 +96,6 @@ void WKdTreeND::add( vector<WKdPointND*>* addables )
             {
                 calculateSplittingPosition( m_points );
             }
-            m_lowerChild = getNewInstance( m_dimensions );
-            m_higherChild = getNewInstance( m_dimensions );
             initSubNodes();
             addPointsToChildren( m_points );
             m_points->resize( 0 );
@@ -304,6 +304,10 @@ void WKdTreeND::addPointsToChildren( vector<WKdPointND* >* newPoints )
         higherChildThread.join();
     }
 
+    lowerPoints->reserve( 0 );
+    lowerPoints->resize( 0 );
+    higherPoints->reserve( 0 );
+    higherPoints->resize( 0 );
     delete lowerPoints;
     delete higherPoints;
 }
@@ -383,8 +387,6 @@ void WKdTreeND::calculateSplittingPosition( vector<WKdPointND* >* inputPoints )
     m_splittingPosition = ( line->at( medianIdx - 1 ) + line->at( medianIdx ) ) / 2.0;
     if( m_splittingPosition == line->at( medianIdx - 1 ) )
         m_splittingPosition = line->at( medianIdx );
-    line->resize( 0 );
-    line->reserve( 0 );
     delete line;
 }
 
@@ -422,10 +424,6 @@ bool WKdTreeND::determineNewSplittingDimension( vector<WKdPointND* >* inputPoint
     if( m_splittingDimension >= m_dimensions && m_parentSplittingDimension < m_dimensions
             && boundingBoxMax->at( m_parentSplittingDimension ) - boundingBoxMin->at( m_parentSplittingDimension ) > 0.0 )
         m_splittingDimension = m_parentSplittingDimension;
-    boundingBoxMin->resize( 0 ); //TODO(aschwarzkopf): delete instead
-    boundingBoxMin->reserve( 0 ); //TODO(aschwarzkopf): delete instead
-    boundingBoxMin->resize( 0 ); //TODO(aschwarzkopf): delete instead
-    boundingBoxMin->reserve( 0 ); //TODO(aschwarzkopf): delete instead
     delete boundingBoxMin;
     delete boundingBoxMax;
     return m_splittingDimension < m_dimensions;
@@ -458,6 +456,8 @@ bool WKdTreeND::hasParent()
 
 void WKdTreeND::initSubNodes()
 {
+    m_lowerChild = getNewInstance( m_dimensions );
+    m_higherChild = getNewInstance( m_dimensions );
     m_lowerChild->m_parentSplittingDimension = m_splittingDimension;
     m_higherChild->m_parentSplittingDimension = m_splittingDimension;
     m_lowerChild->m_hierarchyLevel = m_hierarchyLevel + 1;

@@ -52,6 +52,8 @@ WOctNode::WOctNode( double centerX, double centerY, double centerZ, double radiu
 
 WOctNode::~WOctNode()
 {
+    for( size_t index = 0; index < 8; index++ )
+        delete m_child[index];
 }
 
 WOctNode* WOctNode::newInstance( double centerX, double centerY, double centerZ, double radius )

@@ -37,6 +37,7 @@ WQuadTree::WQuadTree( double detailLevel )
 
 WQuadTree::~WQuadTree()
 {
+    delete m_root;
 }
 
 void WQuadTree::registerPoint( double x, double y, double value )

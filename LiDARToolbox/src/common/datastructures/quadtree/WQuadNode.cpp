@@ -45,6 +45,8 @@ WQuadNode::WQuadNode( double centerX, double centerY, double radius )
 WQuadNode::~WQuadNode()
 {
     m_pointCount = 0;
+    for( size_t index = 0; index < 4; index++ )
+        delete m_child[index];
 }
 
 WQuadNode* WQuadNode::getChild( size_t drawer )

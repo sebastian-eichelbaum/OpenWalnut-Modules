@@ -42,6 +42,7 @@ WOctree::WOctree( double detailLevel, WOctNode* nodeType )
 
 WOctree::~WOctree()
 {
+    delete m_root;
 }
 
 void WOctree::registerPoint( double x, double y, double z )
