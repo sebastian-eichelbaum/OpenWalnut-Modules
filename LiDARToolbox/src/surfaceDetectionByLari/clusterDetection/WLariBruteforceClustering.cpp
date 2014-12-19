@@ -108,14 +108,14 @@ void WLariBruteforceClustering::initExtentSizes( vector<WKdPointND*>* pointsToPr
 
 void WLariBruteforceClustering::initExtentSizesAtThread( vector<WKdPointND*>* pointsToProcess, size_t threadIndex )
 {
+    WParameterSpaceSearcher parameterSearcher;
+    parameterSearcher.setExaminedKdTree( m_parameterDomain );
+    parameterSearcher.setSegmentationSettings( m_segmentationMaxAngleDegrees, m_segmentationMaxPlaneDistance );
     for( size_t index = threadIndex; index < pointsToProcess->size(); index += m_cpuThreadCount )
     {
         WParameterDomainKdPoint* refreshable = static_cast<WParameterDomainKdPoint*>( pointsToProcess->at( index ) );
         if( refreshable->isTaggedToRefresh() )
         {
-            WParameterSpaceSearcher parameterSearcher;
-            parameterSearcher.setExaminedKdTree( m_parameterDomain );
-            parameterSearcher.setSegmentationSettings( m_segmentationMaxAngleDegrees, m_segmentationMaxPlaneDistance );
             parameterSearcher.setSearchedPeakCenter( refreshable->getCoordinate() );
             size_t count = parameterSearcher.getNearestNeighborCount();
 
@@ -140,6 +140,9 @@ void WLariBruteforceClustering::addExtentCluster( WParameterDomainKdPoint* peakC
                 &WLariBruteforceClustering::addExtentClusterAtThread, this, extentPoints, clusterID, thread );
     for( size_t thread = 0; thread < threads; thread++ )
         m_cpuThreads[thread]->join();
+
+    peakCenterPoint->getSpatialPoint()->setClusterID( clusterID );
+    peakCenterPoint->setIsAddedToPlane( true );
 }
 
 void WLariBruteforceClustering::addExtentClusterAtThread( vector<WParameterDomainKdPoint*>* extentPoints, size_t clusterID, size_t threadIndex )

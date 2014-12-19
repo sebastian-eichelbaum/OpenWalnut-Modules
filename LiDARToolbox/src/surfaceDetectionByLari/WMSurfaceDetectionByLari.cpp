@@ -232,6 +232,7 @@ void WMSurfaceDetectionByLari::moduleMain()
             WLariOutliner* outliner = new WLariOutliner( classifier );
 
             classifier->assignProgressCombiner( m_progress );
+            classifier->setProgressSettings( 0, 10, "Initializing " );
             classifier->setNumberPointsK( m_numberPointsK->get() );
             classifier->setMaxPointDistanceR( m_maxPointDistanceR->get() );
             classifier->setCpuThreadCount( m_cpuThreadCount->get() );
@@ -266,12 +267,6 @@ void WMSurfaceDetectionByLari::moduleMain()
             m_outputParameterDomain->updateData( outliner->outlineParameterDomain() );
             cout << "Outlining done" << endl;
 
-            delete classifier;
-            delete inputPoints;
-            delete clustering;
-            delete outliner;
-            delete boundaryDetector;
-
             m_nbPoints->set( count );
             m_infoPointsPerSecond->set( m_infoRenderTimeSeconds->get() == 0.0 ?m_nbPoints->get()
                     :m_nbPoints->get() / m_infoRenderTimeSeconds->get() );
@@ -281,9 +276,15 @@ void WMSurfaceDetectionByLari::moduleMain()
             m_yMax->set( boundingBox->getRootNode()->getYMax() );
             m_zMin->set( boundingBox->getRootNode()->getValueMin() );
             m_zMax->set( boundingBox->getRootNode()->getValueMax() );
-            delete boundingBox;
             m_infoRenderTimeSeconds->set( timer.elapsed() / 60.0 );
             classifier->finishProgress();
+
+            delete classifier;
+            delete inputPoints;
+            delete clustering;
+            delete outliner;
+            delete boundaryDetector;
+            delete boundingBox;
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );
         m_reloadData->get( true );
