@@ -28,12 +28,14 @@
 
 WParameterDomainKdPoint::WParameterDomainKdPoint( vector<double> coordinate ) : WKdPointND( coordinate )
 {
+    m_isAddedToPlane = false;
     m_markedToRefresh = true;
     m_extentPointCount = 0;
 }
 
 WParameterDomainKdPoint::WParameterDomainKdPoint( double x0, double y0, double z0 ) : WKdPointND( x0, y0, z0 )
 {
+    m_isAddedToPlane = false;
     m_markedToRefresh = true;
     m_extentPointCount = 0;
 }

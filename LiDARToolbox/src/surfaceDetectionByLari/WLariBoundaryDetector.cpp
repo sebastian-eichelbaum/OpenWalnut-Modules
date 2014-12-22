@@ -113,6 +113,7 @@ void WLariBoundaryDetector::detectInputCluster( vector<WSpatialDomainKdPoint*>* 
         clusterPoint->setSpatialPoint( currentPoint );
         clusterPoints->push_back( clusterPoint );
         currentPoint->setClusterID( 9 );
+        clusterPoint->setIsAddedToPlane( false );
         delete coordinate;
     }
 

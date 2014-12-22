@@ -225,20 +225,18 @@ bool WKdTreeND::removePoint( WKdPointND* removablePoint )
 {
     if( m_points->size() > 0 && m_lowerChild == 0 && m_lowerChild == 0 )
     {
-        size_t removeCount = 0;
+        size_t keptNodeCount = 0;
         size_t size = m_points->size();
         for(size_t index = 0; index < size; index++)
-        {
-            if( m_points->at( index ) == removablePoint )
+            if( m_points->at( index ) != removablePoint )
             {
-                for( size_t index2 = index + 1; index2 < size - removeCount; index2++ )
-                    m_points->at( index ) = m_points->at( index + 1 );
-                removeCount++;
+                if( index > keptNodeCount )
+                    m_points->at( keptNodeCount ) = m_points->at( index );
+                keptNodeCount++;
             }
-        }
-        m_points->resize( size - removeCount );
-        m_points->reserve( size - removeCount );
-        return removeCount > 0;
+        m_points->resize( keptNodeCount );
+        m_points->reserve( keptNodeCount );
+        return keptNodeCount < size;
     }
     else
     {

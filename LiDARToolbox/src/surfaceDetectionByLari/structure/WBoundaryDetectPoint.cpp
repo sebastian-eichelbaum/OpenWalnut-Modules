@@ -30,11 +30,13 @@ WBoundaryDetectPoint::WBoundaryDetectPoint( vector<double> coordinate ) : WKdPoi
 {
     if( coordinate.size() >= 3 )
         m_zCoordinate = coordinate[2];
+    m_isAddedToPlane = false;
 }
 
 WBoundaryDetectPoint::WBoundaryDetectPoint( double x, double y, double z ) : WKdPointND( x, y )
 {
     m_zCoordinate = z;
+    m_isAddedToPlane = false;
 }
 
 WBoundaryDetectPoint::~WBoundaryDetectPoint()
