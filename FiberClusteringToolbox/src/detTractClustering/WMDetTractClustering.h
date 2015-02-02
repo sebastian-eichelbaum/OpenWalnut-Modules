@@ -36,6 +36,7 @@
 #include "core/common/math/WMatrixSym.h"
 #include "core/dataHandler/datastructures/WFiberCluster.h"
 #include "core/dataHandler/WDataSetFiberVector.h"
+#include "core/dataHandler/WDataSetFiberClustering.h"
 #include "core/graphicsEngine/WGEManagedGroupNode.h"
 #include "core/kernel/WModule.h"
 #include "core/kernel/WModuleInputData.h"
@@ -257,6 +258,11 @@ private:
      * Output connector for the first cluster.
      */
     boost::shared_ptr< WModuleOutputData< WFiberCluster > > m_cluserOC;
+
+    /**
+     * Output connector for all clusters.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetFiberClustering > > m_clustersOutput;
 
     /**
      * Distance matrix lookUpTable

@@ -168,6 +168,15 @@ void WMDetTractClustering::updateOutput()
         m_clusterOutputID->set( 0, true );
     }
     m_cluserOC->updateData( boost::shared_ptr< WFiberCluster >( new WFiberCluster( m_clusters[ m_clusterOutputID->get() ] ) ) );
+
+    boost::shared_ptr< WDataSetFiberClustering > clustering( new WDataSetFiberClustering() );
+
+    for( std::size_t k = 0; k < m_clusters.size(); ++k )
+    {
+        clustering->getOrCreateCluster( k )->merge( m_clusters[ k ] );
+    }
+
+    m_clustersOutput->updateData( clustering );
 }
 
 void WMDetTractClustering::update()
@@ -419,6 +428,8 @@ void WMDetTractClustering::connectors()
 {
     m_tractIC = WModuleInputData< WDataSetFibers >::createAndAdd( shared_from_this(), "tractInput", "A deterministic tract dataset." );
     m_cluserOC = WModuleOutputData< WFiberCluster >::createAndAdd( shared_from_this(), "clusterOutput", "A set of tract indices aka cluster" );
+
+    m_clustersOutput = WModuleOutputData< WDataSetFiberClustering >::createAndAdd( shared_from_this(), "allClustersOutput", "The clustering." );
 
     WModule::connectors();  // call WModules initialization
 }
