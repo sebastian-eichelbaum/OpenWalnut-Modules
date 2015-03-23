@@ -26,21 +26,23 @@
 #include <vector>
 #include "WOctree.h"
 
-WOctree::WOctree( double detailDepth )
+WOctree::WOctree( double detailLevel )
 {
-    m_root = new WOctNode( 0.0, 0.0, 0.0, detailDepth );
-    m_detailLevel = detailDepth;
+    m_root = new WOctNode( 0.0, 0.0, 0.0, detailLevel );
+    m_detailLevel = detailLevel;
     m_cornerNeighborClass = 1;
 }
-WOctree::WOctree( double detailDepth, WOctNode* nodeType )
+
+WOctree::WOctree( double detailLevel, WOctNode* nodeType )
 {
-    m_root = nodeType->newInstance( 0.0, 0.0, 0.0, detailDepth );
-    m_detailLevel = detailDepth;
+    m_root = nodeType->newInstance( 0.0, 0.0, 0.0, detailLevel );
+    m_detailLevel = detailLevel;
     m_cornerNeighborClass = 1;
 }
 
 WOctree::~WOctree()
 {
+    delete m_root;
 }
 
 void WOctree::registerPoint( double x, double y, double z )
@@ -59,6 +61,7 @@ void WOctree::registerPoint( double x, double y, double z )
         node->touchPosition( x, y, z );
     }
 }
+
 WOctNode* WOctree::getLeafNode( double x, double y, double z )
 {
     if( !m_root->fitsIn( x, y, z ) )
@@ -74,14 +77,17 @@ WOctNode* WOctree::getLeafNode( double x, double y, double z )
     }
     return node;
 }
+
 WOctNode* WOctree::getRootNode()
 {
     return m_root;
 }
+
 size_t WOctree::getGroupCount()
 {
     return m_groupEquivs.size();
 }
+
 void WOctree::groupNeighbourLeafsFromRoot()
 {
     resizeGroupList( 0 );
@@ -106,6 +112,7 @@ void WOctree::groupNeighbourLeafsFromRoot()
         m_groupEquivs[index] = index;
 //    std::cout << "Found " << currentFinalGroup << " groups." << std::endl;
 }
+
 void WOctree::refreshNodeGroup( WOctNode* node )
 {
     if  ( isLeafNode(node) )
@@ -120,6 +127,7 @@ void WOctree::refreshNodeGroup( WOctNode* node )
                 refreshNodeGroup( node->getChild( child ) );
     }
 }
+
 void WOctree::groupNeighbourLeafs( WOctNode* node )
 {
     if  ( isLeafNode(node) )
@@ -162,6 +170,7 @@ void WOctree::groupNeighbourLeafs( WOctNode* node )
                 groupNeighbourLeafs( node->getChild( child ) );
     }
 }
+
 vector<WOctNode*> WOctree::getNeighborsOfNode( WOctNode* node )
 {
     vector<WOctNode*>* foundNeighbors = new vector<WOctNode*>();
@@ -171,6 +180,7 @@ vector<WOctNode*> WOctree::getNeighborsOfNode( WOctNode* node )
         neighbors.push_back( foundNeighbors->at( index ) );
     return neighbors;
 }
+
 void WOctree::fetchNeighborsTooNode( WOctNode* nodeOfArea, WOctNode* examinedNode, vector<WOctNode*>* targetNeighborList )
 {
     if( !isConnectedTo( nodeOfArea, examinedNode ) )
@@ -187,6 +197,7 @@ void WOctree::fetchNeighborsTooNode( WOctNode* nodeOfArea, WOctNode* examinedNod
                 fetchNeighborsTooNode( nodeOfArea, examinedNode->getChild( child ), targetNeighborList );
     }
 }
+
 bool WOctree::isConnectedTo( WOctNode* node1, WOctNode* node2 )
 {
     size_t cornerNeighborClass = 0;
@@ -201,19 +212,23 @@ bool WOctree::isConnectedTo( WOctNode* node1, WOctNode* node2 )
     }
     return cornerNeighborClass <= m_cornerNeighborClass;
 }
+
 bool WOctree::canGroupNodes( WOctNode* node1, WOctNode* node2 )
 {
     return isConnectedTo(node1, node2);
 }
+
 void WOctree::resizeGroupList( size_t listLength )
 {
     m_groupEquivs.resize( listLength );
     m_groupEquivs.reserve( listLength );
 }
+
 double WOctree::getDetailLevel()
 {
     return m_detailLevel;
 }
+
 const size_t WOctree::colors[] = {
         0xff8080, 0xff0000, 0xa00000,   //red
         0xffb080, 0xff8000, 0xb25900,   //orange
@@ -223,13 +238,17 @@ const size_t WOctree::colors[] = {
         0x8080ff, 0x0000ff,             //blue
         0xff80cf, 0xff00a0, 0xb20070    //pink
 };
+
 const size_t WOctree::colorCount = sizeof( colors ) / sizeof( colors[0] );
+
 float WOctree::calcColor( size_t groupNr, size_t colorChannel )
 {
+    groupNr = ( groupNr * 7 ) + 9;
     groupNr = colors[groupNr%colorCount];
     groupNr = ( groupNr >> ( 16-8*colorChannel ) ) & 0xff;
     return static_cast<float>( groupNr )/255.0f;
 }
+
 bool WOctree::isLeafNode( WOctNode* node )
 {
     if( node->getRadius() > m_detailLevel )
@@ -239,6 +258,7 @@ bool WOctree::isLeafNode( WOctNode* node )
             return false;
     return true;
 }
+
 void WOctree::setCornerNeighborClass( size_t cornerNeighborClass )
 {
     m_cornerNeighborClass = cornerNeighborClass;

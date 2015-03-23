@@ -41,10 +41,12 @@ public:
      * The cut outliers constructor.
      */
     WCutOutliersDeamon();
+
     /**
      * The cut outliers destructor.
      */
     virtual ~WCutOutliersDeamon();
+
     /**
      * Cuts Outliers of a point data. At first all point cubes are grouped. After that only 
      * points of the group with the highest volume is returned
@@ -53,6 +55,7 @@ public:
      */
     boost::shared_ptr< WDataSetPoints > cutOutliers(
             boost::shared_ptr< WDataSetPoints > points );
+
     /**
      * Sets the cube radius to determine cube neighborships. Not connected nodes are cut off.
      * \param detailDepth Cube radius in meters. Use only numbers that are in 2^n 
@@ -66,15 +69,18 @@ private:
      * \param node Octree node to count voxels of each physically connected node group.
      */
     void countGroups( WOctNode* node );
+
     /**
      * Resizes the voxel group list representing corresponding voxel counts.
      * \param newSize Target list length to apply.
      */
     void resizeItemCountGroupList( size_t newSize );
+
     /**
      * Cube width bin points into.
      */
     double m_detailDepth;
+
     /**
      * Temporary voxel count array of each group.
      */

@@ -38,10 +38,12 @@ WPCAWallDetector::~WPCAWallDetector()
     m_maximalGroupSize = 100000000;
     m_minimalPointsPerVoxel = 1;
 }
+
 void WPCAWallDetector::analyze()
 {
-    analyzeNode( ( WWallDetectOctNode* )( m_analyzableOctree->getRootNode() ) );
+    analyzeNode( static_cast<WWallDetectOctNode*>( m_analyzableOctree->getRootNode() ) );
 }
+
 void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
 {
     m_progressStatus->increment( 1 );
@@ -50,10 +52,10 @@ void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
         if(node->getPointCount() >= 3 )
         {
             WPrincipalComponentAnalysis pca;
-            pca.analyzeData( node->getInputPoints() );
+            pca.analyzeData( *( node->getInputPoints() ) );
             node->clearInputData();
             node->setMean( pca.getMean() );
-            node->setEigenVectors( pca.getDirections() );
+            node->setEigenVectors( pca.getEigenVectors() );
             node->setEigenValues( pca.getEigenValues() );
         }
     }
@@ -61,9 +63,10 @@ void WPCAWallDetector::analyzeNode( WWallDetectOctNode* node )
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                analyzeNode( ( WWallDetectOctNode* )( node->getChild( child ) ) );
+                analyzeNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ) );
     }
 }
+
 boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSetPoints::VertexArray inputVertices )
 {
     WDataSetPoints::VertexArray outVertices(
@@ -80,7 +83,7 @@ boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSet
         WOctNode* octNode = m_analyzableOctree->getLeafNode( x, y, z );
         if( octNode != 0 )
         {
-            WWallDetectOctNode* node = ( WWallDetectOctNode* )octNode;
+            WWallDetectOctNode* node = static_cast<WWallDetectOctNode*>( octNode );
             size_t groupSize = m_analyzableOctree->getNodeCountOfGroup( node->getGroupNr() );
             bool groupMatch = groupSize >= m_minimalGroupSize && groupSize <= m_maximalGroupSize;
             bool pointCountMatch = node->getPointCount() >= m_minimalPointsPerVoxel;
@@ -108,10 +111,11 @@ boost::shared_ptr< WDataSetPoints > WPCAWallDetector::getOutlinePoints( WDataSet
             new WDataSetPoints( outVertices, outColors ) );
     return outputPoints;
 }
+
 boost::shared_ptr< WTriangleMesh > WPCAWallDetector::getOutline()
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
-    drawNode( ( WWallDetectOctNode* )( m_analyzableOctree->getRootNode() ), tmpMesh );
+    drawNode( static_cast<WWallDetectOctNode*>( m_analyzableOctree->getRootNode() ), tmpMesh );
     return tmpMesh;
 }
 
@@ -134,9 +138,10 @@ void WPCAWallDetector::drawNode( WWallDetectOctNode* node, boost::shared_ptr< WT
     {
         for  ( int child = 0; child < 8; child++ )
             if  ( node->getChild( child ) != 0 )
-                drawNode( ( WWallDetectOctNode* )(node->getChild( child ) ), outputMesh );
+                drawNode( static_cast<WWallDetectOctNode*>( node->getChild( child ) ), outputMesh );
     }
 }
+
 void WPCAWallDetector::drawLeafNodeCube( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
     size_t index = outputMesh->vertSize();
@@ -174,6 +179,7 @@ void WPCAWallDetector::drawLeafNodeCube( WWallDetectOctNode* node, boost::shared
     outputMesh->addTriangle( index + 2, index + 6, index + 3 );
     outputMesh->addTriangle( index + 6, index + 7, index + 3 );
 }
+
 void WPCAWallDetector::drawLeafNodeNormalVector( WWallDetectOctNode* node, boost::shared_ptr< WTriangleMesh > outputMesh )
 {
     if( !node->hasEigenValuesAndVectors() )
@@ -204,10 +210,6 @@ void WPCAWallDetector::drawLeafNodeNormalVector( WWallDetectOctNode* node, boost
     double eigen1_s = eigen1 * 3.0 / 5.0;
     double eigen2 = pow( node->getEigenValues()[1], 0.5 ) * 2.0;
     double eigen3 = pow( node->getEigenValues()[2], 0.5 ) * 2.0;
-    /*double eigen1 = 1;
-    double eigen1_s = 1;
-    double eigen2 = 1;
-    double eigen3 = 1;*/
 
     outputMesh->addVertex( meanX - vec2_x * eigen2, meanY - vec2_y * eigen2, meanZ - vec2_z * eigen2 );
     outputMesh->addVertex( meanX + vec1_x * eigen1, meanY + vec1_y * eigen1, meanZ + vec1_z * eigen1 );
@@ -227,18 +229,22 @@ void WPCAWallDetector::drawLeafNodeNormalVector( WWallDetectOctNode* node, boost
     outputMesh->addTriangle( index + 4, index + 5, index + 6 );
     outputMesh->addTriangle( index + 4, index + 6, index + 7 );
 }
+
 void WPCAWallDetector::setMinimalGroupSize( double minimalGroupSize )
 {
     m_minimalGroupSize = minimalGroupSize;
 }
+
 void WPCAWallDetector::setMaximalGroupSize( double maximalGroupSize )
 {
     m_maximalGroupSize = maximalGroupSize;
 }
+
 void WPCAWallDetector::setMinimalPointsPerVoxel( double minimalPointsPerVoxel )
 {
     m_minimalPointsPerVoxel = minimalPointsPerVoxel;
 }
+
 void WPCAWallDetector::setVoxelOutlineMode( size_t voxelOutlineMode )
 {
     m_voxelOutlineMode = voxelOutlineMode;

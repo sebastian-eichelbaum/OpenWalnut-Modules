@@ -52,6 +52,28 @@ WElevationImageOutliner::WElevationImageOutliner()
 WElevationImageOutliner::~WElevationImageOutliner()
 {
 }
+
+double WElevationImageOutliner::getSurfaceArea2D( WQuadTree* quadTree )
+{
+    return calculateSurfaceForNode2D( quadTree->getRootNode(), quadTree );
+}
+
+double WElevationImageOutliner::calculateSurfaceForNode2D( WQuadNode* node, WQuadTree* quadTree )
+{
+    if( node->getRadius() <= quadTree->getDetailLevel() )
+    {
+        return node->getRadius() * node->getRadius() * 4;
+    }
+    else
+    {
+        double area = 0.0;
+        for  ( size_t child = 0; child < 4; child++ )
+            if  ( node->getChild( child ) != 0 )
+                area += calculateSurfaceForNode2D( node->getChild( child ), quadTree );
+        return area;
+    }
+}
+
 void WElevationImageOutliner::importElevationImage( WQuadTree* quadTree, size_t elevImageMode )
 {
     boost::shared_ptr< WTriangleMesh > tmpMesh( new WTriangleMesh( 0, 0 ) );
@@ -60,6 +82,7 @@ void WElevationImageOutliner::importElevationImage( WQuadTree* quadTree, size_t 
     m_printedQuadrats = new WQuadTree( quadTree->getDetailLevel() );
     drawNode( quadTree->getRootNode(), quadTree, elevImageMode );
 }
+
 void WElevationImageOutliner::drawNode(
         WQuadNode* node, WQuadTree* quadTree, size_t elevImageMode )
 {
@@ -110,6 +133,7 @@ void WElevationImageOutliner::drawNode(
                 drawNode( node->getChild( child ), quadTree, elevImageMode );
     }
 }
+
 size_t WElevationImageOutliner::getVertexID(
         WQuadNode* node, size_t elevImageMode )
 {
@@ -117,7 +141,7 @@ size_t WElevationImageOutliner::getVertexID(
     double y = node->getCenter( 1 );
     WQuadNode* existingNode = m_vertices->getLeafNode( x, y );
     if( existingNode != 0 ) return existingNode->getID();
-    double elevation = elevImageMode != 0 ?node->getElevationMax() :node->getElevationMin();
+    double elevation = elevImageMode != 0 ?node->getValueMax() :node->getValueMin();
     if( elevImageMode == 2 ) elevation = node->getPointCount();
     m_vertices->registerPoint( x, y, elevation );
     existingNode = m_vertices->getLeafNode( x, y );
@@ -133,23 +157,28 @@ size_t WElevationImageOutliner::getVertexID(
     m_outputMesh->setVertexColor( currentVertex, color );
     return existingNode->getID();
 }
+
 void WElevationImageOutliner::setExportElevationImageSettings( double minElevImageZ, double intensityIncreasesPerMeter )
 {
     m_minElevImageZ = minElevImageZ;
     m_intensityIncreasesPerMeter = intensityIncreasesPerMeter;
 }
+
 void WElevationImageOutliner::setShowElevationInMeshColor( bool showElevationInMeshColor )
 {
     m_showElevationInMeshColor = showElevationInMeshColor;
 }
+
 void WElevationImageOutliner::setShowElevationInMeshOffset( bool showElevationInMeshOffset )
 {
     m_showElevationInMeshOffset = showElevationInMeshOffset;
 }
+
 boost::shared_ptr< WTriangleMesh > WElevationImageOutliner::getOutputMesh()
 {
     return m_outputMesh;
 }
+
 void WElevationImageOutliner::highlightBuildingGroups( boost::shared_ptr< WDataSetPointsGrouped >  groupedPoints )
 {
     if( !groupedPoints ) return;

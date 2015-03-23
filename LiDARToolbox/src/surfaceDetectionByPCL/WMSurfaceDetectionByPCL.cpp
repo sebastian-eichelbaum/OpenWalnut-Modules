@@ -84,14 +84,13 @@ void WMSurfaceDetectionByPCL::connectors()
                 new WModuleOutputData< WDataSetPointsGrouped >( shared_from_this(), "Grouped points", "The loaded mesh." ) );
 
     addConnector( m_outputPointsGrouped );
-//    addConnector( m_buildings );
     WModule::connectors();
 }
 
 void WMSurfaceDetectionByPCL::properties()
 {
     m_infoNbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
-    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
+    m_infoRenderTimeMinutes = m_infoProperties->addProperty( "Wall time (min): ", "Time in seconds that the "
                                                             "whole render process took.", 0.0 );
     m_infoPointsPerSecond = m_infoProperties->addProperty( "Points per second: ",
                                                             "The current speed in points per second.", 0.0 );
@@ -103,17 +102,15 @@ void WMSurfaceDetectionByPCL::properties()
     m_infoZMax = m_infoProperties->addProperty( "Z max.: ", "Maximal z coordinate of all input points.", 0.0 );
 
 
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
     m_clusterSizeMin = m_properties->addProperty( "Cluster size min.: ",
-            "Minimal size of a surface point set.", 15 );
+            "Minimal size of a surface point set.", 50 );
     m_clusterSizeMax = m_properties->addProperty( "Cluster size max.: ",
                 "Maximal size of a surface point set.", 1000 * 1000 );
     m_numberOfNeighbours = m_properties->addProperty( "Number of neighbors: ", "Resulting detail depth "
                             "in meters for the octree search tree.", 30 );
 
-    m_smoothnessThresholdDegrees = m_properties->addProperty( "Smoothness threshold: ", "", 5.0 );
+    m_smoothnessThresholdDegrees = m_properties->addProperty( "Smoothness threshold: ", "", 3.0 );
     m_smoothnessThresholdDegrees->setMin( 0.0 );
     m_smoothnessThresholdDegrees->setMax( 30 );
     m_curvatureThreshold = m_properties->addProperty( "Curvature Threshold: ", "", 1.0 );
@@ -128,9 +125,6 @@ void WMSurfaceDetectionByPCL::requirements()
 
 void WMSurfaceDetectionByPCL::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
@@ -144,11 +138,9 @@ void WMSurfaceDetectionByPCL::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         boost::shared_ptr< WDataSetPoints > points = m_input->getData();
-//        std::cout << "Execute cycle\r\n";
         if  ( points )
         {
             WRealtimeTimer timer;
@@ -176,15 +168,15 @@ void WMSurfaceDetectionByPCL::moduleMain()
             boost::shared_ptr< WDataSetPointsGrouped > outputPcl = detector.detectSurfaces( points );
             m_outputPointsGrouped->updateData( outputPcl );
             m_infoNbPoints->set( count );
-            m_infoRenderTimeSeconds->set( timer.elapsed() );
-            m_infoPointsPerSecond->set( m_infoRenderTimeSeconds->get() == 0.0 ?m_infoNbPoints->get()
-                    :m_infoNbPoints->get() / m_infoRenderTimeSeconds->get() );
+            m_infoRenderTimeMinutes->set( timer.elapsed() / 60.0 );
+            m_infoPointsPerSecond->set( m_infoRenderTimeMinutes->get() == 0.0 ?m_infoNbPoints->get()
+                    :m_infoNbPoints->get() / ( m_infoRenderTimeMinutes->get() * 60.0 ) );
             m_infoXMin->set( boundingBox->getRootNode()->getXMin() );
             m_infoXMax->set( boundingBox->getRootNode()->getXMax() );
             m_infoYMin->set( boundingBox->getRootNode()->getYMin() );
             m_infoYMax->set( boundingBox->getRootNode()->getYMax() );
-            m_infoZMin->set( boundingBox->getRootNode()->getElevationMin() );
-            m_infoZMax->set( boundingBox->getRootNode()->getElevationMax() );
+            m_infoZMin->set( boundingBox->getRootNode()->getValueMin() );
+            m_infoZMax->set( boundingBox->getRootNode()->getValueMax() );
             m_progressStatus->finish();
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );
@@ -202,12 +194,11 @@ void WMSurfaceDetectionByPCL::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMSurfaceDetectionByPCL::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );

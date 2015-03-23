@@ -28,15 +28,17 @@
 #include <iostream>
 #include <vector>
 
-#include "WSurfaceDetectorLari.h"
+#include "WLariPointClassifier.h"
 #include "core/dataHandler/WDataSetPoints.h"
-#include "structure/WParameterDomainKdNode.h"
-#include "structure/WSpatialDomainKdNode.h"
+#include "structure/WParameterDomainKdPoint.h"
+#include "structure/WSpatialDomainKdPoint.h"
 #include "../common/datastructures/kdtree/WPointSearcher.h"
+#include "../common/datastructures/kdtree/WKdTreeND.h"
 #include "core/common/math/principalComponentAnalysis/WPrincipalComponentAnalysis.h"
 #include "core/common/WRealtimeTimer.h"
 #include "../common/math/leastSquares/WLeastSquares.h"
 #include "../tempLeastSquaresTest/WMTempLeastSquaresTest.h"
+#include "../common/datastructures/WDataSetPointsGrouped.h"
 
 
 using std::cout;
@@ -50,30 +52,39 @@ class WLariOutliner
 {
 public:
     /**
-     * Creates the instance that is used to segment surfaces using the approach of 
-     * Lari/Habib.
-     * \param surfaceDetector Surface detection instance that uses the approach of 
-     *                        Lari/Habib.
+     * Instantiates the Lari/Habib segmentation result outliner.
+     * \param pointClassifier Lari/Habib segmentation insgance to access the spatial and 
+     *                        parameter domain.
      */
-    explicit WLariOutliner( WSurfaceDetectorLari* surfaceDetector );
+    explicit WLariOutliner( WLariPointClassifier* pointClassifier );
+
     /**
      * Destroys the result outlining instance.
      */
     virtual ~WLariOutliner();
 
     /**
-     * Puts out points of the spatial domain.
-     * \return Points of the spatiial domain. Red ones are planar and blue points belong 
-     *         to the linear/cylindrical features.
+     * Outlines the point plane segmentation result using the context of the parameter 
+     * domain.
+     * \return Point plane segmentation result using the context of the parameter domain.
      */
-    boost::shared_ptr< WDataSetPoints > outlineParameterDomain();
+    boost::shared_ptr< WDataSetPointsGrouped > outlineParameterDomain();
+
     /**
-     * Returns points of the parameter domain (Plane describing features of each 
-     * corresponding spatial point).
-     * \return Points of the parameter domain that describe each spatial point's fitted 
-     *         plane.
+     * Outlines the point plane segmentation result using the context of the spatial 
+     * domain.
+     * \return Point plane segmentation result that depicts segmented plane groups.
      */
-    boost::shared_ptr< WDataSetPoints > outlineSpatialDomain();
+    boost::shared_ptr< WDataSetPointsGrouped > outlineSpatialDomainGroups();
+
+    /**
+     * Gives the classification result of each spatial point. Red points are detected as 
+     * planar, blue as linear/cylindrical, magenta points belong to both and grey to 
+     * none of them.
+     * \return Outline of the parameter domain points.
+     */
+    boost::shared_ptr< WDataSetPoints > outlineSpatialDomainCategories();
+
     /**
      * Outlines each point's best fitted plane.
      * \param squaresWidth Square width of the outlined best fitted planes of input 
@@ -84,10 +95,11 @@ public:
 
 private:
     /**
-     * Assigned Surface detection instance that uses the approach of Lari/Habib. It's 
-     * used to retirieve a corresponding spatial or parameter domain.
+     * Point classification instance. By this way spatial and parameter domain points 
+     * are fetched. But also points can be classified whether they areplanar, 
+     * cylindrical or rough surface.
      */
-    WSurfaceDetectorLari* m_surfaceDetector;
+    WLariPointClassifier* m_pointClassifier;
 };
 
 #endif  // WLARIOUTLINER_H

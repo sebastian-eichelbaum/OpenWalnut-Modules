@@ -24,7 +24,6 @@
 
 #include <liblas/liblas.hpp>
 #include <fstream>  // std::ifstream
-#include <iostream> // std::cout
 
 #include <string>
 #include <vector>
@@ -32,23 +31,44 @@
 #include "WLasReader.h"
 #include "core/kernel/WModule.h"
 #include "core/kernel/WKernel.h"
+#include "../common/math/vectors/WVectorMaths.h"
 
 namespace laslibb
 {
     WLasReader::WLasReader()
     {
-        m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 0;
-        filePath = 0;
+        m_minCoord.reserve( 3 );
+        m_minCoord.resize( 3 );
+        m_maxCoord.reserve( 3 );
+        m_maxCoord.resize( 3 );
+        m_minColor.reserve( 3 );
+        m_minColor.resize( 3 );
+        m_maxColor.reserve( 3 );
+        m_maxColor.resize( 3 );
+        m_filePath = 0;
+        m_selectionX = 0;
+        m_selectionY = 0;
+        m_selectionRadius = 100;
+        m_translateToCenter = true;
+        m_contrast = 0.005;
     }
+
     WLasReader::WLasReader( boost::shared_ptr< WProgressCombiner > progress )
     {
         this->m_associatedProgressCombiner = progress;
-        m_xMin = m_xMax = m_yMin = m_yMax = m_zMin = m_zMax = 1;
-        filePath = 0;
+        m_minCoord.reserve( 3 );
+        m_minCoord.resize( 3 );
+        m_maxCoord.reserve( 3 );
+        m_maxCoord.resize( 3 );
+        m_minColor.reserve( 3 );
+        m_minColor.resize( 3 );
+        m_maxColor.reserve( 3 );
+        m_maxColor.resize( 3 );
+        m_filePath = 0;
     }
+
     WLasReader::~WLasReader()
     {
-        // TODO(schwarzkopf): Auto-generated destructor stub
     }
 
     void WLasReader::setProgressSettings( size_t steps )
@@ -59,13 +79,17 @@ namespace laslibb
         m_associatedProgressCombiner->addSubProgress( m_progressStatus );
     }
 
-    void WLasReader::setInputFilePath( const char* path )
+    void WLasReader::setColorsEnabled( bool colorsEnabled )
     {
-        filePath = path;
+        m_colorsEnabled = colorsEnabled;
     }
 
-    boost::shared_ptr< WDataSetPoints > WLasReader::getPoints(
-            size_t fromX, size_t fromY, size_t dataSetWidth, bool moveToCenter )
+    void WLasReader::setInputFilePath( const char* path )
+    {
+        m_filePath = path;
+    }
+
+    boost::shared_ptr< WDataSetPoints > WLasReader::getPoints()
     {
         WDataSetPoints::VertexArray vertices(
                 new WDataSetPoints::VertexArray::element_type() );
@@ -73,7 +97,7 @@ namespace laslibb
                 new WDataSetPoints::ColorArray::element_type() );
 
         std::ifstream ifs;
-        ifs.open( filePath, std::ios::in | std::ios::binary );
+        ifs.open( m_filePath, std::ios::in | std::ios::binary );
 
 
         liblas::ReaderFactory f;
@@ -82,87 +106,62 @@ namespace laslibb
         liblas::Header const& header = reader.GetHeader();
 
         liblas::Point point;
+        liblas::Color colorLas;
         size_t count = header.GetPointRecordsCount();
         setProgressSettings( count );
         size_t addedPoints = 0;
-        float xOffset = fromX + dataSetWidth / 2;
-        float yOffset = fromY + dataSetWidth / 2;
-        float zOffset = ( m_zMax - m_zMin ) / 2;
-
-//        double oldTime = 0.0; //TODO(schwarzkopf): remove that commented lines in final version
-//        size_t oldI = 0;
-//        size_t timeIdx = 0;
-//        size_t crashCount = 0;
+        vector<double> offset = WVectorMaths::new3dVector( m_selectionX, m_selectionY,
+                ( m_maxCoord[2] - m_minCoord[2] ) / 2.0 );
+        vector<double> color( 3, 0.0 );
 
         for  ( size_t i = 0; i < count; i++ )
         {
-            double x, y, z;
-            int v;
-
             reader.ReadNextPoint();
             point = reader.GetPoint();
-            x = point.GetX();
-            y = point.GetY();
-            z = point.GetZ();
-            v = point.GetIntensity(); //TODO(schwarzkopf): Still had no colored data set to check some liblas functions.
-//            { //TODO(schwarzkopf): remove that commented lines in final version
-//                double thisTime = point.GetTime();
-//                if(oldTime != thisTime)
-//                {
-//                    if(oldTime>thisTime)
-//                    {
-//                        crashCount++;
-//                        std::cout << "crash!! " << oldTime << "\t" << thisTime-oldTime << std::endl;
-//                    }
-//                    double diff = thisTime-oldTime;
-//                    std::cout << diff << "\t" << ( i - oldI ) << std::endl;
-//                    oldTime = thisTime;
-//                    oldI = i;
-//                    timeIdx++;
-//                }
-//                //std::cout << "Point stuff: " << point.GetFlightLineEdge() << "\t" <<
-//                //        point.GetPointSourceID() << "\t" << point.GetRawX() << "\t" <<
-//                //        timeIdx << std::endl;
-//            }
-            if  ( i == 0 )
-            {
-                m_xMin = m_xMax = x;
-                m_yMin = m_yMax = y;
-                m_zMin = m_zMax = z;
-                m_intensityMin = m_intensityMax = v;
-            }
-            if  ( x < m_xMin ) m_xMin = x;
-            if  ( x > m_xMax ) m_xMax = x;
-            if  ( y < m_yMin ) m_yMin = y;
-            if  ( y > m_yMax ) m_yMax = y;
-            if  ( z < m_zMin ) m_zMin = z;
-            if  ( z > m_zMax ) m_zMax = z;
-            if  ( v < m_intensityMin ) m_intensityMin = v;
-            if  ( v > m_intensityMax ) m_intensityMax = v;
+            vector<double> coord = WVectorMaths::new3dVector( point.GetX(), point.GetY(), point.GetZ() );
 
-            if  ( dataSetWidth == 0 || ( x >= fromX && x < fromX+dataSetWidth
-                    && y >= fromY && y < fromY+dataSetWidth ) )
+            double intensity = point.GetIntensity(); //TODO(schwarzkopf): Still had no colored data set to check some liblas functions.
+            colorLas = point.GetColor();
+            color[0] = colorLas.GetRed();
+            color[1] = colorLas.GetGreen();
+            color[2] = colorLas.GetBlue();
+
+
+            for( size_t dimension = 0; dimension < 3; dimension++ )
             {
-                if  ( moveToCenter )
-                {
-                    x -= xOffset;
-                    y -= yOffset;
-                    z -= zOffset;
-                }
-                vertices->push_back( x );
-                vertices->push_back( y );
-                vertices->push_back( z );
-                for  ( int color = 0; color < 3; color++ )
-                    colors->push_back( v );
+                if( coord[dimension] < m_minCoord[dimension] || i == 0 )
+                    m_minCoord[dimension] = coord[dimension];
+                if( coord[dimension] > m_maxCoord[dimension] || i == 0 )
+                    m_maxCoord[dimension] = coord[dimension];
+
+                if( color[dimension] < m_minColor[dimension] || i == 0 )
+                    m_minColor[dimension] = color[dimension];
+                if( color[dimension] > m_maxColor[dimension] || i == 0 )
+                    m_maxColor[dimension] = color[dimension];
+            }
+
+            if  ( intensity < m_intensityMin ) m_intensityMin = intensity;
+            if  ( intensity > m_intensityMax ) m_intensityMax = intensity;
+
+            if  ( m_selectionRadius == 0
+                    || ( coord[0] >= m_selectionX - m_selectionRadius
+                            && coord[0] <= m_selectionX + m_selectionRadius
+                            && coord[1] >= m_selectionY - m_selectionRadius
+                            && coord[1] <= m_selectionY + m_selectionRadius ) )
+            {
+                for( size_t dimension = 0; m_translateToCenter && dimension < 3; dimension++ )
+                    coord[dimension] -= offset[dimension];
+
+                for( size_t dimension = 0; dimension < 3; dimension++ )
+                    vertices->push_back( coord[dimension] );
+                for  ( int colorIndex = 0; colorIndex < 3; colorIndex++ )
+                    colors->push_back( m_colorsEnabled ?( color[colorIndex] * m_contrast )
+                            :( intensity * m_contrast ) );
                 addedPoints++;
             }
-//            std::cout << i << ": " << x << " " << " " << y << " " << z << " " << v << "\r\n";
             m_progressStatus->increment( 1 );
         }
-//        std::cout << "Time/point count: " << timeIdx << " / " << count <<
-//                "\tInvalid order occurances: " << crashCount<< std::endl;
         m_progressStatus->finish();
-//        std::cout << "Added points: " << addedPoints << std::endl;
 
         if  ( addedPoints == 0 )
         {
@@ -179,36 +178,51 @@ namespace laslibb
 
         return m_outputPoints;
     }
-    float WLasReader::getXMin()
+
+    void WLasReader::setDataSetRegion( double selectionX, double selectionY, double selectionRadius )
     {
-        return m_xMin;
+        m_selectionX = selectionX;
+        m_selectionY = selectionY;
+        m_selectionRadius = selectionRadius;
     }
-    float WLasReader::getXMax()
+
+    void WLasReader::setTranslateToCenter( bool translateToCenter )
     {
-        return m_xMax;
+        m_translateToCenter = translateToCenter;
     }
-    float WLasReader::getYMin()
+
+    void WLasReader::setContrast( double contrast )
     {
-        return m_yMin;
+        m_contrast = contrast;
     }
-    float WLasReader::getYMax()
+
+    vector<double> WLasReader::getMinCoord()
     {
-        return m_yMax;
+        return m_minCoord;
     }
-    float WLasReader::getZMin()
+
+    vector<double> WLasReader::getMaxCoord()
     {
-        return m_zMin;
+        return m_maxCoord;
     }
-    float WLasReader::getZMax()
-    {
-        return m_zMax;
-    }
-    float WLasReader::getIntensityMin()
+
+    double WLasReader::getIntensityMin()
     {
         return m_intensityMin;
     }
-    float WLasReader::getIntensityMax()
+
+    double WLasReader::getIntensityMax()
     {
         return m_intensityMax;
     }
-} /* namespace std */
+
+    vector<double> WLasReader::getColorMin()
+    {
+        return m_minColor;
+    }
+
+    vector<double> WLasReader::getColorMax()
+    {
+        return m_maxColor;
+    }
+} /* namespace laslibb */

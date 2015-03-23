@@ -100,8 +100,6 @@ void WMTempLeastSquaresTest::requirements()
 
 void WMTempLeastSquaresTest::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
     // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
@@ -116,7 +114,6 @@ void WMTempLeastSquaresTest::moduleMain()
     // main loop
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
 
@@ -142,6 +139,7 @@ void WMTempLeastSquaresTest::moduleMain()
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
 }
+
 void WMTempLeastSquaresTest::setProgressSettings( size_t steps )
 {
     m_progress->removeSubProgress( m_progressStatus );
@@ -149,10 +147,11 @@ void WMTempLeastSquaresTest::setProgressSettings( size_t steps )
     m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
     m_progress->addSubProgress( m_progressStatus );
 }
+
 void WMTempLeastSquaresTest::analyzeBestFittedPlane()
 {
     boost::shared_ptr< WDataSetPoints > points = m_input->getData();
-//    std::cout << "Execute cycle\r\n";
+
     if( points )
     {
         m_verts = points->getVertices();
@@ -182,7 +181,7 @@ void WMTempLeastSquaresTest::analyzeBestFittedPlane()
             if(distance > maxDistance)
                 maxDistance = distance;
         }
-        vector<double> planeFormula = leastSquares.getHessescheNormalForm();
+        vector<double> planeFormula = leastSquares.getHessianNormalForm();
 
         boost::shared_ptr< WTriangleMesh > outputMesh( new WTriangleMesh( 0, 0 ) );
         outlineNormalPlane( planeFormula, mean, maxDistance * 1.5, outputMesh );
@@ -203,27 +202,27 @@ void WMTempLeastSquaresTest::analyzeBestFittedPlane()
         std::cout << endl << endl;
     }
 }
-void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessescheNormalForm,
+
+void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessianNormalForm,
         WPosition nearestPoint, double planeRadius, boost::shared_ptr< WTriangleMesh > targetTriangleMesh )
 {
-    WPosition cuttingPoint = WLeastSquares::getNearestPointTo( planeHessescheNormalForm, nearestPoint );
-    //std::cout << "outlineNormalPlane() - Nearest point:  " << cuttingPoint << std::endl;
+    WPosition cuttingPoint = WLeastSquares::getNearestPointTo( planeHessianNormalForm, nearestPoint );
+
     size_t strongestDimension = 0;
     double strongestDimensionExtent = 0;
     for( size_t dimension = 0; dimension < cuttingPoint.size(); dimension++ )
-        if( planeHessescheNormalForm[dimension] > strongestDimensionExtent )
+        if( planeHessianNormalForm[dimension] > strongestDimensionExtent )
         {
             strongestDimension = dimension;
-            strongestDimensionExtent = planeHessescheNormalForm[dimension];
+            strongestDimensionExtent = planeHessianNormalForm[dimension];
         }
     size_t dimensionVec1 = strongestDimension == 0 ?1 :0;
-    //size_t dimensionVec2 = strongestDimension == 2 ?1 :2;
-    //cout << "Vec1: " << dimensionVec1 << "    Vec2: " << dimensionVec2 << "    Strongest: " << strongestDimension << endl;
-    WVector3d normalVector( planeHessescheNormalForm[0], planeHessescheNormalForm[1], planeHessescheNormalForm[2] );
+
+    WVector3d normalVector( planeHessianNormalForm[0], planeHessianNormalForm[1], planeHessianNormalForm[2] );
     normalVector = getNormalizedVector( normalVector );
     WVector3d vector1( 0, 0, 0 );
     vector1[dimensionVec1] = normalVector[strongestDimension];
-    vector1[strongestDimension] = - normalVector[dimensionVec1]/* / planeHessescheNormalForm[strongestDimension]*/;
+    vector1[strongestDimension] = - normalVector[dimensionVec1];
     vector1 = getNormalizedVector( vector1 );
     WPosition vector2( normalVector[1] * vector1[2] - normalVector[2] * vector1[1],
                         normalVector[2] * vector1[0] - normalVector[0] * vector1[2],
@@ -231,7 +230,7 @@ void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessescheNo
     WPosition vector3( vector1[1] * vector2[2] - vector1[2] * vector2[1],
                         vector1[2] * vector2[0] - vector1[0] * vector2[2],
                         vector1[0] * vector2[1] - vector1[1] * vector2[0] );
-    //cout << "Reverse transformation: " << vector3 << endl;
+
     size_t count = targetTriangleMesh->vertSize();
     for( double factor = 1.0; factor >= -2.0; factor -= 2.0 )
         for( double vectorN = 1.0; vectorN >= -2.0; vectorN -= 2.0 )
@@ -245,6 +244,7 @@ void WMTempLeastSquaresTest::outlineNormalPlane( vector<double> planeHessescheNo
     targetTriangleMesh->addTriangle( 2 + count, 0 + count, 1 + count );
     targetTriangleMesh->addTriangle( 3 + count, 2 + count, 1 + count );
 }
+
 WPosition WMTempLeastSquaresTest::getNormalizedVector( WVector3d vector )
 {
     double sumSquared = 0;

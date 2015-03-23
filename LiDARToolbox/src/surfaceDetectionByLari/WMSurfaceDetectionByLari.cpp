@@ -41,7 +41,7 @@
 #include "core/kernel/WModuleInputData.h"
 #include "WMSurfaceDetectionByLari.xpm"
 #include "WMSurfaceDetectionByLari.h"
-#include "WSurfaceDetectorLari.h"
+#include "WLariPointClassifier.h"
 
 // This line is needed by the module loader to actually find your module.
 //W_LOADABLE_MODULE( WMSurfaceDetectionByLari )
@@ -68,7 +68,7 @@ const char** WMSurfaceDetectionByLari::getXPMIcon() const
 }
 const std::string WMSurfaceDetectionByLari::getName() const
 {
-    return "Surface Detection by Lari";
+    return "Surface Detection by Lari/Habib";
 }
 
 const std::string WMSurfaceDetectionByLari::getDescription() const
@@ -80,27 +80,30 @@ void WMSurfaceDetectionByLari::connectors()
 {
     m_input = WModuleInputData< WDataSetPoints >::createAndAdd( shared_from_this(), "input", "The mesh to display" );
 
-    m_outputSpatialDomain = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
+    m_outputSpatialDomainGroups = boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > >(
+            new WModuleOutputData< WDataSetPointsGrouped >( shared_from_this(),
+                    "Spatial domain point groups", "//TODO: description" ) );
+    m_outputSpatialDomainCategories = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
             new WModuleOutputData< WDataSetPoints >( shared_from_this(),
-                    "Spatial domain points", "//TODO: description" ) );
-    m_outputParameterDomain = boost::shared_ptr< WModuleOutputData< WDataSetPoints > >(
-            new WModuleOutputData< WDataSetPoints >( shared_from_this(),
+                    "Spatial domain point categories", "//TODO: description" ) );
+    m_outputParameterDomain = boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > >(
+            new WModuleOutputData< WDataSetPointsGrouped >( shared_from_this(),
                     "Parameter domain points", "//TODO: description" ) );
     m_outputLeastSquaresPlanes = boost::shared_ptr< WModuleOutputData< WTriangleMesh > >(
             new WModuleOutputData< WTriangleMesh >( shared_from_this(),
                     "Least Squares Planes", "//TODO: description" ) );
 
-    addConnector( m_outputSpatialDomain );
+    addConnector( m_outputSpatialDomainGroups );
+    addConnector( m_outputSpatialDomainCategories );
     addConnector( m_outputParameterDomain );
     addConnector( m_outputLeastSquaresPlanes );
-//    addConnector( m_buildings );
     WModule::connectors();
 }
 
 void WMSurfaceDetectionByLari::properties()
 {
     m_nbPoints = m_infoProperties->addProperty( "Points: ", "Input points count.", 0 );
-    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (s): ", "Time in seconds that the "
+    m_infoRenderTimeSeconds = m_infoProperties->addProperty( "Wall time (minutes): ", "Time in seconds that the "
                                             "whole render process took.", 0.0 );
     m_infoPointsPerSecond = m_infoProperties->addProperty( "Points per second: ",
                                             "The current speed in points per second.", 0.0 );
@@ -114,19 +117,27 @@ void WMSurfaceDetectionByLari::properties()
     m_reloadData = m_properties->addProperty( "Reload data:",  "Execute", WPVBaseTypes::PV_TRIGGER_READY, m_propCondition );
 
     double minRange = 0.01;
-    m_numberPointsK = m_properties->addProperty( "Number points K=", "", 12, m_propCondition );
+    m_segmentationMaxPlaneDistance = m_properties->addProperty( "Delta d", "", 0.7, m_propCondition );
+    m_segmentationMaxAngleDegrees = m_properties->addProperty( "Delta alpha", "", 15.0, m_propCondition );
+    m_numberPointsK = m_properties->addProperty( "Number points K=", "", 40, m_propCondition );
     m_maxPointDistanceR = m_properties->addProperty( "Max point distance r=", "", 1.0, m_propCondition );
+
+    m_applyBoundaryDetection = m_properties->addProperty( "Detect boundries: ", "", true, m_propCondition );
 
     m_squareWidth = m_properties->addProperty( "Plane outline size: ", "", 0.2, m_propCondition );
 
+    m_cpuThreadCount = m_properties->addProperty( "CPU threads: ", "", 8, m_propCondition );
+    m_cpuThreadCount->setMin( 4 );
+    m_cpuThreadCount->setMax( 24 );
+
     m_planarGroup = m_properties->addPropertyGroup( "Planar feature properties",
                                             "All conditions must be met to detect as a surface." );
-    m_surfaceNLambda1Min = m_planarGroup->addProperty( "N Lambda 1 >=", "", 0.3, m_propCondition );
-    m_surfaceNLambda1Max = m_planarGroup->addProperty( "N Lambda 1 <", "", 0.7, m_propCondition );
-    m_surfaceNLambda2Min = m_planarGroup->addProperty( "N Lambda 2 >=", "", 0.0, m_propCondition );
-    m_surfaceNLambda2Max = m_planarGroup->addProperty( "N Lambda 2 <", "", 1.0, m_propCondition );
+    m_surfaceNLambda1Min = m_planarGroup->addProperty( "N Lambda 1 >=", "", 0.4, m_propCondition );
+    m_surfaceNLambda1Max = m_planarGroup->addProperty( "N Lambda 1 <", "", 0.63, m_propCondition );
+    m_surfaceNLambda2Min = m_planarGroup->addProperty( "N Lambda 2 >=", "", 0.3, m_propCondition );
+    m_surfaceNLambda2Max = m_planarGroup->addProperty( "N Lambda 2 <", "", 0.6, m_propCondition );
     m_surfaceNLambda3Min = m_planarGroup->addProperty( "N Lambda 3 >=", "", 0.0, m_propCondition );
-    m_surfaceNLambda3Max = m_planarGroup->addProperty( "N Lambda 3 <", "", 1.0, m_propCondition );
+    m_surfaceNLambda3Max = m_planarGroup->addProperty( "N Lambda 3 <", "", 0.1, m_propCondition );
 
     m_surfaceNLambda1Min->setMin( 0.0 );
     m_surfaceNLambda1Min->setMax( 1.0 - minRange );
@@ -167,11 +178,6 @@ void WMSurfaceDetectionByLari::properties()
     m_cylNLambda3Max->setMin( m_cylNLambda3Min->get() );
     m_cylNLambda3Max->setMax( 1.0 );
 
-
-
-    // ---> Put the code for your properties here. See "src/modules/template/" for an extensively documented example.
-
-
     WModule::properties();
 }
 
@@ -181,23 +187,18 @@ void WMSurfaceDetectionByLari::requirements()
 
 void WMSurfaceDetectionByLari::moduleMain()
 {
-    infoLog() << "Thrsholding example main routine started";
-
-    // get notified about data changes
     m_moduleState.setResetable( true, true );
     m_moduleState.add( m_input->getDataChangedCondition() );
     m_moduleState.add( m_propCondition );
 
     ready();
 
-    // graphics setup
     m_rootNode = osg::ref_ptr< WGEManagedGroupNode >( new WGEManagedGroupNode( m_active ) );
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->insert( m_rootNode );
 
-    // main loop
+
     while( !m_shutdownFlag() )
     {
-        //infoLog() << "Waiting ...";
         m_moduleState.wait();
 
         m_surfaceNLambda1Max->setMin( m_surfaceNLambda1Min->get() );
@@ -214,63 +215,81 @@ void WMSurfaceDetectionByLari::moduleMain()
             timer.reset();
             WDataSetPoints::VertexArray inputVerts = points->getVertices();
             size_t count = inputVerts->size()/3;
-            setProgressSettings( count );
 
             WQuadTree* boundingBox = new WQuadTree( pow( 2.0, 3 ) );
 
-            vector<vector<double> >* inputPointsVector = new vector<vector<double> >();
-            inputPointsVector->reserve( count );
-            inputPointsVector->resize( count );
+            vector<WSpatialDomainKdPoint*>* inputPoints = new vector<WSpatialDomainKdPoint*>();
             for  ( size_t vertex = 0; vertex < count; vertex++)
             {
                 float x = inputVerts->at( vertex*3 );
                 float y = inputVerts->at( vertex*3+1 );
                 float z = inputVerts->at( vertex*3+2 );
-                inputPointsVector->at( vertex ).reserve( 3 );
-                inputPointsVector->at( vertex ).resize( 3 );
-                inputPointsVector->at( vertex )[0] = x;
-                inputPointsVector->at( vertex )[1] = y;
-                inputPointsVector->at( vertex )[2] = z;
+                inputPoints->push_back( new WSpatialDomainKdPoint( x, y, z ) );
                 boundingBox->registerPoint( x, y, z );
-                m_progressStatus->increment( 1 );
             }
 
-            WSurfaceDetectorLari* detector = new WSurfaceDetectorLari();
-            detector->setNumberPointsK( m_numberPointsK->get() );
-            detector->setMaxPointDistanceR( m_maxPointDistanceR->get() );
-            detector->setPlanarNLambdaRange( 0, m_surfaceNLambda1Min->get(), m_surfaceNLambda1Max->get() );
-            detector->setPlanarNLambdaRange( 1, m_surfaceNLambda2Min->get(), m_surfaceNLambda2Max->get() );
-            detector->setPlanarNLambdaRange( 2, m_surfaceNLambda3Min->get(), m_surfaceNLambda3Max->get() );
-            detector->setCylindricalNLambdaRange( 0, m_cylNLambda1Min->get(), m_cylNLambda1Max->get() );
-            detector->setCylindricalNLambdaRange( 1, m_cylNLambda2Min->get(), m_cylNLambda2Max->get() );
-            detector->setCylindricalNLambdaRange( 2, m_cylNLambda3Min->get(), m_cylNLambda3Max->get() );
+            WLariPointClassifier* classifier = new WLariPointClassifier();
+            WLariOutliner* outliner = new WLariOutliner( classifier );
 
-            detector->analyzeData( inputPointsVector );
-            WLariOutliner outliner( detector );
-            m_outputSpatialDomain->updateData( outliner.outlineSpatialDomain() );
-            m_outputParameterDomain->updateData( outliner.outlineParameterDomain() );
-            m_outputLeastSquaresPlanes->updateData( outliner.outlineLeastSquaresPlanes( m_squareWidth->get() ) );
+            classifier->assignProgressCombiner( m_progress );
+            classifier->setProgressSettings( 0, 10, "Initializing " );
+            classifier->setNumberPointsK( m_numberPointsK->get() );
+            classifier->setMaxPointDistanceR( m_maxPointDistanceR->get() );
+            classifier->setCpuThreadCount( m_cpuThreadCount->get() );
+            classifier->setPlanarNLambdaRange( 0, m_surfaceNLambda1Min->get(), m_surfaceNLambda1Max->get() );
+            classifier->setPlanarNLambdaRange( 1, m_surfaceNLambda2Min->get(), m_surfaceNLambda2Max->get() );
+            classifier->setPlanarNLambdaRange( 2, m_surfaceNLambda3Min->get(), m_surfaceNLambda3Max->get() );
+            classifier->setCylindricalNLambdaRange( 0, m_cylNLambda1Min->get(), m_cylNLambda1Max->get() );
+            classifier->setCylindricalNLambdaRange( 1, m_cylNLambda2Min->get(), m_cylNLambda2Max->get() );
+            classifier->setCylindricalNLambdaRange( 2, m_cylNLambda3Min->get(), m_cylNLambda3Max->get() );
+            classifier->analyzeData( inputPoints );
 
-            //delete detector;
-            delete inputPointsVector;
+            cout << "Outlining parameter domain" << endl;
+            m_outputSpatialDomainCategories->updateData( outliner->outlineSpatialDomainCategories() );
+            cout << "Outlining point planes" << endl;
+            m_outputLeastSquaresPlanes->updateData( outliner->outlineLeastSquaresPlanes( m_squareWidth->get() ) );
+
+            WLariBruteforceClustering* clustering = new WLariBruteforceClustering( classifier );
+            clustering->setSegmentationSettings( m_segmentationMaxAngleDegrees->get(), m_segmentationMaxPlaneDistance->get() );
+            clustering->setCpuThreadCount( m_cpuThreadCount->get() );
+            clustering->detectClustersByBruteForce();
+
+            WLariBoundaryDetector* boundaryDetector = new WLariBoundaryDetector();
+            if( m_applyBoundaryDetection->get() )
+            {
+                boundaryDetector->setMaxPointDistanceR( m_maxPointDistanceR->get() );
+                boundaryDetector->detectBoundaries( classifier );
+            }
+
+            cout << "Outlining spatial domain" << endl;
+            m_outputSpatialDomainGroups->updateData( outliner->outlineSpatialDomainGroups() );
+            cout << "Outlining parameter domain" << endl;
+            m_outputParameterDomain->updateData( outliner->outlineParameterDomain() );
+            cout << "Outlining done" << endl;
 
             m_nbPoints->set( count );
-            m_infoRenderTimeSeconds->set( timer.elapsed() );
             m_infoPointsPerSecond->set( m_infoRenderTimeSeconds->get() == 0.0 ?m_nbPoints->get()
                     :m_nbPoints->get() / m_infoRenderTimeSeconds->get() );
             m_xMin->set( boundingBox->getRootNode()->getXMin() );
             m_xMax->set( boundingBox->getRootNode()->getXMax() );
             m_yMin->set( boundingBox->getRootNode()->getYMin() );
             m_yMax->set( boundingBox->getRootNode()->getYMax() );
-            m_zMin->set( boundingBox->getRootNode()->getElevationMin() );
-            m_zMax->set( boundingBox->getRootNode()->getElevationMax() );
-            m_progressStatus->finish();
+            m_zMin->set( boundingBox->getRootNode()->getValueMin() );
+            m_zMax->set( boundingBox->getRootNode()->getValueMax() );
+            m_infoRenderTimeSeconds->set( timer.elapsed() / 60.0 );
+            classifier->finishProgress();
+
+            delete classifier;
+            delete inputPoints;
+            delete clustering;
+            delete outliner;
+            delete boundaryDetector;
+            delete boundingBox;
         }
         m_reloadData->set( WPVBaseTypes::PV_TRIGGER_READY, true );
         m_reloadData->get( true );
 
 
-        // woke up since the module is requested to finish?
         if  ( m_shutdownFlag() )
         {
             break;
@@ -281,16 +300,7 @@ void WMSurfaceDetectionByLari::moduleMain()
         {
             continue;
         }
-
-        // ---> Insert code doing the real stuff here
     }
 
     WKernel::getRunningKernel()->getGraphicsEngine()->getScene()->remove( m_rootNode );
-}
-void WMSurfaceDetectionByLari::setProgressSettings( size_t steps )
-{
-    m_progress->removeSubProgress( m_progressStatus );
-    std::string headerText = "Loading data";
-    m_progressStatus = boost::shared_ptr< WProgress >( new WProgress( headerText, steps ) );
-    m_progress->addSubProgress( m_progressStatus );
 }

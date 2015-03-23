@@ -47,60 +47,74 @@ WOctNode* WWallDetectOctNode::newInstance( double centerX, double centerY, doubl
 {
     return new WWallDetectOctNode( centerX, centerY, centerZ, radius );
 }
+
 void WWallDetectOctNode::onTouchPosition( double x, double y, double z )
 {
     m_inputPoints->push_back( WPosition( x, y, z ) );
 }
+
 vector<WPosition>* WWallDetectOctNode::getInputPoints()
 {
     return m_inputPoints;
 }
+
 WPosition WWallDetectOctNode::getMean()
 {
     return m_mean;
 }
+
 void WWallDetectOctNode::setMean( WPosition mean )
 {
     m_mean = mean;
 }
+
 double WWallDetectOctNode::getLinearLevel()
 {
     return m_eigenValues.size() < 2 || m_eigenValues[0] == 0.0
             ?1.0 :m_eigenValues[1] / m_eigenValues[0];
 }
+
 double WWallDetectOctNode::getIsotropicLevel()
 {
     return m_eigenValues.size() < 3 || m_eigenValues[0] == 0.0
             ?1.0 :m_eigenValues[2] / m_eigenValues[0];
 }
+
 vector<double> WWallDetectOctNode::getEigenValues()
 {
     return m_eigenValues;
 }
+
 void WWallDetectOctNode::setEigenValues( vector<double> eigenValues )
 {
     m_eigenValues = eigenValues;
 }
+
 WVector3d WWallDetectOctNode::getNormalVector()
 {
     return m_eigenVectors[2];
 }
+
 WVector3d WWallDetectOctNode::getStrongestEigenVector()
 {
     return m_eigenVectors[0];
 }
+
 void WWallDetectOctNode::setEigenVectors( vector<WVector3d> eigenVectors )
 {
     m_eigenVectors = eigenVectors;
 }
+
 bool WWallDetectOctNode::hasEigenValuesAndVectors()
 {
     return m_eigenValues.size() >= 3 && m_eigenVectors.size() >= 3;
 }
+
 WVector3d WWallDetectOctNode::getEigenVector( size_t index )
 {
     return m_eigenVectors[index];
 }
+
 void WWallDetectOctNode::clearInputData()
 {
     m_inputPoints->resize( 0 );

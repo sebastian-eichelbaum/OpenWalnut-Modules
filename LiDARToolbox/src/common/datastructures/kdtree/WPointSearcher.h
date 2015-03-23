@@ -29,10 +29,12 @@
 #include <vector>
 #include "WPointDistance.h"
 #include "WKdTreeND.h"
+#include "WKdPointND.h"
 #include "core/common/math/linearAlgebra/WPosition.h"
 
 using std::cout;
 using std::endl;
+using std::numeric_limits;
 using std::vector;
 
 /**
@@ -43,22 +45,19 @@ using std::vector;
 class WPointSearcher
 {
 public:
+    explicit WPointSearcher();
+
     /**
      * Instantiates the points searcher.
      * \param kdTree Assigned source kd tree to search points.
      */
     explicit WPointSearcher( WKdTreeND* kdTree );
+
     /**
      * Destroys the points searcher
      */
     virtual ~WPointSearcher();
-    /**
-     * Static method that fetches coordinates of WPointDistance sets into a three 
-     * dimensional WPosition point list.
-     * \param pointDistances Point distance data sets to fetch positions from.
-     * \return A WPosition list. That type is very commonly used in OpenWalnut.
-     */
-    static vector<WPosition>* convertToPointSet( vector<WPointDistance>* pointDistances );
+
     /**
      * Returns nearest points of a particular coordinate. Execute methods for setting 
      * examined coordinate, maximal neighbor count and radius first. Consider that the 
@@ -68,60 +67,116 @@ public:
      *         distance.
      */
     vector<WPointDistance>* getNearestPoints();
+
+    /**
+     * Counts points within the region during regarding the maximal point count. Setting 
+     * an infinite count speeds the process up. Points do would neither to be sorted nor 
+     * there have to be an array to built up.
+     * \return Point count within the region.
+     */
+    size_t getNearestNeighborCount();
+
     /**
      * Links a kd tree to the search engine in order to find nearest points of a 
      * coordinate.
      * \param kdTree The kd tree where to look for neighbors.
      */
     void setExaminedKdTree( WKdTreeND* kdTree );
+
     /**
      * Sets the coordinate of the point to get its neighbors afterwarts.
      * \param searchedPoint Coordinate to search for neighbors.
      */
-    void setSearchedPoint( vector<double> searchedPoint );
+    void setSearchedPoint( const vector<double>& searchedPoint );
+
     /**
      * Sets the maximal distance of neighbors.
      * \param distance The maximal distance of neighbors.
      */
     void setMaxSearchDistance( double distance );
+
     /**
      * Sets the maximal point count.
      * \param maxPointCount The maximal neighbor count that is found for a coordinate.
      */
     void setMaxResultPointCount( size_t maxPointCount );
+
     /**
-     * A performance setting that has no effect on the result. Often the limited point 
-     * count is covered by a significantly smaller radius than the limit.
-     * Searching through the nodes it firstly traverses nodes of a smaller distance. The 
-     * first radius is searched radius divided by pow(2, steps).
+     * Sets the maximal point count to infinite. Especially the point count within a 
+     * fixed radius has a performance benefit. Points would have neither to be sorted 
+     * nor there have to be an array to built up.
      */
-    size_t m_distanceSteps;
+    void setMaxResultPointCountInfinite();
+
+protected:
+    /**
+     * Traverses kd-tree nodes to apply onPointFound() on points that were found using 
+     * pointCanBelongToPointSet().
+     * \param currentNode The current node where neighbor points are searched for.
+     * \param maxDistance Maximal euclidian distance to a output point.
+     */
+    void traverseNodePoints( WKdTreeND* currentNode, double maxDistance );
+
+    /**
+     * Action which is executed when a point is found. This method adds points to the 
+     * found points list. Overwrite this method in the inheriting class to define own 
+     * functionality.
+     * \param point Point that can be further processed during execution.
+     */
+    virtual void onPointFound( WKdPointND* point );
+
+    /**
+     * Determines whether a searched point can belong to the group of the coordinate to 
+     * find neighbors of.
+     * \param point Point to be tested.
+     * \param maxDistance Distance limit during kd-tree search.
+     * \return Point belongs to the searched point or not.
+     */
+    virtual bool pointCanBelongToPointSet( const vector<double>& point, double maxDistance );
+
+
     /**
      * Kd tree where nearest points are searched.
      */
     WKdTreeND* m_examinedKdTree;
-    /**
-     * The coordinate of which nearest points will be returned.
-     */
-    vector<double> m_searchedPoint;
+
     /**
      * maximal euclidian distance within which neighbors are searched.
      */
     double m_maxSearchDistance;
+
     /**
      * Maximal output neighbor count.
      */
     size_t m_maxResultPointCount;
 
+    /**
+     * The coordinate of which nearest points will be returned.
+     */
+    vector<double> m_searchedCoordinate;
+
+    /**
+     * A performance setting that has no effect on the result. Often the limited point
+     * count is covered by a significantly smaller radius than the limit.
+     * Searching through the nodes it firstly traverses nodes of a smaller distance. The
+     * first radius is searched radius divided by pow(2, steps).
+     */
+    size_t m_distanceSteps;
+
+    /**
+     * Points that were found during the search.
+     */
+    vector<WPointDistance>* m_foundPoints;
+
 private:
     /**
-     * Fetches the nearest points into a point list using a kd tree node. It doesn't 
-     * consider the maximal point count.
-     * \param currentNode The current node where neighbor points are searched for.
-     * \param targetPoints The target list where points are put to.
-     * \param maxDistance Maximal euclidian distance to a output point.
+     * Returns the point count within a radius not regarding the maximal point count. It 
+     * has an impact on performance because with that condition points do have neither 
+     * to be sorted nor there have to be an array to built up.
+     * \param currentNode Kd-tree to search.
+     * \result Region point count not regarding the masimal point count.
      */
-    void fetchNearestPoints( WKdTreeND* currentNode, vector<WPointDistance>* targetPoints, double maxDistance );
+    size_t getNearestNeighborCountInfiniteMaxCount( WKdTreeND* currentNode );
 };
 
 #endif  // WPOINTSEARCHER_H

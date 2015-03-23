@@ -68,6 +68,8 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 #include "WLariOutliner.h"
+#include "WLariBoundaryDetector.h"
+#include "clusterDetection/WLariBruteforceClustering.h"
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -161,17 +163,26 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+
     /**
-     * Output point set that depicts the input points of the spatial domains. Points are 
-     * hilighted if they belong to the planar or linear/cylindrical domain.
+     * Output connector that depicts planar groups using the context of the spatial 
+     * domain.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputSpatialDomain;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputSpatialDomainGroups;
+
+    /**
+     * Output connector that depicts planar groups using the context of the parameter 
+     * domain.
+     */
+    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputSpatialDomainCategories;
+
     /**
      * Output point set that depicts the parameter domain. Each point of that depicts 
      * a planar formula (in relation to its neighbors) of each input point of the 
      * spatial domain.
      */
-    boost::shared_ptr< WModuleOutputData< WDataSetPoints > > m_outputParameterDomain;
+    boost::shared_ptr< WModuleOutputData< WDataSetPointsGrouped > > m_outputParameterDomain;
+
     /**
      * Output connector that depicts best fitted planes of each input point in relation 
      * to its neighbors.
@@ -192,81 +203,116 @@ private:
      * Info tab property: Input points count.
      */
     WPropInt m_nbPoints;
+
     /**
      * Info field - Wall time for the whole surface detection process.
      */
     WPropDouble m_infoRenderTimeSeconds;
+
     /**
      * Info field - The points per second detection rate of the segmentation process.
      */
     WPropDouble m_infoPointsPerSecond;
+
     /**
      * Info tab property: Minimal x value of input x coordunates.
      */
     WPropDouble m_xMin;
+
     /**
      * Info tab property: Maximal x value of input x coordunates.
      */
     WPropDouble m_xMax;
+
     /**
      * Info tab property: Minimal y value of input x coordunates.
      */
     WPropDouble m_yMin;
+
     /**
      * Info tab property: Maximal y value of input x coordunates.
      */
     WPropDouble m_yMax;
+
     /**
      * Info tab property: Minimal z value of input x coordunates.
      */
     WPropDouble m_zMin;
+
     /**
      * Info tab property: Maximal z value of input x coordunates.
      */
     WPropDouble m_zMax;
 
 
+    /**
+     * Setting that regards the planar formula of each spatial point in relation to its 
+     * neighborship. This variable is the maximal angular deviation of plane formulas 
+     * between two points.
+     */
+    WPropDouble m_segmentationMaxAngleDegrees;
+
+    /**
+     * Setting that regards the planar formula of each spatial point in relation to its 
+     * neighborship. This variable is the maximal difference between two plane normal 
+     * distance to the origin.
+     */
+    WPropDouble m_segmentationMaxPlaneDistance;
 
     /**
      * The maximal count of analyzed neighbors of an 
      * examined input point.
      */
     WPropInt m_numberPointsK;
+
     /**
      * Maximal radius within which the nearest neighbors are examined.
      */
     WPropDouble m_maxPointDistanceR;
+
+    /**
+     * Switch that enables the modified convex hull detection to separate spatially 
+     * disconnected point clusters thet were previously segmented by a peak detection 
+     * approach of Lari/Habib.
+     */
+    WPropBool m_applyBoundaryDetection;
 
 
     /**
      * Options for surface features.
      */
     WPropGroup m_planarGroup;
+
     /**
      * The lower limit of the first normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
      */
     WPropDouble m_surfaceNLambda1Min;
+
     /**
      * The higher limit of the first normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
      */
     WPropDouble m_surfaceNLambda1Max;
+
     /**
      * The lower limit of the second normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
      */
     WPropDouble m_surfaceNLambda2Min;
+
     /**
      * The higher limit of the second normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
      */
     WPropDouble m_surfaceNLambda2Max;
+
     /**
      * The lower limit of the third normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
      */
     WPropDouble m_surfaceNLambda3Min;
+
     /**
      * The higher limit of the third normalized lambda (eigen value) to detect point's 
      * feature as planar. The eigen values are sorted descending.
@@ -278,36 +324,43 @@ private:
      * Options for cylindrical features.
      */
     WPropGroup m_cylindricalGroup;
+
     /**
      * The lower limit of the first normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda1Min;
+
     /**
      * The higher limit of the first normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda1Max;
+
     /**
      * The lower limit of the second normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda2Min;
+
     /**
      * The higher limit of the second normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda2Max;
+
     /**
      * The lower limit of the third normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda3Min;
+
     /**
      * The higher limit of the third normalized lambda (eigen value) to detect point's 
      * feature as linear/cylindrical. The eigen values are sorted descending.
      */
     WPropDouble m_cylNLambda3Max;
+
 
     /**
      * Width of each square that depichts a best fitted plane of each input point.
@@ -317,10 +370,11 @@ private:
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
 
+
     /**
-     * Plugin progress status.
+     * Applied CPU thread count.
      */
-    boost::shared_ptr< WProgress > m_progressStatus;
+    WPropInt m_cpuThreadCount;
 };
 
 #endif  // WMSURFACEDETECTIONBYLARI_H

@@ -29,35 +29,38 @@
 #include "WQuadTree.h"
 
 
-WQuadTree::WQuadTree( double detailDepth )
+WQuadTree::WQuadTree( double detailLevel )
 {
-    m_root = new WQuadNode( 0.0, 0.0, detailDepth );
-    m_detailLevel = detailDepth;
+    m_root = new WQuadNode( 0.0, 0.0, detailLevel );
+    m_detailLevel = detailLevel;
 }
 
 WQuadTree::~WQuadTree()
 {
+    delete m_root;
 }
 
-void WQuadTree::registerPoint( double x, double y, double elevation )
+void WQuadTree::registerPoint( double x, double y, double value )
 {
     while  ( !m_root->fitsIn( x, y ) )
         m_root->expand();
 
     WQuadNode* node = m_root;
-    node->updateMinMax( x, y, elevation );
+    node->updateMinMax( x, y, value );
     while  ( node->getRadius() > m_detailLevel )
     {
         size_t drawer = node->getFittingCase( x, y );
         node->touchNode( drawer );
         node = node->getChild( drawer );
-        node->updateMinMax( x, y, elevation );
+        node->updateMinMax( x, y, value );
     }
 }
+
 WQuadNode* WQuadTree::getLeafNode( double x, double y )
 {
     return getLeafNode( x, y, m_detailLevel);
 }
+
 WQuadNode* WQuadTree::getLeafNode( double x, double y, double detailLevel )
 {
     if( !m_root->fitsIn( x, y ) )
@@ -73,6 +76,7 @@ WQuadNode* WQuadTree::getLeafNode( double x, double y, double detailLevel )
     }
     return node;
 }
+
 WQuadNode* WQuadTree::getRootNode()
 {
     return m_root;
@@ -87,6 +91,7 @@ size_t WQuadTree::getBin( double x )
     double goback = static_cast<int>( value - 1.0 );
     return static_cast<int>(value - goback) + goback;
 }
+
 double WQuadTree::getDetailLevel()
 {
     return m_detailLevel;

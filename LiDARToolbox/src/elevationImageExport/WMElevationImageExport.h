@@ -66,8 +66,8 @@
 #include "core/graphicsEngine/WGEUtils.h"
 #include "core/graphicsEngine/WGERequirement.h"
 
-#include "bitmapImage/WBmpImage.h"
-#include "bitmapImage/WBmpSaver.h"
+#include "../common/algorithms/bitmapImage/WBmpImage.h"
+#include "../common/algorithms/bitmapImage/WBmpSaver.h"
 
 #include "WElevationImageOutliner.h"
 #include "../common/datastructures/WDataSetPointsGrouped.h"
@@ -151,10 +151,12 @@ private:
      * WDataSetPoints data input (proposed for LiDAR data).
      */
     boost::shared_ptr< WModuleInputData< WDataSetPoints > > m_input;
+
     /**
      * Grouped points input data to highlight detected groupes using a set of colors.
      */
     boost::shared_ptr< WModuleInputData< WDataSetPointsGrouped > > m_pointGroups;
+
     /**
      * The output connector containing the elevation image outlined to the triangle mesh.
      */
@@ -170,6 +172,7 @@ private:
      */
     boost::shared_ptr< WCondition > m_propCondition;
 
+
     /**
      * Info tab property: Input points count.
      */
@@ -178,31 +181,43 @@ private:
      * Info tab property: Minimal x value of input x coordunates.
      */
     WPropDouble m_xMin;
+
     /**
      * Info tab property: Maximal x value of input x coordunates.
      */
     WPropDouble m_xMax;
+
     /**
      * Info tab property: Minimal y value of input x coordunates.
      */
     WPropDouble m_yMin;
+
     /**
      * Info tab property: Maximal y value of input x coordunates.
      */
     WPropDouble m_yMax;
+
     /**
      * Info tab property: Minimal z value of input x coordunates.
      */
     WPropDouble m_zMin;
+
     /**
      * Info tab property: Maximal z value of input x coordunates.
      */
     WPropDouble m_zMax;
 
     /**
+     * Info field for surface area in m^2 of the elevation image.
+     * Area = [node count] * [node radius]^2 * 4.
+     */
+    WPropDouble m_infoSurfaceArea2D;
+
+    /**
      * Determines the resolution of the smallest octree nodes in 2^n meters
      */
     WPropInt m_detailDepth;
+
     /**
      * Determines the resolution of the smallest octree nodes in meters
      */
@@ -221,6 +236,7 @@ private:
      * Elevation height that will be displayed as the black color.
      */
     WPropDouble m_minElevImageZ;
+
     /**
      * Elevation image export setting. 
      * Count of intensity increases per meter.
@@ -231,11 +247,14 @@ private:
      * Path of the exportable elevation image *.bmp file.
      */
     WPropFilename m_elevationImageExportablePath; //!< Path of the exportable elevation image *.bmp file.
+
     WPropTrigger  m_exportTriggerProp; //!< This property triggers the actual reading,
+
     /**
      * If trigger set then the elevation will be displayed in the triangle mesh color.
      */
     WPropBool m_showElevationInMeshColor;
+
     /**
      * If trigger set then the elevation will be displayed in the triangle mesh height offset.
      */
@@ -245,6 +264,7 @@ private:
      * Plugin progress status that is shared with the reader.
      */
     boost::shared_ptr< WProgress > m_progressStatus;
+
     /**
      * This is the elevation image of the whole data set.
      * It depicts some statistical Z coordinate information of each X/Y-coordinate.

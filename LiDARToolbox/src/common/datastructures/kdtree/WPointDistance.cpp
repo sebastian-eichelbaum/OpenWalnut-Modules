@@ -25,39 +25,51 @@
 #include <vector>
 
 #include "WPointDistance.h"
+#include "../../math/vectors/WVectorMaths.h"
 
 WPointDistance::WPointDistance()
 {
     m_pointDistance = 0;
+    m_comparedPoint = 0;
 }
-WPointDistance::WPointDistance( vector<double> sourcePoint, vector<double> comparedPoint )
+
+WPointDistance::WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint )
 {
-    m_comparedCoordinate = comparedPoint;
-    m_pointDistance = getPointDistance( sourcePoint, comparedPoint );
+    m_comparedPoint = comparedPoint;
+    m_pointDistance = WVectorMaths::getEuclidianDistance( sourcePoint, getComparedPoint()->getCoordinate() );
 }
 
 WPointDistance::~WPointDistance()
 {
 }
+
 vector<double> WPointDistance::getComparedCoordinate()
 {
-    return m_comparedCoordinate;
+    return m_comparedPoint->getCoordinate();
 }
+
+WKdPointND* WPointDistance::getComparedPoint()
+{
+    return m_comparedPoint;
+}
+
 double WPointDistance::getDistance()
 {
     return m_pointDistance;
 }
-double WPointDistance::getPointDistance( vector<double> point1, vector<double> point2 )
-{    //TODO(aschwarzkopf): Not verified that the euclidian distance is calculated right also for points above 3 dimensions.
-    double distance = 0;
-    for( size_t index = 0; index < point1.size() && index < point2.size(); index++ )
+
+vector<WPosition>* WPointDistance::convertToPointSet( vector<WPointDistance>* pointDistances )
+{
+    vector<WPosition>* pointSet = new vector<WPosition>();
+    for( size_t index = 0; index < pointDistances->size(); index++ )
     {
-        double coord1 = point1[index];
-        double coord2 = point2[index];
-        distance += pow( coord1 - coord2, 2 );
+        vector<double> coordinate = pointDistances->at( index ).getComparedCoordinate();
+        if( coordinate.size() == 3 )
+            pointSet->push_back( WPosition( coordinate[0], coordinate[1], coordinate[2] ) );
     }
-    return pow( distance, 0.5 );
+    return pointSet;
 }
+
 bool WPointDistance::operator<( WPointDistance const& right ) const
 {
     return m_pointDistance < right.m_pointDistance;

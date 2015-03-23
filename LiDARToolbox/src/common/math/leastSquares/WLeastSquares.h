@@ -53,35 +53,49 @@ public:
      * \param dimensions Dimension definition of the space for the calculation.
      */
     explicit WLeastSquares( size_t dimensions );
+
+    /**
+     * Destroys the least squares adjustment instance.
+     */
     virtual ~WLeastSquares();
+
     /**
      * Launchs the least squares adjustment.
      * \param data Point data to analyze the best fitted plane for.
      */
     void analyzeData( vector<WPosition>* data );
+
     /**
      * Returns the plane formula for the best fitted plane.
-     * \return The hessesche Normal Form of the best fitted plane. First n numbers (by 
-     *         the dimensions coordinate count) represent the normal vector of the best 
+     * \return The Hessian normal form of the best fitted plane. First n numbers (by the 
+     *         dimensions coordinate count) represent the normal vector of the best 
      *         fitted plane. The last one is the perpendicular euclidian distance to the 
      *         coordinate system orign.
      */
-    vector<double> getHessescheNormalForm();
+    vector<double> getHessianNormalForm();
+
+    /**
+     * Returns a not normalized normal vector of the least squares adjustment result.
+     * \return A not normalized normal vector of the least squares adjustment result.
+     */
+    vector<double> getNormalVectorNotNormalized();
+
     /**
      * Returns the parameters X_0, Y_0 and Z_0 etc. of the best fitted plane in an n 
      * dimensional space.
      * \return Parameter space coordinates corresponding to Lari/Habib 2014.
      */
-    vector<double> getParametersXYZ0();
+    vector<double> getParametersXYZ0_();    //TODO(aschwarzkopf): consider removal
 
     /**
      * Calculates a plane formula of the parameter domain using the approach of 
-     * Lari/Habib using the Hessesche normal form as input plane formula.
-     * \param hessescheNormalForm The Hessesche normal formula of a plane.
+     * Lari/Habib using the Hessian normal form as input plane formula.
+     * \param hessianNormalForm The Hessian normal formula of a plane.
      * \return Parameters X_0, Y_0 and Z_0 that describe a plane using the approach of 
      *         Lari/Habib.
      */
-    static vector<double> getParametersXYZ0( vector<double> hessescheNormalForm );
+    static vector<double> getParametersXYZ0( const vector<double>& hessianNormalForm );    //TODO(aschwarzkopf): Consider removal
+
     /**
      * Returns a point distance to the currently calculated plane.
      * analyzeData() must have been executes.
@@ -90,6 +104,7 @@ public:
      *         squares algorithm.
      */
     double getDistanceToPlane( WPosition point );
+
     /**
      * Returns a nearest point to the input point's coordinate that lies on the 
      * calculated plane.
@@ -97,14 +112,15 @@ public:
      * \return The nearest coordinate on the calculates plane of an arbitrary point.
      */
     WPosition getNearestPointTo( WPosition point );
+
     /**
      * Returns a nearest point to the input point's coordinate that lies on the 
      * calculated plane.
-     * \param planeHessescheNormalForm Plane on which the nearest point is found.
+     * \param planeHessianNormalForm Plane on which the nearest point is found.
      * \param point Point to get the nearest coordinate on the plane of.
      * \return The nearest coordinate on the calculates plane of an arbitrary point.
      */
-    static WPosition getNearestPointTo( vector<double> planeHessescheNormalForm, WPosition point );
+    static WPosition getNearestPointTo( const vector<double>& planeHessianNormalForm, WPosition point );
 
 private:
     /**
@@ -113,44 +129,48 @@ private:
      *         Value.
      */
     void calculatePerpendicularDimension();
-    /**
-     * Erases the matrices required during the calculation.
-     */
-    void clearMatrices();
+
     /**
      * The algorithm solves the matrix formula A*x=B. This method calculates A and B.
      */
     void calculateMatrices();
+
     /**
      * The algorithm solves the matrix formula A*x=B. This method at first calculates 
-     * the matrix x and then the Hessesche Normal Form of the best fitted plane.
+     * the matrix x and then the Hessian Normal Form of the best fitted plane.
      */
-    void calculateHessescheNormalForm();
+    void calculateHessianNormalForm();
+
 
     /**
      * Dimension definition of the coordinate system.
      */
     size_t m_dimensions;
+
     /**
      * Points to calculate the best fitted plane for.
      */
     vector<WPosition>* m_positions;
+
     /**
-     * Space for the calculated Hessesche Normal Form.
+     * Space for the calculated hessian normal form.
      */
-    vector<double> m_hessescheNormalForm;
+    vector<double> m_hessianNormalForm;
+
     /**
      * Dimension with the biggest eigen vector coordonate extent of the smallest Eigen Value.
      */
     size_t m_verticalDimension;
+
     /**
-     * Matrix A of the least squares adjustment,
+     * Independent variable: Values of dimensions.
      */
-    MatrixXd m_matrixA;
+    MatrixXd m_matrixX;
+
     /**
-     * Matrix A of the least squares adjustment,
+     * Values of the dependent variable.
      */
-    MatrixXd m_matrixB;
+    MatrixXd m_matrixY;
 };
 
 #endif  // WLEASTSQUARES_H

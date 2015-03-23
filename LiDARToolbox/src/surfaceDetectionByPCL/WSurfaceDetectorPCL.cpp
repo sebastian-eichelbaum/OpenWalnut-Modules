@@ -50,6 +50,7 @@ WSurfaceDetectorPCL::WSurfaceDetectorPCL()
 WSurfaceDetectorPCL::~WSurfaceDetectorPCL()
 {
 }
+
 boost::shared_ptr< WDataSetPointsGrouped > WSurfaceDetectorPCL::detectSurfaces( boost::shared_ptr< WDataSetPoints > inputPoints )
 {
     WDataSetPoints::VertexArray inputVerts = inputPoints->getVertices();
@@ -128,19 +129,23 @@ boost::shared_ptr< WDataSetPointsGrouped > WSurfaceDetectorPCL::detectSurfaces( 
             new WDataSetPointsGrouped( outputVerts, outputColors, outputGroups ) );
     return output;
 }
+
 void WSurfaceDetectorPCL::setClusterSizeRange( size_t sizeMin, size_t sizeMax )
 {
     m_clusterSizeMin = sizeMin;
     m_clusterSizeMax = sizeMax;
 }
+
 void WSurfaceDetectorPCL::setNumberOfNeighbors( size_t count )
 {
     m_numberOfNeighbours = count;
 }
+
 void WSurfaceDetectorPCL::setSmoothnessThreshold( double degrees )
 {
     m_smoothnessThresholdDegrees = degrees;
 }
+
 void WSurfaceDetectorPCL::setCurvatureThreshold( double threshold )
 {
     m_curvatureThreshold = threshold;

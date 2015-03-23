@@ -29,6 +29,8 @@
 
 #include <iostream>
 #include <vector>
+#include "WKdPointND.h"
+#include "core/common/math/linearAlgebra/WPosition.h"
 
 using std::vector;
 
@@ -45,6 +47,7 @@ public:
      * Sets up the object without filling parameters.
      */
     WPointDistance();
+
     /**
      * Instantiates the coordinate distance pair filling all necessary parameters.
      * \param sourcePoint Reference point used to calculate the distance. Its 
@@ -52,44 +55,58 @@ public:
      * \param comparedPoint The second point that is used to calculate the distance 
      *                      between. The object stores its coordinates by that.
      */
-    WPointDistance( vector<double> sourcePoint, vector<double> comparedPoint );
+    WPointDistance( vector<double> sourcePoint, WKdPointND* comparedPoint );
+
     /**
      * Object destructor
      */
     virtual ~WPointDistance();
+
     /**
      * Returns the coordinate of the point compared to the reference.
      * \return The compared point coordinate.
      */
     vector<double> getComparedCoordinate();
+
+    /**
+     * Returns the point that is considered within the current distance calculation 
+     * instance.
+     * \return Point that is considered within the current distance calculation instance.
+     */
+    WKdPointND* getComparedPoint();
+
     /**
      * Returns the distance between the reference point and the compared one.
      * \return The distance between the two instantiated points using the constructor.
      */
     double getDistance();
+
     /**
-     * Static method that calculates the euclidian distance between two arbitrary 
-     * unidimensional points.
-     * \param point1 First point for calculating the distance.
-     * \param point2 Second point for calculating the distance.
-     * \return Euclidian distance between that two points.
+     * Static method that fetches coordinates of WPointDistance sets into a three 
+     * dimensional WPosition point list.
+     * \param pointDistances Point distance data sets to fetch positions from.
+     * \return A WPosition list. That type is very commonly used in OpenWalnut.
      */
-    static double getPointDistance( vector<double> point1, vector<double> point2 );
+    static vector<WPosition>* convertToPointSet( vector<WPointDistance>* pointDistances );
+
     /**
      * Operator for sorting a vector<WPointDistance> using std::sort.
      * \param right The right compared object to this one.
      * \return The distance of this object is smaller than the right one or not.
      */
     bool operator<( WPointDistance const& right ) const;
+
+private:
     /**
      * The euclidian distance between the two points instantiated using the constructor.
      */
     double m_pointDistance;
+
     /**
      * The unidimensional coordinate of the compared point instantiated using the 
      * constructor.
      */
-    vector<double> m_comparedCoordinate;
+    WKdPointND* m_comparedPoint;
 };
 
 #endif  // WPOINTDISTANCE_H

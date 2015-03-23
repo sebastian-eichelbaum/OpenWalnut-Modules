@@ -147,6 +147,7 @@ private:
      * \param steps Points count as reference to the progress bar.
      */
     void setProgressSettings( size_t steps );
+
     /**
      * Returns a pseudo random number. It depends on a counter. The aim is to get 
      * reproducable results.
@@ -158,6 +159,7 @@ private:
      * The OSG root node for this module. All other geodes or OSG nodes will be attached on this single node.
      */
     osg::ref_ptr< WGEManagedGroupNode > m_rootNode;
+
     /**
      * Returns a cropped data set corresponding to the selection. The selection is
      * set by m_<from/to>_<X/Y/Z>. m_cutInsteadOfCrop determines whether to crop to
@@ -165,6 +167,7 @@ private:
      * \return The cropped or cut point data set.
      */
     boost::shared_ptr< WDataSetPoints > getRandomPoints();
+
     /**
      * Processed point data with cut off outliers.
      */
@@ -184,10 +187,12 @@ private:
      * Input point coordinates to crop.
      */
     WDataSetPoints::VertexArray m_verts;
+
     /**
      * Colors of the input point data set that are also passed through.
      */
     WDataSetPoints::ColorArray m_colors;
+
     /**
      * The last random number It's stored to calculate a next number deterministically. 
      * Reproducable results are produced that way
@@ -198,14 +203,17 @@ private:
      * Settings for the random point generator.
      */
     WPropGroup m_groupRandomPointGenerator;
+
     /**
      * Organizes points in a spherical space instead of in a qubical one.
      */
     WPropBool m_isSphericalSpace;
+
     /**
      * Point count in the random point set.
      */
     WPropInt m_pointCount;
+
     /**
      * Initial number for the random number generator.
      */

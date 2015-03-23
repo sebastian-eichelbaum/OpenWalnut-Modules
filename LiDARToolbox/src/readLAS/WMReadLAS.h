@@ -28,9 +28,9 @@
 
 #include <liblas/liblas.hpp>
 #include <string>
-
-#include <fstream>  // std::ifstream
-#include <iostream> // std::cout
+#include <vector>
+#include <fstream>
+#include <iostream>
 
 #include "core/kernel/WModule.h"
 
@@ -65,6 +65,8 @@
 #include "core/graphicsEngine/WGERequirement.h"
 
 #include "WLasReader.h"
+
+using std::vector;
 
 // forward declarations to reduce compile dependencies
 template< class T > class WModuleInputData;
@@ -162,52 +164,64 @@ private:
     WPropFilename m_lasFile; //!< The mesh will be read from this file.
 
     WPropTrigger  m_reloadData; //!< This property triggers the actual reading,
+
     /**
      * The maximal width of the output data.
      */
-    WPropInt m_outputDataWidth;
+    WPropDouble m_selectionRadius;
+
     /**
      * Scrollbar that changes the minimal output X value
      */
-    WPropInt m_scrollBarX;
+    WPropDouble m_sliderX;
+
     /**
      * Scrollbar that changes the minimal output Y value
      */
-    WPropInt m_scrollBarY;
+    WPropDouble m_sliderY;
+
     /**
      * Enables to put the output data to the coordinate system center
      */
     WPropBool m_translateDataToCenter;
 
+    /**
+     * Switch that enables colored las file input instead of the greyscale method.
+     */
+    WPropBool m_colorsEnabled;
+
+    /**
+     * Multiplier that is applied on the input data set color intensity.
+     */
+    WPropDouble m_contrast;
+
     WPropInt m_nbVertices; //!< Info-property showing the number of vertices in the mesh.
+
     /**
      * Info tab property: Minimal x value of input x coordunates.
      */
-    WPropDouble m_xMin;
+    vector<WPropDouble> m_minCoord;
+
     /**
      * Info tab property: Maximal x value of input x coordunates.
      */
-    WPropDouble m_xMax;
+    vector<WPropDouble> m_maxCoord;
+
     /**
-     * Info tab property: Minimal y value of input x coordunates.
+     * Information about minimal color RGB values.
      */
-    WPropDouble m_yMin;
+    vector<WPropDouble> m_colorMin;
+
     /**
-     * Info tab property: Maximal y value of input x coordunates.
+     * Information about maximal color RGB values.
      */
-    WPropDouble m_yMax;
-    /**
-     * Info tab property: Minimal z value of input x coordunates.
-     */
-    WPropDouble m_zMin;
-    /**
-     * Info tab property: Maximal z value of input x coordunates.
-     */
-    WPropDouble m_zMax;
+    vector<WPropDouble> m_colorMax;
+
     /**
     * Info tab property: Minimal color intensity in LAS file.
     */
     WPropDouble m_intensityMin;
+
     /**
     * Info tab property: Maximal color intensity in LAS file.
     */

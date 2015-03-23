@@ -36,6 +36,7 @@ WOctNode::WOctNode()
     m_pointCount = 0;
     m_hasGroup = false;
 }
+
 WOctNode::WOctNode( double centerX, double centerY, double centerZ, double radius )
 {
     m_pointCount = 0;
@@ -51,6 +52,8 @@ WOctNode::WOctNode( double centerX, double centerY, double centerZ, double radiu
 
 WOctNode::~WOctNode()
 {
+    for( size_t index = 0; index < 8; index++ )
+        delete m_child[index];
 }
 
 WOctNode* WOctNode::newInstance( double centerX, double centerY, double centerZ, double radius )
@@ -108,9 +111,7 @@ void WOctNode::expand()
     m_radius *= 2.0;
 }
 
-/**
- * Creates a new octree node within a particular drawer if doesn't exist;
- */
+
 void WOctNode::touchNode( size_t drawer )
 {
     if  ( m_child[drawer] == 0 )
@@ -121,18 +122,22 @@ void WOctNode::touchNode( size_t drawer )
         m_child[drawer] = newInstance( centerX, centerY, centerZ, m_radius * 0.5 );
     }
 }
+
 double WOctNode::getRadius()
 {
     return m_radius;
 }
+
 double WOctNode::getCenter( size_t dimension )
 {
     return m_center[dimension];
 }
+
 size_t WOctNode::getGroupNr()
 {
     return m_groupNr;
 }
+
 bool WOctNode::hasGroup()
 {
     if( m_hasGroup )    //TODO(aschwarzkopf): Shorten this temporary debugging purpused stuff
@@ -144,11 +149,13 @@ bool WOctNode::hasGroup()
         return false;
     }
 }
+
 void WOctNode::setGroupNr( size_t groupNr )
 {
     m_groupNr = groupNr;
     m_hasGroup = true;
 }
+
 size_t WOctNode::getTotalNodeCount()
 {
     size_t totalNodeCount = 1;
@@ -157,6 +164,7 @@ size_t WOctNode::getTotalNodeCount()
             totalNodeCount += m_child[index]->getTotalNodeCount();
     return totalNodeCount;
 }
+
 void WOctNode::touchPosition( double x, double y, double z )
 {
     if( !m_pointCount > 0 )
@@ -175,40 +183,49 @@ void WOctNode::touchPosition( double x, double y, double z )
 
     onTouchPosition( x, y, z );
 }
+
 void WOctNode::onTouchPosition( double x, double y, double z )
 {
     x = x;  //TODO(aschwarzkopf): How to come around warnings by another way?
     y = y;
     z = z;
 }
+
 void WOctNode::setChild( WOctNode* child, size_t drawer )
 {
     m_child[drawer] = child;
 }
+
 size_t WOctNode::getPointCount()
 {
     return m_pointCount;
 }
+
 double WOctNode::getXMin()
 {
     return m_xMin;
 }
+
 double WOctNode::getXMax()
 {
     return m_xMax;
 }
+
 double WOctNode::getYMin()
 {
     return m_yMin;
 }
+
 double WOctNode::getYMax()
 {
     return m_yMax;
 }
+
 double WOctNode::getZMin()
 {
     return m_zMin;
 }
+
 double WOctNode::getZMax()
 {
     return m_zMax;
