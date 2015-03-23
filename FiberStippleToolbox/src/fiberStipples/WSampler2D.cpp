@@ -269,5 +269,136 @@ std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_
     return components;
 }
 
+namespace{
+  bool myless( const Vec2& a, const Vec2& b ) {
+    if( a.x < b.x ) { return true;}
+    if( a.x == b.x && a.y < b.y ) { return true; }
+    return false;
+  }
+}
+std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, const size_t numComponents, const size_t numsamples, boost::shared_ptr< WProgress > progress )
+{
+//   Debug:: BottomUP Variante
+//   std::vector< WSampler2D > components;
+//
+//   std::vector< Vec2 > pointsSoFar;
+//
+//   for( size_t i = 0; i < numComponents; ++i ) {
+//     double radius = 1.0 / std::sqrt( static_cast< double >( (i + 1) * sampler.size() / numComponents  ) ) / 2.0;
+//     boost::shared_ptr< PDSampler > s( new BoundarySampler( radius, true ) );
+//     for( size_t j = 0; j < pointsSoFar.size(); ++j) {
+//       s->addPoint( pointsSoFar[j] );
+//     }
+//     s->complete();
+//     std::vector< Vec2 > newpoints( s->points );
+//     // std::sort( newpoints.begin(), newpoints.end(), myless );
+//     // std::vector< Vec2 > diff( newpoints.size() - pointsSoFar.size(), Vec2( 0.0, 0.0 ) );
+//     // std::vector< Vec2 >::iterator it = std::set_difference( newpoints.begin(), newpoints.end(), pointsSoFar.begin(), pointsSoFar.end(), diff.begin(), myless );
+//     // diff.resize( it - diff.begin() );
+//
+//     // double x,y;
+//     // WSampler2D comp;
+//     // for( size_t j = 0; j < diff.size(); ++j ) {
+//     //   // rescale to [0,1]^2 domain
+//     //   x = ( diff[j].x + 1.0 ) / 2.0;
+//     //   y = ( diff[j].y + 1.0 ) / 2.0;
+//     //   comp.push_back( WVector2d( x, y ) );
+//     // }
+//
+//     // components.push_back( comp );
+//     std::swap( pointsSoFar, newpoints );
+//     ++*progress;
+//   }
+//   progress->finish();
+//   return components;
+
+   std::vector< WSampler2D > components;
+
+    std::string cache( "/tmp/klaus" );
+    if( fileExists( cache ) ) {
+        components = loadHierarchy( cache );
+    }
+    else {
+        WSampler2D points( sampler );
+        size_t numPoints = points.size(); // we need this as we want to delete in O(1)
+        std::cout << numPoints << std::endl;
+        std::random_shuffle( points.begin(), points.end() );
+
+        double radius = 1.0 / std::sqrt( static_cast< double >( points.size() / numComponents ) );
+        double r2 = radius * radius;
+        double shrinkRatio = 0.02;
+        WSampler2D comp;
+        while( radius > 0 && numPoints > 0 ) {
+          size_t oldNumPTS = comp.size();
+          size_t j = 0;
+          do {
+            if( valid( points[j], comp.begin(), comp.end(), r2 ) ) {
+              comp.push_back( points[j] );
+              std::swap( points[j], points[ numPoints - 1 ] );
+              numPoints -= 1;
+              if( comp.size() - oldNumPTS > 0.02 * points.size() ) {
+                 break;
+              }
+              continue; // check the new point again
+            }
+            ++j;
+            if( comp.size() - oldNumPTS > 0.02 * points.size() ) {
+               break;
+            }
+          } while ( j < numPoints && numPoints > 0 );
+
+          size_t newPTS = comp.size() - oldNumPTS;
+          if( newPTS > 0.02 * points.size() ) {
+            std::cout << "Too much points: " << newPTS << " of " << points.size() << " radius: " << radius << std::endl;
+            radius /= ( 1 - shrinkRatio );
+            shrinkRatio *= 0.5;
+          }
+          else if( newPTS < 0.005 * points.size() ) {
+            shrinkRatio *= 1.1;
+          }
+
+          radius -= shrinkRatio * radius;
+          r2 = radius * radius;
+          std::random_shuffle( points.begin(), points.begin() + numPoints );
+          std::cout << "current #pts: " << comp.size() << " old radius: " << radius << " new: ";
+          std::cout << radius << " shrinkRatio: " << shrinkRatio << std::endl;
+        }
 
 
+        for( size_t i = 0; i < numComponents; ++i ) {
+           WSampler2D c;
+           for( size_t j = i * comp.size() / numComponents; j < ( i + 1 ) * comp.size() / numComponents; ++j ) {
+              c.push_back( comp[j] );
+           }
+           components.push_back( c );
+           ++*progress;
+        }
+    }
+
+    saveHierarchy( components, "/tmp/klaus" );
+
+    progress->finish();
+
+    // discard points
+    return components;
+}
+// 0,7.0
+// 1,5.0
+// 2,4.0
+// 3,3.5
+// 4,3.0
+// 5,2.6
+// 6,2.3
+// 7,2.1
+// 8,2.02
+// 9,2.00001
+// 10,2.000005
+// 11,2.000001
+// 12,1.9999995
+// 13,1.999999
+// 14,1.999998
+// 15,1.999997
+// 16,1.9999955
+// 17,1.999994
+// 18,1.999992
+// 19,1.99999

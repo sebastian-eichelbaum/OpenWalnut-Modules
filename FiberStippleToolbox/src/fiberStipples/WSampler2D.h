@@ -221,5 +221,6 @@ public:
 
 std::vector< WSampler2D > splitSampling( const WSampler2D& sampler, size_t numComponents );
 std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_t numComponents, boost::shared_ptr< WProgress > splitProgress );
+std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, const size_t numComponents, const size_t numsamples, boost::shared_ptr< WProgress > splitProgress );
 #endif // WSAMPLER2D_H
 

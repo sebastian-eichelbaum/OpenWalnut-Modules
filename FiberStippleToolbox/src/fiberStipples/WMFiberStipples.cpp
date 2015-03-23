@@ -322,7 +322,7 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
         osg::ref_ptr< osg::Geode > slice;
         // select sampling strategy
 
-        debugLog() <<  m_samplingSelection->get( true ).at( 0 );
+//        debugLog() <<  m_samplingSelection->get( true ).at( 0 );
         switch(  m_samplingSelection->get( true ).at( 0 )->getAs< SamplingMethod >()->getValue() )
         {
           case 0 : slice = genScatteredDegeneratedQuads( m_samplers[i], minV, aVec, bVec, i );
@@ -402,7 +402,7 @@ void WMFiberStipples::moduleMain()
     WSampler2DPoisson sampler( 0.02 );
     boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
     m_progress->addSubProgress( splitProgress );
-    m_samplers = splitSamplingPoisson( sampler, numDensitySlices, splitProgress );
+    m_samplers = splitSamplingPoisson2( sampler, numDensitySlices, m_numSamples->get( true ), splitProgress );
 
     // main loop
     while( !m_shutdownFlag() )
@@ -425,7 +425,7 @@ void WMFiberStipples::moduleMain()
             boost::filesystem::remove( "/tmp/klaus" );
             boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
             m_progress->addSubProgress( splitProgress );
-            m_samplers = splitSamplingPoisson( WSampler2DPoisson( m_sampleRes->get( true ) ), numDensitySlices, splitProgress );
+            m_samplers = splitSamplingPoisson2( WSampler2DPoisson( m_sampleRes->get( true ) ), numDensitySlices, m_numSamples->get( true ), splitProgress );
         }
 
         // save data behind connectors since it might change during processing
