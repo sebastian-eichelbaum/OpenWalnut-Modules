@@ -29,7 +29,8 @@
  * back to their original form as they are stored in RBGA (for example allowing
  * only values between 0..1 for components but no negative ones).
  */
-uniform float u_vectorsMin; uniform float u_vectorsScale;
+// uniform float u_vectorsMin;
+// uniform float u_vectorsScale;
 
 /**
  * The matrix describes the transformation of gl_Vertex to OpenWalnut Scene Space
@@ -107,7 +108,7 @@ uniform int u_numDensitySlices;
 /**
  * Scales the quad which is used later for the stipples.
  */
-uniform float u_glyphSize;
+// uniform float u_glyphSize;
 
 /**
  * Color of the fiber stipples. This will be further combined with tract probability.

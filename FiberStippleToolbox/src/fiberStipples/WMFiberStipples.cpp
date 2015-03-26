@@ -214,6 +214,8 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
             vertices->push_back( quadCenter );
             texcoords2->push_back( osg::Vec3( static_cast< double >( sliceNum ), 0.0, 0.0 ) );
             texcoords3->push_back( osg::Vec3( inSliceNumber, 0.0, 0.0 ) );
+            normals->push_back( aCrossB );
+            colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
         }
 
         texcoords0->push_back( ( -aNorm + -bNorm ) );
@@ -225,11 +227,7 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
         texcoords1->push_back( osg::Vec3( 1.0, 0.0, 0.0 ) );
         texcoords1->push_back( osg::Vec3( 1.0, 1.0, 0.0 ) );
         texcoords1->push_back( osg::Vec3( 0.0, 1.0, 0.0 ) );
-
     }
-
-    normals->push_back( aCrossB );
-    colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
 
     // put it all together
     osg::ref_ptr< osg::Geometry > geometry = new osg::Geometry();
@@ -240,8 +238,8 @@ osg::ref_ptr< osg::Geode > WMFiberStipples::genScatteredDegeneratedQuads( const 
     geometry->setTexCoordArray( 3, texcoords3 );
     geometry->setNormalArray( normals );
     geometry->setColorArray( colors );
-    geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-    geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
+    geometry->setNormalBinding( osg::Geometry::BIND_PER_VERTEX );
+    geometry->setColorBinding( osg::Geometry::BIND_PER_VERTEX );
     geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
 
     osg::ref_ptr< osg::Geode > geode = new osg::Geode();
@@ -293,14 +291,14 @@ void WMFiberStipples::initOSG( boost::shared_ptr< WDataSetScalar > probTract, co
     wge::bindAsUniform( m_output, offsets[2], "u_pixelSizeZ" );
     wge::bindAsUniform( m_output, aVec, "u_aVec" );
     wge::bindAsUniform( m_output, bVec, "u_bVec" );
-    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
+    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrixf::identity() );
     wge::bindAsUniform( m_output, u_WorldTransform, "u_WorldTransform" );
     wge::bindAsUniform( m_output, m_color, "u_color" );
     wge::bindAsUniform( m_output, m_minRange, "u_minRange" );
     wge::bindAsUniform( m_output, m_maxRange, "u_maxRange" );
     wge::bindAsUniform( m_output, m_outline, "u_outline" );
     wge::bindAsUniform( m_output, m_threshold, "u_threshold" );
-    wge::bindAsUniform( m_output, probTract->getMax(), "u_maxConnectivityScore" );
+    // wge::bindAsUniform( m_output, probTract->getMax(), "u_maxConnectivityScore" );
     wge::bindAsUniform( m_output, numDensitySlices, "u_numDensitySlices" );
     wge::bindAsUniform( m_output, m_glyphSize, "u_glyphSize" );
     wge::bindAsUniform( m_output, m_glyphThickness, "u_glyphThickness" );
