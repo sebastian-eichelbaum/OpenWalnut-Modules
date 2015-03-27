@@ -108,7 +108,7 @@ uniform int u_numDensitySlices;
 /**
  * Scales the quad which is used later for the stipples.
  */
-// uniform float u_glyphSize;
+uniform float u_glyphSize;
 
 /**
  * Color of the fiber stipples. This will be further combined with tract probability.

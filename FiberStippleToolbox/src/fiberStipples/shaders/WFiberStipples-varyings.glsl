@@ -31,4 +31,7 @@ varying float v_probability;
 
 // varying vec3 diff;
 
-varying vec3 v_textPos;
+varying vec3 v_probTexturePos;
+varying vec3 v_vecTexturePos;
+varying vec3 v_colorTexturePos;
+

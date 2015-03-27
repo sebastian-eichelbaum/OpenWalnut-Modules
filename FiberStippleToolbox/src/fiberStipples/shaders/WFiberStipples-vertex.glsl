@@ -39,22 +39,12 @@ void main()
     gl_TexCoord[3] = gl_MultiTexCoord3; // for selecting quads within a single hierarchy level
 
     // compute texture coordinates from worldspace coordinates for texture access
-//     mat4 m;
-//     m[0] = vec4(0.0);
-//     m[1] = vec4(0.0);
-//     m[2] = vec4(0.0);
-//     m[3] = vec4(0.0);
-//     m[0][0]=m[1][1]=m[2][2]=m[3][3]=1.0;
-//     m[0][3]=152.315;
-    vec3 texturePosition = ( u_WorldTransform * gl_Vertex ).xyz;
-//     vec3 texturePosition = ( m * gl_Vertex ).xyz;
-    v_textPos = texturePosition;
-    texturePosition.x /= u_pixelSizeX * u_probTractSizeX;
-    texturePosition.y /= u_pixelSizeY * u_probTractSizeY;
-    texturePosition.z /= u_pixelSizeZ * u_probTractSizeZ;
+    v_probTexturePos = ( gl_TextureMatrix[ 1 ] * u_WorldTransform * gl_Vertex ).xyz;
+    v_vecTexturePos = ( gl_TextureMatrix[ 0 ] * u_WorldTransform * gl_Vertex ).xyz;
+    v_colorTexturePos = ( gl_TextureMatrix[ 2 ] * u_WorldTransform * gl_Vertex ).xyz;
 
     // get connectivity score from probTract (please not, it is already scaled between 0.0...1.0 from WDataTexture3D::createTexture
-    v_probability = texture3D( u_probTractSampler, texturePosition ).r;
+    v_probability = texture3D( u_probTractSampler, v_probTexturePos ).r;
 
     // // span quad incase of regions with high probablility
     if( v_probability > u_threshold && ( u_minRange + v_probability ) * u_maxRange * u_numDensitySlices >= gl_TexCoord[2].x + gl_TexCoord[3].x )
