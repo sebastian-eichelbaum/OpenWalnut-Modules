@@ -168,67 +168,71 @@ float rand(vec2 co){
  *
  * @return interpolated vector at position textPos
  */
-// vec3 customInterpolate( vec3 textPos, out vec3 interpolDiff )
-// {
-//   vec3 pos[8];
-//   pos[0] = vec3( floor( textPos.x ), floor( textPos.y ), floor( textPos.z ) );
-//   pos[1] = vec3(  ceil( textPos.x ), floor( textPos.y ), floor( textPos.z ) );
-//   pos[2] = vec3( floor( textPos.x ),  ceil( textPos.y ), floor( textPos.z ) );
-//   pos[3] = vec3(  ceil( textPos.x ),  ceil( textPos.y ), floor( textPos.z ) );
-//   pos[4] = vec3( floor( textPos.x ), floor( textPos.y ),  ceil( textPos.z ) );
-//   pos[5] = vec3(  ceil( textPos.x ), floor( textPos.y ),  ceil( textPos.z ) );
-//   pos[6] = vec3( floor( textPos.x ),  ceil( textPos.y ),  ceil( textPos.z ) );
-//   pos[7] = vec3(  ceil( textPos.x ),  ceil( textPos.y ),  ceil( textPos.z ) );
-//
-//   vec3 localPos = textPos - pos[0];
-//   float lambdaX = localPos.x * u_pixelSizeX;
-//   float lambdaY = localPos.y * u_pixelSizeY;
-//   float lambdaZ = localPos.z * u_pixelSizeZ;
-//
-//   float h[8];
-//   h[0] = ( 1 - lambdaX ) * ( 1 - lambdaY ) * ( 1 - lambdaZ );
-//   h[1] = (     lambdaX ) * ( 1 - lambdaY ) * ( 1 - lambdaZ );
-//   h[2] = ( 1 - lambdaX ) * (     lambdaY ) * ( 1 - lambdaZ );
-//   h[3] = (     lambdaX ) * (     lambdaY ) * ( 1 - lambdaZ );
-//   h[4] = ( 1 - lambdaX ) * ( 1 - lambdaY ) * (     lambdaZ );
-//   h[5] = (     lambdaX ) * ( 1 - lambdaY ) * (     lambdaZ );
-//   h[6] = ( 1 - lambdaX ) * (     lambdaY ) * (     lambdaZ );
-//   h[7] = (     lambdaX ) * (     lambdaY ) * (     lambdaZ );
-//
-//   vec3 result = vec3( 0, 0, 0 );
-//   vec3 v[8];
-//   float dist = 9999999;
-//   int nearest = 9999999;
-//   for( int i = 0; i < 8; ++i )
-//   {
-//     if( length( pos[i] - textPos ) < dist )
-//     {
-//       dist = length( pos[i] - textPos );
-//       nearest = i;
-//     }
-//     pos[i].x /= u_pixelSizeX * ( u_probTractSizeX -1 );
-//     pos[i].y /= u_pixelSizeY * ( u_probTractSizeY -1 );
-//     pos[i].z /= u_pixelSizeZ * ( u_probTractSizeZ -1 );
-//     v[i] = texture3DUnscaled( u_vectorsSampler, pos[i], u_vectorsMin, u_vectorsScale ).xyz;
-//     // for orientation swaps use the step function below instead of 1.0
-//     float sgn = 1.0; // step( 0, dot( v[0], v[i] ) )*2 - 1;
-//     result += h[i] * sgn * v[i];
-//   }
-//
-//   result = v[nearest];
-//   textPos.x /= u_pixelSizeX * ( u_probTractSizeX);
-//   textPos.y /= u_pixelSizeY * ( u_probTractSizeY);
-//   textPos.z /= u_pixelSizeZ * ( u_probTractSizeZ);
-//
-//   interpolDiff = vec3( 1, 1, 1 ) -  abs( result - texture3DUnscaled( u_vectorsSampler, textPos, u_vectorsMin, u_vectorsScale ).xyz );
-//
-//   return normalize( result );
-// }
+vec3 customInterpolate( vec3 texPos, out vec3 interpolDiff )
+{
+    texPos.x *= u_vectorsSizeX;
+    texPos.y *= u_vectorsSizeY;
+    texPos.z *= u_vectorsSizeZ;
+
+    vec3 pos[8];
+    pos[0] = vec3( floor( texPos.x ), floor( texPos.y ), floor( texPos.z ) );
+    pos[1] = vec3(  ceil( texPos.x ), floor( texPos.y ), floor( texPos.z ) );
+    pos[2] = vec3( floor( texPos.x ),  ceil( texPos.y ), floor( texPos.z ) );
+    pos[3] = vec3(  ceil( texPos.x ),  ceil( texPos.y ), floor( texPos.z ) );
+    pos[4] = vec3( floor( texPos.x ), floor( texPos.y ),  ceil( texPos.z ) );
+    pos[5] = vec3(  ceil( texPos.x ), floor( texPos.y ),  ceil( texPos.z ) );
+    pos[6] = vec3( floor( texPos.x ),  ceil( texPos.y ),  ceil( texPos.z ) );
+    pos[7] = vec3(  ceil( texPos.x ),  ceil( texPos.y ),  ceil( texPos.z ) );
+
+    vec3 localPos = texPos - pos[0];
+    float lambdaX = localPos.x;
+    float lambdaY = localPos.y;
+    float lambdaZ = localPos.z;
+
+    float h[8];
+    h[0] = ( 1 - lambdaX ) * ( 1 - lambdaY ) * ( 1 - lambdaZ );
+    h[1] = (     lambdaX ) * ( 1 - lambdaY ) * ( 1 - lambdaZ );
+    h[2] = ( 1 - lambdaX ) * (     lambdaY ) * ( 1 - lambdaZ );
+    h[3] = (     lambdaX ) * (     lambdaY ) * ( 1 - lambdaZ );
+    h[4] = ( 1 - lambdaX ) * ( 1 - lambdaY ) * (     lambdaZ );
+    h[5] = (     lambdaX ) * ( 1 - lambdaY ) * (     lambdaZ );
+    h[6] = ( 1 - lambdaX ) * (     lambdaY ) * (     lambdaZ );
+    h[7] = (     lambdaX ) * (     lambdaY ) * (     lambdaZ );
+
+    vec3 result = vec3( 0, 0, 0 );
+    vec3 v[8];
+    // float dist = 9999999;
+    // int nearest = 9999999;
+    for( int i = 0; i < 8; ++i )
+    {
+      // if( length( pos[i] - textPos ) < dist )
+      // {
+      //   dist = length( pos[i] - textPos );
+      //   nearest = i;
+      // }
+      pos[i].x /= u_vectorsSizeX;
+      pos[i].y /= u_vectorsSizeY;
+      pos[i].z /= u_vectorsSizeZ;
+      v[i] = texture3DUnscaled( u_vectorsSampler, pos[i], u_vectorsMin, u_vectorsScale ).xyz;
+      // for orientation swaps use the step function below instead of 1.0
+      float sgn = step( 0, dot( v[0], v[i] ) ) * 2 - 1;
+      result += h[i] * sgn * v[i];
+    }
+
+  // result = v[nearest];
+  texPos.x /= u_vectorsSizeX;
+  texPos.y /= u_vectorsSizeY;
+  texPos.z /= u_vectorsSizeZ;
+
+  interpolDiff = vec3( 1, 1, 1 ) -  abs( result - texture3DUnscaled( u_vectorsSampler, texPos, u_vectorsMin, u_vectorsScale ).xyz );
+
+  return normalize( result );
+}
 
 void main()
 {
-    // vec3 diffusionDirection = customInterpolate( v_textPos, interpolDiff );
-    vec3 diffusionDirection = texture3D( u_vectorsSampler, v_vecTexturePos ).xyz;
+    vec3 interpolDiff;
+    vec3 diffusionDirection = customInterpolate( v_vecTexturePos, interpolDiff );
 
     // project into plane (given by two vectors aVec and bVec)
     vec3 aVecNorm = normalize( u_aVec );

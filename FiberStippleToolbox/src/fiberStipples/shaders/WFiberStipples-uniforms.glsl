@@ -64,6 +64,10 @@ uniform int u_probTractSizeY;
  */
 uniform int u_probTractSizeZ;
 
+uniform int u_vectorsSizeX;
+uniform int u_vectorsSizeY;
+uniform int u_vectorsSizeZ;
+
 // For correct transformation into texture space we also need the size of each voxel.
 /**
  * Voxel size in X direction.
@@ -133,3 +137,8 @@ uniform vec3 u_bVec;
 
 uniform bool u_outline;
 uniform bool u_outlineInOut;
+
+uniform float u_vectorsMin;
+
+uniform float u_vectorsScale;
+
