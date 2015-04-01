@@ -124,6 +124,8 @@ namespace
                     for( int k = 0; k < 4; ++k )
                     {
                         vertices->push_back( base + aNorm * i * resolution + bNorm * j * resolution );
+                        normals->push_back( aCrossB );
+                        colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
                     }
 
                     texcoords0->push_back( ( -aNorm + -bNorm ) * 0.5 * resolution );
@@ -139,18 +141,16 @@ namespace
             }
         }
 
-        normals->push_back( aCrossB );
-        colors->push_back( osg::Vec4( 1.0, 1.0, 1.0, 1.0 ) );
 
         // put it all together
         osg::ref_ptr< osg::Geometry > geometry = new osg::Geometry();
         geometry->setVertexArray( vertices );
         geometry->setTexCoordArray( 0, texcoords0 );
         geometry->setTexCoordArray( 1, texcoords1 );
-        geometry->setNormalBinding( osg::Geometry::BIND_OVERALL );
-        geometry->setColorBinding( osg::Geometry::BIND_OVERALL );
         geometry->setNormalArray( normals );
         geometry->setColorArray( colors );
+        geometry->setNormalBinding( osg::Geometry::BIND_PER_VERTEX );
+        geometry->setColorBinding( osg::Geometry::BIND_PER_VERTEX );
         geometry->addPrimitiveSet( new osg::DrawArrays( osg::PrimitiveSet::QUADS, 0, vertices->size() ) );
 
         osg::ref_ptr< osg::Geode > geode = new osg::Geode();
@@ -190,7 +190,7 @@ void WMIsoLines::initOSG( boost::shared_ptr< WDataSetScalar > scalars, const dou
         m_pos->set( midBB[axis] );
     }
 
-    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrix::identity() );
+    osg::ref_ptr< osg::Uniform > u_WorldTransform = new osg::Uniform( "u_WorldTransform", osg::Matrixf::identity() );
     wge::bindAsUniform( m_output, u_WorldTransform, "u_WorldTransform" );
     wge::bindAsUniform( m_output, m_isovalue, "u_isovalue" );
     wge::bindAsUniform( m_output, m_lineWidth, "u_lineWidth" );
