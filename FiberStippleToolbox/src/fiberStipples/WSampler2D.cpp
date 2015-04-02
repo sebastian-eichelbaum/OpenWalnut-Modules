@@ -276,46 +276,11 @@ namespace{
     return false;
   }
 }
-std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, const size_t numComponents, const size_t numsamples, boost::shared_ptr< WProgress > progress )
+std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, const size_t numComponents, const size_t numsamples, boost::shared_ptr< WProgress > progress, std::string const& cache )
 {
-//   Debug:: BottomUP Variante
-//   std::vector< WSampler2D > components;
-//
-//   std::vector< Vec2 > pointsSoFar;
-//
-//   for( size_t i = 0; i < numComponents; ++i ) {
-//     double radius = 1.0 / std::sqrt( static_cast< double >( (i + 1) * sampler.size() / numComponents  ) ) / 2.0;
-//     boost::shared_ptr< PDSampler > s( new BoundarySampler( radius, true ) );
-//     for( size_t j = 0; j < pointsSoFar.size(); ++j) {
-//       s->addPoint( pointsSoFar[j] );
-//     }
-//     s->complete();
-//     std::vector< Vec2 > newpoints( s->points );
-//     // std::sort( newpoints.begin(), newpoints.end(), myless );
-//     // std::vector< Vec2 > diff( newpoints.size() - pointsSoFar.size(), Vec2( 0.0, 0.0 ) );
-//     // std::vector< Vec2 >::iterator it = std::set_difference( newpoints.begin(), newpoints.end(), pointsSoFar.begin(), pointsSoFar.end(), diff.begin(), myless );
-//     // diff.resize( it - diff.begin() );
-//
-//     // double x,y;
-//     // WSampler2D comp;
-//     // for( size_t j = 0; j < diff.size(); ++j ) {
-//     //   // rescale to [0,1]^2 domain
-//     //   x = ( diff[j].x + 1.0 ) / 2.0;
-//     //   y = ( diff[j].y + 1.0 ) / 2.0;
-//     //   comp.push_back( WVector2d( x, y ) );
-//     // }
-//
-//     // components.push_back( comp );
-//     std::swap( pointsSoFar, newpoints );
-//     ++*progress;
-//   }
-//   progress->finish();
-//   return components;
-
    std::vector< WSampler2D > components;
 
-    std::string cache( "/tmp/klaus" );
-    if( fileExists( cache ) ) {
+    if( fileExists( cache ) && boost::filesystem::is_regular_file( cache ) ) {
         components = loadHierarchy( cache );
     }
     else {
@@ -375,7 +340,10 @@ std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, cons
         }
     }
 
-    saveHierarchy( components, "/tmp/klaus" );
+    if( boost::filesystem::path( "/" ) != boost::filesystem::path( cache ) && ( !fileExists( cache ) || boost::filesystem::is_regular_file( cache ) ) )
+    {
+        saveHierarchy( components, cache );
+    }
 
     progress->finish();
 

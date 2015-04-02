@@ -101,6 +101,9 @@ void WMFiberStipples::connectors()
 
 void WMFiberStipples::properties()
 {
+    m_stipplesFile = m_properties->addProperty( "Stipples file", "File containing the set of stipples to create or use, if existing.",
+                                                boost::filesystem::path( "/" ), m_propCondition );
+
     m_color = m_properties->addProperty( "Color", "Color for the fiber stipples", WColor( 1.0, 0.0, 0.0, 1.0 ) );
     m_threshold = m_properties->addProperty( "Threshold", "Connectivity scores below this threshold will be discarded.", 0.01 );
     m_threshold->setMin( 0.0 );
@@ -417,13 +420,19 @@ void WMFiberStipples::moduleMain()
         // determine which axis to draw stipples
         size_t axis = m_sliceSelection->get( true ).at( 0 )->getAs< AxisType >()->getValue();
 
-        if( m_sampleRes->changed() )
+        if( m_sampleRes->changed() || m_stipplesFile->changed() )
         {
-            debugLog() << "New poission sampling resolution";
-            boost::filesystem::remove( "/tmp/klaus" );
+            m_stippleFileName = m_stipplesFile->get( true ).string();;
+
+            if( m_sampleRes->changed() )
+            {
+                debugLog() << "New poission sampling resolution";
+                if( boost::filesystem::path( "/" ) != boost::filesystem::path( m_stippleFileName ) && boost::filesystem::exists( m_stippleFileName ) && boost::filesystem::is_regular_file( m_stippleFileName ) )
+                    boost::filesystem::remove( m_stippleFileName );
+            }
             boost::shared_ptr< WProgress > splitProgress( new WProgress( "Split Poisson-Disk samplings hierachical", numDensitySlices ) );
             m_progress->addSubProgress( splitProgress );
-            m_samplers = splitSamplingPoisson2( WSampler2DPoisson( m_sampleRes->get( true ) ), numDensitySlices, m_numSamples->get( true ), splitProgress );
+            m_samplers = splitSamplingPoisson2( WSampler2DPoisson( m_sampleRes->get( true ) ), numDensitySlices, m_numSamples->get( true ), splitProgress, m_stippleFileName );
         }
 
         // save data behind connectors since it might change during processing

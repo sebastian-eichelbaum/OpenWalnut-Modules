@@ -122,6 +122,8 @@ private:
      */
     boost::shared_ptr< WModuleInputData< WDataSetVector > > m_vectorIC;
 
+    WPropFilename m_stipplesFile;
+
     /**
      * Color for the fiber stipples.
      */
@@ -184,6 +186,8 @@ private:
 
     // TODO(math): Remove this ugly hack as soon as possible
     std::vector< WSampler2D > m_samplers;
+
+    std::string m_stippleFileName;
 };
 
 #endif  // WMFIBERSTIPPLES_H
