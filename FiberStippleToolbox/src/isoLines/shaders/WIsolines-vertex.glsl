@@ -83,10 +83,7 @@ uniform float u_resolution; // could be calculated from gl_TexCoord[1], but for 
 vec3 textPos( vec3 p )
 {
     // compute texture coordinates from worldspace coordinates for texture access
-    vec3 texturePosition = ( u_WorldTransform * vec4( p, 1.0 ) ).xyz;
-    texturePosition.x /= u_scalarDataSizeX;
-    texturePosition.y /= u_scalarDataSizeY;
-    texturePosition.z /= u_scalarDataSizeZ;
+    vec3 texturePosition = ( gl_TextureMatrix[ 0 ] * u_WorldTransform * vec4( p, 1.0 ) ).xyz;
 
     return texturePosition;
 }
