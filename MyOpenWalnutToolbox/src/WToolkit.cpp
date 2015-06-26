@@ -25,7 +25,7 @@
 // This file's purpose is to provide a list of modules and additional extensions as entry point for OpenWalnut's module loader.
 // Both functAdd your modules here. If you miss this step, OpenWalnut will not be able to load your modules/extensions.
 
-
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 #include <core/kernel/WModule.h>
