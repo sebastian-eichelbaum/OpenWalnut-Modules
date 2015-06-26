@@ -25,6 +25,8 @@
 #ifndef WVIEWEVENTHANDLER_H
 #define WVIEWEVENTHANDLER_H
 
+#include <core/common/math/linearAlgebra/WVectorFixed.h>
+
 #include <boost/signals2/signal.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -35,7 +37,6 @@
 #include <osgGA/GUIEventAdapter>
 #include <osgGA/GUIEventHandler>
 
-#include <core/common/math/linearAlgebra/WVectorFixed.h>
 
 /**
  * Class to handle events in a WGEView/widget.
@@ -106,4 +107,3 @@ private:
 };
 
 #endif  // WVIEWEVENTHANDLER_H
-

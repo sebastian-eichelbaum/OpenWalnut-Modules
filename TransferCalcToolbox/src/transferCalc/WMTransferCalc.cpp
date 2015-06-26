@@ -29,22 +29,23 @@
 //    * External Lib headers (like OSG or Boost headers)
 //    * headers of other classes inside OpenWalnut
 //    * your own header file
-#define _USE_MATH_DEFINES 
+#define _USE_MATH_DEFINES
 
-#include <string>
-#include <sstream>
-#include <vector>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
 #include <ctime>
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <limits>
-#include <cmath>
-#include <math.h>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <vector>
 
 #include <osg/ShapeDrawable>
 #include <osg/Group>
@@ -54,6 +55,7 @@
 #include <osg/Vec3>
 
 #include <Eigen/Eigen>
+
 
 #include "core/kernel/WKernel.h"
 #include "core/common/WColor.h"
@@ -658,8 +660,8 @@ void WMTransferCalc::onClick( WVector2i mousePos )
             WVector4d ax2_4( ax2.x(), ax2.y(), ax2.z(), 0.0 );
 
             // calculate random ray
-            WVector4d vicPoint = ray.start() + 
-                                ( ax1_4 * sqrt( random_rad ) * std::cos( angle ) * radius ) + 
+            WVector4d vicPoint = ray.start() +
+                                ( ax1_4 * sqrt( random_rad ) * std::cos( angle ) * radius ) +
                                 ( ax2_4 * sqrt( random_rad ) * std::sin( angle ) * radius );
             WRay vicinity( vicPoint, ray.direction() );
             m_profiles.push_back( castRay( vicinity, interval, rayGeode ) );
@@ -693,7 +695,7 @@ WRayProfile WMTransferCalc::castRay( WRay ray, double interval, osg::ref_ptr< os
     }
     double start_t = bounds.minimum_t;
     double end_t   = bounds.maximum_t;
-    
+
 //    debugLog() << "Start:" << start_t;
 //    debugLog() << "End  :" << end_t;
 
@@ -891,13 +893,13 @@ WVector4d WMTransferCalc::getGradient( const WVector4d& position )
 
     // central difference quotient in each direction
     x_val = ( ( interpolate( position + WVector4d( dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) )
-            - ( interpolate( position - WVector4d( dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) 
+            - ( interpolate( position - WVector4d( dist_x, 0.0, 0.0, 0.0 ), m_grid, m_dataSet ) ) )
             / 2 * dist_x;
     y_val = ( ( interpolate( position + WVector4d( 0.0, dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) )
-            - ( interpolate( position - WVector4d( 0.0, dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) ) ) 
+            - ( interpolate( position - WVector4d( 0.0, dist_y, 0.0, 0.0 ), m_grid, m_dataSet ) ) )
             / 2 * dist_y;
     z_val = ( ( interpolate( position + WVector4d( 0.0, 0.0, dist_z, 0.0 ), m_grid, m_dataSet ) )
-            - ( interpolate( position - WVector4d( 0.0, 0.0, dist_z, 0.0 ), m_grid, m_dataSet ) ) ) 
+            - ( interpolate( position - WVector4d( 0.0, 0.0, dist_z, 0.0 ), m_grid, m_dataSet ) ) )
             / 2 * dist_z;
 
     return WVector4d( x_val, y_val, z_val, 0 );
@@ -1215,12 +1217,18 @@ void WMTransferCalc::calculateCurvature()
                 derivIds[4] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0, -dist_z ) );
                 derivIds[5] = m_deriGrid->getVoxelNum( position + WVector3d(  0,  0,  dist_z ) );
                 // get gradient vectors for each neighbour if this neighbour is inside the grid
-                derivDirection[0] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
-                derivDirection[1] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
-                derivDirection[2] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
-                derivDirection[3] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[3] == -1 ) ? id : derivIds[3] ) );
-                derivDirection[4] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
-                derivDirection[5] = static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
+                derivDirection[0] =
+                    static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[0] == -1 ) ? id : derivIds[0] ) );
+                derivDirection[1] =
+                    static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[1] == -1 ) ? id : derivIds[1] ) );
+                derivDirection[2] =
+                    static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[2] == -1 ) ? id : derivIds[2] ) );
+                derivDirection[3] =
+                    static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[3] == -1 ) ? id : derivIds[3] ) );
+                derivDirection[4] =
+                    static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[4] == -1 ) ? id : derivIds[4] ) );
+                derivDirection[5] =
+                    static_cast< WVector3d >( m_deriDataSet->getValueSet()->getWValueDouble( ( derivIds[5] == -1 ) ? id : derivIds[5] ) );
 
                 // derivate in each direction again (central differential quotient) to get hessian matrix
                 Eigen::Matrix3d hesse;
@@ -1244,8 +1252,8 @@ void WMTransferCalc::calculateCurvature()
                 //      normal n = -g/|g|
                 //      P = E - nn^T
                 //      nabla-n^T = -PH / |g|   (where H is the hessian matrix)
-                WVector3d g = static_cast< WVector3d >( 
-                        m_deriDataSet->getValueSet()->getWValueDouble( m_deriGrid->getVoxelNum( position ) ) 
+                WVector3d g = static_cast< WVector3d >(
+                        m_deriDataSet->getValueSet()->getWValueDouble( m_deriGrid->getVoxelNum( position ) )
                 );
                 double g_weight = length( g );
                 WVector3d n = ( g * -1 ) / g_weight;

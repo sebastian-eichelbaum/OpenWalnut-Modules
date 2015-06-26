@@ -25,12 +25,13 @@
 #ifndef WGETMATRIXCALLBACK_H
 #define WGETMATRIXCALLBACK_H
 
+#include <core/common/WProperties.h>
+
 #include <osg/ref_ptr>
 #include <osg/NodeCallback>
 #include <osg/NodeVisitor>
 #include <osg/Node>
 
-#include <core/common/WProperties.h>
 
 /**
  * This is a simple cull callback which grabs the view or projection matrix information for a certain node. It provides these matrices and camera
@@ -176,4 +177,3 @@ private:
 };
 
 #endif  // WGETMATRIXCALLBACK_H
-
