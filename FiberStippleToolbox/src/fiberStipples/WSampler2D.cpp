@@ -269,14 +269,7 @@ std::vector< WSampler2D > splitSamplingPoisson( const WSampler2D& sampler, size_
     return components;
 }
 
-namespace{
-  bool myless( const Vec2& a, const Vec2& b ) {
-    if( a.x < b.x ) { return true;}
-    if( a.x == b.x && a.y < b.y ) { return true; }
-    return false;
-  }
-}
-std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, const size_t numComponents, const size_t numsamples, boost::shared_ptr< WProgress > progress, std::string const& cache )
+std::vector< WSampler2D > splitSamplingPoisson2( const WSampler2D& sampler, const size_t numComponents, const size_t /*numsamples*/, boost::shared_ptr< WProgress > progress, std::string const& cache )
 {
    std::vector< WSampler2D > components;
 
