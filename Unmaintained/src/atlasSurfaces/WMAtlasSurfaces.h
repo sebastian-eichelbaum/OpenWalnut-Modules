@@ -192,7 +192,6 @@ private:
      * The shader
      */
     osg::ref_ptr< WGEShader > m_shader;
-
 };
 
 #endif  // WMATLASSURFACES_H

@@ -34,7 +34,6 @@ varying float v_worldScale;
 
 void main()
 {
-
     // prepare light
     v_normal = gl_NormalMatrix * gl_Normal;
 
