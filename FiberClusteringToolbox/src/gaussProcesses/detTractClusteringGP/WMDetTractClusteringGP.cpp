@@ -180,7 +180,7 @@ boost::shared_ptr< WDendrogram > WMDetTractClusteringGP::computeDendrogram( size
 
     SimSortArray sims;
     IdxSimMap map;
-    for( int i = 0; i < n ; ++i ) {
+    for( size_t i = 0; i < n ; ++i ) {
         for( size_t j = i + 1; j < n; ++j ) {
             IdxSimSPtr current( new IndexSimilarity( (*m_similarities)( i, j ), i, j ) );
             sims.push( current );
