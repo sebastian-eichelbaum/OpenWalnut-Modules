@@ -1059,7 +1059,7 @@ def CheckForCompleteCommentHeader(filename, lines, error):
             and ( len( lines[3] ) == 52 )
             and re.match(r'//', lines[4])
             and ( len( lines[4] ) == 2 )
-            and re.match(r'// Copyright 2009 ', lines[5]) #Checks only the first part of the line. Other copyrights could appear.
+            and re.match(r'// Copyright 20', lines[5]) #Checks only the first part of the line. Other copyrights could appear.
             #            and ( len( lines[5] ) == 18 )    #Checks only the first part of the line. Other copyrights could appear.
             and re.match(r'// For more information see http://www.openwalnut.org/copying', lines[6])
             and ( len( lines[6] ) == 61 )
