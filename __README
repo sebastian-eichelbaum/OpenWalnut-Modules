@@ -1,1 +1,7 @@
 See http://www.openwalnut.org/projects/openwalnut/wiki/Module_ExternalDevelopment for an extensive introduction to external (out-of-source) module development.
+
+Building all toolboxes
+======================
+
+- The script makeAllToolboxe in the __repository_tools directory
+  can support you in building all toolboxes
