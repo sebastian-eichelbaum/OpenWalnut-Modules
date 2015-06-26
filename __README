@@ -3,5 +3,5 @@ See http://www.openwalnut.org/projects/openwalnut/wiki/Module_ExternalDevelopmen
 Building all toolboxes
 ======================
 
-- The script makeAllToolboxe in the __repository_tools directory
+- The script makeAllToolboxes in the __repository_tools directory
   can support you in building all toolboxes
