@@ -58,10 +58,10 @@ void WTransparentLinesDrawable::drawImplementation( osg::RenderInfo &renderInfo 
     WPosition startPos = WPosition( wge::unprojectFromScreen( osg::Vec3(), viewer->getCamera() ) );
     WPosition viewDir = normalize( endPos - startPos );
 
-    std::vector< std::pair< double, size_t > > depthVals( _vertexData.array->getNumElements() );
-    for( size_t i = 0; i < _vertexData.array->getNumElements(); i += 2 )
+    std::vector< std::pair< double, size_t > > depthVals( _vertexArray->getNumElements() );
+    for( size_t i = 0; i < _vertexArray->getNumElements(); i += 2 )
     {
-        double myDepth = -1 * depth( ( *( dynamic_cast< osg::Vec3Array* >( _vertexData.array.get() ) ) )[i], viewDir );
+        double myDepth = -1 * depth( ( *( dynamic_cast< osg::Vec3Array* >( _vertexArray.get() ) ) )[i], viewDir );
         // TODO(wiebel): improve this unidication of values
         depthVals[i]   = std::make_pair( myDepth, i );
         depthVals[i+1] = std::make_pair( myDepth, i+1 );
@@ -70,16 +70,16 @@ void WTransparentLinesDrawable::drawImplementation( osg::RenderInfo &renderInfo 
     std::stable_sort( depthVals.begin(), depthVals.end(), MySorting() );
 
 
-    // osg::ref_ptr< osg::Vec3Array > tmp( new osg::Vec3Array( _vertexData.array->getNumElements() ) );
+    // osg::ref_ptr< osg::Vec3Array > tmp( new osg::Vec3Array( _vertexArray->getNumElements() ) );
     osg::ref_ptr< osg::Vec3Array > oldVec =
-        new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>(  _vertexData.array.get() ), osg::CopyOp::DEEP_COPY_ALL );
+        new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>(  _vertexArray.get() ), osg::CopyOp::DEEP_COPY_ALL );
     osg::Vec3Array* oldVec2 = oldVec.get();
-    osg::Vec3Array* tmpVec = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _vertexData.array.get() ) ) );
+    osg::Vec3Array* tmpVec = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _vertexArray.get() ) ) );
     osg::ref_ptr< osg::Vec3Array > oldTexCoords =
-        new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>(  getTexCoordData( 0 ).array.get() ), osg::CopyOp::DEEP_COPY_ALL );
+        new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>( _texCoordList[0].get() ), osg::CopyOp::DEEP_COPY_ALL );
     osg::Vec3Array* oldTexCoords2 = oldTexCoords.get();
-    osg::Vec3Array* tmpTexCoords = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( getTexCoordData( 0 ).array.get() ) ) );
-    for( size_t i = 0; i < _vertexData.array->getNumElements(); ++i )
+    osg::Vec3Array* tmpTexCoords = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _texCoordList[0].get() ) ) );
+    for( size_t i = 0; i < _vertexArray->getNumElements(); ++i )
     {
         ( *tmpTexCoords )[i] = ( *oldTexCoords2 )[ depthVals[i].second ];
         ( *tmpVec )[i] = ( *oldVec2 )[ depthVals[i].second ];
