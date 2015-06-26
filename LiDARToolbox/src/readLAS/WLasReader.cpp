@@ -105,7 +105,6 @@ namespace laslibb
 
         liblas::Header const& header = reader.GetHeader();
 
-        liblas::Point point;
         liblas::Color colorLas;
         size_t count = header.GetPointRecordsCount();
         setProgressSettings( count );
@@ -117,7 +116,8 @@ namespace laslibb
         for  ( size_t i = 0; i < count; i++ )
         {
             reader.ReadNextPoint();
-            point = reader.GetPoint();
+
+            liblas::Point point = reader.GetPoint();
             vector<double> coord = WVectorMaths::new3dVector( point.GetX(), point.GetY(), point.GetZ() );
 
             double intensity = point.GetIntensity(); //TODO(schwarzkopf): Still had no colored data set to check some liblas functions.

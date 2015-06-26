@@ -8,5 +8,9 @@ This toolbox is currently under development by
 - Alexander Wiebel
 
 Requirements:
-- libLAS (http://www.liblas.org/ or packages liblas-dev and liblas-c-dev)
-- Point Cloud Library (http://pointclouds.org/)
+- libLAS
+  - http://www.liblas.org/
+  - or packages liblas-dev and liblas-c-dev
+- Point Cloud Library
+  - http://pointclouds.org/
+  - or packacges libpcl-dev
