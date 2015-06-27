@@ -43,10 +43,6 @@
 #include "../common/datastructures/octree/WOctree.h"
 #include "WCutOutliersDeamon.h"
 
-// This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMPointsCutOutliers )
-//TODO(aschwarzkopf): Reenable above after solving the toolbox problem
-
 WMPointsCutOutliers::WMPointsCutOutliers():
     WModule(),
     m_propCondition( new WCondition() )

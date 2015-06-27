@@ -42,10 +42,6 @@
 #include "WMElevationImageExport.xpm"
 #include "WMElevationImageExport.h"
 
-// This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMElevationImageExport )
-//TODO(aschwarzkopf): Reenable above after solving the toolbox problem
-
 WMElevationImageExport::WMElevationImageExport():
     WModule(),
     m_propCondition( new WCondition() )

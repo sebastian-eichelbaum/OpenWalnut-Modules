@@ -45,8 +45,7 @@
 #include "tempLeastSquaresTest/WMTempLeastSquaresTest.h"
 #include "tempRandomPoints/WMTempRandomPoints.h"
 
-
-// #include "WToolkit.h"
+#include "WToolkit.h"
 
 /**
  * This function is called by OpenWalnut, when loading your library to learn about the modules you provide. The function is called with a given

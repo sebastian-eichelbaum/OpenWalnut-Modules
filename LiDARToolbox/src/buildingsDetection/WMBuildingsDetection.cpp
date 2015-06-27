@@ -44,10 +44,6 @@
 #include "WBuildingDetector.h"
 #include "../common/datastructures/octree/WOctree.h"
 
-// This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMBuildingsDetection )
-//TODO(aschwarzkopf): Reenable above after solving the toolbox problem
-
 WMBuildingsDetection::WMBuildingsDetection():
     WModule(),
     m_propCondition( new WCondition() )

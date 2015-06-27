@@ -43,10 +43,6 @@
 #include "WMSurfaceDetectionByLari.h"
 #include "WLariPointClassifier.h"
 
-// This line is needed by the module loader to actually find your module.
-//W_LOADABLE_MODULE( WMSurfaceDetectionByLari )
-//TODO(aschwarzkopf): Reenable above after solving the toolbox problem
-
 WMSurfaceDetectionByLari::WMSurfaceDetectionByLari():
     WModule(),
     m_propCondition( new WCondition() )
