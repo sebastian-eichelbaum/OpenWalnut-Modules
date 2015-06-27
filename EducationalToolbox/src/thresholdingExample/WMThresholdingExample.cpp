@@ -37,9 +37,6 @@
 #include "WMThresholdingExample.xpm"
 #include "WMThresholdingExample.h"
 
-// This line is needed by the module loader to actually find your module.
-W_LOADABLE_MODULE( WMThresholdingExample )
-
 WMThresholdingExample::WMThresholdingExample():
     WModule(),
     m_propCondition( new WCondition() )
