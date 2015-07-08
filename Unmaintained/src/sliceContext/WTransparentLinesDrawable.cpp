@@ -30,60 +30,62 @@
 #include "core/graphicsEngine/WGraphicsEngine.h"
 #include "WTransparentLinesDrawable.h"
 
-namespace
+// namespace
+// {
+//     double depth( osg::Vec3f pos, WPosition viewDir )
+//     {
+//         WVector3d tmp = pos - WPosition();
+//         double result = dot( tmp, viewDir );
+//         return result;
+//     }
+
+//     class MySorting
+//     {
+//     public:
+//         int operator()( std::pair< double, size_t > p1 , std::pair< double, size_t > p2 )
+//             {
+//                 return ( p1.first < p2.first );
+//             }
+//     };
+// }
+
+void WTransparentLinesDrawable::drawImplementation( osg::RenderInfo &/*renderInfo*/ ) const //NOLINT
 {
-    double depth( osg::Vec3f pos, WPosition viewDir )
-    {
-        WVector3d tmp = pos - WPosition();
-        double result = dot( tmp, viewDir );
-        return result;
-    }
+    // TODO(wiebel): reactivate this and above if build server has osg100
 
-    class MySorting
-    {
-    public:
-        int operator()( std::pair< double, size_t > p1 , std::pair< double, size_t > p2 )
-            {
-                return ( p1.first < p2.first );
-            }
-    };
-}
+    // boost::shared_ptr< WGraphicsEngine > ge = WGraphicsEngine::getGraphicsEngine();
+    // boost::shared_ptr< WGEViewer > viewer; //!< Stores reference to the main viewer
+    // viewer = ge->getViewerByName( "Main View" );
+    // WPosition endPos = WPosition( wge::unprojectFromScreen( osg::Vec3( 0.0, 0.0, 1.0 ), viewer->getCamera() ) );
+    // WPosition startPos = WPosition( wge::unprojectFromScreen( osg::Vec3(), viewer->getCamera() ) );
+    // WPosition viewDir = normalize( endPos - startPos );
 
-void WTransparentLinesDrawable::drawImplementation( osg::RenderInfo &renderInfo ) const //NOLINT
-{
-    boost::shared_ptr< WGraphicsEngine > ge = WGraphicsEngine::getGraphicsEngine();
-    boost::shared_ptr< WGEViewer > viewer; //!< Stores reference to the main viewer
-    viewer = ge->getViewerByName( "Main View" );
-    WPosition endPos = WPosition( wge::unprojectFromScreen( osg::Vec3( 0.0, 0.0, 1.0 ), viewer->getCamera() ) );
-    WPosition startPos = WPosition( wge::unprojectFromScreen( osg::Vec3(), viewer->getCamera() ) );
-    WPosition viewDir = normalize( endPos - startPos );
+    // std::vector< std::pair< double, size_t > > depthVals( _vertexArray->getNumElements() );
+    // for( size_t i = 0; i < _vertexArray->getNumElements(); i += 2 )
+    // {
+    //     double myDepth = -1 * depth( ( *( dynamic_cast< osg::Vec3Array* >( _vertexArray.get() ) ) )[i], viewDir );
+    //     // TODO(wiebel): improve this unidication of values
+    //     depthVals[i]   = std::make_pair( myDepth, i );
+    //     depthVals[i+1] = std::make_pair( myDepth, i+1 );
+    // }
 
-    std::vector< std::pair< double, size_t > > depthVals( _vertexArray->getNumElements() );
-    for( size_t i = 0; i < _vertexArray->getNumElements(); i += 2 )
-    {
-        double myDepth = -1 * depth( ( *( dynamic_cast< osg::Vec3Array* >( _vertexArray.get() ) ) )[i], viewDir );
-        // TODO(wiebel): improve this unidication of values
-        depthVals[i]   = std::make_pair( myDepth, i );
-        depthVals[i+1] = std::make_pair( myDepth, i+1 );
-    }
-
-    std::stable_sort( depthVals.begin(), depthVals.end(), MySorting() );
+    // std::stable_sort( depthVals.begin(), depthVals.end(), MySorting() );
 
 
-    // osg::ref_ptr< osg::Vec3Array > tmp( new osg::Vec3Array( _vertexArray->getNumElements() ) );
-    osg::ref_ptr< osg::Vec3Array > oldVec =
-        new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>(  _vertexArray.get() ), osg::CopyOp::DEEP_COPY_ALL );
-    osg::Vec3Array* oldVec2 = oldVec.get();
-    osg::Vec3Array* tmpVec = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _vertexArray.get() ) ) );
-    osg::ref_ptr< osg::Vec3Array > oldTexCoords =
-        new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>( _texCoordList[0].get() ), osg::CopyOp::DEEP_COPY_ALL );
-    osg::Vec3Array* oldTexCoords2 = oldTexCoords.get();
-    osg::Vec3Array* tmpTexCoords = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _texCoordList[0].get() ) ) );
-    for( size_t i = 0; i < _vertexArray->getNumElements(); ++i )
-    {
-        ( *tmpTexCoords )[i] = ( *oldTexCoords2 )[ depthVals[i].second ];
-        ( *tmpVec )[i] = ( *oldVec2 )[ depthVals[i].second ];
-    }
+    // // osg::ref_ptr< osg::Vec3Array > tmp( new osg::Vec3Array( _vertexArray->getNumElements() ) );
+    // osg::ref_ptr< osg::Vec3Array > oldVec =
+    //     new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>(  _vertexArray.get() ), osg::CopyOp::DEEP_COPY_ALL );
+    // osg::Vec3Array* oldVec2 = oldVec.get();
+    // osg::Vec3Array* tmpVec = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _vertexArray.get() ) ) );
+    // osg::ref_ptr< osg::Vec3Array > oldTexCoords =
+    //     new  osg::Vec3Array( *dynamic_cast<osg::Vec3Array*>( _texCoordList[0].get() ), osg::CopyOp::DEEP_COPY_ALL );
+    // osg::Vec3Array* oldTexCoords2 = oldTexCoords.get();
+    // osg::Vec3Array* tmpTexCoords = const_cast< osg::Vec3Array* >( ( dynamic_cast< const osg::Vec3Array*>( _texCoordList[0].get() ) ) );
+    // for( size_t i = 0; i < _vertexArray->getNumElements(); ++i )
+    // {
+    //     ( *tmpTexCoords )[i] = ( *oldTexCoords2 )[ depthVals[i].second ];
+    //     ( *tmpVec )[i] = ( *oldVec2 )[ depthVals[i].second ];
+    // }
 
-    osg::Geometry::drawImplementation( renderInfo );
+    // osg::Geometry::drawImplementation( renderInfo );
 }
