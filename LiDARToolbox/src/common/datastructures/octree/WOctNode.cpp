@@ -167,7 +167,7 @@ size_t WOctNode::getTotalNodeCount()
 
 void WOctNode::touchPosition( double x, double y, double z )
 {
-    if( !m_pointCount > 0 )
+    if( !( m_pointCount > 0 ) )
     {
         m_xMin = m_xMax = x;
         m_yMin = m_yMax = y;

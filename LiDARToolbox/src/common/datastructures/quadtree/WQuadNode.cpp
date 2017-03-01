@@ -117,7 +117,7 @@ double WQuadNode::getCenter( size_t dimension )
 
 void WQuadNode::updateMinMax( double x, double y, double value )
 {
-    if( !m_pointCount > 0 )
+    if( !( m_pointCount > 0 ) )
     {
         m_xMin = m_xMax = x;
         m_yMin = m_yMax = y;
