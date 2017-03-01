@@ -77,7 +77,7 @@ void WLariBruteforceClustering::detectClustersByBruteForce()
             {
                 m_parameterDomain->removePoint( oldParameterNodes->at( index ) );
             }
-            cout << "Current parameter space Size: " << m_parameterDomain->getAllPoints()->size() << "    ";
+        cout << "Current parameter space Size: " << m_parameterDomain->getAllPoints()->size() << "    ";
     }
 }
 
