@@ -3,7 +3,7 @@
 # Project: OpenWalnut ( http://www.openwalnut.org )
 #
 # Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
-# For more information see http:#www.openwalnut.org/copying
+# For more information see http://www.openwalnut.org/copying
 #
 # This file is part of OpenWalnut.
 #
@@ -18,7 +18,7 @@
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with OpenWalnut. If not, see <http:#www.gnu.org/licenses/>.
+# along with OpenWalnut. If not, see <http://www.gnu.org/licenses/>.
 #
 #---------------------------------------------------------------------------
 
@@ -71,8 +71,8 @@ FIND_PACKAGE( PCL REQUIRED COMPONENTS common kdtree search registration segmenta
 INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS} )
 LINK_DIRECTORIES( ${PCL_LIBRARY_DIRS} )
 ADD_DEFINITIONS( ${PCL_DEFINITIONS} )
-LIST( APPEND ADDITIONAL_LIBS ${PCL_SEGMENTATION_LIBRARIES};)
-
+LIST( APPEND ADDITIONAL_LIBS ${PCL_SEGMENTATION_LIBRARIES})
+MESSAGE( STATUS "BLAAA ${PCL_SEGMENTATION_LIBRARIES}" )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
@@ -90,7 +90,7 @@ LIST( APPEND ADDITIONAL_LIBS ${PCL_SEGMENTATION_LIBRARIES};)
 SETUP_MODULE( 
     ${PROJECT_NAME}                 # use project name as module(-toolbox) name
     "."                             # where to find the sources
-    "liblas.so;${ADDITIONAL_LIBS}"  # no additonal dependencies
+    "liblas.so;${PCL_SEGMENTATION_LIBRARIES}"
     ""                              # no sources to exclude
 )
 

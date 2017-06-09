@@ -3,7 +3,7 @@
 # Project: OpenWalnut ( http://www.openwalnut.org )
 #
 # Copyright 2009 OpenWalnut Community, BSV@Uni-Leipzig and CNCF@MPI-CBS
-# For more information see http:#www.openwalnut.org/copying
+# For more information see http://www.openwalnut.org/copying
 #
 # This file is part of OpenWalnut.
 #
@@ -18,7 +18,7 @@
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with OpenWalnut. If not, see <http:#www.gnu.org/licenses/>.
+# along with OpenWalnut. If not, see <http://www.gnu.org/licenses/>.
 #
 #---------------------------------------------------------------------------
 
