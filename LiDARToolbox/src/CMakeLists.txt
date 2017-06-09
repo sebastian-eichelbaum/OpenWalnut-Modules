@@ -59,6 +59,7 @@ INCLUDE( OpenWalnut )
 
 # IMPORTANT: NEVER add any commands bore the line INCLUDE( OpenWalnut ). This might cause problems!
 
+FIND_PACKAGE(Qt5Widgets REQUIRED)
 
 # -----------------------------------------------------------------------------------------------------------------------------------------------
 # Add Point Cloud Library for Nearest Neighbor Search
