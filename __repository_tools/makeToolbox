@@ -1,0 +1,51 @@
+#!/bin/bash
+
+INTERNAL_LIBDIR=$1
+INTERNAL_INCLUDEDIR=$2
+echo 
+MODULENAME=$3
+PARAM_PARALLEL=$4
+PARAM_ADDITIONAL=$5
+if [ "$INTERNAL_LIBDIR" -a "$INTERNAL_INCLUDEDIR" ]; # Test for empty strings
+then
+    echo OPENWALNUT_LIBDIR $INTERNAL_LIBDIR
+    echo OPENWALNUT_INCLUDEDIR $INTERNAL_INCLUDEDIR
+    echo
+else
+    echo "Usage: makeAllToolboxes <OPENWALNUT_LIBDIR> <OPENWALNUT_INCLUDEDIR> <MODULE_NAME> [number of threads] [additional option]"
+    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained"
+    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained 8"
+    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained 8 stylecheck"
+    echo
+    echo "Not enough parameters given, exiting."
+    exit;
+fi
+
+if [ "$PARAM_PARALLEL" ];
+then
+  echo Parallel compilation: $PARAM_PARALLEL
+else
+  PARAM_PARALLEL=1
+fi
+
+if [ "$PARAM_ADDITIONAL" ];
+then
+  echo Additional parameter: $PARAM_ADDITIONAL
+else
+  PARAM_ADDITIONAL=
+fi
+
+# Make relative paths absolute
+INTERNAL_LIBDIR=`cd "$INTERNAL_LIBDIR"; pwd`
+INTERNAL_INCLUDEDIR=`cd "$INTERNAL_INCLUDEDIR"; pwd`
+
+echo
+echo "=========================================================="
+echo "=== " $MODULENAME
+echo "=========================================================="
+cd $MODULENAME
+
+mkdir -p build
+cd build
+OPENWALNUT_LIBDIR="$INTERNAL_LIBDIR" OPENWALNUT_INCLUDEDIR="$INTERNAL_INCLUDEDIR" cmake ../src && make $PARAM_ADDITIONAL -j$PARAM_PARALLEL 
+cd ../..
