@@ -13,9 +13,9 @@ then
     echo
 else
     echo "Usage: makeAllToolboxes <OPENWALNUT_LIBDIR> <OPENWALNUT_INCLUDEDIR> <MODULE_NAME> [number of threads] [additional option]"
-    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained"
-    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained 8"
-    echo "Example: __repository_tools/makeAllToolboxes ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained 8 stylecheck"
+    echo "Example: __repository_tools/makeToolbox ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained"
+    echo "Example: __repository_tools/makeToolbox ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained 8"
+    echo "Example: __repository_tools/makeToolbox ../OpenWalnut/build/release/lib/ ../OpenWalnut/src/ Unmaintained 8 stylecheck"
     echo
     echo "Not enough parameters given, exiting."
     exit;
