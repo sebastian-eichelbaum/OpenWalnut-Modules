@@ -72,7 +72,6 @@ INCLUDE_DIRECTORIES( ${PCL_INCLUDE_DIRS} )
 LINK_DIRECTORIES( ${PCL_LIBRARY_DIRS} )
 ADD_DEFINITIONS( ${PCL_DEFINITIONS} )
 LIST( APPEND ADDITIONAL_LIBS ${PCL_SEGMENTATION_LIBRARIES})
-MESSAGE( STATUS "BLAAA ${PCL_SEGMENTATION_LIBRARIES}" )
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------
 #
